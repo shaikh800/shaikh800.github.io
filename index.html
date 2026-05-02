@@ -1,88 +1,176 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- SEO Meta Tags -->
-    <title>Md. Shaikh Alam | Civil Engineering Student & 3D Modeler</title>
-    <meta name="description" content="Md. Shaikh Alam - Civil Engineering student, Blender 4.2 3D Artist, and Developer based in Faridpur, Bangladesh.">
+    <title>Md. Shaikh Alam | Civil Engineering & 3D Artist</title>
+    <meta name="description" content="Portfolio of Md. Shaikh Alam - Civil Engineering student, Blender 3D Artist, and Developer based in Faridpur, Bangladesh.">
     <meta name="keywords" content="Md. Shaikh Alam, mdshaikh, shaikh800, Civil Engineer Bangladesh, Blender Artist, Blender 0 to 1, 3D Modeling Portfolio">
     <meta name="author" content="Md. Shaikh Alam">
 
     <style>
         :root {
-            --primary: #2563eb;
-            --dark: #1e293b;
-            --light: #f8fafc;
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background-color: var(--light);
-            color: var(--dark);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             line-height: 1.6;
+            /* Creates a cool 3D viewport/blueprint grid effect */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
+
         header {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: white;
-            padding: 100px 20px;
+            padding: 120px 20px;
             text-align: center;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
         }
+
         header h1 {
             margin: 0;
-            font-size: 2.5rem;
-            letter-spacing: 1px;
+            font-size: 3.5rem;
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
         }
+
         header p {
             font-size: 1.2rem;
-            opacity: 0.9;
+            color: var(--text-muted);
+            margin-top: 10px;
+            letter-spacing: 1px;
         }
+
         .container {
             max-width: 900px;
-            margin: -50px auto 50px;
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: -40px auto 50px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 50px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+
         .section-title {
-            border-bottom: 3px solid var(--primary);
+            font-size: 1.5rem;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--primary-color);
             display: inline-block;
-            margin-bottom: 20px;
-            padding-bottom: 5px;
+            margin-bottom: 25px;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
+        p {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
         }
+
         .skill-card {
-            background: #f1f5f9;
-            padding: 20px;
-            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 30px 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             text-align: center;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
         }
+
         .skill-card:hover {
-            transform: translateY(-5px);
-            background: #e2e8f0;
+            transform: translateY(-10px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
         }
+
+        .skill-card h3 {
+            margin: 0 0 10px 0;
+            color: #e2e8f0;
+            font-size: 1.3rem;
+        }
+
+        .skill-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .projects-section {
+            margin-top: 60px;
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
         footer {
             text-align: center;
             padding: 40px;
             font-size: 0.9rem;
-            color: #64748b;
-        }
-        .btn {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 10px 25px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.8);
         }
     </style>
 </head>
@@ -90,43 +178,46 @@
 
 <header>
     <h1>Md. Shaikh Alam</h1>
-    <p>Civil Engineering Student | 3D Modeler | Developer</p>
+    <p>Civil Engineering Student • 3D Modeler • Developer</p>
 </header>
 
 <div class="container">
     <section>
-        <h2 class="section-title">আমার সম্পর্কে</h2>
-        <p>আমি <strong>শাইখ</strong>, ফরিদপুরে বসবাসরত একজন সিভিল ইঞ্জিনিয়ারিং ছাত্র। ইঞ্জিনিয়ারিংয়ের পাশাপাশি আমি <strong>Blender 4.2</strong> ব্যবহার করে ৩ডি মডেলিং ও অ্যানিমেশন করতে ভালোবাসি। এছাড়া সফটওয়্যার ডেভেলপমেন্ট এবং সি (C) প্রোগ্রামিংয়ে আমার বিশেষ আগ্রহ রয়েছে।</p>
+        <h2 class="section-title">About Me</h2>
+        <p>Hello! I am <span class="highlight">Shaikh</span>, a Civil Engineering student based in Faridpur, Bangladesh. Alongside my academic focus on engineering, I am deeply passionate about digital art and animation, specializing in <span class="highlight">Blender 4.2</span>. I also have a strong interest in software development, C programming, and exploring new technological frontiers.</p>
     </section>
 
-    <section style="margin-top: 40px;">
-        <h2 class="section-title">দক্ষতা ও আগ্রহ</h2>
+    <section style="margin-top: 50px;">
+        <h2 class="section-title">Skills & Expertise</h2>
         <div class="skills-grid">
             <div class="skill-card">
                 <h3>Civil Engineering</h3>
-                <p>Surveying, Geology & Physics</p>
+                <p>Surveying, Geology, Physics & AutoCAD</p>
             </div>
             <div class="skill-card">
                 <h3>3D Modeling</h3>
-                <p>Blender 4.2, Rigging & Shaders</p>
+                <p>Blender 4.2, Rigging, Animation & Shaders</p>
             </div>
             <div class="skill-card">
                 <h3>Development</h3>
-                <p>C Programming & GitHub</p>
+                <p>C Programming, Web Dev & GitHub</p>
             </div>
         </div>
     </section>
 
-    <section style="margin-top: 40px; text-align: center;">
-        <h2 class="section-title">আমার প্রজেক্ট</h2>
-        <p>আমি বর্তমানে আমার ইউটিউব চ্যানেল <strong>"Blender 0 to 1"</strong> এর জন্য টিউটোরিয়াল তৈরি করছি।</p>
-        <a href="https://github.com/shaikh800" class="btn">GitHub প্রোফাইল দেখুন</a>
-        <a href="/print" class="btn" style="background-color: #10b981; margin-left: 10px;">Ctrl P Print Service</a>
+    <section class="projects-section">
+        <h2 class="section-title">Featured Work</h2>
+        <p>Currently producing in-depth 3D modeling and rigging tutorials for an international audience on my YouTube channel, <strong>"Blender 0 to 1"</strong>.</p>
+        
+        <div class="btn-group">
+            <a href="https://github.com/shaikh800" class="btn">View GitHub</a>
+            <a href="/print" class="btn btn-secondary">Ctrl P Print Service</a>
+        </div>
     </section>
 </div>
 
 <footer>
-    &copy; 2026 Md. Shaikh Alam. All rights reserved.
+    &copy; 2026 Md. Shaikh Alam. All rights reserved. Built with passion.
 </footer>
 
 </body>
