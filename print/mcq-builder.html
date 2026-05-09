@@ -215,8 +215,14 @@
         grid-template-columns: 1fr 1fr 1fr;
       }
       .toolbar.four {
-        grid-template-columns: repeat(4, 1fr);
-      }
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* ২ কলামে ভাগ হবে যাতে ওভারফ্লো না হয় */
+  gap: 10px;
+}
+.toolbar.four button {
+  font-size: 12px; /* টেক্সট যাতে ধরে যায় */
+  padding: 8px 4px;
+}
       button {
         border: none;
         border-radius: 10px;
@@ -2953,7 +2959,7 @@
         .map((img) => {
           const width = numberValueOr(defaultWidth, img.width);
           const height = numberValueOr(defaultHeight, img.height);
-          return `<img class="mcq-image img-${img.align || 'center'}" style="max-width:${width}%; max-height:${height}px; margin-top:0; margin-bottom:6px;" src="${img.src}">`;
+          return `<img class="mcq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
         })
         .join("")}
       <div class="q-head">
@@ -3001,7 +3007,7 @@
         .map((img) => {
           const width = numberValueOr(defaultWidth, img.width);
           const height = numberValueOr(defaultHeight, img.height);
-          return `<img class="cq-image img-${img.align || 'center'}" style="max-width:${width}%; max-height:${height}px; margin-top:0; margin-bottom:6px;" src="${img.src}" alt="CQ image">`;
+          return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
         })
         .join("")}
       <div class="cq-head">
@@ -3039,7 +3045,7 @@
         .map((img) => {
           const width = numberValueOr(defaultWidth, img.width);
           const height = numberValueOr(defaultHeight, img.height);
-          return `<img class="cq-image img-${img.align || 'center'}" style="max-width:${width}%; max-height:${height}px; margin-top:0; margin-bottom:6px;" src="${img.src}" alt="Question image">`;
+          return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
         })
         .join("")}
       <div class="cq-head">
