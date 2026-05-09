@@ -1,224 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO Meta Tags -->
-    <title>Md. Shaikh Alam | Civil Engineering & 3D Artist</title>
-    <meta name="description" content="Portfolio of Md. Shaikh Alam - Civil Engineering student, Blender 3D Artist, and Developer based in Faridpur, Bangladesh .">
-    <meta name="keywords" content="Md. Shaikh Alam, mdshaikh, shaikh800, Civil Engineer Bangladesh, Blender Artist, Blender 0 to 1, 3D Modeling Portfolio">
-    <meta name="author" content="Md. Shaikh Alam">
-
+    <title>Md. Shaikh Alam - Portfolio</title>
     <style>
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #10b981;
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --light: #f8fafc;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            background-color: var(--light);
+            color: var(--dark);
             line-height: 1.6;
-            /* Creates a cool 3D viewport/blueprint grid effect */
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
         }
-
         header {
-            padding: 120px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 100px 20px;
             text-align: center;
-            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
         }
-
         header h1 {
             margin: 0;
-            font-size: 3.5rem;
-            letter-spacing: 2px;
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
+            font-size: 2.5rem;
+            letter-spacing: 1px;
         }
-
         header p {
             font-size: 1.2rem;
-            color: var(--text-muted);
-            margin-top: 10px;
-            letter-spacing: 1px;
+            opacity: 0.9;
         }
-
         .container {
             max-width: 900px;
-            margin: -40px auto 50px;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            padding: 50px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin: -50px auto 50px;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
         .section-title {
-            font-size: 1.5rem;
-            color: var(--text-main);
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 3px solid var(--primary);
             display: inline-block;
-            margin-bottom: 25px;
-            padding-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
         }
-
-        p {
-            color: #cbd5e1;
-            font-size: 1.1rem;
-        }
-
-        .highlight {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-
         .skills-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .skill-card {
-            background: rgba(15, 23, 42, 0.6);
-            padding: 30px 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .skill-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary-color);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
-        }
-
-        .skill-card h3 {
-            margin: 0 0 10px 0;
-            color: #e2e8f0;
-            font-size: 1.3rem;
-        }
-
-        .skill-card p {
-            margin: 0;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-        }
-
-        .projects-section {
-            margin-top: 60px;
-            text-align: center;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .btn-group {
-            display: flex;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            justify-content: center;
-            margin-top: 30px;
-            flex-wrap: wrap;
+            margin-top: 20px;
         }
-
-        .btn {
-            display: inline-block;
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
+        .skill-card {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
         }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        .skill-card:hover {
+            transform: translateY(-5px);
+            background: #e2e8f0;
         }
-
-        .btn-secondary {
-            background: var(--secondary-color);
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
-        }
-
         footer {
             text-align: center;
             padding: 40px;
             font-size: 0.9rem;
-            color: var(--text-muted);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(15, 23, 42, 0.8);
+            color: #64748b;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Md. Shaikh Alam</h1>
-    <p>Civil Engineering Student • 3D Modeler • Developer</p>
-</header>
+    <header>
+        <h1>Md. Shaikh Alam</h1>
+        <p>Civil Engineer | 3D Artist | Developer</p>
+    </header>
 
-<div class="container">
-    <section>
-        <h2 class="section-title">About Me</h2>
-        <p>Hello! I am <span class="highlight">Shaikh</span>, a Civil Engineering student based in Faridpur, Bangladesh. Alongside my academic focus on engineering, I am deeply passionate about digital art and animation, specializing in <span class="highlight">Blender 4.2</span>. I also have a strong interest in software development, C programming, and exploring new technological frontiers.</p>
-    </section>
-
-    <section style="margin-top: 50px;">
-        <h2 class="section-title">Skills & Expertise</h2>
-        <div class="skills-grid">
-            <div class="skill-card">
-                <h3>Civil Engineering</h3>
-                <p>Surveying, Geology, Physics & AutoCAD</p>
+    <div class="container">
+        <!-- দক্ষতা সেকশন -->
+        <section style="margin-top: 40px;">
+            <h2 class="section-title">দক্ষতা ও আগ্রহ</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <h3>Civil Engineering</h3>
+                    <p>Surveying, Geology & Physics</p>
+                </div>
+                <div class="skill-card">
+                    <h3>3D Modeling</h3>
+                    <p>Blender 4.2, Rigging & Shaders</p>
+                </div>
+                <div class="skill-card">
+                    <h3>Development</h3>
+                    <p>C Programming & GitHub</p>
+                </div>
             </div>
-            <div class="skill-card">
-                <h3>3D Modeling</h3>
-                <p>Blender 4.2, Rigging, Animation & Shaders</p>
-            </div>
-            <div class="skill-card">
-                <h3>Development</h3>
-                <p>C Programming, Web Dev & GitHub</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="projects-section">
-        <h2 class="section-title">Featured Work</h2>
-        <p>Currently producing in-depth 3D modeling and rigging tutorials for an international audience on my YouTube channel, <strong>"Blender 0 to 1"</strong>.</p>
-        
-        <div class="btn-group">
-            <a href="https://github.com/shaikh800" class="btn">View GitHub</a>
-            <a href="/print" class="btn btn-secondary">Ctrl P Print Service</a>
-        </div>
-    </section>
-</div>
+        <!-- প্রজেক্ট সেকশন -->
+        <section style="margin-top: 40px; text-align: center;">
+            <h2 class="section-title">আমার প্রজেক্ট</h2>
+            <p>আমি বর্তমানে আমার ইউটিউব চ্যানেল <strong>"Blender 0 to 1"</strong> এর জন্য টিউটোরিয়াল তৈরি করছি।</p>
+            <a href="https://github.com/shaikh800" class="btn">GitHub প্রোফাইল দেখুন</a>
+            <a href="/print" class="btn" style="background-color: #10b981; margin-left: 10px;">Ctrl P Print Service</a>
+        </section>
+    </div>
 
-<footer>
-    &copy; 2026 Md. Shaikh Alam. All rights reserved. Built with passion.
-</footer>
+    <footer>
+        <p>© 2026 Md. Shaikh Alam. All Rights Reserved.</p>
+    </footer>
 
 </body>
 </html>
