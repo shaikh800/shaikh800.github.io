@@ -1,175 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Md. Shaikh | Portfolio</title>
+    <title>Md. Shaikh | Evren Kael Portfolio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --sidebar-bg: #1e293b;
-            --accent-color: #3b82f6;
-            --text-color: #f1f5f9;
-            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg: #0b0f1a;
+            --card-bg: #161e2d;
+            --sidebar-bg: #0f172a;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #1e293b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; scroll-behavior: smooth; }
 
-        body { background-color: var(--bg-color); color: var(--text-color); display: flex; min-height: 100vh; }
+        body { background-color: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; }
 
-        /* Side Panel / Navigation */
+        /* --- Sidebar Navigation --- */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background-color: var(--sidebar-bg);
-            padding: 40px 20px;
-            position: fixed;
+            border-right: 1px solid var(--border);
             height: 100vh;
+            position: fixed;
+            padding: 40px 25px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #334155;
+            z-index: 100;
         }
 
-        .profile-info h2 { font-size: 24px; margin-bottom: 5px; color: var(--accent-color); }
-        .profile-info p { font-size: 14px; color: #94a3b8; margin-bottom: 30px; }
+        .profile-brand { margin-bottom: 50px; }
+        .profile-brand h2 { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
+        .profile-brand p { font-size: 13px; color: var(--text-dim); margin-top: 5px; }
 
-        .nav-links { list-style: none; flex-grow: 1; }
-        .nav-links li { margin-bottom: 15px; }
-        .nav-links a {
+        .nav-menu { list-style: none; flex-grow: 1; }
+        .nav-menu li { margin-bottom: 8px; }
+        .nav-menu a {
             text-decoration: none;
-            color: #94a3b8;
-            font-size: 16px;
+            color: var(--text-dim);
+            padding: 12px 15px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
+            font-size: 15px;
+            font-weight: 500;
             transition: 0.3s;
         }
-        .nav-links a i { margin-right: 12px; width: 20px; }
-        .nav-links a:hover { color: var(--text-color); transform: translateX(5px); }
+        .nav-menu a i { margin-right: 15px; width: 20px; font-size: 18px; }
+        .nav-menu a:hover, .nav-menu a.active { background: #1e293b; color: var(--primary); }
 
-        /* Main Content Area */
-        .main-content { margin-left: 260px; padding: 60px; width: 100%; }
+        /* --- Main Content --- */
+        .content-wrapper { margin-left: 280px; width: 100%; padding: 50px 80px; }
 
-        .section { margin-bottom: 80px; }
-        .section-title { font-size: 28px; margin-bottom: 30px; border-bottom: 2px solid var(--accent-color); display: inline-block; padding-bottom: 5px; }
+        /* Hero Section */
+        .hero { padding: 60px 0 100px; }
+        .hero h1 { font-size: 56px; font-weight: 800; margin-bottom: 20px; line-height: 1.1; }
+        .hero span { color: var(--primary); }
+        .hero p { font-size: 18px; color: var(--text-dim); max-width: 600px; line-height: 1.6; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        /* Section Styling */
+        .section-header { margin-bottom: 40px; }
+        .section-header h2 { font-size: 32px; font-weight: 700; position: relative; padding-bottom: 10px; }
+        .section-header h2::after { content: ''; position: absolute; bottom: 0; left: 0; width: 50px; height: 4px; background: var(--primary); }
 
-        /* Modern Card Design */
-        .card {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid #334155;
-            transition: 0.3s;
+        /* Grid Layout (Compact & Organized) */
+        .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-bottom: 80px; }
+
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 35px;
+            border-radius: 20px;
+            transition: 0.4s;
+            display: flex;
+            flex-direction: column;
         }
-        .card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
-        .card i { font-size: 40px; color: var(--accent-color); margin-bottom: 20px; }
-        .card h3 { margin-bottom: 15px; }
-        .card p { color: #94a3b8; line-height: 1.6; font-size: 14px; }
+        .project-card:hover { border-color: var(--primary); transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .project-card i { font-size: 35px; color: var(--primary); margin-bottom: 25px; }
+        .project-card h3 { font-size: 22px; margin-bottom: 15px; }
+        .project-card p { font-size: 15px; color: var(--text-dim); line-height: 1.6; margin-bottom: 25px; flex-grow: 1; }
 
-        /* Web Dev Tools Buttons */
-        .tool-buttons { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        /* Buttons and Tools */
+        .action-group { display: flex; flex-direction: column; gap: 12px; }
         .btn {
-            padding: 10px 15px;
-            border-radius: 8px;
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 12px;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 14px;
             text-align: center;
-            font-size: 13px;
             transition: 0.3s;
         }
-        .btn-primary { background-color: var(--accent-color); color: white; }
-        .btn-outline { border: 1px solid var(--accent-color); color: var(--accent-color); }
-        .btn:hover { opacity: 0.8; }
+        .btn-filled { background: var(--primary); color: white; }
+        .btn-filled:hover { background: var(--primary-dark); }
+        .btn-outline { border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--border); }
 
-        /* Contact Section */
-        .contact-info { display: flex; gap: 40px; margin-top: 20px; }
-        .contact-item { display: flex; align-items: center; gap: 10px; color: #94a3b8; }
-        .contact-item i { color: var(--accent-color); }
+        /* Contact Section Styles */
+        .contact-box { background: var(--card-bg); padding: 40px; border-radius: 24px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .contact-links { display: flex; gap: 30px; }
+        .contact-info-unit { display: flex; align-items: center; gap: 15px; }
+        .contact-info-unit i { color: var(--primary); font-size: 20px; }
+        .contact-info-unit span { font-size: 15px; color: var(--text-dim); }
 
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #334155; }
-            .main-content { margin-left: 0; padding: 30px; }
+        /* Footer */
+        footer { margin-top: 100px; padding-bottom: 50px; text-align: center; color: var(--text-dim); font-size: 14px; }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 80px; padding: 40px 15px; }
+            .profile-brand h2, .profile-brand p, .nav-menu span { display: none; }
+            .content-wrapper { margin-left: 80px; padding: 40px; }
         }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="profile-info">
-            <h2>Md. Shaikh</h2>
-            <p>Civil Engineer | 3D Modeler | Developer</p>
+        <div class="profile-brand">
+            <h2>শাইখ</h2>
+            <p>Civil Engineer & Developer</p>
         </div>
-        <ul class="nav-links">
-            <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="#civil"><i class="fas fa-hard-hat"></i> Civil Engineering</a></li>
-            <li><a href="#3d"><i class="fas fa-cube"></i> 3D Modeling</a></li>
-            <li><a href="#webdev"><i class="fas fa-code"></i> Web Development</a></li>
-            <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+        <ul class="nav-menu">
+            <li><a href="#home" class="active"><i class="fas fa-home"></i> <span>Home</span></a></li>
+            <li><a href="#civil"><i class="fas fa-building"></i> <span>Civil Engineering</span></a></li>
+            <li><a href="#3d"><i class="fas fa-cube"></i> <span>3D Modeling</span></a></li>
+            <li><a href="#webdev"><i class="fas fa-code"></i> <span>Web Tools</span></a></li>
+            <li><a href="https://www.youtube.com/@Blender0to1" target="_blank"><i class="fab fa-youtube"></i> <span>YouTube</span></a></li>
         </ul>
     </aside>
 
-    <main class="main-content">
-        <section id="home" class="section">
-            <h1 style="font-size: 48px; margin-bottom: 20px;">Welcome to My Workspace</h1>
-            <p style="color: #94a3b8; max-width: 700px; font-size: 18px;">
-                I bridge the gap between physical infrastructure and the virtual world. Combining my core expertise in Civil Engineering with modern Web Development and Blender 3D modeling.
-            </p>
+    <main class="content-wrapper">
+        <section id="home" class="hero">
+            <h1>Hi, I'm <span>Md. Shaikh</span></h1>
+            <p>আমি ফরিদপুর ইঞ্জিনিয়ারিং কলেজের একজন সিভিল ইঞ্জিনিয়ারিং ছাত্র, ৩ডি মডেলিং (Blender) এক্সপার্ট এবং একজন ডেভেলপার। আমি বাস্তব অবকাঠামো এবং ডিজিটাল প্রযুক্তির মিলন ঘটাই।</p>
         </section>
 
-        <section id="civil" class="section">
-            <h2 class="section-title">Civil Engineering</h2>
-            <div class="grid">
-                <div class="card">
-                    <i class="fas fa-drafting-compass"></i>
-                    <h3>Structural Design</h3>
-                    <p>Focusing on Construction Planning, Analysis, and sustainable infrastructure solutions.</p>
+        <section id="civil" class="section-header">
+            <h2>Civil Engineering</h2>
+        </section>
+        <div class="grid-layout">
+            <div class="project-card">
+                <i class="fas fa-drafting-compass"></i>
+                <h3>Structural Analysis</h3>
+                <p>AutoCAD এবং স্ট্রাকচারাল অ্যানালাইসিস ব্যবহার করে টেকসই অবকাঠামো তৈরির পরিকল্পনা।</p>
+                <a href="#" class="btn btn-outline">View Details</a>
+            </div>
+        </div>
+
+        <section id="3d" class="section-header">
+            <h2>3D Modeling & Design</h2>
+        </section>
+        <div class="grid-layout">
+            <div class="project-card">
+                <i class="fas fa-dice-d20"></i>
+                <h3>Blender Animations</h3>
+                <p>Blender 4.2 ব্যবহার করে ক্যারেক্টার রিগিং এবং ৩ডি অ্যানিমেশন তৈরি। আমার টিউটোরিয়াল চ্যানেল 'Blender 0 to 1' ফলো করতে পারেন।</p>
+                <a href="https://www.youtube.com/@Blender0to1" class="btn btn-filled">Visit Channel</a>
+            </div>
+        </div>
+
+        <section id="webdev" class="section-header">
+            <h2>Web Development Tools</h2>
+        </section>
+        <div class="grid-layout">
+            <div class="project-card">
+                <i class="fas fa-tools"></i>
+                <h3>Engineering Productivity</h3>
+                <p>ছাত্র এবং ইঞ্জিনিয়ারদের জন্য কার্যকরী ওয়েব টুলস তৈরি করি। এখানে আমার গুরুত্বপূর্ণ প্রজেক্টগুলো রয়েছে।</p>
+                <div class="action-group">
+                    <a href="mcq-builder.html" class="btn btn-filled">Open MCQ Builder</a>
+                    <a href="#" class="btn btn-outline">Ctrl-P Print Service</a>
+                    <a href="https://github.com/shaikh800" target="_blank" class="btn btn-outline">GitHub Profile</a>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <section id="3d" class="section">
-            <h2 class="section-title">3D Modeling & Animation</h2>
-            <div class="grid">
-                <div class="card">
-                    <i class="fas fa-video"></i>
-                    <h3>Blender Projects</h3>
-                    <p>Rendering, Product Design, and complex 3D character rigging/animations.</p>
-                </div>
-            </div>
+        <section id="contact" class="section-header">
+            <h2>Contact Details</h2>
         </section>
-
-        <section id="webdev" class="section">
-            <h2 class="section-title">Web Development</h2>
-            <div class="grid">
-                <div class="card">
-                    <i class="fas fa-laptop-code"></i>
-                    <h3>Featured Tools</h3>
-                    <p>Building efficient tools and modern UI/UX applications for developers and engineers.</p>
-                    <div class="tool-buttons">
-                        <a href="mcq-builder.html" class="btn btn-primary">Open Question Builder</a>
-                        <a href="#" class="btn btn-outline">Ctrl-P Print Order</a>
-                        <a href="https://github.com/shaikh800" class="btn btn-outline">View GitHub Projects</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section">
-            <h2 class="section-title">Get In Touch</h2>
-            <p style="color: #94a3b8; margin-bottom: 25px;">Let's collaborate on your next big idea.</p>
-            <div class="contact-info">
-                <div class="contact-item">
+        <div class="contact-box">
+            <div class="contact-links">
+                <div class="contact-info-unit">
                     <i class="fas fa-envelope"></i>
                     <span>md.shaikh.alam.007@gmail.com</span>
                 </div>
-                <div class="contact-item">
-                    <i class="fas fa-phone"></i>
+                <div class="contact-info-unit">
+                    <i class="fas fa-phone-alt"></i>
                     <span>01722592967</span>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Md. Shaikh Alam (Evren Kael). All rights reserved.</p>
+        </footer>
     </main>
 
 </body>
