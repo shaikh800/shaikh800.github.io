@@ -895,18 +895,17 @@
             ← Back Only
           </button>
         </div>
-        <div class="toolbar">
-          <button type="button" class="secondary" onclick="addQuestion()">
-            Add MCQ
-          </button>
-          <button
-            type="button"
-            class="secondary"
-            onclick="trimEmptyQuestions()"
-          >
-            Trim Empty MCQ
-          </button>
-        </div>
+        <div class="toolbar three">
+  <button type="button" class="secondary" onclick="addQuestion()">
+    Add MCQ
+  </button>
+  <button type="button" class="secondary" onclick="trimEmptyQuestions()">
+    Trim Empty MCQ
+  </button>
+  <button type="button" class="ghost" onclick="removeMCQPart()">
+    Remove MCQ Part
+  </button>
+</div>
 
         <div class="builder-section" id="basicExamInfoSection">
           <h2 class="section-title">Basic Exam Info</h2>
