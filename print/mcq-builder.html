@@ -3835,12 +3835,12 @@
           .map((x) => x.trim())
           .filter(Boolean);
         const lines = rawLines
-          .flatMap((line) =>
-            line
-              .split(/(?=(?:[ক-ঘ]|[A-D])\))/u)
-              .map((x) => x.trim())
-          )
-          .filter(Boolean);
+  .flatMap((line) =>
+    line
+      .split(/(?=[(\[]?\s*[A-Dক-ঘ]\s*[)\].:,-])/u) // সংশোধিত লজিক
+      .map((x) => x.trim())
+  )
+  .filter(Boolean);
         if (!lines.length) return null;
         let answer = "";
         if (looksLikeAnswer(lines[lines.length - 1]))
