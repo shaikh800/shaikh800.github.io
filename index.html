@@ -19,7 +19,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background-color: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* --- 3-Dot Sidebar Navigation --- */
+        /* --- Compact 3-Dot Sidebar Navigation --- */
         .sidebar-trigger {
             position: fixed;
             top: 25px;
@@ -103,7 +103,7 @@
             width: 260px;
             margin: 0 auto;
         }
-        .card.active-tools .reveal-tools { max-height: 200px; margin-top: 30px; }
+        .card.active-tools .reveal-tools { max-height: 250px; margin-top: 30px; }
 
         .btn {
             padding: 12px 20px;
@@ -145,26 +145,26 @@
     <div class="wrapper" id="home">
         <header class="hero-section">
             <h1>Md. <span>Shaikh</span></h1>
-            <p>Civil Engineering student at Faridpur Engineering College, specializing in Structural Analysis and 3D Modeling.</p>
+            <p>Civil Engineering student at Faridpur Engineering College, specializing in Structural Analysis and 3D Animation.</p>
         </header>
 
         <div class="grid-container">
             <div class="card" id="civil">
                 <i class="fas fa-drafting-compass icon-main"></i>
                 <h3>Civil Engineering</h3>
-                <p>Expertise in Structural Design, Analysis, and Construction Planning using AutoCAD 2025.</p>
+                <p>Developing sustainable infrastructure through structural analysis and precision drafting using AutoCAD 2025.</p>
             </div>
 
             <div class="card" id="3d">
                 <i class="fas fa-dice-d20 icon-main"></i>
                 <h3>3D Modeling & Animation</h3>
-                <p>Advanced finger rigging and character animation in Blender 4.2. Creator of the "Blender 0 to 1" channel.</p>
+                <p>Creating high-fidelity 3D assets and animations in Blender 4.2. Featured content on the "Blender 0 to 1" channel.</p>
             </div>
 
             <div class="card" id="web" onclick="toggleTools()">
                 <i class="fas fa-laptop-code icon-main"></i>
                 <h3>Web Development</h3>
-                <p>Developing professional productivity tools and engineering utilities. Click to view projects.</p>
+                <p>Building technical utilities and productivity platforms for professional and academic environments. Click to view tools.</p>
                 
                 <div class="reveal-tools" id="toolBox">
                     <a href="mcq-builder.html" class="btn btn-primary">Open MCQ Builder</a>
@@ -196,7 +196,7 @@
             card.classList.toggle('active-tools');
         }
 
-        // Prevent tool buttons from closing the card when clicked
+        // Prevents tool buttons from closing the card when clicked
         document.getElementById('toolBox').addEventListener('click', function(e) {
             e.stopPropagation();
         });
