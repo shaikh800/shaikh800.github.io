@@ -19,7 +19,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background-color: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* --- Compact 3-Dot Sidebar Navigation --- */
+        /* --- Sidebar Navigation --- */
         .sidebar-trigger {
             position: fixed;
             top: 25px;
@@ -68,7 +68,7 @@
         .nav-menu a i { margin-right: 15px; width: 20px; text-align: center; }
         .nav-menu a:hover { color: var(--accent); transform: translateX(5px); }
 
-        /* --- Main Content Layout --- */
+        /* --- Main Content --- */
         .wrapper { width: 100%; max-width: 800px; margin: 0 auto; padding: 120px 20px; text-align: center; }
 
         .hero-section { margin-bottom: 80px; }
@@ -96,7 +96,7 @@
         .reveal-tools {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.5s ease-out, margin-top 0.3s;
+            transition: max-height 0.5s ease-out;
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -145,7 +145,7 @@
     <div class="wrapper" id="home">
         <header class="hero-section">
             <h1>Md. <span>Shaikh</span></h1>
-            <p>Civil Engineering student at Faridpur Engineering College, specializing in Structural Analysis and 3D Animation.</p>
+            <p>Civil Engineering student at Faridpur Engineering College, specializing in Structural Analysis and 3D Modeling.</p>
         </header>
 
         <div class="grid-container">
@@ -158,17 +158,17 @@
             <div class="card" id="3d">
                 <i class="fas fa-dice-d20 icon-main"></i>
                 <h3>3D Modeling & Animation</h3>
-                <p>Creating high-fidelity 3D assets and animations in Blender 4.2. Featured content on the "Blender 0 to 1" channel.</p>
+                <p>Creating high-fidelity 3D assets and animations in Blender 4.2. Creator of the "Blender 0 to 1" tutorial channel.</p>
             </div>
 
             <div class="card" id="web" onclick="toggleTools()">
                 <i class="fas fa-laptop-code icon-main"></i>
                 <h3>Web Development</h3>
-                <p>Building technical utilities and productivity platforms for professional and academic environments. Click to view tools.</p>
+                <p>Engineering-focused productivity tools and technical web solutions. Click to view active projects.</p>
                 
                 <div class="reveal-tools" id="toolBox">
-                    <a href="mcq-builder.html" class="btn btn-primary">Open MCQ Builder</a>
-                    <a href="ctrl-p.html" class="btn btn-outline">CTRL-P Print Service</a>
+                    <a href="print/mcq-builder.html" class="btn btn-primary">Open MCQ Builder</a>
+                    <a href="print/index.html" class="btn btn-outline">CTRL-P Print Service</a>
                     <a href="https://github.com/shaikh800" target="_blank" class="btn btn-outline">GitHub Profile</a>
                 </div>
             </div>
@@ -196,7 +196,6 @@
             card.classList.toggle('active-tools');
         }
 
-        // Prevents tool buttons from closing the card when clicked
         document.getElementById('toolBox').addEventListener('click', function(e) {
             e.stopPropagation();
         });
