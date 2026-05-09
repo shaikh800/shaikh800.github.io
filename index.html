@@ -4,261 +4,173 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Md. Shaikh | Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Basic Resets & Variables */
         :root {
-            --primary: #3b82f6; 
-            --primary-hover: #2563eb;
-            --success: #10b981; 
-            --success-hover: #059669;
-            --glass-bg: rgba(15, 23, 42, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f8fafc;
-            --text-muted: #cbd5e1;
-        }
-        
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: var(--text-main);
-            overflow-x: hidden;
+            --bg-color: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --text-color: #f1f5f9;
+            --card-bg: #1e293b;
         }
 
-        /* Construction Background Image with Overlay */
-        .hero-section {
-            position: relative;
-            min-height: 100vh;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; min-height: 100vh; }
+
+        /* Side Panel / Navigation */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            padding: 40px 20px;
+            position: fixed;
+            height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            background-image: url('https://images.unsplash.com/photo-1541888086425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            padding: 20px;
+            flex-direction: column;
+            border-right: 1px solid #334155;
         }
 
-        /* Dark gradient fade over the image */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.6) 100%);
-            z-index: 1;
-        }
+        .profile-info h2 { font-size: 24px; margin-bottom: 5px; color: var(--accent-color); }
+        .profile-info p { font-size: 14px; color: #94a3b8; margin-bottom: 30px; }
 
-        /* Glassmorphism UI Box */
-        .content-wrapper {
-            position: relative;
-            z-index: 2;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 60px 40px;
-            max-width: 900px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeInUp 1s ease-out forwards;
-        }
-
-        /* Typography */
-        .subtitle {
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.9rem;
-            color: #60a5fa;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        h1 {
-            font-size: 4rem;
-            margin: 0 0 15px 0;
-            background: linear-gradient(to right, #ffffff, #93c5fd);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        h2 {
-            font-size: 1.4rem;
-            font-weight: 400;
-            margin: 0 0 30px 0;
-            color: var(--text-muted);
-        }
-
-        p.description {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: #94a3b8;
-            margin: 0 auto 40px auto;
-            max-width: 700px;
-        }
-
-        /* 3-Column Skills Grid */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 45px;
-        }
-
-        .skill-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 30px 20px;
-            border-radius: 16px;
-            transition: all 0.4s ease;
-        }
-
-        .skill-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-8px);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .skill-icon {
-            font-size: 2.8rem;
-            margin-bottom: 15px;
-        }
-
-        .skill-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-bottom: 8px;
-            color: #e2e8f0;
-        }
-
-        .skill-desc {
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        /* Beautiful Buttons */
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 50px;
-            font-weight: 600;
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a {
             text-decoration: none;
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-            font-size: 1rem;
-            display: inline-flex;
+            color: #94a3b8;
+            font-size: 16px;
+            display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            transition: 0.3s;
         }
+        .nav-links a i { margin-right: 12px; width: 20px; }
+        .nav-links a:hover { color: var(--text-color); transform: translateX(5px); }
 
-        /* Ctrl-P Print Order Button (Green) */
-        .btn-print {
-            background: var(--success);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        /* Main Content Area */
+        .main-content { margin-left: 260px; padding: 60px; width: 100%; }
+
+        .section { margin-bottom: 80px; }
+        .section-title { font-size: 28px; margin-bottom: 30px; border-bottom: 2px solid var(--accent-color); display: inline-block; padding-bottom: 5px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+
+        /* Modern Card Design */
+        .card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #334155;
+            transition: 0.3s;
         }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
+        .card i { font-size: 40px; color: var(--accent-color); margin-bottom: 20px; }
+        .card h3 { margin-bottom: 15px; }
+        .card p { color: #94a3b8; line-height: 1.6; font-size: 14px; }
 
-        .btn-print:hover {
-            background: var(--success-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        /* Web Dev Tools Buttons */
+        .tool-buttons { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            font-size: 13px;
+            transition: 0.3s;
         }
+        .btn-primary { background-color: var(--accent-color); color: white; }
+        .btn-outline { border: 1px solid var(--accent-color); color: var(--accent-color); }
+        .btn:hover { opacity: 0.8; }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
+        /* Contact Section */
+        .contact-info { display: flex; gap: 40px; margin-top: 20px; }
+        .contact-item { display: flex; align-items: center; gap: 10px; color: #94a3b8; }
+        .contact-item i { color: var(--accent-color); }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #fff;
-            transform: translateY(-3px);
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            h1 { font-size: 2.8rem; }
-            .content-wrapper { padding: 40px 20px; }
-            .btn-group { flex-direction: column; width: 100%; }
-            .btn { width: 100%; }
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #334155; }
+            .main-content { margin-left: 0; padding: 30px; }
         }
     </style>
 </head>
 <body>
 
-    <section class="hero-section">
-        <div class="overlay"></div>
-        
-        <div class="content-wrapper">
-            <div class="subtitle">Welcome to my workspace</div>
-            <h1>Md. Shaikh</h1>
-            <h2>Civil Engineering Student | 3D Modeler | Developer</h2>
-            
-            <p class="description">
-                I bridge the gap between physical infrastructure and the virtual world. Combining my core expertise in Civil Engineering with modern Web Development and Blender 3D modeling to bring creative blueprints to life.
-            </p>
-            
-            <div class="skills-grid">
-                <div class="skill-card">
-                    <div class="skill-icon">🏗️</div>
-                    <div class="skill-title">Civil Engineering</div>
-                    <div class="skill-desc">Structural Design, Construction Planning & Analysis</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">🧊</div>
-                    <div class="skill-title">3D Modeling</div>
-                    <div class="skill-desc">Blender Rendering, Product Design & Animation</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">💻</div>
-                    <div class="skill-title">Web Development</div>
-                    <div class="skill-desc">Frontend UI/UX, JavaScript & App Architecture</div>
-                </div>
-            </div>
-
-            <div class="btn-group">
-                <a href="./print/index.html" class="btn btn-print">🖨️ Ctrl-P Print Order</a>
-                
-                <a href="./print/mcq-builder.html" class="btn btn-primary">Open MCQ Builder</a>
-                <a href="#projects" class="btn btn-secondary">View Projects</a>
-            </div>
+    <aside class="sidebar">
+        <div class="profile-info">
+            <h2>Md. Shaikh</h2>
+            <p>Civil Engineer | 3D Modeler | Developer</p>
         </div>
-    </section>
+        <ul class="nav-links">
+            <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#civil"><i class="fas fa-hard-hat"></i> Civil Engineering</a></li>
+            <li><a href="#3d"><i class="fas fa-cube"></i> 3D Modeling</a></li>
+            <li><a href="#webdev"><i class="fas fa-code"></i> Web Development</a></li>
+            <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <section id="home" class="section">
+            <h1 style="font-size: 48px; margin-bottom: 20px;">Welcome to My Workspace</h1>
+            <p style="color: #94a3b8; max-width: 700px; font-size: 18px;">
+                I bridge the gap between physical infrastructure and the virtual world. Combining my core expertise in Civil Engineering with modern Web Development and Blender 3D modeling.
+            </p>
+        </section>
+
+        <section id="civil" class="section">
+            <h2 class="section-title">Civil Engineering</h2>
+            <div class="grid">
+                <div class="card">
+                    <i class="fas fa-drafting-compass"></i>
+                    <h3>Structural Design</h3>
+                    <p>Focusing on Construction Planning, Analysis, and sustainable infrastructure solutions.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="3d" class="section">
+            <h2 class="section-title">3D Modeling & Animation</h2>
+            <div class="grid">
+                <div class="card">
+                    <i class="fas fa-video"></i>
+                    <h3>Blender Projects</h3>
+                    <p>Rendering, Product Design, and complex 3D character rigging/animations.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="webdev" class="section">
+            <h2 class="section-title">Web Development</h2>
+            <div class="grid">
+                <div class="card">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>Featured Tools</h3>
+                    <p>Building efficient tools and modern UI/UX applications for developers and engineers.</p>
+                    <div class="tool-buttons">
+                        <a href="mcq-builder.html" class="btn btn-primary">Open Question Builder</a>
+                        <a href="#" class="btn btn-outline">Ctrl-P Print Order</a>
+                        <a href="https://github.com/shaikh800" class="btn btn-outline">View GitHub Projects</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section">
+            <h2 class="section-title">Get In Touch</h2>
+            <p style="color: #94a3b8; margin-bottom: 25px;">Let's collaborate on your next big idea.</p>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>md.shaikh.alam.007@gmail.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>01722592967</span>
+                </div>
+            </div>
+        </section>
+    </main>
 
 </body>
 </html>
