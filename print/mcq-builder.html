@@ -11,10 +11,10 @@
       :root {
         --page-width: 8.27in;
         --page-height: 11.69in;
-        --pad-top: 0.42in;
-        --pad-right: 0.42in;
-        --pad-bottom: 0.28in;
-        --pad-left: 0.42in;
+  --pad-top: 0.25in;
+  --pad-right: 0.25in;
+  --pad-bottom: 0.25in;
+  --pad-left: 0.25in;
         --header-scale: 1;
         --body-font-size: 11px;
         --mcq-font-size: 11px;
@@ -3834,26 +3834,41 @@
           .split("\n")
           .map((x) => x.trim())
           .filter(Boolean);
+        
+        // এখানে অপশনের আগের ব্র্যাকেটসহ স্প্লিট করার লজিক ঠিক করা হয়েছে
         const lines = rawLines
-  .flatMap((line) =>
-    line
-      .split(/(?=[(\[]?\s*[A-Dক-ঘ]\s*[)\].:,-])/u) // সংশোধিত লজিক
-      .map((x) => x.trim())
-  )
-  .filter(Boolean);
+          .flatMap((line) =>
+            line
+              .split(/(?=[(\[]?\s*[A-Dক-ঘ]\s*[)\].:,-])/u) 
+              .map((x) => x.trim())
+          )
+          .filter(Boolean);
+
         if (!lines.length) return null;
         let answer = "";
         if (looksLikeAnswer(lines[lines.length - 1]))
           answer = parseAnswerLine(lines.pop());
+
         const firstLine = stripQuestionPrefix(lines.shift() || "");
         const optionLines = [];
         const extraLines = [];
+
         for (const line of lines) {
-          if (looksLikeOption(line)) optionLines.push(stripOptionPrefix(line));
-          else extraLines.push(line);
+          // যদি লাইনটি একটি অপশন হয় (যেমন (ক) বা ক)), তবেই সেটি অপশন লিস্টে যাবে
+          if (looksLikeOption(line)) {
+            optionLines.push(stripOptionPrefix(line));
+          } else {
+            // অন্যথায় সেটি বাড়তি টেক্সট হিসেবে প্রশ্নের সাথে যোগ হবে
+            // কিন্তু শুধু ব্র্যাকেট বা স্পেস হলে সেটিকে আমরা বাদ দিব
+            if (line.trim() !== "(" && line.trim() !== ")" && line.trim() !== "") {
+                extraLines.push(line);
+            }
+          }
         }
+        
         let qText = firstLine;
         if (extraLines.length) qText = [qText, ...extraLines].join(" ").trim();
+        
         return {
           text: qText || "প্রশ্ন",
           options: [
