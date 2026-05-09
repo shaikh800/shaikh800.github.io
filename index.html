@@ -7,22 +7,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
+            --bg: #0b0f1a;
+            --card-bg: #161e2d;
+            --sidebar-bg: #0f172a;
             --accent: #3b82f6;
-            --text-main: #f1f5f9;
+            --text-main: #f8fafc;
             --text-dim: #94a3b8;
-            --border: #334155;
+            --border: #1e293b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
-        body { background-color: var(--bg); color: var(--text-main); line-height: 1.6; }
+        body { background-color: var(--bg); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* --- Compact 3-Dot Sidebar --- */
-        .menu-btn {
+        /* --- 3-Dot Sidebar Navigation --- */
+        .sidebar-trigger {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 25px;
+            left: 25px;
             z-index: 1001;
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -31,55 +32,79 @@
             height: 45px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            transition: 0.3s;
         }
+        .sidebar-trigger:hover { border-color: var(--accent); }
 
         .sidebar {
             position: fixed;
             top: 0;
-            left: -280px;
-            width: 260px;
+            left: -300px;
+            width: 280px;
             height: 100vh;
-            background: var(--bg);
+            background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
-            padding: 80px 30px;
-            transition: 0.3s ease-in-out;
+            padding: 100px 30px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
         }
-
         .sidebar.active { left: 0; }
-        .nav-list { list-style: none; }
-        .nav-list li { margin-bottom: 25px; }
-        .nav-list a { text-decoration: none; color: var(--text-dim); font-size: 16px; font-weight: 500; transition: 0.3s; }
-        .nav-list a:hover { color: var(--accent); }
+
+        .nav-menu { list-style: none; }
+        .nav-menu li { margin-bottom: 20px; }
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .nav-menu a i { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-menu a:hover { color: var(--accent); transform: translateX(5px); }
 
         /* --- Main Content Layout --- */
-        .container { max-width: 800px; margin: 0 auto; padding: 120px 20px; text-align: center; }
+        .wrapper { width: 100%; max-width: 800px; margin: 0 auto; padding: 120px 20px; text-align: center; }
 
-        header { margin-bottom: 80px; }
-        header h1 { font-size: 48px; font-weight: 800; margin-bottom: 15px; }
-        header span { color: var(--accent); }
-        header p { color: var(--text-dim); font-size: 18px; max-width: 600px; margin: 0 auto; }
+        .hero-section { margin-bottom: 80px; }
+        .hero-section h1 { font-size: 48px; font-weight: 800; margin-bottom: 15px; letter-spacing: -1px; }
+        .hero-section span { color: var(--accent); }
+        .hero-section p { color: var(--text-dim); font-size: 18px; max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
-        .section-grid { display: flex; flex-direction: column; gap: 30px; }
+        .grid-container { display: flex; flex-direction: column; gap: 25px; }
 
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            padding: 50px 40px;
+            padding: 40px;
             border-radius: 20px;
             transition: 0.3s;
+            cursor: pointer;
+            position: relative;
         }
         .card:hover { border-color: var(--accent); }
-        .card i { font-size: 40px; color: var(--accent); margin-bottom: 20px; }
-        .card h3 { font-size: 24px; margin-bottom: 15px; }
-        .card p { color: var(--text-dim); font-size: 15px; margin-bottom: 30px; }
+        .card i.icon-main { font-size: 35px; color: var(--accent); margin-bottom: 20px; display: block; }
+        .card h3 { font-size: 24px; margin-bottom: 12px; font-weight: 700; }
+        .card p { color: var(--text-dim); font-size: 15px; line-height: 1.6; }
 
-        /* --- Web Dev Tool Actions --- */
-        .tool-actions { display: flex; flex-direction: column; gap: 12px; max-width: 280px; margin: 0 auto; }
+        /* --- Tool Reveal Mechanism --- */
+        .reveal-tools {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, margin-top 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 260px;
+            margin: 0 auto;
+        }
+        .card.active-tools .reveal-tools { max-height: 200px; margin-top: 30px; }
+
         .btn {
             padding: 12px 20px;
             border-radius: 10px;
@@ -91,55 +116,57 @@
         }
         .btn-primary { background: var(--accent); color: white; }
         .btn-outline { border: 1px solid var(--accent); color: var(--accent); }
-        .btn:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
 
-        footer { margin-top: 100px; padding: 40px 0; color: var(--text-dim); border-top: 1px solid var(--border); font-size: 14px; }
+        footer { margin-top: 100px; padding: 40px 0; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 14px; }
 
         @media (max-width: 600px) {
-            header h1 { font-size: 36px; }
-            .container { padding-top: 80px; }
+            .hero-section h1 { font-size: 36px; }
+            .wrapper { padding-top: 100px; }
         }
     </style>
 </head>
 <body>
 
-    <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-ellipsis-v"></i></button>
+    <button class="sidebar-trigger" onclick="toggleSidebar()" aria-label="Toggle Menu">
+        <i class="fas fa-ellipsis-v"></i>
+    </button>
 
     <nav class="sidebar" id="sidebar">
-        <ul class="nav-list">
-            <li><a href="#home" onclick="toggleSidebar()">Home</a></li>
-            <li><a href="#civil" onclick="toggleSidebar()">Civil Engineering</a></li>
-            <li><a href="#3d" onclick="toggleSidebar()">3D Modeling</a></li>
-            <li><a href="#webdev" onclick="toggleSidebar()">Web Development</a></li>
-            <li><a href="#contact" onclick="toggleSidebar()">Contact</a></li>
+        <ul class="nav-menu">
+            <li><a href="#home" onclick="toggleSidebar()"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#civil" onclick="toggleSidebar()"><i class="fas fa-hard-hat"></i> Civil Engineering</a></li>
+            <li><a href="#3d" onclick="toggleSidebar()"><i class="fas fa-cube"></i> 3D Modeling</a></li>
+            <li><a href="#web" onclick="toggleSidebar()"><i class="fas fa-code"></i> Web Development</a></li>
+            <li><a href="#contact" onclick="toggleSidebar()"><i class="fas fa-envelope"></i> Contact</a></li>
         </ul>
     </nav>
 
-    <div class="container" id="home">
-        <header>
+    <div class="wrapper" id="home">
+        <header class="hero-section">
             <h1>Md. <span>Shaikh</span></h1>
-            <p>Civil Engineering Student | 3D Modeler | Developer</p>
+            <p>Civil Engineering student at Faridpur Engineering College, specializing in Structural Analysis and 3D Modeling.</p>
         </header>
 
-        <div class="section-grid">
+        <div class="grid-container">
             <div class="card" id="civil">
-                <i class="fas fa-hard-hat"></i>
+                <i class="fas fa-drafting-compass icon-main"></i>
                 <h3>Civil Engineering</h3>
-                <p>Focused on Structural Analysis, Design, and Construction Planning. Currently pursuing a degree at Faridpur Engineering College.</p>
+                <p>Expertise in Structural Design, Analysis, and Construction Planning using AutoCAD 2025.</p>
             </div>
 
             <div class="card" id="3d">
-                <i class="fas fa-cube"></i>
+                <i class="fas fa-dice-d20 icon-main"></i>
                 <h3>3D Modeling & Animation</h3>
-                <p>Expert in finger rigging and character animation using Blender 4.2 and AutoCAD 2025.</p>
-                <a href="https://www.youtube.com/@Blender0to1" target="_blank" class="btn btn-outline" style="max-width: 220px; margin: 0 auto;">Visit YouTube Channel</a>
+                <p>Advanced finger rigging and character animation in Blender 4.2. Creator of the "Blender 0 to 1" channel.</p>
             </div>
 
-            <div class="card" id="webdev">
-                <i class="fas fa-code"></i>
+            <div class="card" id="web" onclick="toggleTools()">
+                <i class="fas fa-laptop-code icon-main"></i>
                 <h3>Web Development</h3>
-                <p>Developing technical solutions and productivity tools for academic and professional engineering workflows.</p>
-                <div class="tool-actions">
+                <p>Developing professional productivity tools and engineering utilities. Click to view projects.</p>
+                
+                <div class="reveal-tools" id="toolBox">
                     <a href="mcq-builder.html" class="btn btn-primary">Open MCQ Builder</a>
                     <a href="ctrl-p.html" class="btn btn-outline">CTRL-P Print Service</a>
                     <a href="https://github.com/shaikh800" target="_blank" class="btn btn-outline">GitHub Profile</a>
@@ -148,9 +175,9 @@
         </div>
 
         <section id="contact" style="margin-top: 80px;">
-            <p style="color: var(--text-dim); margin-bottom: 5px;">Primary Email</p>
+            <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 5px;">Email</p>
             <h3 style="margin-bottom: 20px;">md.shaikh.alam.007@gmail.com</h3>
-            <p style="color: var(--text-dim); margin-bottom: 5px;">Phone</p>
+            <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 5px;">Mobile</p>
             <h3>01722592967</h3>
         </section>
 
@@ -163,6 +190,16 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
         }
+
+        function toggleTools() {
+            const card = document.getElementById('web');
+            card.classList.toggle('active-tools');
+        }
+
+        // Prevent tool buttons from closing the card when clicked
+        document.getElementById('toolBox').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
     </script>
 </body>
 </html>
