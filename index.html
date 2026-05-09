@@ -7,9 +7,9 @@
     <style>
         /* Basic Resets & Variables */
         :root {
-            --primary: #3b82f6; /* Modern Blue */
+            --primary: #3b82f6; 
             --primary-hover: #2563eb;
-            --success: #10b981; /* Green for Print Order */
+            --success: #10b981; 
             --success-hover: #059669;
             --glass-bg: rgba(15, 23, 42, 0.65);
             --glass-border: rgba(255, 255, 255, 0.1);
@@ -26,7 +26,6 @@
             overflow-x: hidden;
         }
 
-        /* Construction Background Image with Overlay */
         .hero-section {
             position: relative;
             min-height: 100vh;
@@ -40,7 +39,6 @@
             padding: 20px;
         }
 
-        /* Dark gradient fade over the image */
         .overlay {
             position: absolute;
             top: 0;
@@ -51,7 +49,6 @@
             z-index: 1;
         }
 
-        /* Glassmorphism UI Box */
         .content-wrapper {
             position: relative;
             z-index: 2;
@@ -68,7 +65,6 @@
             animation: fadeInUp 1s ease-out forwards;
         }
 
-        /* Typography */
         .subtitle {
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -103,7 +99,6 @@
             max-width: 700px;
         }
 
-        /* 3-Column Skills Grid */
         .skills-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -143,7 +138,6 @@
             color: #64748b;
         }
 
-        /* Beautiful Buttons */
         .btn-group {
             display: flex;
             gap: 15px;
@@ -165,7 +159,6 @@
             gap: 8px;
         }
 
-        /* Ctrl-P Print Order Button (Green) */
         .btn-print {
             background: var(--success);
             color: white;
@@ -177,19 +170,6 @@
             background: var(--success-hover);
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
         }
 
         .btn-secondary {
@@ -204,13 +184,11 @@
             transform: translateY(-3px);
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             h1 { font-size: 2.8rem; }
             .content-wrapper { padding: 40px 20px; }
@@ -252,10 +230,8 @@
             </div>
 
             <div class="btn-group">
-                <a href="YOUR_CTRL_P_LINK_HERE" class="btn btn-print">🖨️ Ctrl-P (Print Order)</a>
-                
-                <a href="/print/mcq-builder.html" class="btn btn-primary">Open MCQ Builder</a>
-                <a href="#projects" class="btn btn-secondary">View Projects</a>
+                <a href="./print/mcq-builder.html" class="btn btn-print">🖨️ Ctrl-P (Print Order)</a>
+                <a href="#projects" class="btn btn-secondary">View My Projects</a>
             </div>
         </div>
     </section>
