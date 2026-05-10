@@ -7,6 +7,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
 body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
 .sidebar { width: 350px; background-color: #f4f4f4; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; z-index: 100; }
 .preview-container { flex-grow: 1; background-color: #334; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
@@ -14,7 +24,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 /* Perfect A4 Dimensions */
 .page { 
     width: 210mm; 
-    height: 296.8mm; /* Slightly less than 297mm to avoid extra page */
+    height: 297mm;
     padding: 0.25in 0.25in 0.25in 0.1in; 
     background: white; 
     box-shadow: 0 0 20px rgba(0,0,0,0.6); 
@@ -23,6 +33,12 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     flex-direction: column; 
     position: relative;
     overflow: hidden;
+    page-break-before: avoid;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    break-before: avoid;
+    break-after: avoid;
+    break-inside: avoid;
 }
 
 /* Subtle Pin Guide Dot */
@@ -37,7 +53,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     border-radius: 50%;
 }
 
-.inner-border { border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
+.inner-border { border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; page-break-inside: avoid; break-inside: avoid; }
 .header-section { text-align: center; }
 .logo { width: 140px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
 .college-name { font-size: 26px; font-weight: 800; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
@@ -82,10 +98,13 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
 /* Hidden during export */
 .exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
+.page.exporting { box-shadow: none; margin: 0; }
 
 @media print {
-    body { display: block; } .sidebar { display: none; } .preview-container { padding: 0; background: none; display: block; }
-    .page { box-shadow: none; margin: 0; width: 100%; height: 100%; padding: 0.25in 0.25in 0.25in 0.1in; }
+    body { display: block; width: 210mm; height: 297mm; overflow: hidden; } 
+    .sidebar { display: none; } 
+    .preview-container { padding: 0; background: none; display: block; width: 210mm; height: 297mm; overflow: hidden; }
+    .page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; padding: 0.25in 0.25in 0.25in 0.1in; overflow: hidden; }
 }
 </style>
 </head>
@@ -366,7 +385,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
     fs('fs-college', '.college-name'); fs('fs-title', '.assignment-title'); fs('fs-sub', '.sub-header'); fs('fs-info', '.info-text');
 
-    // --- RE-ENGINEERED PDF DOWNLOAD ENGINE ---
+    // --- PDF DOWNLOAD ENGINE ---
     function downloadPDF() {
         const element = document.getElementById('printable-area');
         const regInput = document.getElementById('in-reg').value.trim();
@@ -374,30 +393,39 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
         element.classList.add('exporting');
 
-        // Capture settings to prevent shifting
         const opt = {
-            margin: 0,
+            margin: [0, 0, 0, 0],
             filename: saveName,
             image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { 
-                scale: 4, 
-                useCORS: true, 
-                scrollY: 0,
+                scale: 3,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
                 scrollX: 0,
-                width: 793.7, // Precise pixel width for A4 at 96dpi
-                windowWidth: 793.7,
-                x: 0,
-                y: 0
+                scrollY: 0,
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
             },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+            pagebreak: {
+                mode: ['css', 'legacy'],
+                before: [],
+                after: [],
+                avoid: ['#printable-area', '.page', '.inner-border']
+            }
         };
 
-        // Download directly with cleaner promise chain
-        html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
-            // No extra pages
-        }).save().then(() => {
-            element.classList.remove('exporting');
-        });
+        html2pdf()
+            .set(opt)
+            .from(element)
+            .save()
+            .then(() => {
+                element.classList.remove('exporting');
+            })
+            .catch(() => {
+                element.classList.remove('exporting');
+            });
     }
 </script>
 </body>
