@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Professional FEC Cover Page Maker</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 @page {
@@ -87,7 +90,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
 /* Hidden during export */
 .exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
-.page.exporting { box-shadow: none; }
+.page.exporting { box-shadow: none !important; }
 
 @media print {
     body { display: block; width: 210mm; height: 297mm; overflow: hidden; } 
@@ -378,28 +381,44 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     function downloadPDF() {
         const element = document.getElementById('printable-area');
         const regInput = document.getElementById('in-reg').value.trim();
-        let saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
+        const saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
+
+        if (!window.html2canvas || !window.jspdf) {
+            alert('PDF library load hoyni. Internet connection check kore page reload din.');
+            return;
+        }
 
         element.classList.add('exporting');
+
+        const originalScrollX = window.scrollX;
+        const originalScrollY = window.scrollY;
+
+        window.scrollTo(0, 0);
 
         html2canvas(element, {
             scale: 3,
             useCORS: true,
-            allowTaint: true,
+            allowTaint: false,
             backgroundColor: '#ffffff',
             scrollX: 0,
             scrollY: 0,
+            width: element.offsetWidth,
+            height: element.offsetHeight,
             windowWidth: element.offsetWidth,
             windowHeight: element.offsetHeight
         }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const pdf = new jspdf.jsPDF('portrait', 'mm', 'a4');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('portrait', 'mm', 'a4');
 
             pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
             pdf.save(saveName);
+        }).catch(error => {
+            console.error('PDF export failed:', error);
+            alert('PDF export failed. Logo image path ba browser console check korun.');
+        }).finally(() => {
             element.classList.remove('exporting');
-        }).catch(() => {
-            element.classList.remove('exporting');
+            window.scrollTo(originalScrollX, originalScrollY);
         });
     }
 </script>
