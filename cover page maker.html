@@ -8,13 +8,13 @@
 
 <style>
 body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
-.sidebar { width: 350px; background-color: #f4f4f4; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; z-index: 10; }
+.sidebar { width: 350px; background-color: #f4f4f4; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; z-index: 100; }
 .preview-container { flex-grow: 1; background-color: #334; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
 
-/* Fixed Page Dimensions for A4 - Adjusted for direct download */
+/* Perfect A4 Dimensions */
 .page { 
     width: 210mm; 
-    height: 296mm; /* Slightly less than 297mm to prevent page break */
+    height: 296.8mm; /* Slightly less than 297mm to avoid extra page */
     padding: 0.25in 0.25in 0.25in 0.1in; 
     background: white; 
     box-shadow: 0 0 20px rgba(0,0,0,0.6); 
@@ -25,7 +25,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     overflow: hidden;
 }
 
-/* Precise Pin Guide Dot */
+/* Subtle Pin Guide Dot */
 .pin-dot {
     position: absolute;
     left: 0.04in; 
@@ -69,6 +69,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 12px; }
 .form-group input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+.form-group input[type="date"] { cursor: pointer; }
 .toggle-group { display: flex; align-items: center; background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
 .toggle-group input { width: auto; margin-right: 10px; cursor: pointer; }
 .font-control-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -80,7 +81,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 #teacher-2-fields { display: none; background: #f9f9f9; padding: 10px; border: 1px dashed #ccc; margin-top: 10px; }
 
 /* Hidden during export */
-.exporting [id^="out-"]:empty::before { display: none !important; }
+.exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
 
 @media print {
     body { display: block; } .sidebar { display: none; } .preview-container { padding: 0; background: none; display: block; }
@@ -198,6 +199,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 </div>
 
 <script>
+    // --- Teacher & Course Database ---
     const courseData = [
         { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
         { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
@@ -311,6 +313,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         } else { document.getElementById('out-date').textContent = ''; }
     });
 
+    // Bidirectional Auto-fill for Students
     const fillStudent = (m) => {
         if(!m) return;
         document.getElementById('in-from-name').value = m.name;
@@ -322,9 +325,14 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
     };
 
-    document.getElementById('in-from-name').addEventListener('change', function() { fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase())); });
-    document.getElementById('in-reg').addEventListener('change', function() { fillStudent(studentData.find(s => s.reg === this.value)); });
+    document.getElementById('in-from-name').addEventListener('change', function() {
+        fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase()));
+    });
+    document.getElementById('in-reg').addEventListener('change', function() {
+        fillStudent(studentData.find(s => s.reg === this.value));
+    });
 
+    // Bidirectional Auto-fill for Courses
     const fillCourse = (m) => {
         if(!m) return;
         document.getElementById('in-course-name').value = m.name;
@@ -334,8 +342,12 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id)));
     };
 
-    document.getElementById('in-course-no').addEventListener('change', function() { fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase())); });
-    document.getElementById('in-course-name').addEventListener('change', function() { fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase())); });
+    document.getElementById('in-course-no').addEventListener('change', function() {
+        fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase()));
+    });
+    document.getElementById('in-course-name').addEventListener('change', function() {
+        fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase()));
+    });
 
     const teacherSync = (id, outId) => {
         document.getElementById(id).addEventListener('change', function() {
@@ -362,22 +374,28 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
         element.classList.add('exporting');
 
+        // Capture settings to prevent shifting
         const opt = {
             margin: 0,
             filename: saveName,
             image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { 
-                scale: 3, 
+                scale: 4, 
                 useCORS: true, 
                 scrollY: 0,
                 scrollX: 0,
-                windowWidth: element.clientWidth // Captures exactly what's seen
+                width: 793.7, // Precise pixel width for A4 at 96dpi
+                windowWidth: 793.7,
+                x: 0,
+                y: 0
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Using simple promise-based flow
-        html2pdf().from(element).set(opt).save().then(() => {
+        // Download directly with cleaner promise chain
+        html2pdf().from(element).set(opt).toPdf().get('pdf').then((pdf) => {
+            // No extra pages
+        }).save().then(() => {
             element.classList.remove('exporting');
         });
     }
