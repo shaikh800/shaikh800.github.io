@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Professional FEC Cover Page Maker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
 body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
 .sidebar { width: 350px; background-color: #f4f4f4; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; }
@@ -20,7 +22,6 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     position: relative;
 }
 
-/* Updated Pin Guide Dot */
 .pin-dot {
     position: absolute;
     left: 0.04in; 
@@ -34,7 +35,8 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 
 .inner-border { border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
 .header-section { text-align: center; }
-.logo { width: 140px; height: auto; margin-bottom: 20px; }
+/* Logo Fix */
+.logo { width: 140px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
 .college-name { font-size: 26px; font-weight: 800; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
 .department-name { font-size: 18px; font-weight: normal; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: none; letter-spacing: 0.5px; }
 .middle-section { text-align: center; }
@@ -135,15 +137,15 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <hr>
     <div class="form-group"><label>Date of Submission:</label><input type="date" id="in-date"></div>
 
-    <button class="print-btn" onclick="window.print()">Save as PDF</button>
+    <button class="print-btn" onclick="downloadPDF()">Download PDF</button>
 </div>
 
 <div class="preview-container">
-    <div class="page">
+    <div class="page" id="printable-area">
         <div class="pin-dot"></div>
         <div class="inner-border">
             <div class="header-section">
-                <img src="Faridpur_Engineering_College.jpg" alt="Logo" class="logo">
+                <img src="Faridpur_Engineeringg_College.jpg" alt="Logo" class="logo">
                 <div class="college-name">FARIDPUR ENGINEERING COLLEGE</div>
                 <div class="department-name">Department of Civil Engineering</div>
             </div>
@@ -192,6 +194,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 </div>
 
 <script>
+    // Logic stays identical to your previous version
     const courseData = [
         { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
         { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
@@ -365,6 +368,29 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
     const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
     fs('fs-college', '.college-name'); fs('fs-title', '.assignment-title'); fs('fs-sub', '.sub-header'); fs('fs-info', '.info-text');
+
+    // --- NEW: DIRECT PDF DOWNLOAD ENGINE ---
+    function downloadPDF() {
+        const element = document.getElementById('printable-area');
+        const regInput = document.getElementById('in-reg').value.trim();
+        
+        // Generate dynamic filename like your other tools
+        let saveName = 'cover-';
+        if (regInput.length >= 3) saveName += regInput.substring(regInput.length - 3);
+        else saveName += 'page';
+        saveName += '.pdf';
+
+        const opt = {
+            margin: 0,
+            filename: saveName,
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Execution similar to your Index Generator
+        html2pdf().set(opt).from(element).save();
+    }
 
 </script>
 </body>
