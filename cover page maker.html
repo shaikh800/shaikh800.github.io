@@ -11,10 +11,10 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .sidebar { width: 350px; background-color: #f4f4f4; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; }
 .preview-container { flex-grow: 1; background-color: #334; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
 
-/* Fixed Page Dimensions for A4 */
+/* Fixed Page Dimensions for A4 to prevent extra pages */
 .page { 
     width: 210mm; 
-    height: 297mm; /* Changed to fixed height to prevent extra page */
+    height: 297mm; 
     padding: 0.25in 0.25in 0.25in 0.1in; 
     background: white; 
     box-shadow: 0 0 20px rgba(0,0,0,0.6); 
@@ -22,7 +22,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     display: flex; 
     flex-direction: column; 
     position: relative;
-    overflow: hidden; /* Ensures no content leaks out */
+    overflow: hidden;
 }
 
 /* Subtle Pin Guide Dot */
@@ -57,7 +57,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .info-text.bold { font-weight: bold; }
 .info-text sup { font-size: 0.7em; }
 
-/* Placeholders for Preview */
+/* Placeholder text hidden on export */
 [id^="out-"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; text-transform: none; }
 #out-exp-no:empty::before { content: "01"; }
 #out-topic:empty::before { content: "Experiment Name Here"; }
@@ -82,13 +82,12 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 .print-btn { display: block; width: 100%; padding: 12px; background-color: #1d8a41; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
 #teacher-2-fields { display: none; background: #f9f9f9; padding: 10px; border: 1px dashed #ccc; margin-top: 10px; }
 
-/* Hiding placeholders during export */
+/* Special class for export */
 .exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
 
 @media print {
     body { display: block; } .sidebar { display: none; } .preview-container { padding: 0; background: none; display: block; }
     .page { box-shadow: none; margin: 0; width: 100%; height: 100%; padding: 0.25in 0.25in 0.25in 0.1in; }
-    [id^="out-"]:empty::before { display: none !important; }
 }
 </style>
 </head>
@@ -202,6 +201,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 </div>
 
 <script>
+    // --- Teacher & Course Database ---
     const courseData = [
         { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
         { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
@@ -220,7 +220,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     ];
 
     const studentData = [
-        { reg: "2022754800", session: "2022-2023", name: "MD. SHAIKH ALAM" },
+        { reg: "2022754800", session: "2022-2023", name: "MD. SHAIKH ALAM" }, 
         { reg: "2022354778", session: "2022-2023", name: "PROTIK SAHA PIAL" },
         { reg: "2022854782", session: "2022-2023", name: "Md. Showrov Hossain" },
         { reg: "2022954772", session: "2022-2023", name: "Shoiab Hosen" },
@@ -315,26 +315,40 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         } else { document.getElementById('out-date').textContent = ''; }
     });
 
+    // Bidirectional Auto-fill for Students
+    const fillStudent = (m) => {
+        if(!m) return;
+        document.getElementById('in-from-name').value = m.name;
+        document.getElementById('in-reg').value = m.reg;
+        document.getElementById('in-session').value = m.session;
+        document.getElementById('in-year').value = "3rd Year";
+        document.getElementById('in-batch').value = "10th";
+        document.getElementById('in-sem').value = "1st";
+        ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
+    };
+
     document.getElementById('in-from-name').addEventListener('change', function() {
-        let m = studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase());
-        if(m) {
-            document.getElementById('in-reg').value = m.reg;
-            document.getElementById('in-session').value = m.session;
-            document.getElementById('in-year').value = "3rd Year";
-            document.getElementById('in-batch').value = "10th";
-            document.getElementById('in-sem').value = "1st";
-            ['in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
-        }
+        fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase()));
+    });
+    document.getElementById('in-reg').addEventListener('change', function() {
+        fillStudent(studentData.find(s => s.reg === this.value));
     });
 
+    // Bidirectional Auto-fill for Courses
+    const fillCourse = (m) => {
+        if(!m) return;
+        document.getElementById('in-course-name').value = m.name;
+        document.getElementById('in-course-no').value = m.code;
+        document.getElementById('in-to-name').value = m.teacher;
+        document.getElementById('in-to-desig').value = m.desig;
+        ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id)));
+    };
+
+    document.getElementById('in-course-no').addEventListener('change', function() {
+        fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase()));
+    });
     document.getElementById('in-course-name').addEventListener('change', function() {
-        let m = courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase());
-        if(m) {
-            document.getElementById('in-course-no').value = m.code;
-            document.getElementById('in-to-name').value = m.teacher;
-            document.getElementById('in-to-desig').value = m.desig;
-            ['in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id)));
-        }
+        fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase()));
     });
 
     const teacherSync = (id, outId) => {
@@ -354,14 +368,12 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
     fs('fs-college', '.college-name'); fs('fs-title', '.assignment-title'); fs('fs-sub', '.sub-header'); fs('fs-info', '.info-text');
 
-    // --- ENHANCED PDF DOWNLOAD ENGINE ---
+    // --- FIXED PDF DOWNLOAD ENGINE ---
     function downloadPDF() {
         const element = document.getElementById('printable-area');
         const regInput = document.getElementById('in-reg').value.trim();
-        
         let saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
 
-        // Add 'exporting' class to hide placeholders
         element.classList.add('exporting');
 
         const opt = {
@@ -369,22 +381,16 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
             filename: saveName,
             image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { 
-                scale: 3, 
+                scale: 4, 
                 useCORS: true, 
-                logging: false,
-                width: element.offsetWidth, // Lock width to actual element width
-                windowWidth: element.offsetWidth,
                 scrollY: 0,
-                scrollX: 0
+                scrollX: 0,
+                windowWidth: 1000 // Forces a wider view to prevent shifting
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Capturing and Downloading
-        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-            // Success
-        }).save().then(() => {
-            // Remove 'exporting' class after download
+        html2pdf().from(element).set(opt).save().then(() => {
             element.classList.remove('exporting');
         });
     }
