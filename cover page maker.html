@@ -112,10 +112,13 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <h3>Cover Page Settings</h3>
     
     <div class="form-group">
-        <label>Document Type:</label>
+        <div style="display: flex; align-items: center; margin-bottom: 3px;">
+            <input type="checkbox" id="chk-doc-type" checked style="width: auto; margin: 0 6px 0 0; cursor: pointer;">
+            <label style="margin: 0; cursor: pointer;" for="chk-doc-type">Document Type:</label>
+        </div>
         <select id="in-doc-type">
-            <option value="ASSIGNMENT ON">ASSIGNMENT ON</option>
             <option value="EXPERIMENT ON">EXPERIMENT ON</option>
+            <option value="ASSIGNMENT ON">ASSIGNMENT ON</option>
             <option value="PROBLEM ON">PROBLEM ON</option>
         </select>
     </div>
@@ -171,7 +174,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
             <div class="middle-section">
                 <div class="horizontal-line"></div>
-                <div class="assignment-title" id="out-doc-type">ASSIGNMENT ON</div>
+                <div class="assignment-title" id="out-doc-type">EXPERIMENT ON</div>
                 <div class="topic-row"><strong>EXPERIMENT NO :</strong> <span id="out-exp-no"></span></div>
                 <div class="topic-row"><strong>EXPERIMENT NAME :</strong> <span id="out-topic"></span></div>
                 <div class="topic-row"><strong>COURSE NAME :</strong> <span id="out-course-name"></span></div>
@@ -296,10 +299,22 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     function format(val) { return caseToggle.checked ? val.toUpperCase() : val; }
     function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
 
-    // NEW: Update Title Document Type
-    document.getElementById('in-doc-type').addEventListener('change', function() {
-        document.getElementById('out-doc-type').textContent = this.value;
-    });
+    // NEW: Document Type Checkbox Logic
+    const docTypeSelect = document.getElementById('in-doc-type');
+    const docTypeOut = document.getElementById('out-doc-type');
+    const chkDocType = document.getElementById('chk-doc-type');
+
+    function updateDocTypeVisibility() {
+        if (chkDocType.checked) {
+            docTypeOut.style.display = 'block';
+            docTypeOut.textContent = docTypeSelect.value;
+        } else {
+            docTypeOut.style.display = 'none';
+        }
+    }
+
+    docTypeSelect.addEventListener('change', updateDocTypeVisibility);
+    chkDocType.addEventListener('change', updateDocTypeVisibility);
 
     function syncUp(i, o) { 
         let el = document.getElementById(i); 
@@ -317,7 +332,6 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         el.addEventListener('input', update); caseToggle.addEventListener('change', update);
     }
 
-    // NEW: Auto-Hide Rows Logic
     function syncVisibility(i, rowId) {
         let el = document.getElementById(i);
         let row = document.getElementById(rowId);
@@ -326,7 +340,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
             row.style.display = el.value.trim() === '' ? 'none' : 'block';
         };
         el.addEventListener('input', updateVisibility);
-        updateVisibility(); // Run once on load to hide empty fields initially
+        updateVisibility();
     }
 
     syncUp('in-exp-no', 'out-exp-no'); syncUp('in-topic', 'out-topic'); 
