@@ -14,16 +14,21 @@
     margin: 0;
 }
 
-body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; }
-.sidebar { width: 350px; background-color: #f4f4f4; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); overflow-y: auto; z-index: 100; }
-.preview-container { flex-grow: 1; background-color: #334; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: #f8fafc; }
+.sidebar { width: 360px; background-color: #ffffff; padding: 20px; box-shadow: 2px 0 15px rgba(0,0,0,0.05); overflow-y: auto; z-index: 100; border-right: 1px solid #e2e8f0; }
+.preview-container { flex-grow: 1; background-color: #1e293b; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
 
 .page { 
     width: 210mm; 
     height: 297mm;
     padding: 0.25in 0.25in 0.25in 0.1in; 
     background: white; 
-    box-shadow: 0 0 20px rgba(0,0,0,0.6); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
     box-sizing: border-box; 
     display: flex; 
     flex-direction: column; 
@@ -31,7 +36,6 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     overflow: hidden;
 }
 
-/* Watermark CSS */
 .watermark {
     position: absolute;
     top: 50%;
@@ -41,20 +45,10 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     opacity: 0.08;
     z-index: 0;
     pointer-events: none;
-    display: none; /* Default hidden */
+    display: none;
 }
 
-.pin-dot {
-    position: absolute;
-    left: 0.04in; 
-    top: 50%;
-    transform: translateY(-50%);
-    width: 2px;
-    height: 2px;
-    background-color: #777;
-    border-radius: 50%;
-}
-
+.pin-dot { position: absolute; left: 0.04in; top: 50%; transform: translateY(-50%); width: 2px; height: 2px; background-color: #777; border-radius: 50%; }
 .inner-border { position: relative; z-index: 10; border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
 .header-section { text-align: center; }
 .logo { width: 140px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
@@ -73,7 +67,6 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .sub-header { font-size: 15px; font-weight: bold; color: #1a759f; margin-bottom: 10px; text-transform: uppercase; }
 .info-text { font-size: 14px; margin-bottom: 5px; text-transform: uppercase; font-weight: 500; color: #000; }
 .info-text.bold { font-weight: bold; }
-/* Modified sup size for better look */
 .info-text sup { font-size: 0.65em; font-weight: 600; text-transform: lowercase; }
 
 [id^="out-"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; text-transform: none; }
@@ -86,20 +79,44 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .footer-dates div { margin-top: 5px; }
 [id^="out-date"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; content: "DD/MM/YYYY"; }
 
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 12px; }
-.form-group input, .form-group select { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #334; }
+.form-group input:not([type="checkbox"]), .form-group select { 
+    width: 100%; padding: 8px 10px; box-sizing: border-box; border: 1px solid #cbd5e1; 
+    border-radius: 6px; font-family: inherit; font-size: 13px; background-color: #f8fafc;
+}
+.form-group input:not([type="checkbox"]):focus, .form-group select:focus {
+    outline: none; border-color: #1d8a41; background-color: #ffffff;
+}
 .form-group input[type="date"] { cursor: pointer; }
-.toggle-group { display: flex; align-items: center; background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
-.toggle-group input { width: auto; margin-right: 10px; cursor: pointer; }
-.font-control-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.font-control-group label { font-size: 12px; font-weight: bold; color: #444; }
-.font-control-group input { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
-h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1d8a41; padding-bottom: 8px; font-size: 18px; margin-bottom: 15px; }
-.teacher-btn { background: #1a759f; color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-.print-btn { display: block; width: 100%; padding: 12px; background-color: #1d8a41; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-#teacher-2-fields { display: none; background: #f9f9f9; padding: 10px; border: 1px dashed #ccc; margin-top: 10px; }
 
+/* COMPACT TOGGLE SWITCHES (Fix for the overly large toggles) */
+.toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
+.toggle-wrapper label { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334; flex-grow: 1; }
+.switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 20px; }
+.slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+input:checked + .slider { background-color: #1d8a41; }
+input:checked + .slider:before { transform: translateX(16px); }
+
+.sortable-item { position: relative; padding-right: 40px; background: #fff; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; }
+.sortable-item label { margin-bottom: 4px; font-size: 12px; }
+.move-controls { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 3px; }
+.move-btn { background: #f1f5f9; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; padding: 4px 6px; color: #64748b; transition: all 0.2s; }
+.move-btn:hover { background: #1d8a41; color: #fff; }
+
+.font-control-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.font-control-group label { font-size: 12px; font-weight: 600; color: #334; }
+.font-control-group input { width: 50px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center; }
+
+h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; font-size: 14px; margin-bottom: 12px; text-transform: uppercase; font-weight: 800; }
+
+.teacher-btn { background: #f1f5f9; color: #334; border: 1px solid #cbd5e1; padding: 8px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 12px; font-size: 12px; }
+.print-btn { display: block; width: 100%; padding: 12px; background-color: #1d8a41; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: all 0.2s; }
+.print-btn:hover { background-color: #157335; }
+
+#teacher-2-fields { display: none; background: #f8fafc; padding: 12px; border: 1px dashed #cbd5e1; border-radius: 6px; margin-top: 10px; }
 .exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
 
 @media print {
@@ -113,10 +130,6 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 <body>
 
 <div class="sidebar">
-    <div class="toggle-group">
-        <input type="checkbox" id="case-toggle" checked>
-        <label for="case-toggle">All Upper Case (Default)</label>
-    </div>
 
     <h3>Font Sizes (px)</h3>
     <div class="font-control-group"><label>College Name:</label><input type="number" id="fs-college" value="26"></div>
@@ -124,23 +137,39 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <div class="font-control-group"><label>Sub-Headers:</label><input type="number" id="fs-sub" value="15"></div>
     <div class="font-control-group"><label>Info Texts:</label><input type="number" id="fs-info" value="14"></div>
 
-    <hr style="margin: 15px 0;">
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
     <h3>Page Elements</h3>
     
-    <div class="form-group" style="display: flex; flex-direction: column; gap: 5px;">
-        <label style="display:flex; align-items:center;"><input type="checkbox" id="chk-watermark" style="width:auto; margin-right:8px;"> Background Logo Watermark</label>
-        <label style="display:flex; align-items:center;"><input type="checkbox" id="chk-date-exp" checked style="width:auto; margin-right:8px;"> Show First Date Field</label>
-        <label style="display:flex; align-items:center;"><input type="checkbox" id="chk-signature" style="width:auto; margin-right:8px;"> Show Teacher's Signature</label>
+    <div class="toggle-wrapper">
+        <label for="case-toggle">All Upper Case Text</label>
+        <label class="switch"><input type="checkbox" id="case-toggle" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-wrapper">
+        <label for="chk-doc-type">Show Document Type</label>
+        <label class="switch"><input type="checkbox" id="chk-doc-type" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-wrapper">
+        <label for="chk-watermark">Background Logo Watermark</label>
+        <label class="switch"><input type="checkbox" id="chk-watermark"><span class="slider"></span></label>
+    </div>
+    <div class="toggle-wrapper">
+        <label for="chk-date-exp">Show First Date Field</label>
+        <label class="switch"><input type="checkbox" id="chk-date-exp" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-wrapper">
+        <label for="chk-date-sub">Show Submission Date</label>
+        <label class="switch"><input type="checkbox" id="chk-date-sub" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-wrapper">
+        <label for="chk-signature">Show Teacher's Signature</label>
+        <label class="switch"><input type="checkbox" id="chk-signature"><span class="slider"></span></label>
     </div>
 
-    <hr style="margin: 15px 0;">
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
     <h3>Cover Page Settings</h3>
     
     <div class="form-group">
-        <div style="display: flex; align-items: center; margin-bottom: 3px;">
-            <input type="checkbox" id="chk-doc-type" checked style="width: auto; margin: 0 6px 0 0; cursor: pointer;">
-            <label style="margin: 0; cursor: pointer;" for="chk-doc-type">Document Type:</label>
-        </div>
+        <label>Document Type:</label>
         <select id="in-doc-type">
             <option value="EXPERIMENT ON">EXPERIMENT ON</option>
             <option value="ASSIGNMENT ON">ASSIGNMENT ON</option>
@@ -156,21 +185,51 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <datalist id="course-code-list"></datalist>
     <datalist id="course-name-list"></datalist>
 
-    <hr>
-    <div class="form-group"><label>Submitted By (Name):</label><input type="text" id="in-from-name" list="name-list" placeholder="Your Name"></div>
-    <div class="form-group"><label>Registration No:</label><input type="text" id="in-reg" list="reg-list" placeholder="Reg. No"></div>
-    <div class="form-group"><label>Semester:</label><input type="text" id="in-sem" list="sem-list" placeholder="1st"></div>
-    <div class="form-group"><label>Year:</label><input type="text" id="in-year" list="year-list" placeholder="3rd Year"></div>
-    <div class="form-group"><label>Session:</label><input type="text" id="in-session" placeholder="2022-2023"></div>
-    <div class="form-group"><label>Batch:</label><input type="text" id="in-batch" placeholder="10th"></div>
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
+    <h3 style="margin-bottom: 5px;">Submitted By Data</h3>
+    <p style="font-size: 11px; color: #64748b; margin-bottom: 10px;">Use ↑ ↓ arrows to reorder.</p>
+    
+    <div id="sortable-student-info">
+        <div class="sortable-item" data-id="name">
+            <label>Name:</label>
+            <input type="text" id="in-from-name" list="name-list" placeholder="Your Name">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
+        <div class="sortable-item" data-id="reg">
+            <label>Registration No:</label>
+            <input type="text" id="in-reg" list="reg-list" placeholder="Reg. No">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
+        <div class="sortable-item" data-id="sem">
+            <label>Semester:</label>
+            <input type="text" id="in-sem" list="sem-list" placeholder="1st">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
+        <div class="sortable-item" data-id="year">
+            <label>Year:</label>
+            <input type="text" id="in-year" list="year-list" placeholder="3rd Year">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
+        <div class="sortable-item" data-id="session">
+            <label>Session:</label>
+            <input type="text" id="in-session" placeholder="2022-2023">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
+        <div class="sortable-item" data-id="batch">
+            <label>Batch:</label>
+            <input type="text" id="in-batch" placeholder="10th">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
+    </div>
 
     <datalist id="name-list"></datalist>
     <datalist id="reg-list"></datalist>
     <datalist id="sem-list"><option value="1st"><option value="2nd"></datalist>
     <datalist id="year-list"><option value="1st Year"><option value="2nd Year"><option value="3rd Year"><option value="4th Year"></datalist>
 
-    <hr>
-    <button class="teacher-btn" onclick="toggleTeacher2()">Add/Remove 2nd Teacher</button>
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
+    <h3>Submitted To Data</h3>
+    <button class="teacher-btn" onclick="toggleTeacher2()">+ Add / Remove 2nd Teacher</button>
     <div class="form-group"><label>Teacher 1 Name:</label><input type="text" id="in-to-name" list="teacher-list" placeholder="Teacher 1"></div>
     <div class="form-group"><label>Designation 1:</label><input type="text" id="in-to-desig" placeholder="Lecturer"></div>
 
@@ -181,7 +240,8 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
     <datalist id="teacher-list"></datalist>
 
-    <hr>
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
+    <h3>Submission Dates</h3>
     <div class="form-group"><label id="lbl-in-date-exp">Date of Experiment:</label><input type="date" id="in-date-exp"></div>
     <div class="form-group"><label>Date of Submission:</label><input type="date" id="in-date"></div>
 
@@ -196,7 +256,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
         <div class="inner-border">
             <div class="header-section">
-                <img src="Faridpur_Engineeringg_College.jpg" alt="Logo" class="logo">
+                <img src="Faridpur_Engineeringg_College.jpg" alt="FEC Logo" class="logo">
                 <div class="college-name">FARIDPUR ENGINEERING COLLEGE</div>
                 <div class="department-name">Department of Civil Engineering</div>
             </div>
@@ -212,15 +272,16 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
             </div>
 
             <div class="bottom-section">
-                <div class="col left">
-                    <div class="sub-header">SUBMITTED BY</div>
-                    <div class="info-text bold" id="out-from-name"></div>
-                    <div class="info-text" id="row-reg">REGISTRATION NO: <span id="out-reg"></span></div>
-                    <div class="info-text" id="row-sem">SEMESTER: <span id="out-sem"></span></div>
-                    <div class="info-text" id="row-year">YEAR: <span id="out-year"></span></div>
-                    <div class="info-text" id="row-session">SESSION: <span id="out-session"></span></div>
-                    <div class="info-text" id="row-batch">BATCH: <span id="out-batch"></span></div>
+                <div class="col left" id="preview-student-info">
+                    <div class="sub-header" id="sub-header-by">SUBMITTED BY</div>
+                    <div class="info-text bold preview-item" id="row-name" data-id="name"><span id="out-from-name"></span></div>
+                    <div class="info-text preview-item" id="row-reg" data-id="reg">REGISTRATION NO: <span id="out-reg"></span></div>
+                    <div class="info-text preview-item" id="row-sem" data-id="sem">SEMESTER: <span id="out-sem"></span></div>
+                    <div class="info-text preview-item" id="row-year" data-id="year">YEAR: <span id="out-year"></span></div>
+                    <div class="info-text preview-item" id="row-session" data-id="session">SESSION: <span id="out-session"></span></div>
+                    <div class="info-text preview-item" id="row-batch" data-id="batch">BATCH: <span id="out-batch"></span></div>
                 </div>
+                
                 <div class="vert-divider"></div>
                 <div class="col right">
                     <div class="sub-header">SUBMITTED TO</div>
@@ -242,7 +303,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
             <div class="footer-section">
                 <div class="footer-dates">
                     <div id="row-date-exp"><span id="out-date-exp-label">Date of Experiment</span>: <span id="out-date-exp"></span></div>
-                    <div>Date of Submission: <span id="out-date"></span></div>
+                    <div id="row-date-sub">Date of Submission: <span id="out-date"></span></div>
                 </div>
                 <div id="signature-block" style="display:none; padding-bottom: 5px;">
                     <div style="border-top: 1px dashed #333; width: 180px; padding-top: 5px; font-weight: bold; text-align: center;">Teacher's Signature</div>
@@ -337,7 +398,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     function format(val) { return caseToggle.checked ? val.toUpperCase() : val; }
     function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
 
-    // Logic for checkboxes (Watermark, Exp Date, Signature)
+    // Toggles
     document.getElementById('chk-watermark').addEventListener('change', function() {
         document.getElementById('watermark-img').style.display = this.checked ? 'block' : 'none';
     });
@@ -346,13 +407,14 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         document.getElementById('signature-block').style.display = this.checked ? 'block' : 'none';
     });
 
-    const chkDateExp = document.getElementById('chk-date-exp');
-    const rowDateExp = document.getElementById('row-date-exp');
-    chkDateExp.addEventListener('change', function() {
-        rowDateExp.style.display = this.checked ? 'block' : 'none';
+    document.getElementById('chk-date-exp').addEventListener('change', function() {
+        document.getElementById('row-date-exp').style.display = this.checked ? 'block' : 'none';
     });
 
-    // Document Type Logic (Updates labels dynamically)
+    document.getElementById('chk-date-sub').addEventListener('change', function() {
+        document.getElementById('row-date-sub').style.display = this.checked ? 'block' : 'none';
+    });
+
     const docTypeSelect = document.getElementById('in-doc-type');
     const docTypeOut = document.getElementById('out-doc-type');
     const chkDocType = document.getElementById('chk-doc-type');
@@ -367,7 +429,6 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
             docTypeOut.style.display = 'none';
         }
         
-        // Dynamically update the First Date label based on doc type
         let baseType = docTypeSelect.value.replace(' ON', '');
         let titleCaseType = baseType.charAt(0).toUpperCase() + baseType.slice(1).toLowerCase();
         let dateLabel = 'Date of ' + titleCaseType;
@@ -379,10 +440,9 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     docTypeSelect.addEventListener('change', updateDocTypeVisibility);
     chkDocType.addEventListener('change', updateDocTypeVisibility);
     caseToggle.addEventListener('change', updateDocTypeVisibility);
-    
-    // Initial call to set correct labels on load
     updateDocTypeVisibility();
 
+    // Data Syncing
     function syncUp(i, o) { 
         let el = document.getElementById(i); 
         if(!el) return;
@@ -395,7 +455,6 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         if(!el) return;
         const update = () => { 
             let val = format(el.value);
-            // Modified to always convert st/nd/rd/th to lower case
             document.getElementById(o).innerHTML = val.replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2.toLowerCase() + "</sup>"); 
         };
         el.addEventListener('input', update); caseToggle.addEventListener('change', update);
@@ -414,7 +473,8 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
     syncUp('in-exp-no', 'out-exp-no'); syncUp('in-topic', 'out-topic'); 
     syncUp('in-course-name', 'out-course-name'); syncUp('in-course-no', 'out-course-no');
-    syncUp('in-from-name', 'out-from-name'); 
+    
+    syncUp('in-from-name', 'out-from-name'); syncVisibility('in-from-name', 'row-name');
     syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
     syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
     
@@ -486,6 +546,45 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         const h = window.getComputedStyle(f).display === 'none';
         f.style.display = h ? 'block' : 'none'; b.style.display = h ? 'block' : 'none';
     }
+
+    // --- REORDER BUG FIXED ---
+    function reorderPreview() {
+        const previewContainer = document.getElementById('preview-student-info');
+        const subHeader = document.getElementById('sub-header-by');
+        
+        // appendChild will re-arrange existing elements instead of clearing them
+        previewContainer.appendChild(subHeader); 
+        
+        const currentOrder = Array.from(document.querySelectorAll('.sortable-item')).map(el => el.dataset.id);
+        currentOrder.forEach(id => {
+            const row = document.getElementById('row-' + id);
+            if(row) {
+                previewContainer.appendChild(row);
+            }
+        });
+    }
+
+    document.querySelectorAll('.move-btn.up').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const item = this.closest('.sortable-item');
+            const prev = item.previousElementSibling;
+            if (prev) {
+                item.parentNode.insertBefore(item, prev);
+                reorderPreview();
+            }
+        });
+    });
+
+    document.querySelectorAll('.move-btn.down').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const item = this.closest('.sortable-item');
+            const next = item.nextElementSibling;
+            if (next) {
+                item.parentNode.insertBefore(next, item);
+                reorderPreview();
+            }
+        });
+    });
 
     const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
     fs('fs-college', '.college-name'); fs('fs-title', '.assignment-title'); fs('fs-sub', '.sub-header'); fs('fs-info', '.info-text');
