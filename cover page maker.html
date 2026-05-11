@@ -72,7 +72,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 12px; }
-.form-group input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+.form-group input, .form-group select { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
 .form-group input[type="date"] { cursor: pointer; }
 .toggle-group { display: flex; align-items: center; background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
 .toggle-group input { width: auto; margin-right: 10px; cursor: pointer; }
@@ -111,6 +111,15 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <hr style="margin: 15px 0;">
     <h3>Cover Page Settings</h3>
     
+    <div class="form-group">
+        <label>Document Type:</label>
+        <select id="in-doc-type">
+            <option value="ASSIGNMENT ON">ASSIGNMENT ON</option>
+            <option value="EXPERIMENT ON">EXPERIMENT ON</option>
+            <option value="PROBLEM ON">PROBLEM ON</option>
+        </select>
+    </div>
+
     <div class="form-group"><label>Experiment No:</label><input type="text" id="in-exp-no" placeholder="e.g. 01"></div>
     <div class="form-group"><label>Experiment Name:</label><input type="text" id="in-topic" placeholder="Experiment Name"></div>
     <div class="form-group"><label>Course Name:</label><input type="text" id="in-course-name" list="course-name-list" placeholder="Course Name"></div>
@@ -162,7 +171,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 
             <div class="middle-section">
                 <div class="horizontal-line"></div>
-                <div class="assignment-title">ASSIGNMENT ON</div>
+                <div class="assignment-title" id="out-doc-type">ASSIGNMENT ON</div>
                 <div class="topic-row"><strong>EXPERIMENT NO :</strong> <span id="out-exp-no"></span></div>
                 <div class="topic-row"><strong>EXPERIMENT NAME :</strong> <span id="out-topic"></span></div>
                 <div class="topic-row"><strong>COURSE NAME :</strong> <span id="out-course-name"></span></div>
@@ -174,11 +183,11 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
                 <div class="col left">
                     <div class="sub-header">SUBMITTED BY</div>
                     <div class="info-text bold" id="out-from-name"></div>
-                    <div class="info-text">REGISTRATION NO: <span id="out-reg"></span></div>
-                    <div class="info-text">SEMESTER: <span id="out-sem"></span></div>
-                    <div class="info-text">YEAR: <span id="out-year"></span></div>
-                    <div class="info-text">SESSION: <span id="out-session"></span></div>
-                    <div class="info-text">BATCH: <span id="out-batch"></span></div>
+                    <div class="info-text" id="row-reg">REGISTRATION NO: <span id="out-reg"></span></div>
+                    <div class="info-text" id="row-sem">SEMESTER: <span id="out-sem"></span></div>
+                    <div class="info-text" id="row-year">YEAR: <span id="out-year"></span></div>
+                    <div class="info-text" id="row-session">SESSION: <span id="out-session"></span></div>
+                    <div class="info-text" id="row-batch">BATCH: <span id="out-batch"></span></div>
                 </div>
                 <div class="vert-divider"></div>
                 <div class="col right">
@@ -287,6 +296,11 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     function format(val) { return caseToggle.checked ? val.toUpperCase() : val; }
     function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
 
+    // NEW: Update Title Document Type
+    document.getElementById('in-doc-type').addEventListener('change', function() {
+        document.getElementById('out-doc-type').textContent = this.value;
+    });
+
     function syncUp(i, o) { 
         let el = document.getElementById(i); 
         if(!el) return;
@@ -303,10 +317,28 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         el.addEventListener('input', update); caseToggle.addEventListener('change', update);
     }
 
+    // NEW: Auto-Hide Rows Logic
+    function syncVisibility(i, rowId) {
+        let el = document.getElementById(i);
+        let row = document.getElementById(rowId);
+        if(!el || !row) return;
+        const updateVisibility = () => {
+            row.style.display = el.value.trim() === '' ? 'none' : 'block';
+        };
+        el.addEventListener('input', updateVisibility);
+        updateVisibility(); // Run once on load to hide empty fields initially
+    }
+
     syncUp('in-exp-no', 'out-exp-no'); syncUp('in-topic', 'out-topic'); 
     syncUp('in-course-name', 'out-course-name'); syncUp('in-course-no', 'out-course-no');
-    syncUp('in-from-name', 'out-from-name'); syncUp('in-reg', 'out-reg'); syncUp('in-session', 'out-session');
-    syncSuper('in-sem', 'out-sem'); syncSuper('in-year', 'out-year'); syncSuper('in-batch', 'out-batch');
+    syncUp('in-from-name', 'out-from-name'); 
+    syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
+    syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
+    
+    syncSuper('in-sem', 'out-sem'); syncVisibility('in-sem', 'row-sem');
+    syncSuper('in-year', 'out-year'); syncVisibility('in-year', 'row-year');
+    syncSuper('in-batch', 'out-batch'); syncVisibility('in-batch', 'row-batch');
+
     syncUp('in-to-name', 'out-to-name'); syncUp('in-to-desig', 'out-to-desig');
     syncUp('in-to-name-2', 'out-to-name-2'); syncUp('in-to-desig-2', 'out-to-desig-2');
 
