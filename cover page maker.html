@@ -31,6 +31,19 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     overflow: hidden;
 }
 
+/* Watermark CSS */
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65%;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+    display: none; /* Default hidden */
+}
+
 .pin-dot {
     position: absolute;
     left: 0.04in; 
@@ -42,7 +55,7 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
     border-radius: 50%;
 }
 
-.inner-border { border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
+.inner-border { position: relative; z-index: 10; border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
 .header-section { text-align: center; }
 .logo { width: 140px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
 .college-name { font-size: 26px; font-weight: 800; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
@@ -60,15 +73,18 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .sub-header { font-size: 15px; font-weight: bold; color: #1a759f; margin-bottom: 10px; text-transform: uppercase; }
 .info-text { font-size: 14px; margin-bottom: 5px; text-transform: uppercase; font-weight: 500; color: #000; }
 .info-text.bold { font-weight: bold; }
-.info-text sup { font-size: 0.7em; }
+/* Modified sup size for better look */
+.info-text sup { font-size: 0.65em; font-weight: 600; text-transform: lowercase; }
 
 [id^="out-"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; text-transform: none; }
 #out-exp-no:empty::before { content: "01"; }
 #out-topic:empty::before { content: "Experiment Name Here"; }
 #out-from-name:empty::before { content: "Student's Full Name"; }
 
-.footer-section { text-align: center; font-size: 14px; color: #333; }
-#out-date { display: inline-block; min-width: 90px; text-align: left; }
+.footer-section { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; font-size: 14px; color: #333; margin-top: 10px; }
+.footer-dates { text-align: left; }
+.footer-dates div { margin-top: 5px; }
+[id^="out-date"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; content: "DD/MM/YYYY"; }
 
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 12px; }
@@ -107,6 +123,15 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <div class="font-control-group"><label>Assignment Title:</label><input type="number" id="fs-title" value="18"></div>
     <div class="font-control-group"><label>Sub-Headers:</label><input type="number" id="fs-sub" value="15"></div>
     <div class="font-control-group"><label>Info Texts:</label><input type="number" id="fs-info" value="14"></div>
+
+    <hr style="margin: 15px 0;">
+    <h3>Page Elements</h3>
+    
+    <div class="form-group" style="display: flex; flex-direction: column; gap: 5px;">
+        <label style="display:flex; align-items:center;"><input type="checkbox" id="chk-watermark" style="width:auto; margin-right:8px;"> Background Logo Watermark</label>
+        <label style="display:flex; align-items:center;"><input type="checkbox" id="chk-date-exp" checked style="width:auto; margin-right:8px;"> Show First Date Field</label>
+        <label style="display:flex; align-items:center;"><input type="checkbox" id="chk-signature" style="width:auto; margin-right:8px;"> Show Teacher's Signature</label>
+    </div>
 
     <hr style="margin: 15px 0;">
     <h3>Cover Page Settings</h3>
@@ -157,6 +182,7 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     <datalist id="teacher-list"></datalist>
 
     <hr>
+    <div class="form-group"><label id="lbl-in-date-exp">Date of Experiment:</label><input type="date" id="in-date-exp"></div>
     <div class="form-group"><label>Date of Submission:</label><input type="date" id="in-date"></div>
 
     <button class="print-btn" onclick="downloadPDF()">Download PDF</button>
@@ -165,9 +191,12 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
 <div class="preview-container">
     <div class="page" id="printable-area">
         <div class="pin-dot"></div>
+        
+        <img src="Faridpur_Engineeringg_College.jpg" alt="Watermark" class="watermark" id="watermark-img">
+
         <div class="inner-border">
             <div class="header-section">
-                <img src="Faridpur_Engineering_College.jpg" alt="Logo" class="logo">
+                <img src="Faridpur_Engineeringg_College.jpg" alt="Logo" class="logo">
                 <div class="college-name">FARIDPUR ENGINEERING COLLEGE</div>
                 <div class="department-name">Department of Civil Engineering</div>
             </div>
@@ -210,7 +239,16 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
                 </div>
             </div>
 
-            <div class="footer-section">Date of Submission: <span id="out-date"></span></div>
+            <div class="footer-section">
+                <div class="footer-dates">
+                    <div id="row-date-exp"><span id="out-date-exp-label">Date of Experiment</span>: <span id="out-date-exp"></span></div>
+                    <div>Date of Submission: <span id="out-date"></span></div>
+                </div>
+                <div id="signature-block" style="display:none; padding-bottom: 5px;">
+                    <div style="border-top: 1px dashed #333; width: 180px; padding-top: 5px; font-weight: bold; text-align: center;">Teacher's Signature</div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -299,10 +337,27 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
     function format(val) { return caseToggle.checked ? val.toUpperCase() : val; }
     function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
 
-    // NEW: Document Type Checkbox Logic
+    // Logic for checkboxes (Watermark, Exp Date, Signature)
+    document.getElementById('chk-watermark').addEventListener('change', function() {
+        document.getElementById('watermark-img').style.display = this.checked ? 'block' : 'none';
+    });
+    
+    document.getElementById('chk-signature').addEventListener('change', function() {
+        document.getElementById('signature-block').style.display = this.checked ? 'block' : 'none';
+    });
+
+    const chkDateExp = document.getElementById('chk-date-exp');
+    const rowDateExp = document.getElementById('row-date-exp');
+    chkDateExp.addEventListener('change', function() {
+        rowDateExp.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Document Type Logic (Updates labels dynamically)
     const docTypeSelect = document.getElementById('in-doc-type');
     const docTypeOut = document.getElementById('out-doc-type');
     const chkDocType = document.getElementById('chk-doc-type');
+    const outDateExpLabel = document.getElementById('out-date-exp-label');
+    const lblInDateExp = document.getElementById('lbl-in-date-exp');
 
     function updateDocTypeVisibility() {
         if (chkDocType.checked) {
@@ -311,10 +366,22 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         } else {
             docTypeOut.style.display = 'none';
         }
+        
+        // Dynamically update the First Date label based on doc type
+        let baseType = docTypeSelect.value.replace(' ON', '');
+        let titleCaseType = baseType.charAt(0).toUpperCase() + baseType.slice(1).toLowerCase();
+        let dateLabel = 'Date of ' + titleCaseType;
+        
+        outDateExpLabel.textContent = caseToggle.checked ? dateLabel.toUpperCase() : dateLabel;
+        lblInDateExp.textContent = dateLabel + ':';
     }
 
     docTypeSelect.addEventListener('change', updateDocTypeVisibility);
     chkDocType.addEventListener('change', updateDocTypeVisibility);
+    caseToggle.addEventListener('change', updateDocTypeVisibility);
+    
+    // Initial call to set correct labels on load
+    updateDocTypeVisibility();
 
     function syncUp(i, o) { 
         let el = document.getElementById(i); 
@@ -327,7 +394,9 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
         let el = document.getElementById(i); 
         if(!el) return;
         const update = () => { 
-            document.getElementById(o).innerHTML = format(el.value).replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2 + "</sup>"); 
+            let val = format(el.value);
+            // Modified to always convert st/nd/rd/th to lower case
+            document.getElementById(o).innerHTML = val.replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2.toLowerCase() + "</sup>"); 
         };
         el.addEventListener('input', update); caseToggle.addEventListener('change', update);
     }
@@ -361,6 +430,13 @@ h3 { margin-top: 0; color: #333; text-align: center; border-bottom: 2px solid #1
             let p = this.value.split('-');
             document.getElementById('out-date').textContent = `${p[2]}/${p[1]}/${p[0]}`;
         } else { document.getElementById('out-date').textContent = ''; }
+    });
+    
+    document.getElementById('in-date-exp').addEventListener('input', function() { 
+        if(this.value) {
+            let p = this.value.split('-');
+            document.getElementById('out-date-exp').textContent = `${p[2]}/${p[1]}/${p[0]}`;
+        } else { document.getElementById('out-date-exp').textContent = ''; }
     });
 
     const fillStudent = (m) => {
