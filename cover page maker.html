@@ -9,10 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-@page {
-    size: A4 portrait;
-    margin: 0;
-}
+@page { size: A4 portrait; margin: 0; }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
@@ -23,37 +20,16 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .sidebar { width: 360px; background-color: #ffffff; padding: 20px; box-shadow: 2px 0 15px rgba(0,0,0,0.05); overflow-y: auto; z-index: 100; border-right: 1px solid #e2e8f0; }
 .preview-container { flex-grow: 1; background-color: #1e293b; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
 
-.page { 
-    width: 210mm; 
-    height: 297mm;
-    padding: 0.25in 0.25in 0.25in 0.1in; 
-    background: white; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-    box-sizing: border-box; 
-    display: flex; 
-    flex-direction: column; 
-    position: relative;
-    overflow: hidden;
-}
+.page { width: 210mm; height: 297mm; padding: 0.25in 0.25in 0.25in 0.1in; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; }
 
-.watermark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 65%;
-    opacity: 0.08;
-    z-index: 0;
-    pointer-events: none;
-    display: none;
-}
+.watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 65%; opacity: 0.08; z-index: 0; pointer-events: none; display: none; }
 
 .pin-dot { position: absolute; left: 0.04in; top: 50%; transform: translateY(-50%); width: 2px; height: 2px; background-color: #777; border-radius: 50%; }
 .inner-border { position: relative; z-index: 10; border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
 .header-section { text-align: center; }
 .logo { width: 140px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
 .college-name { font-size: 26px; font-weight: 800; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-.department-name { font-size: 18px; font-weight: normal; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: none; letter-spacing: 0.5px; }
+.department-name { font-size: 18px; font-weight: normal; color: #000; font-family: 'Georgia', 'Times New Roman', serif; letter-spacing: 0.5px; }
 .middle-section { text-align: center; }
 .horizontal-line { height: 1px; background-color: #8fb1b5; margin: 12px auto; width: 95%; }
 .assignment-title { font-size: 18px; font-weight: bold; color: #2b4c5e; margin-bottom: 12px; }
@@ -69,31 +45,18 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .info-text.bold { font-weight: bold; }
 .info-text sup { font-size: 0.65em; font-weight: 600; text-transform: lowercase; }
 
-[id^="out-"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; text-transform: none; }
-#out-exp-no:empty::before { content: "01"; }
-#out-topic:empty::before { content: "Experiment Name Here"; }
-#out-from-name:empty::before { content: "Student's Full Name"; }
-
 .footer-section { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; font-size: 14px; color: #333; margin-top: 10px; }
 .footer-dates { text-align: left; }
 .footer-dates div { margin-top: 5px; }
-[id^="out-date"]:empty::before { color: #bbb; font-weight: normal; font-style: italic; content: "DD/MM/YYYY"; }
 
 .form-group { margin-bottom: 14px; }
 .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #334; }
-.form-group input:not([type="checkbox"]), .form-group select { 
-    width: 100%; padding: 8px 10px; box-sizing: border-box; border: 1px solid #cbd5e1; 
-    border-radius: 6px; font-family: inherit; font-size: 13px; background-color: #f8fafc;
-}
-.form-group input:not([type="checkbox"]):focus, .form-group select:focus {
-    outline: none; border-color: #0284c7; background-color: #ffffff;
-}
+.form-group input:not([type="checkbox"]), .form-group select { width: 100%; padding: 8px 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 13px; background-color: #f8fafc; }
+.form-group input:not([type="checkbox"]):focus, .form-group select:focus { outline: none; border-color: #0284c7; background-color: #ffffff; }
 .form-group input[type="date"] { cursor: pointer; }
 
-/* FIXED PERFECT BLUE TOGGLE SWITCHES */
 .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
 .toggle-text { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334; flex-grow: 1; }
-
 .switch { position: relative; display: inline-block; width: 42px !important; height: 24px !important; flex-shrink: 0; flex-grow: 0 !important; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
@@ -134,7 +97,6 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
 <body>
 
 <div class="sidebar">
-
     <h3>Font Sizes (px)</h3>
     <div class="font-control-group"><label>College Name:</label><input type="number" id="fs-college" value="26"></div>
     <div class="font-control-group"><label>Assignment Title:</label><input type="number" id="fs-title" value="18"></div>
@@ -143,7 +105,7 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
 
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
     <h3>Page Elements</h3>
-    
+
     <div class="toggle-wrapper">
         <label for="case-toggle" class="toggle-text">All Upper Case Text</label>
         <label class="switch"><input type="checkbox" id="case-toggle" checked><span class="slider"></span></label>
@@ -159,7 +121,7 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
 
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
     <h3>Cover Page Settings</h3>
-    
+
     <div class="form-group">
         <div class="form-header-inline">
             <label class="toggle-text">Document Type:</label>
@@ -176,14 +138,14 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
     <div class="form-group"><label>Experiment Name:</label><input type="text" id="in-topic" placeholder="Experiment Name"></div>
     <div class="form-group"><label>Course Name:</label><input type="text" id="in-course-name" list="course-name-list" placeholder="Course Name"></div>
     <div class="form-group"><label>Course Code:</label><input type="text" id="in-course-no" list="course-code-list" placeholder="CE 501"></div>
-    
+
     <datalist id="course-code-list"></datalist>
     <datalist id="course-name-list"></datalist>
 
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
     <h3 style="margin-bottom: 5px;">Submitted By Data</h3>
     <p style="font-size: 11px; color: #64748b; margin-bottom: 10px;">Use ↑ ↓ arrows to reorder.</p>
-    
+
     <div id="sortable-student-info">
         <div class="sortable-item" data-id="name">
             <label>Name:</label>
@@ -237,7 +199,7 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
 
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
     <h3>Submission Dates</h3>
-    
+
     <div class="form-group">
         <div class="form-header-inline">
             <label id="lbl-in-date-exp" class="toggle-text">Date of Experiment:</label>
@@ -245,7 +207,7 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
         </div>
         <input type="date" id="in-date-exp">
     </div>
-    
+
     <div class="form-group">
         <div class="form-header-inline">
             <label class="toggle-text">Date of Submission:</label>
@@ -260,12 +222,12 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
 <div class="preview-container">
     <div class="page" id="printable-area">
         <div class="pin-dot"></div>
-        
-        <img src="Faridpur_Engineeringg_College.jpg" alt="Watermark" class="watermark" id="watermark-img">
+
+        <img src="Faridpur_Engineering_College.jpg" alt="Watermark" class="watermark" id="watermark-img">
 
         <div class="inner-border">
             <div class="header-section">
-                <img src="Faridpur_Engineeringg_College.jpg" alt="FEC Logo" class="logo">
+                <img src="Faridpur_Engineering_College.jpg" alt="FEC Logo" class="logo">
                 <div class="college-name">FARIDPUR ENGINEERING COLLEGE</div>
                 <div class="department-name">Department of Civil Engineering</div>
             </div>
@@ -273,10 +235,10 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
             <div class="middle-section">
                 <div class="horizontal-line"></div>
                 <div class="assignment-title" id="out-doc-type">EXPERIMENT ON</div>
-                <div class="topic-row"><strong>EXPERIMENT NO :</strong> <span id="out-exp-no"></span></div>
-                <div class="topic-row"><strong>EXPERIMENT NAME :</strong> <span id="out-topic"></span></div>
-                <div class="topic-row"><strong>COURSE NAME :</strong> <span id="out-course-name"></span></div>
-                <div class="topic-row"><strong>COURSE CODE :</strong> <span id="out-course-no"></span></div>
+                <div class="topic-row" id="row-exp-no"><strong>EXPERIMENT NO :</strong> <span id="out-exp-no"></span></div>
+                <div class="topic-row" id="row-topic"><strong>EXPERIMENT NAME :</strong> <span id="out-topic"></span></div>
+                <div class="topic-row" id="row-course-name"><strong>COURSE NAME :</strong> <span id="out-course-name"></span></div>
+                <div class="topic-row" id="row-course-no"><strong>COURSE CODE :</strong> <span id="out-course-no"></span></div>
                 <div class="horizontal-line"></div>
             </div>
 
@@ -290,7 +252,7 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
                     <div class="info-text preview-item" id="row-session" data-id="session">SESSION: <span id="out-session"></span></div>
                     <div class="info-text preview-item" id="row-batch" data-id="batch">BATCH: <span id="out-batch"></span></div>
                 </div>
-                
+
                 <div class="vert-divider"></div>
                 <div class="col right">
                     <div class="sub-header">SUBMITTED TO</div>
@@ -318,370 +280,369 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
                     <div style="border-top: 1px dashed #333; width: 180px; padding-top: 5px; font-weight: bold; text-align: center;">Teacher's Signature</div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
-    const courseData = [
-        { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
-        { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
-        { code: "CE 503", name: "Design of Concrete Structures-I", teacher: "Shohanur Rahman", desig: "Lecturer" },
-        { code: "CE 504", name: "Environmental Engineering-I", teacher: "Ashis Modok", desig: "Adjunct Lecturer" },
-        { code: "CE 505", name: "Principles of Soil Mechanics", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
-        { code: "CE 506", name: "Geotechnical Engineering Sessional-I", teacher: "Ashis Modok", desig: "Adjunct Lecturer" },
-        { code: "CE 507", name: "Open Channel Flow", teacher: "Md. Ekhlas Uddin", desig: "Assistant Professor" },
-        { code: "CE 508", name: "Open Channel Flow Sessional", teacher: "Shahed Mahmud", desig: "Workshop/Laboratory In-charge" }
-    ].sort((a,b) => a.code.localeCompare(b.code));
+const courseData = [
+    { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
+    { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
+    { code: "CE 503", name: "Design of Concrete Structures-I", teacher: "Shohanur Rahman", desig: "Lecturer" },
+    { code: "CE 504", name: "Environmental Engineering-I", teacher: "Ashis Modok", desig: "Adjunct Lecturer" },
+    { code: "CE 505", name: "Principles of Soil Mechanics", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
+    { code: "CE 506", name: "Geotechnical Engineering Sessional-I", teacher: "Ashis Modok", desig: "Adjunct Lecturer" },
+    { code: "CE 507", name: "Open Channel Flow", teacher: "Md. Ekhlas Uddin", desig: "Assistant Professor" },
+    { code: "CE 508", name: "Open Channel Flow Sessional", teacher: "Shahed Mahmud", desig: "Workshop/Laboratory In-charge" }
+].sort((a,b) => a.code.localeCompare(b.code));
 
-    const extraTeachers = [
-        { name: "Raihan Khan Apu", desig: "Assistant Professor" },
-        { name: "Puja Brombha", desig: "Adjunct Lecturer" },
-        { name: "Foysal Ahmed", desig: "Adjunct Lecturer" }
-    ];
+const extraTeachers = [
+    { name: "Raihan Khan Apu", desig: "Assistant Professor" },
+    { name: "Puja Brombha", desig: "Adjunct Lecturer" },
+    { name: "Foysal Ahmed", desig: "Adjunct Lecturer" }
+];
 
-    const studentData = [
-        { reg: "2022754800", session: "2022-2023", name: "MD. SHAIKH ALAM" }, 
-        { reg: "2022354778", session: "2022-2023", name: "PROTIK SAHA PIAL" },
-        { reg: "2022854782", session: "2022-2023", name: "Md. Showrov Hossain" },
-        { reg: "2022954772", session: "2022-2023", name: "Shoiab Hosen" },
-        { reg: "878", session: "2021-2022", name: "MASHUDUR RAHMAN" },
-        { reg: "2022954808", session: "2022-2023", name: "Shazid Rownok Ayon" },
-        { reg: "2022554785", session: "2022-2023", name: "MD.HASIB" },
-        { reg: "2022154798", session: "2022-2023", name: "Sardar All-Fahat (Rabin)" },
-        { reg: "2022854773", session: "2022-2023", name: "MD. Mubtasim Rahman Mitul" },
-        { reg: "2022054780", session: "2022-2023", name: "TAHER AHMAD" },
-        { reg: "883", session: "2021-2022", name: "MD.SHARIF SARDAR" },
-        { reg: "2022054799", session: "2022-2023", name: "Md Sihab" },
-        { reg: "860", session: "2021-2022", name: "Jannatul Hoque Akondo" },
-        { reg: "2022454803", session: "2022-2023", name: "MD. TANVIR AHMED" },
-        { reg: "2022954781", session: "2022-2023", name: "MD. MINHAZUR RAHMAN" },
-        { reg: "2022554776", session: "2022-2023", name: "AZIZUL HAKIM MIRAZ" },
-        { reg: "1040", session: "2020-2021", name: "NOWFEL HOSSAIN" },
-        { reg: "2022354813", session: "2022-2023", name: "Md.Rakib Munshi" },
-        { reg: "881", session: "2021-2022", name: "Samrat Fakir" },
-        { reg: "2022154815", session: "2022-2023", name: "Mst.Zermoon Nisa" },
-        { reg: "2022454786", session: "2022-2023", name: "Maniruzzaman" },
-        { reg: "2022654793", session: "2022-2023", name: "Md Nurmohammad Shanto" },
-        { reg: "2022454821", session: "2022-2023", name: "Shuvashis Chakma" },
-        { reg: "866", session: "2021-2022", name: "MD. SAKIB FARDOUS" },
-        { reg: "862", session: "2021-2022", name: "S. M. Rafat Uddin" },
-        { reg: "2022154789", session: "2022-2023", name: "SHADMAN SHAKIB SHIRSHO" },
-        { reg: "2022554811", session: "2022-2023", name: "MOHAMMAD TAMJED HASAN" },
-        { reg: "2022254779", session: "2022-2023", name: "MD. Mahfuzur Rahman" },
-        { reg: "2022754774", session: "2022-2023", name: "Md. Saiful Islam" },
-        { reg: "2022054807", session: "2022-2023", name: "Mahathir Mohammad" },
-        { reg: "2022354804", session: "2022-2023", name: "Md Marjabin Islam Mafi" },
-        { reg: "2022454768", session: "2022-2023", name: "Ali Asgar Talukder" },
-        { reg: "2022754783", session: "2022-2023", name: "Abdullah Al Mamun" },
-        { reg: "886", session: "2021-2022", name: "Shariful Islam Siam" },
-        { reg: "2022254814", session: "2022-2023", name: "Md.Nazmul Haq Bhuiya" },
-        { reg: "2022654775", session: "2022-2023", name: "MD. AFIF ALL ABIR" },
-        { reg: "2022054816", session: "2022-2023", name: "Md.Naimur Rahman" },
-        { reg: "889", session: "2021-2022", name: "MEHERAN MAHTHIR SROBON" },
-        { reg: "2022154770", session: "2022-2023", name: "Raduan Ahammad Shuvo" },
-        { reg: "2022554802", session: "2022-2023", name: "Talha Hamim Antor" },
-        { reg: "2022254797", session: "2022-2023", name: "Md.Abu bokor" },
-        { reg: "2022354796", session: "2022-2023", name: "MD.MIFTAUL JANNAT TASIN" }
-    ];
+const studentData = [
+    { reg: "2022754800", session: "2022-2023", name: "MD. SHAIKH ALAM" },
+    { reg: "2022354778", session: "2022-2023", name: "PROTIK SAHA PIAL" },
+    { reg: "2022854782", session: "2022-2023", name: "Md. Showrov Hossain" },
+    { reg: "2022954772", session: "2022-2023", name: "Shoiab Hosen" },
+    { reg: "878", session: "2021-2022", name: "MASHUDUR RAHMAN" },
+    { reg: "2022954808", session: "2022-2023", name: "Shazid Rownok Ayon" },
+    { reg: "2022554785", session: "2022-2023", name: "MD.HASIB" },
+    { reg: "2022154798", session: "2022-2023", name: "Sardar All-Fahat (Rabin)" },
+    { reg: "2022854773", session: "2022-2023", name: "MD. Mubtasim Rahman Mitul" },
+    { reg: "2022054780", session: "2022-2023", name: "TAHER AHMAD" },
+    { reg: "883", session: "2021-2022", name: "MD.SHARIF SARDAR" },
+    { reg: "2022054799", session: "2022-2023", name: "Md Sihab" },
+    { reg: "860", session: "2021-2022", name: "Jannatul Hoque Akondo" },
+    { reg: "2022454803", session: "2022-2023", name: "MD. TANVIR AHMED" },
+    { reg: "2022954781", session: "2022-2023", name: "MD. MINHAZUR RAHMAN" },
+    { reg: "2022554776", session: "2022-2023", name: "AZIZUL HAKIM MIRAZ" },
+    { reg: "1040", session: "2020-2021", name: "NOWFEL HOSSAIN" },
+    { reg: "2022354813", session: "2022-2023", name: "Md.Rakib Munshi" },
+    { reg: "881", session: "2021-2022", name: "Samrat Fakir" },
+    { reg: "2022154815", session: "2022-2023", name: "Mst.Zermoon Nisa" },
+    { reg: "2022454786", session: "2022-2023", name: "Maniruzzaman" },
+    { reg: "2022654793", session: "2022-2023", name: "Md Nurmohammad Shanto" },
+    { reg: "2022454821", session: "2022-2023", name: "Shuvashis Chakma" },
+    { reg: "866", session: "2021-2022", name: "MD. SAKIB FARDOUS" },
+    { reg: "862", session: "2021-2022", name: "S. M. Rafat Uddin" },
+    { reg: "2022154789", session: "2022-2023", name: "SHADMAN SHAKIB SHIRSHO" },
+    { reg: "2022554811", session: "2022-2023", name: "MOHAMMAD TAMJED HASAN" },
+    { reg: "2022254779", session: "2022-2023", name: "MD. Mahfuzur Rahman" },
+    { reg: "2022754774", session: "2022-2023", name: "Md. Saiful Islam" },
+    { reg: "2022054807", session: "2022-2023", name: "Mahathir Mohammad" },
+    { reg: "2022354804", session: "2022-2023", name: "Md Marjabin Islam Mafi" },
+    { reg: "2022454768", session: "2022-2023", name: "Ali Asgar Talukder" },
+    { reg: "2022754783", session: "2022-2023", name: "Abdullah Al Mamun" },
+    { reg: "886", session: "2021-2022", name: "Shariful Islam Siam" },
+    { reg: "2022254814", session: "2022-2023", name: "Md.Nazmul Haq Bhuiya" },
+    { reg: "2022654775", session: "2022-2023", name: "MD. AFIF ALL ABIR" },
+    { reg: "2022054816", session: "2022-2023", name: "Md.Naimur Rahman" },
+    { reg: "889", session: "2021-2022", name: "MEHERAN MAHTHIR SROBON" },
+    { reg: "2022154770", session: "2022-2023", name: "Raduan Ahammad Shuvo" },
+    { reg: "2022554802", session: "2022-2023", name: "Talha Hamim Antor" },
+    { reg: "2022254797", session: "2022-2023", name: "Md.Abu bokor" },
+    { reg: "2022354796", session: "2022-2023", name: "MD.MIFTAUL JANNAT TASIN" }
+];
 
-    const cCodeL = document.getElementById('course-code-list');
-    const cNameL = document.getElementById('course-name-list');
-    const nList = document.getElementById('name-list');
-    const rList = document.getElementById('reg-list');
-    const tList = document.getElementById('teacher-list');
+const cCodeL = document.getElementById('course-code-list');
+const cNameL = document.getElementById('course-name-list');
+const nList = document.getElementById('name-list');
+const rList = document.getElementById('reg-list');
+const tList = document.getElementById('teacher-list');
 
-    courseData.forEach(c => {
-        cCodeL.innerHTML += `<option value="${c.code}">`;
-        cNameL.innerHTML += `<option value="${c.name}">`;
-        tList.innerHTML += `<option value="${c.teacher}">`;
-    });
-    extraTeachers.forEach(t => { tList.innerHTML += `<option value="${t.name}">`; });
-    studentData.forEach(s => {
-        nList.innerHTML += `<option value="${s.name}">`;
-        if(s.reg) rList.innerHTML += `<option value="${s.reg}">`;
-    });
+courseData.forEach(c => {
+    cCodeL.innerHTML += `<option value="${c.code}">`;
+    cNameL.innerHTML += `<option value="${c.name}">`;
+    tList.innerHTML += `<option value="${c.teacher}">`;
+});
+extraTeachers.forEach(t => { tList.innerHTML += `<option value="${t.name}">`; });
+studentData.forEach(s => {
+    nList.innerHTML += `<option value="${s.name}">`;
+    if(s.reg) rList.innerHTML += `<option value="${s.reg}">`;
+});
 
-    const caseToggle = document.getElementById('case-toggle');
-    function format(val) { return caseToggle.checked ? val.toUpperCase() : val; }
-    function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
+const caseToggle = document.getElementById('case-toggle');
+function format(val) { return caseToggle.checked ? val.toUpperCase() : val; }
+function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
 
-    // Toggles
-    document.getElementById('chk-watermark').addEventListener('change', function() {
-        document.getElementById('watermark-img').style.display = this.checked ? 'block' : 'none';
-    });
-    
-    document.getElementById('chk-signature').addEventListener('change', function() {
-        document.getElementById('signature-block').style.display = this.checked ? 'block' : 'none';
-    });
+document.getElementById('chk-watermark').addEventListener('change', function() {
+    document.getElementById('watermark-img').style.display = this.checked ? 'block' : 'none';
+});
 
-    document.getElementById('chk-date-exp').addEventListener('change', function() {
-        document.getElementById('row-date-exp').style.display = this.checked ? 'block' : 'none';
-    });
+document.getElementById('chk-signature').addEventListener('change', function() {
+    document.getElementById('signature-block').style.display = this.checked ? 'block' : 'none';
+});
 
-    document.getElementById('chk-date-sub').addEventListener('change', function() {
-        document.getElementById('row-date-sub').style.display = this.checked ? 'block' : 'none';
-    });
+document.getElementById('chk-date-exp').addEventListener('change', function() {
+    document.getElementById('row-date-exp').style.display = this.checked ? 'block' : 'none';
+});
 
-    const docTypeSelect = document.getElementById('in-doc-type');
-    const docTypeOut = document.getElementById('out-doc-type');
-    const chkDocType = document.getElementById('chk-doc-type');
-    const outDateExpLabel = document.getElementById('out-date-exp-label');
-    const lblInDateExp = document.getElementById('lbl-in-date-exp');
+document.getElementById('chk-date-sub').addEventListener('change', function() {
+    document.getElementById('row-date-sub').style.display = this.checked ? 'block' : 'none';
+});
 
-    function updateDocTypeVisibility() {
-        if (chkDocType.checked) {
-            docTypeOut.style.display = 'block';
-            docTypeOut.textContent = docTypeSelect.value;
-        } else {
-            docTypeOut.style.display = 'none';
+const docTypeSelect = document.getElementById('in-doc-type');
+const docTypeOut = document.getElementById('out-doc-type');
+const chkDocType = document.getElementById('chk-doc-type');
+const outDateExpLabel = document.getElementById('out-date-exp-label');
+const lblInDateExp = document.getElementById('lbl-in-date-exp');
+
+function updateDocTypeVisibility() {
+    if (chkDocType.checked) {
+        docTypeOut.style.display = 'block';
+        docTypeOut.textContent = docTypeSelect.value;
+    } else {
+        docTypeOut.style.display = 'none';
+    }
+
+    let baseType = docTypeSelect.value.replace(' ON', '');
+    let titleCaseType = baseType.charAt(0).toUpperCase() + baseType.slice(1).toLowerCase();
+    let dateLabel = 'Date of ' + titleCaseType;
+
+    outDateExpLabel.textContent = caseToggle.checked ? dateLabel.toUpperCase() : dateLabel;
+    lblInDateExp.textContent = dateLabel + ':';
+}
+
+docTypeSelect.addEventListener('change', updateDocTypeVisibility);
+chkDocType.addEventListener('change', updateDocTypeVisibility);
+caseToggle.addEventListener('change', updateDocTypeVisibility);
+
+function syncUp(i, o) {
+    let el = document.getElementById(i);
+    if(!el) return;
+    const update = () => { document.getElementById(o).textContent = format(el.value); };
+    el.addEventListener('input', update);
+    caseToggle.addEventListener('change', update);
+}
+
+function syncSuper(i, o) {
+    let el = document.getElementById(i);
+    if(!el) return;
+    const update = () => {
+        let val = format(el.value);
+        document.getElementById(o).innerHTML = val.replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2.toLowerCase() + "</sup>");
+    };
+    el.addEventListener('input', update);
+    caseToggle.addEventListener('change', update);
+}
+
+function syncVisibility(i, rowId) {
+    let el = document.getElementById(i);
+    let row = document.getElementById(rowId);
+    if(!el || !row) return;
+    const updateVisibility = () => {
+        row.style.display = el.value.trim() === '' ? 'none' : 'block';
+    };
+    el.addEventListener('input', updateVisibility);
+    updateVisibility();
+}
+
+syncUp('in-exp-no', 'out-exp-no'); syncVisibility('in-exp-no', 'row-exp-no');
+syncUp('in-topic', 'out-topic'); syncVisibility('in-topic', 'row-topic');
+syncUp('in-course-name', 'out-course-name'); syncVisibility('in-course-name', 'row-course-name');
+syncUp('in-course-no', 'out-course-no'); syncVisibility('in-course-no', 'row-course-no');
+
+syncUp('in-from-name', 'out-from-name'); syncVisibility('in-from-name', 'row-name');
+syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
+syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
+
+syncSuper('in-sem', 'out-sem'); syncVisibility('in-sem', 'row-sem');
+syncSuper('in-year', 'out-year'); syncVisibility('in-year', 'row-year');
+syncSuper('in-batch', 'out-batch'); syncVisibility('in-batch', 'row-batch');
+
+syncUp('in-to-name', 'out-to-name');
+syncUp('in-to-desig', 'out-to-desig');
+syncUp('in-to-name-2', 'out-to-name-2');
+syncUp('in-to-desig-2', 'out-to-desig-2');
+
+document.getElementById('in-date').addEventListener('input', function() {
+    if(this.value) {
+        let p = this.value.split('-');
+        document.getElementById('out-date').textContent = `${p[2]}/${p[1]}/${p[0]}`;
+    } else {
+        document.getElementById('out-date').textContent = '';
+    }
+});
+
+document.getElementById('in-date-exp').addEventListener('input', function() {
+    if(this.value) {
+        let p = this.value.split('-');
+        document.getElementById('out-date-exp').textContent = `${p[2]}/${p[1]}/${p[0]}`;
+    } else {
+        document.getElementById('out-date-exp').textContent = '';
+    }
+});
+
+const fillStudent = (m) => {
+    if(!m) return;
+    document.getElementById('in-from-name').value = m.name;
+    document.getElementById('in-reg').value = m.reg;
+    document.getElementById('in-session').value = m.session;
+    document.getElementById('in-year').value = "3rd Year";
+    document.getElementById('in-batch').value = "10th";
+    document.getElementById('in-sem').value = "1st";
+    ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
+};
+
+document.getElementById('in-from-name').addEventListener('change', function() {
+    fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase()));
+});
+
+document.getElementById('in-reg').addEventListener('change', function() {
+    fillStudent(studentData.find(s => s.reg === this.value));
+});
+
+const fillCourse = (m) => {
+    if(!m) return;
+    document.getElementById('in-course-name').value = m.name;
+    document.getElementById('in-course-no').value = m.code;
+    document.getElementById('in-to-name').value = m.teacher;
+    document.getElementById('in-to-desig').value = m.desig;
+    ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id)));
+};
+
+document.getElementById('in-course-no').addEventListener('change', function() {
+    fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase()));
+});
+
+document.getElementById('in-course-name').addEventListener('change', function() {
+    fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase()));
+});
+
+const teacherSync = (id, outId) => {
+    document.getElementById(id).addEventListener('change', function() {
+        let m = courseData.find(c => c.teacher.toLowerCase() === this.value.toLowerCase()) || extraTeachers.find(t => t.name.toLowerCase() === this.value.toLowerCase());
+        if(m) {
+            document.getElementById(outId).value = m.desig;
+            trigger(document.getElementById(outId));
         }
-        
-        let baseType = docTypeSelect.value.replace(' ON', '');
-        let titleCaseType = baseType.charAt(0).toUpperCase() + baseType.slice(1).toLowerCase();
-        let dateLabel = 'Date of ' + titleCaseType;
-        
-        outDateExpLabel.textContent = caseToggle.checked ? dateLabel.toUpperCase() : dateLabel;
-        lblInDateExp.textContent = dateLabel + ':';
-    }
-
-    docTypeSelect.addEventListener('change', updateDocTypeVisibility);
-    chkDocType.addEventListener('change', updateDocTypeVisibility);
-    caseToggle.addEventListener('change', updateDocTypeVisibility);
-
-    // Data Syncing
-    function syncUp(i, o) { 
-        let el = document.getElementById(i); 
-        if(!el) return;
-        const update = () => { document.getElementById(o).textContent = format(el.value); };
-        el.addEventListener('input', update); caseToggle.addEventListener('change', update);
-    }
-    
-    function syncSuper(i, o) {
-        let el = document.getElementById(i); 
-        if(!el) return;
-        const update = () => { 
-            let val = format(el.value);
-            document.getElementById(o).innerHTML = val.replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2.toLowerCase() + "</sup>"); 
-        };
-        el.addEventListener('input', update); caseToggle.addEventListener('change', update);
-    }
-
-    function syncVisibility(i, rowId) {
-        let el = document.getElementById(i);
-        let row = document.getElementById(rowId);
-        if(!el || !row) return;
-        const updateVisibility = () => {
-            row.style.display = el.value.trim() === '' ? 'none' : 'block';
-        };
-        el.addEventListener('input', updateVisibility);
-    }
-
-    syncUp('in-exp-no', 'out-exp-no'); syncUp('in-topic', 'out-topic'); 
-    syncUp('in-course-name', 'out-course-name'); syncUp('in-course-no', 'out-course-no');
-    
-    syncUp('in-from-name', 'out-from-name'); syncVisibility('in-from-name', 'row-name');
-    syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
-    syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
-    
-    syncSuper('in-sem', 'out-sem'); syncVisibility('in-sem', 'row-sem');
-    syncSuper('in-year', 'out-year'); syncVisibility('in-year', 'row-year');
-    syncSuper('in-batch', 'out-batch'); syncVisibility('in-batch', 'row-batch');
-
-    syncUp('in-to-name', 'out-to-name'); syncUp('in-to-desig', 'out-to-desig');
-    syncUp('in-to-name-2', 'out-to-name-2'); syncUp('in-to-desig-2', 'out-to-desig-2');
-
-    document.getElementById('in-date').addEventListener('input', function() { 
-        if(this.value) {
-            let p = this.value.split('-');
-            document.getElementById('out-date').textContent = `${p[2]}/${p[1]}/${p[0]}`;
-        } else { document.getElementById('out-date').textContent = ''; }
     });
-    
-    document.getElementById('in-date-exp').addEventListener('input', function() { 
-        if(this.value) {
-            let p = this.value.split('-');
-            document.getElementById('out-date-exp').textContent = `${p[2]}/${p[1]}/${p[0]}`;
-        } else { document.getElementById('out-date-exp').textContent = ''; }
+};
+
+teacherSync('in-to-name', 'in-to-desig');
+teacherSync('in-to-name-2', 'in-to-desig-2');
+
+function toggleTeacher2() {
+    const f = document.getElementById('teacher-2-fields');
+    const b = document.getElementById('teacher-2-block');
+    const h = window.getComputedStyle(f).display === 'none';
+    f.style.display = h ? 'block' : 'none';
+    b.style.display = h ? 'block' : 'none';
+}
+
+function reorderPreview() {
+    const previewContainer = document.getElementById('preview-student-info');
+    const subHeader = document.getElementById('sub-header-by');
+
+    previewContainer.appendChild(subHeader);
+
+    const currentOrder = Array.from(document.querySelectorAll('.sortable-item')).map(el => el.dataset.id);
+    currentOrder.forEach(id => {
+        const row = document.getElementById('row-' + id);
+        if(row) previewContainer.appendChild(row);
     });
+}
 
-    const fillStudent = (m) => {
-        if(!m) return;
-        document.getElementById('in-from-name').value = m.name;
-        document.getElementById('in-reg').value = m.reg;
-        document.getElementById('in-session').value = m.session;
-        document.getElementById('in-year').value = "3rd Year";
-        document.getElementById('in-batch').value = "10th";
-        document.getElementById('in-sem').value = "1st";
-        ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
-    };
-
-    document.getElementById('in-from-name').addEventListener('change', function() {
-        fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase()));
-    });
-    document.getElementById('in-reg').addEventListener('change', function() {
-        fillStudent(studentData.find(s => s.reg === this.value));
-    });
-
-    const fillCourse = (m) => {
-        if(!m) return;
-        document.getElementById('in-course-name').value = m.name;
-        document.getElementById('in-course-no').value = m.code;
-        document.getElementById('in-to-name').value = m.teacher;
-        document.getElementById('in-to-desig').value = m.desig;
-        ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id)));
-    };
-
-    document.getElementById('in-course-no').addEventListener('change', function() {
-        fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase()));
-    });
-    document.getElementById('in-course-name').addEventListener('change', function() {
-        fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase()));
-    });
-
-    const teacherSync = (id, outId) => {
-        document.getElementById(id).addEventListener('change', function() {
-            let m = courseData.find(c => c.teacher.toLowerCase() === this.value.toLowerCase()) || extraTeachers.find(t => t.name.toLowerCase() === this.value.toLowerCase());
-            if(m) { document.getElementById(outId).value = m.desig; trigger(document.getElementById(outId)); }
-        });
-    };
-    teacherSync('in-to-name', 'in-to-desig'); teacherSync('in-to-name-2', 'in-to-desig-2');
-
-    function toggleTeacher2() {
-        const f = document.getElementById('teacher-2-fields'), b = document.getElementById('teacher-2-block');
-        const h = window.getComputedStyle(f).display === 'none';
-        f.style.display = h ? 'block' : 'none'; b.style.display = h ? 'block' : 'none';
-    }
-
-    function reorderPreview() {
-        const previewContainer = document.getElementById('preview-student-info');
-        const subHeader = document.getElementById('sub-header-by');
-        
-        previewContainer.appendChild(subHeader); 
-        
-        const currentOrder = Array.from(document.querySelectorAll('.sortable-item')).map(el => el.dataset.id);
-        currentOrder.forEach(id => {
-            const row = document.getElementById('row-' + id);
-            if(row) {
-                previewContainer.appendChild(row);
-            }
-        });
-    }
-
-    document.querySelectorAll('.move-btn.up').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.sortable-item');
-            const prev = item.previousElementSibling;
-            if (prev) {
-                item.parentNode.insertBefore(item, prev);
-                reorderPreview();
-            }
-        });
-    });
-
-    document.querySelectorAll('.move-btn.down').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const item = this.closest('.sortable-item');
-            const next = item.nextElementSibling;
-            if (next) {
-                item.parentNode.insertBefore(next, item);
-                reorderPreview();
-            }
-        });
-    });
-
-    const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
-    fs('fs-college', '.college-name'); fs('fs-title', '.assignment-title'); fs('fs-sub', '.sub-header'); fs('fs-info', '.info-text');
-
-    // === NEW: AUTO-FILL DEFAULT DATA ON PAGE LOAD ===
-    window.onload = () => {
-        updateDocTypeVisibility();
-
-        const defCourse = courseData[0];
-        document.getElementById('in-course-no').value = defCourse.code;
-        fillCourse(defCourse);
-        
-        const defStudent = studentData.find(s => s.reg === "2022754800");
-        if(defStudent) fillStudent(defStudent);
-        
-        document.getElementById('in-exp-no').value = "01";
-        trigger(document.getElementById('in-exp-no'));
-        document.getElementById('in-topic').value = "Introduction to structural drafting";
-        trigger(document.getElementById('in-topic'));
-        
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('in-date').value = today;
-        document.getElementById('in-date-exp').value = today;
-        trigger(document.getElementById('in-date'));
-        trigger(document.getElementById('in-date-exp'));
-    };
-
-    function waitForImages(root) {
-        const images = Array.from(root.querySelectorAll('img'));
-        return Promise.all(images.map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = resolve;
-            });
-        }));
-    }
-
-    function downloadPDF() {
-        const original = document.getElementById('printable-area');
-        const regInput = document.getElementById('in-reg').value.trim();
-        const saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
-
-        if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
-            alert('PDF library load hoyni. Internet connection check kore page reload din.');
-            return;
+document.querySelectorAll('.move-btn.up').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const item = this.closest('.sortable-item');
+        const prev = item.previousElementSibling;
+        if (prev) {
+            item.parentNode.insertBefore(item, prev);
+            reorderPreview();
         }
+    });
+});
 
-        const clone = original.cloneNode(true);
-        clone.id = 'pdf-export-area';
-        clone.classList.add('exporting');
+document.querySelectorAll('.move-btn.down').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const item = this.closest('.sortable-item');
+        const next = item.nextElementSibling;
+        if (next) {
+            item.parentNode.insertBefore(next, item);
+            reorderPreview();
+        }
+    });
+});
 
-        clone.style.position = 'fixed';
-        clone.style.left = '-10000px';
-        clone.style.top = '0';
-        clone.style.margin = '0';
-        clone.style.width = '210mm';
-        clone.style.height = '297mm';
-        clone.style.boxShadow = 'none';
-        clone.style.overflow = 'hidden';
-        clone.style.background = '#ffffff';
-        clone.style.zIndex = '999999';
+const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
+fs('fs-college', '.college-name');
+fs('fs-title', '.assignment-title');
+fs('fs-sub', '.sub-header');
+fs('fs-info', '.info-text');
 
-        document.body.appendChild(clone);
+window.onload = () => {
+    updateDocTypeVisibility();
+};
 
-        waitForImages(clone).then(() => {
-            return html2canvas(clone, {
-                scale: 3,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: '#ffffff',
-                scrollX: 0,
-                scrollY: 0,
-                width: clone.offsetWidth,
-                height: clone.offsetHeight,
-                windowWidth: clone.offsetWidth,
-                windowHeight: clone.offsetHeight
-            });
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('portrait', 'mm', 'a4');
-
-            pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-            pdf.save(saveName);
-        }).catch(error => {
-            console.error('PDF export failed:', error);
-            alert('PDF export failed. Logo image path ba browser console check korun.');
-        }).finally(() => {
-            clone.remove();
+function waitForImages(root) {
+    const images = Array.from(root.querySelectorAll('img'));
+    return Promise.all(images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
         });
+    }));
+}
+
+function downloadPDF() {
+    const original = document.getElementById('printable-area');
+    const regInput = document.getElementById('in-reg').value.trim();
+    const saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
+
+    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+        alert('PDF library load hoyni. Internet connection check kore page reload din.');
+        return;
     }
+
+    const clone = original.cloneNode(true);
+    clone.id = 'pdf-export-area';
+    clone.classList.add('exporting');
+
+    clone.style.position = 'fixed';
+    clone.style.left = '-10000px';
+    clone.style.top = '0';
+    clone.style.margin = '0';
+    clone.style.width = '210mm';
+    clone.style.height = '297mm';
+    clone.style.boxShadow = 'none';
+    clone.style.overflow = 'hidden';
+    clone.style.background = '#ffffff';
+    clone.style.zIndex = '999999';
+
+    document.body.appendChild(clone);
+
+    waitForImages(clone).then(() => {
+        return html2canvas(clone, {
+            scale: 3,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: 0,
+            width: clone.offsetWidth,
+            height: clone.offsetHeight,
+            windowWidth: clone.offsetWidth,
+            windowHeight: clone.offsetHeight
+        });
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        pdf.save(saveName);
+    }).catch(error => {
+        console.error('PDF export failed:', error);
+        alert('PDF export failed. Logo image path ba browser console check korun.');
+    }).finally(() => {
+        clone.remove();
+    });
+}
 </script>
 </body>
 </html>
