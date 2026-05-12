@@ -274,7 +274,7 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
             <div class="footer-section">
                 <div class="footer-dates">
                     <div id="row-date-exp"><span id="out-date-exp-label">Date of Experiment</span>: <span id="out-date-exp"></span></div>
-                    <div id="row-date-sub">Date of Submission: <span id="out-date"></span></div>
+                    <div id="row-date-sub"><span id="out-date-sub-label">Date of Submission</span>: <span id="out-date"></span></div>
                 </div>
                 <div id="signature-block" style="display:none; padding-bottom: 5px;">
                     <div style="border-top: 1px dashed #333; width: 180px; padding-top: 5px; font-weight: bold; text-align: center;">Teacher's Signature</div>
@@ -389,6 +389,8 @@ const docTypeOut = document.getElementById('out-doc-type');
 const chkDocType = document.getElementById('chk-doc-type');
 const outDateExpLabel = document.getElementById('out-date-exp-label');
 const lblInDateExp = document.getElementById('lbl-in-date-exp');
+// MODIFIED THIS LINE
+const outDateSubLabel = document.getElementById('out-date-sub-label');
 
 function updateDocTypeVisibility() {
     if (chkDocType.checked) {
@@ -404,6 +406,11 @@ function updateDocTypeVisibility() {
 
     outDateExpLabel.textContent = caseToggle.checked ? dateLabel.toUpperCase() : dateLabel;
     lblInDateExp.textContent = dateLabel + ':';
+    
+    // MODIFIED THESE LINES
+    if (outDateSubLabel) {
+        outDateSubLabel.textContent = caseToggle.checked ? 'DATE OF SUBMISSION' : 'Date of Submission';
+    }
 }
 
 docTypeSelect.addEventListener('change', updateDocTypeVisibility);
