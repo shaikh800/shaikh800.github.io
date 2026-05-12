@@ -162,9 +162,11 @@ a {
   width: min(360px, 35vw);
   aspect-ratio: 1;
   transform: translateY(-48%);
-  background: url("../print/ctrlp_main.png") center / contain no-repeat;
-  opacity: 0.13;
-  filter: drop-shadow(0 24px 38px rgba(47, 111, 237, 0.22));
+  /* এখানে আপনার ছবির নাম দিন */
+  background: url("shaikh.png") center / contain no-repeat; 
+  opacity: 0.10; /* জলছাপ কতটুকু হালকা হবে (০.১০ মানে ১০%) */
+  filter: grayscale(100%); /* ছবি সাদা-কালো করতে চাইলে এটি রাখুন, না চাইলে মুছে দিন */
+  z-index: 0;
 }
 
 .intro-content {
