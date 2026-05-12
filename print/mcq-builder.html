@@ -5,16 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Question Builder</title>
     <style>
-      .img-left { margin-right: auto; margin-left: 0; display: block; }
-.img-center { margin-left: auto; margin-right: auto; display: block; }
-.img-right { margin-left: auto; margin-right: 0; display: block; }
+      /* --- Custom Scrollbar like Cover Page --- */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+      /* Alignment Classes */
+      .img-left { margin-right: auto !important; margin-left: 0 !important; display: block; }
+      .img-center { margin-left: auto !important; margin-right: auto !important; display: block; }
+      .img-right { margin-left: auto !important; margin-right: 0 !important; display: block; }
+      
       :root {
+        /* UI Font (Segoe UI like Cover Page) */
+        --ui-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Page/Content Font */
+        --bangla-font: "Noto Serif Bengali", "Noto Sans Bengali", "Hind Siliguri", "SolaimanLipi", "Segoe UI", Arial, sans-serif;
+
         --page-width: 8.27in;
         --page-height: 11.69in;
-  --pad-top: 0.25in;
-  --pad-right: 0.25in;
-  --pad-bottom: 0.25in;
-  --pad-left: 0.25in;
+        --pad-top: 0.25in;
+        --pad-right: 0.25in;
+        --pad-bottom: 0.25in;
+        --pad-left: 0.25in;
         --header-scale: 1;
         --body-font-size: 11px;
         --mcq-font-size: 11px;
@@ -52,54 +65,74 @@
         --paper: #ffffff;
         --panel: #ffffff;
         --soft: #f8fafc;
-        --shadow: rgba(15, 23, 42, 0.12);
+        --shadow: rgba(0, 0, 0, 0.5); /* Darker shadow from cover page */
       }
       * {
         box-sizing: border-box;
       }
-      html,
-      body {
+      html, body {
         margin: 0;
         padding: 0;
+        height: 100vh;
+        overflow: hidden;
       }
       body {
-        font-family: var(--bangla-font);
-        background: #edf2f7;
+        font-family: var(--ui-font); /* Puro UI ekhon Segoe UI hobe */
+        background-color: #1e293b;
         color: var(--ink);
-        padding: 24px;
         text-rendering: geometricPrecision;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        display: flex;
       }
       .app {
-        max-width: 1600px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 440px 1fr;
-        gap: 24px;
-        align-items: start;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: flex-start;
       }
       .panel {
-        background: var(--panel);
-        border: 1px solid #d9e2ec;
-        border-radius: 18px;
-        padding: 18px;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
-        position: sticky;
-        top: 16px;
-        max-height: calc(100vh - 32px);
-        overflow: auto;
+        width: 440px; /* Kept 440px to fit MCQ settings properly */
+        background-color: #ffffff;
+        padding: 24px;
+        box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+        overflow-y: auto;
+        z-index: 100;
+        border-right: 1px solid #e2e8f0;
+        height: 100%;
+        border-radius: 0;
+        flex-shrink: 0;
       }
+      .page-wrap {
+        flex-grow: 1;
+        background-color: #1e293b; /* Dark preview background */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        overflow-y: auto;
+        height: 100%;
+      }
+      
+      /* --- Sidebar Internal Styling Updates --- */
       .panel h1 {
-        margin: 0 0 8px;
-        font-size: 25px;
-        line-height: 1.2;
-        font-family: Cambria, "Times New Roman", serif;
+        margin: 0 0 12px;
+        font-size: 22px; 
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #1e293b;
+        border-bottom: 2px solid #e2e8f0; 
+        padding-bottom: 8px;
+        font-family: var(--ui-font);
       }
       .panel h2.section-title {
-        margin: 14px 0 10px;
-        font-size: 16px;
-        line-height: 1.2;
+        margin: 20px 0 12px;
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #64748b; 
       }
       .lead {
         margin: 0 0 14px;
@@ -110,758 +143,260 @@
       .panel-note {
         margin: 0 0 18px;
         padding: 14px 16px;
-        border-radius: 16px;
+        border-radius: 6px;
         background: #eef2ff;
         border: 1px solid #dbeafe;
         color: #1d4ed8;
         font-size: 13px;
         line-height: 1.65;
       }
-      .image-card {
-        padding: 14px;
-        border: 1px solid #d9e2ec;
-        border-radius: 14px;
-        background: #ffffff;
-        margin-top: 10px;
-        max-width: 100%;
-        overflow: hidden;
-      }
-      .image-card-body {
-        display: grid;
-        gap: 12px;
-        grid-template-columns: 120px minmax(0, 1fr);
-        align-items: start;
-        min-width: 0;
-      }
-      .image-card-body > * {
-        min-width: 0;
-      }
-      .image-preview {
+      
+      /* Form fields synced with cover page design */
+      .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .field { margin-bottom: 12px; }
+      .field label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #334; }
+      .field input, .field textarea, .field select {
         width: 100%;
-        max-width: 120px;
-        min-width: 120px;
-        height: auto;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        object-fit: contain;
-      }
-      .image-field-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-        gap: 10px;
-        align-items: start;
-      }
-      .image-field-grid .field {
-        min-width: 0;
-      }
-      .image-field-grid input,
-      .image-field-grid select {
-        width: 100%;
+        padding: 8px 10px;
         box-sizing: border-box;
-      }
-      .image-card-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 10px;
-        justify-content: flex-start;
-      }
-      .image-card-actions button {
-        flex: 1 1 120px;
-        min-width: 0;
-      }
-      .field-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .field {
-        margin-bottom: 12px;
-      }
-      .field label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 700;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px; /* Sharper corners */
+        font-family: inherit;
         font-size: 13px;
+        background-color: #f8fafc;
       }
-      .field input,
-      .field textarea,
-      .field select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        font: inherit;
-        background: #fff;
+      .field input:focus, .field textarea:focus, .field select:focus {
+        outline: none;
+        border-color: #0284c7;
+        background-color: #ffffff;
       }
-      .field textarea {
-        resize: vertical;
-        min-height: 88px;
-        line-height: 1.45;
-      }
-      .bulk-box textarea {
-        min-height: 210px;
-        font-size: 12.5px;
-        font-family: Consolas, var(--bangla-font);
-        white-space: pre-wrap;
-      }
-      .toolbar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-      .toolbar.three {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-      .toolbar.four {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* ২ কলামে ভাগ হবে যাতে ওভারফ্লো না হয় */
-  gap: 10px;
-}
-.toolbar.four button {
-  font-size: 12px; /* টেক্সট যাতে ধরে যায় */
-  padding: 8px 4px;
-}
+      .field textarea { resize: vertical; min-height: 88px; line-height: 1.45; }
+      .bulk-box textarea { min-height: 210px; font-size: 12.5px; font-family: Consolas, var(--bangla-font); white-space: pre-wrap; }
+      
+      /* Image Controls */
+      .image-card { padding: 14px; border: 1px solid #d9e2ec; border-radius: 6px; background: #ffffff; margin-top: 10px; max-width: 100%; overflow: hidden; }
+      .image-card-body { display: grid; gap: 12px; grid-template-columns: 120px minmax(0, 1fr); align-items: start; min-width: 0; }
+      .image-card-body > * { min-width: 0; }
+      .image-preview { width: 100%; max-width: 120px; min-width: 120px; height: auto; border-radius: 6px; border: 1px solid #e2e8f0; object-fit: contain; }
+      .image-field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; align-items: start; }
+      .image-field-grid .field { min-width: 0; }
+      .image-field-grid input, .image-field-grid select { width: 100%; box-sizing: border-box; }
+      .image-card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: flex-start; }
+      .image-card-actions button { flex: 1 1 120px; min-width: 0; }
+      
+      /* Buttons styled like cover page */
+      .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+      .toolbar.three { grid-template-columns: 1fr 1fr 1fr; }
+      .toolbar.four { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .toolbar.four button { font-size: 12px; padding: 8px 4px; }
       button {
         border: none;
-        border-radius: 10px;
+        border-radius: 6px;
         padding: 10px 12px;
         font: inherit;
-        font-weight: 700;
+        font-weight: bold;
         cursor: pointer;
         background: #111827;
         color: #fff;
+        transition: all 0.2s;
       }
-      button.secondary {
-        background: #e5e7eb;
-        color: #111827;
-      }
-      button.ghost {
-        background: #f8fafc;
-        color: #111827;
-        border: 1px solid var(--line);
-      }
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .three-col {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 10px;
-      }
-      .control-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-      .tiny {
-        font-size: 12px;
-        color: var(--muted);
-        line-height: 1.45;
-      }
-      .builder-section {
-        margin-bottom: 18px;
-        padding: 0 0 0 0;
-      }
-      .builder-section > .section-title {
-        margin-bottom: 12px;
-      }
+      button:hover { opacity: 0.9; }
+      button.secondary { background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; }
+      button.secondary:hover { background: #cbd5e1; }
+      button.ghost { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
+      button.ghost:hover { background: #e2e8f0; }
+      
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+      .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+      .tiny { font-size: 12px; color: var(--muted); line-height: 1.45; }
+      .builder-section { margin-bottom: 18px; padding: 0 0 0 0; }
+      .builder-section > .section-title { margin-bottom: 12px; }
+      
       .status-box {
-        margin-top: 10px;
-        border: 1px solid #d9e2ec;
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 10px 12px;
-        font-size: 12px;
-        line-height: 1.45;
+        margin-top: 10px; border: 1px solid #d9e2ec; background: #f8fafc;
+        border-radius: 6px; padding: 10px 12px; font-size: 12px; line-height: 1.45;
       }
-      .status-box.status-save {
-        border-color: #c7f0d5;
-        background: #ecfdf5;
-        color: #0f5132;
-      }
-      .status-box.status-warning {
-        border-color: #f1e0b5;
-        background: #fff7d6;
-        color: #664d03;
-      }
-      .status-box.status-offline {
-        border-color: #f8d7da;
-        background: #fbe8eb;
-        color: #842029;
-      }
-      .sample {
-        margin-top: 6px;
-        padding: 10px 12px;
-        border: 1px dashed #cbd5e1;
-        border-radius: 12px;
-        background: #f8fafc;
-        font-size: 12px;
-        line-height: 1.45;
-        white-space: pre-wrap;
-      }
-      .editor-group details {
-        border: 1px solid #d9e2ec;
-        border-radius: 12px;
-        background: #f8fafc;
-        padding: 10px 12px;
-        margin-bottom: 10px;
-      }
-      .editor-group summary {
-        cursor: pointer;
-        font-weight: 700;
-      }
-      .editor-grid {
-        margin-top: 10px;
-        display: grid;
-        gap: 10px;
-      }
-      .answer-buttons {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-      }
-      .answer-buttons label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        padding: 8px 6px;
-        background: #fff;
-        font-size: 13px;
-      }
-      .part-editor-row {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 88px;
-        gap: 10px;
-        align-items: end;
-      }
-      .hidden {
-        display: none !important;
-      }
-      .page-wrap {
-        display: block;
-      }
-      .page,
-      .page * {
-        font-family: var(--bangla-font);
-      }
+      .status-box.status-save { border-color: #c7f0d5; background: #ecfdf5; color: #0f5132; }
+      .status-box.status-warning { border-color: #f1e0b5; background: #fff7d6; color: #664d03; }
+      .status-box.status-offline { border-color: #f8d7da; background: #fbe8eb; color: #842029; }
+      
+      .sample { margin-top: 6px; padding: 10px 12px; border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc; font-size: 12px; line-height: 1.45; white-space: pre-wrap; }
+      
+      .editor-group details { border: 1px solid #d9e2ec; border-radius: 6px; background: #f8fafc; padding: 10px 12px; margin-bottom: 10px; }
+      .editor-group summary { cursor: pointer; font-weight: 700; color: #1e293b; }
+      .editor-grid { margin-top: 10px; display: grid; gap: 10px; }
+      
+      .answer-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .answer-buttons label { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 6px; background: #fff; font-size: 13px; cursor: pointer; }
+      .part-editor-row { display: grid; grid-template-columns: minmax(0, 1fr) 88px; gap: 10px; align-items: end; }
+      
+      .hidden { display: none !important; }
+
+      /* --- Page Layout --- */
+      .page { font-family: var(--bangla-font); }
+      .page-header, .page-header * { font-family: 'Georgia', 'Times New Roman', serif; }
       .page {
         position: relative;
         width: var(--page-width);
         height: var(--page-height);
         background: var(--paper);
-        box-shadow: 0 18px 40px var(--shadow);
-        padding: var(--pad-top) var(--pad-right) var(--pad-bottom)
-          var(--pad-left);
+        box-shadow: 0 10px 30px var(--shadow);
+        padding: var(--pad-top) var(--pad-right) var(--pad-bottom) var(--pad-left);
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        margin: 0 auto 18px;
+        margin: 0 auto 18px; /* Spacing between pages */
         page-break-after: always;
-      }
-      .page:last-child {
-        page-break-after: auto;
-      }
-      .page-number {
-        position: absolute;
-        top: 8px;
-        right: 12px;
-        font-size: 10px;
-        line-height: 1;
-        color: #334155;
-      }
-      .page-header {
-        display: grid;
-        grid-template-columns: 185px 1fr 185px;
-        gap: 12px;
-        align-items: center;
-        padding-bottom: 8px;
-        margin-bottom: 10px;
-        border-bottom: 1.5px solid #111;
-        flex: 0 0 auto;
-      }
-      .header-box {
-        border: 1px solid #111;
-        min-height: 44px;
-        padding: var(--header-box-pad);
-        font-size: calc(var(--body-font-size) * var(--header-info-scale));
-        line-height: 1.2;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        font-weight: var(--header-box-weight);
-      }
-      .header-box.right {
-        justify-content: space-between;
-      }
-      .header-box .label-inline {
-        margin-right: 0;
-      }
-      .header-box .value-inline {
-        text-align: right;
-      }
-      .top-credit {
-        text-align: center;
-        font-size: var(--header-credit-font);
-        line-height: 1.15;
-        margin-bottom: 4px;
-      }
-      .header-center {
-        text-align: center;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .header-center h2 {
-        margin: 0;
-        font-size: var(--header-title);
-        line-height: 1.2;
-        font-family: var(--bangla-font);
-        font-weight: 800;
-        width: 100%;
-        text-align: center;
-      }
-      .header-center .meta {
-        margin-top: 4px;
-        font-size: var(--header-meta);
-        line-height: 1.22;
-        word-break: break-word;
-      }
-      .header-center .meta-line {
-        display: block;
-      }
-      .page-section-title {
-        text-align: center;
-        font-size: 10px;
-        letter-spacing: 0.45px;
-        font-weight: 700;
-        margin: 0 0 6px;
-      }
-      .content-area {
-        flex: 1 1 auto;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        overflow: hidden;
-      }
-      .mcq-columns {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 18px;
-        align-content: start;
-      }
-      .mcq-column {
-        display: grid;
-        gap: var(--mcq-gap);
-        align-content: start;
-        min-height: 0;
-      }
-      .q-item {
-        font-size: var(--mcq-font-size);
-        line-height: var(--body-line-height);
-        font-weight: var(--body-weight);
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-      .q-head {
-        display: flex;
-        align-items: flex-start;
-        gap: 5px;
-        margin-bottom: 2px;
-      }
-      .q-no {
-        font-weight: 700;
-        white-space: nowrap;
-      }
-      .q-text {
-        font-weight: var(--mcq-question-weight);
-        flex: 1;
-      }
-      .mcq-image-wrap {
-        padding-left: 18px;
-        margin: 4px 0 2px;
-      }
-      .mcq-image {
-        display: block;
-        width: auto;
-        
-        object-fit: contain;
-        border: 1px solid #bbb;
-      }
-      .options-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        column-gap: var(--option-col-gap);
-        row-gap: 2px;
-        padding-left: 18px;
-        font-size: var(--mcq-font-size);
-        line-height: var(--body-line-height);
-      }
-      .option-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        min-width: 0;
-      }
-      .option-mark {
-        width: calc(var(--mcq-font-size) * 1.55);
-        height: calc(var(--mcq-font-size) * 1.55);
-        min-width: calc(var(--mcq-font-size) * 1.55);
-        border: 1px solid #111;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: var(--option-mark-weight);
-        font-size: calc(var(--mcq-font-size) * 0.94);
-        line-height: 1;
         flex-shrink: 0;
       }
-      .option-text {
-        overflow-wrap: anywhere;
-        flex: 1;
+      .page:last-child { margin-bottom: 0; page-break-after: auto; }
+      
+      .page-number { position: absolute; top: 8px; right: 12px; font-size: 10px; line-height: 1; color: #334155; }
+      .page-header { display: grid; grid-template-columns: 185px 1fr 185px; gap: 12px; align-items: center; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1.5px solid #111; flex: 0 0 auto; }
+      .header-box { border: 1px solid #111; min-height: 44px; padding: var(--header-box-pad); font-size: calc(var(--body-font-size) * var(--header-info-scale)); line-height: 1.2; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: var(--header-box-weight); }
+      .header-box.right { justify-content: space-between; }
+      .header-box .label-inline { margin-right: 0; }
+      .header-box .value-inline { text-align: right; }
+      .top-credit { text-align: center; font-size: var(--header-credit-font); line-height: 1.15; margin-bottom: 4px; }
+      .header-center { text-align: center; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+     .header-center h2 { 
+        margin: 0; 
+        font-size: var(--header-title); 
+        line-height: 1.2; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        width: 100%; 
+        text-align: center; 
       }
-      .footer-box {
-        margin-top: auto;
-        padding-top: 6px;
-        flex: 0 0 auto;
-      }
-      .answer-cut {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 10px;
-        margin-bottom: 4px;
-      }
-      .answer-cut .scissor {
-        font-size: 11px;
-        line-height: 1;
-      }
-      .answer-cut .dotline {
-        flex: 1;
-        border-top: 1px dotted #111;
-        height: 0;
-      }
-      .footer-title {
-        text-align: center;
-        font-size: 9px;
-        font-weight: var(--answer-key-weight);
-        letter-spacing: 0.35px;
-        margin-bottom: 3px;
-      }
-      .answer-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-      }
-      .answer-table th,
-      .answer-table td {
-        border: 1px solid #111;
-        padding: 1px 0;
-        text-align: center;
-        vertical-align: middle;
-      }
-      .answer-num {
-        font-size: var(--footer-number-font);
-        font-weight: var(--answer-num-weight);
-        line-height: 1.1;
-      }
-      .answer-letter {
-        font-size: var(--footer-answer-font);
-        font-weight: var(--answer-letter-weight);
-        line-height: 1.1;
-      }
-      .footer-note {
-        text-align: center;
-        margin-top: 4px;
-        font-size: 10px;
-        color: #334155;
-        line-height: 1.3;
-      }
-      .placeholder-box {
-        border: 1px dashed #94a3b8;
-        color: #64748b;
-        padding: 14px;
-        text-align: center;
-        font-size: 12px;
-        line-height: 1.5;
-        border-radius: 10px;
-      }
-      .starter-box {
-        border: 1px dashed #cbd5e1;
-        border-radius: 14px;
-        background: #f8fafc;
-        padding: 14px;
-        margin-bottom: 12px;
-      }
-      .starter-box-title {
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 10px;
-      }
-      .panel-flow-section {
-        border: 1px solid #d9e2ec;
-        border-radius: 12px;
-        background: #f8fafc;
-        padding: 10px 12px;
-        margin-bottom: 12px;
-      }
-      .panel-flow-section summary {
-        cursor: pointer;
-        font-weight: 700;
-        list-style: none;
-      }
-      .panel-flow-section summary::-webkit-details-marker {
-        display: none;
-      }
-      .panel-flow-body {
-        margin-top: 10px;
-      }
-      .summary-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-      .summary-actions {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .icon-btn {
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        color: #0f172a;
-        border-radius: 8px;
-        padding: 2px 7px;
-        font-size: 12px;
-        line-height: 1.2;
-        cursor: pointer;
-      }
-      .uniform-card {
-        border: 1px solid #d9e2ec;
-        background: #fff;
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 10px;
-      }
-      .uniform-card-title {
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 8px;
-        color: #0f172a;
-      }
-      .uniform-grid-one,
-      .uniform-grid-two,
-      .uniform-grid-three {
-        display: grid;
-        gap: 10px;
-      }
-      .uniform-grid-one {
-        grid-template-columns: 1fr;
-      }
-      .uniform-grid-two {
-        grid-template-columns: 1fr 1fr;
-      }
-      .uniform-grid-three {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-      .uniform-card .toolbar.four {
-        margin-bottom: 0;
-        grid-template-columns: 1fr 1fr;
-      }
-      .uniform-card .toolbar.four button {
-        min-height: 56px;
-      }
-      .uniform-card #fitStatus {
-        margin-top: 0;
-      }
-      button.secondary {
-        background: #eaf2ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
-      }
-      button.ghost {
-        background: #fff;
-        color: #334155;
-        border: 1px solid #cbd5e1;
-      }
-      .no-header-top {
-        padding-top: calc(var(--pad-top) + 2px);
-      }
-      .cq-section {
-        margin-top: 10px;
-        border-top: 1px dashed #666;
-        padding-top: 7px;
-        display: grid;
-        gap: 8px;
-        align-content: start;
-      }
-      .cq-title {
-        text-align: center;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-      }
-      .cq-item {
-        border: none;
-        padding: 4px 0;
-        font-size: var(--cq-font-size);
-        line-height: var(--body-line-height);
-        font-weight: var(--body-weight);
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-      .only-question-item {
-        font-size: var(--question-font-size);
-      }
-      .cq-head {
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        font-weight: 700;
-        margin-bottom: 4px;
-      }
-      .cq-meta {
-        font-size: calc(var(--body-font-size) * 0.86);
-        color: #111827;
-        white-space: nowrap;
-      }
-      .cq-stimulus {
-        margin-bottom: 4px;
-      }
-      .cq-stem {
-        margin-bottom: 4px;
-        font-weight: 700;
-      }
-      .cq-part {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 8px;
-        margin-top: 2px;
-      }
-      .cq-part-main {
-        display: flex;
-        gap: 6px;
-        min-width: 0;
-        flex: 1;
-      }
-      .cq-part-label {
-        font-weight: 700;
-        min-width: 22px;
-      }
-      .cq-part-text {
-        flex: 1;
-        overflow-wrap: anywhere;
-      }
-      .cq-part-mark {
-        min-width: 44px;
-        text-align: right;
-        font-weight: 700;
-        white-space: nowrap;
-      }
-      .cq-image {
-        display: block;
-        width: auto;
-        
-        object-fit: contain;
-        margin: 6px 0 5px;
-        border: 1px solid #bbb;
-      }
-      .only-question-item .cq-head {
-        align-items: flex-start;
-        margin-bottom: 2px;
-        font-weight: 400;
-      }
-      .only-question-main {
-        display: flex;
-        align-items: flex-start;
-        gap: 5px;
-        flex: 1;
-        min-width: 0;
-      }
-      .only-question-no {
-        font-weight: var(--question-number-weight);
-        white-space: nowrap;
-      }
-      .only-question-text {
-        font-weight: 400;
-        line-height: var(--body-line-height);
-        flex: 1;
-        overflow-wrap: anywhere;
-      }
-      hr.soft {
-        border: none;
-        border-top: 1px solid #dbe3ed;
-        margin: 14px 0;
-      }
-      /* Alignment Classes */
-.img-left { margin-right: auto !important; margin-left: 0 !important; display: block; }
-.img-center { margin-left: auto !important; margin-right: auto !important; display: block; }
-.img-right { margin-left: auto !important; margin-right: 0 !important; display: block; }
+      .header-center .meta { margin-top: 4px; font-size: var(--header-meta); line-height: 1.22; word-break: break-word; }
+      .header-center .meta-line { display: block; }
+      .page-section-title { text-align: center; font-size: 10px; letter-spacing: 0.45px; font-weight: 700; margin: 0 0 6px; }
+      .content-area { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+      
+      /* --- MCQ and Question Styling --- */
+      .mcq-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-content: start; }
+      .mcq-column { display: grid; gap: var(--mcq-gap); align-content: start; min-height: 0; }
+      .q-item { font-size: var(--mcq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
+      .q-head { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 2px; }
+      .q-no { font-weight: 700; white-space: nowrap; }
+      .q-text { font-weight: var(--mcq-question-weight); flex: 1; }
+      .mcq-image-wrap { padding-left: 18px; margin: 4px 0 2px; }
+      .mcq-image { display: block; width: auto; object-fit: contain; border: 1px solid #bbb; }
+      .options-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--option-col-gap); row-gap: 2px; padding-left: 18px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
+      .option-item { display: flex; align-items: center; gap: 5px; min-width: 0; }
+      .option-mark { width: calc(var(--mcq-font-size) * 1.55); height: calc(var(--mcq-font-size) * 1.55); min-width: calc(var(--mcq-font-size) * 1.55); border: 1px solid #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: var(--option-mark-weight); font-size: calc(var(--mcq-font-size) * 0.94); line-height: 1; flex-shrink: 0; }
+      .option-text { overflow-wrap: anywhere; flex: 1; }
+      
+      /* --- Footer --- */
+      .footer-box { margin-top: auto; padding-top: 6px; flex: 0 0 auto; }
+      .answer-cut { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 4px; }
+      .answer-cut .scissor { font-size: 11px; line-height: 1; }
+      .answer-cut .dotline { flex: 1; border-top: 1px dotted #111; height: 0; }
+      .footer-title { text-align: center; font-size: 9px; font-weight: var(--answer-key-weight); letter-spacing: 0.35px; margin-bottom: 3px; }
+      .answer-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .answer-table th, .answer-table td { border: 1px solid #111; padding: 1px 0; text-align: center; vertical-align: middle; }
+      .answer-num { font-size: var(--footer-number-font); font-weight: var(--answer-num-weight); line-height: 1.1; }
+      .answer-letter { font-size: var(--footer-answer-font); font-weight: var(--answer-letter-weight); line-height: 1.1; }
+      .footer-note { text-align: center; margin-top: 4px; font-size: 10px; color: #334155; line-height: 1.3; }
+      
+      .placeholder-box { border: 1px dashed #94a3b8; color: #64748b; padding: 14px; text-align: center; font-size: 12px; line-height: 1.5; border-radius: 6px; }
+      .starter-box { border: 1px dashed #cbd5e1; border-radius: 6px; background: #f8fafc; padding: 14px; margin-bottom: 12px; }
+      .starter-box-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+      
+      .panel-flow-section { border: 1px solid #d9e2ec; border-radius: 6px; background: #f8fafc; padding: 10px 12px; margin-bottom: 12px; }
+      .panel-flow-section summary { cursor: pointer; font-weight: 700; list-style: none; color: #1e293b; }
+      .panel-flow-section summary::-webkit-details-marker { display: none; }
+      .panel-flow-body { margin-top: 10px; }
+      .summary-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+      .summary-actions { display: inline-flex; align-items: center; gap: 6px; }
+      .icon-btn { border: 1px solid #cbd5e1; background: #fff; color: #0f172a; border-radius: 4px; padding: 2px 7px; font-size: 12px; line-height: 1.2; cursor: pointer; }
+      
+      .uniform-card { border: 1px solid #d9e2ec; background: #fff; border-radius: 6px; padding: 10px; margin-bottom: 10px; }
+      .uniform-card-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #0f172a; }
+      .uniform-grid-one, .uniform-grid-two, .uniform-grid-three { display: grid; gap: 10px; }
+      .uniform-grid-one { grid-template-columns: 1fr; }
+      .uniform-grid-two { grid-template-columns: 1fr 1fr; }
+      .uniform-grid-three { grid-template-columns: 1fr 1fr 1fr; }
+      .uniform-card .toolbar.four { margin-bottom: 0; grid-template-columns: 1fr 1fr; }
+      .uniform-card .toolbar.four button { min-height: 56px; }
+      .uniform-card #fitStatus { margin-top: 0; }
+      
+      .no-header-top { padding-top: calc(var(--pad-top) + 2px); }
+      .cq-section { margin-top: 10px; border-top: 1px dashed #666; padding-top: 7px; display: grid; gap: 8px; align-content: start; }
+      .cq-title { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+      .cq-item { border: none; padding: 4px 0; font-size: var(--cq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
+      .only-question-item { font-size: var(--question-font-size); }
+      .cq-head { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; margin-bottom: 4px; }
+      .cq-meta { font-size: calc(var(--body-font-size) * 0.86); color: #111827; white-space: nowrap; }
+      .cq-stimulus { margin-bottom: 4px; }
+      .cq-stem { margin-bottom: 4px; font-weight: 700; }
+      .cq-part { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
+      .cq-part-main { display: flex; gap: 6px; min-width: 0; flex: 1; }
+      .cq-part-label { font-weight: 700; min-width: 22px; }
+      .cq-part-text { flex: 1; overflow-wrap: anywhere; }
+      .cq-part-mark { min-width: 44px; text-align: right; font-weight: 700; white-space: nowrap; }
+      .cq-image { display: block; width: auto; object-fit: contain; margin: 6px 0 5px; border: 1px solid #bbb; }
+      .only-question-item .cq-head { align-items: flex-start; margin-bottom: 2px; font-weight: 400; }
+      .only-question-main { display: flex; align-items: flex-start; gap: 5px; flex: 1; min-width: 0; }
+      .only-question-no { font-weight: var(--question-number-weight); white-space: nowrap; }
+      .only-question-text { font-weight: 400; line-height: var(--body-line-height); flex: 1; overflow-wrap: anywhere; }
+      
+      hr.soft { border: none; border-top: 1px solid #dbe3ed; margin: 14px 0; }
 
-/* Cropper Modal */
-#cropperModal {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center;
-}
-.cropper-content { background: #fff; padding: 20px; border-radius: 15px; width: 90%; max-width: 600px; text-align: center; }
-.cropper-wrap { max-height: 60vh; overflow: hidden; margin-bottom: 15px; background: #f0f0f0; border-radius: 8px; }
-#cropperImg { max-width: 100%; }
+      /* Cropper Modal - Mobile Optimized */
+      #cropperModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; }
+      .cropper-content { background: #fff; padding: 15px; border-radius: 12px; width: 95%; max-width: 600px; text-align: center; display: flex; flex-direction: column; max-height: 90vh; }
+      .cropper-wrap { flex-grow: 1; min-height: 45vh; overflow: hidden; margin-bottom: 12px; background: #f0f0f0; border-radius: 8px; touch-action: none; }
+      #cropperImg { display: block; max-width: 100%; }
+
+      /* --- Print Styles --- */
       @media print {
-        @page {
-          size: A4 portrait;
-          margin: 0;
-        }
-        html,
-        body {
-          width: auto;
-          height: auto;
-        }
-        body {
-          background: #fff;
-          padding: 0;
-        }
-        .app {
-          display: block;
-        }
-        .panel {
-          display: none;
-        }
-        .page {
-          width: 210mm;
-          height: 297mm;
-          min-height: 297mm;
-          box-shadow: none;
-          margin: 0;
-          overflow: hidden;
-        }
+        @page { size: A4 portrait; margin: 0; }
+        html, body { width: 100%; height: auto; display: block; overflow: visible; background: #fff !important; margin: 0; padding: 0; }
+        .app { display: block; height: auto; }
+        .panel { display: none !important; }
+        .page-wrap { display: block; background: none !important; padding: 0 !important; height: auto; overflow: visible; }
+        .page { width: 210mm; height: 297mm; min-height: 297mm; box-shadow: none; margin: 0; overflow: hidden; page-break-after: always; }
       }
-    </style>
+    /* --- Slider Toggle Switch Styling --- */
+      .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0px; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
+      .toggle-text { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334155; flex-grow: 1; }
+      .switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+      .switch input { opacity: 0; width: 0; height: 0; }
+      .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .3s; border-radius: 20px; }
+      .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+      input:checked + .slider { background-color: #0ea5e9; }
+      input:checked + .slider:before { transform: translateX(16px); }
+      /* --- Smart Info Boxes --- */
+      .guide-box { margin-bottom: 18px; border: 1px solid #bae6fd; border-radius: 8px; background: #f0f9ff; overflow: hidden; }
+      .guide-box summary { padding: 10px 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #0369a1; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
+      .guide-box summary::-webkit-details-marker { display: none; }
+      .guide-box summary:after { content: "▼"; font-size: 10px; color: #0284c7; }
+      .guide-box[open] summary:after { content: "▲"; }
+      .guide-content { padding: 0 14px 14px; font-size: 12px; color: #334155; line-height: 1.55; }
+      .guide-content ul { margin: 0; padding-left: 22px; }
+      .guide-content li { margin-bottom: 4px; }
+      
+      .tiny-hint { display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; font-size: 11px; color: #64748b; line-height: 1.4; background: #f8fafc; padding: 8px 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
+      .tiny-hint i { font-style: normal; background: #e2e8f0; color: #475569; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 9px; font-weight: bold; flex-shrink: 0; }
+      </style>
   </head>
   <body>
     <div class="app">
       <aside class="panel">
         <h1>Question Builder</h1>
-        <p class="lead">
-          প্রতি page-এ সর্বোচ্চ ৩০টি MCQ থাকবে। ৩০টির answer একই page-এর
-          footer-এ থাকবে। ৩১ নম্বর থেকে পরের page শুরু হবে। CQ আলাদা page-এ
-          যাবে, আর জায়গা খুব বেশি থাকলে প্রথম page-এর নিচেও বসতে পারবে।
-        </p>
-        <div class="panel-note">
-          Draft autosaves automatically. ব্যবহার করার পরে অবশ্যই Save & Back
-          বা Restore Draft ব্যবহার করুন যাতে কোনো লেখা হারিয়ে না যায়।
-        </div>
+        <details class="guide-box">
+           <summary>💡 Guidelines & Tips</summary>
+           <div class="guide-content">
+             <ul>
+               <li><b>Pagination:</b> Max 30 MCQs per page. Answers auto-generate at the footer.</li>
+               <li><b>Layout:</b> CQs automatically break into new pages.</li>
+               <li><b>Autosave:</b> Draft saves locally. Use "Save & Back" before leaving.</li>
+             </ul>
+           </div>
+        </details>
 
         <div class="toolbar three">
           <button type="button" onclick="downloadPDFDirect()">
@@ -962,10 +497,11 @@
               Clear Box
             </button>
           </div>
-          <div class="tiny">
-            A/B/C/D বা ক/খ/গ/ঘ দুইটাই চলবে। numbering ১, 1, 1), 1. সব ধরার
-            চেষ্টা করা হয়েছে।
+          
+          <div class="tiny-hint">
+            <i>i</i> Supports A/B/C/D or ক/খ/গ/ঘ options. Auto-detects numberings.
           </div>
+        </div>
         </div>
 
         <div class="control-grid">
@@ -980,11 +516,7 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="bodyBoldControl">Uniform Bold Master</label
-            ><select id="bodyBoldControl">
-              <option value="0">Off</option>
-              <option value="1">On</option>
-            </select>
+            <div class="toggle-wrapper"><label for="bodyBoldControl" class="toggle-text">Uniform Bold Master</label><label class="switch"><input type="checkbox" id="bodyBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
             <label for="lineHeightControl">Body Line Height</label
@@ -1052,46 +584,22 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="answerKeyBoldControl">Answer Key Title Bold</label
-            ><select id="answerKeyBoldControl">
-              <option value="0">Off</option>
-              <option value="1">On</option>
-            </select>
+            <div class="toggle-wrapper"><label for="answerKeyBoldControl" class="toggle-text">Answer Key Title Bold</label><label class="switch"><input type="checkbox" id="answerKeyBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="answerNumBoldControl">Answer Numbers Bold</label
-            ><select id="answerNumBoldControl">
-              <option value="0">Off</option>
-              <option value="1">On</option>
-            </select>
+            <div class="toggle-wrapper"><label for="answerNumBoldControl" class="toggle-text">Answer Numbers Bold</label><label class="switch"><input type="checkbox" id="answerNumBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="answerLetterBoldControl">Answer Letters Bold</label
-            ><select id="answerLetterBoldControl">
-              <option value="0">Off</option>
-              <option value="1">On</option>
-            </select>
+            <div class="toggle-wrapper"><label for="answerLetterBoldControl" class="toggle-text">Answer Letters Bold</label><label class="switch"><input type="checkbox" id="answerLetterBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="headerBoxesBoldControl">Time / Marks Box Bold</label
-            ><select id="headerBoxesBoldControl">
-              <option value="1">On</option>
-              <option value="0">Off</option>
-            </select>
+            <div class="toggle-wrapper"><label for="headerBoxesBoldControl" class="toggle-text">Time / Marks Box Bold</label><label class="switch"><input type="checkbox" id="headerBoxesBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="optionBadgeBoldControl">Option Circle Letter Bold</label
-            ><select id="optionBadgeBoldControl">
-              <option value="1">On</option>
-              <option value="0">Off</option>
-            </select>
+            <div class="toggle-wrapper"><label for="optionBadgeBoldControl" class="toggle-text">Option Letter Bold</label><label class="switch"><input type="checkbox" id="optionBadgeBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="mcqBoldControl">MCQ Question Bold</label
-            ><select id="mcqBoldControl">
-              <option value="1">On</option>
-              <option value="0">Off</option>
-            </select>
+            <div class="toggle-wrapper"><label for="mcqBoldControl" class="toggle-text">MCQ Question Bold</label><label class="switch"><input type="checkbox" id="mcqBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
             <label for="mcqFontControl">MCQ Font Size</label
@@ -1164,11 +672,7 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="questionNumberBoldControl">Question Number Bold</label
-            ><select id="questionNumberBoldControl">
-              <option value="1">On</option>
-              <option value="0">Off</option>
-            </select>
+            <div class="toggle-wrapper"><label for="questionNumberBoldControl" class="toggle-text">Question Number Bold</label><label class="switch"><input type="checkbox" id="questionNumberBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
             <label for="questionImageWidthControl">Question Image Width %</label
@@ -1537,10 +1041,11 @@
         questionNumberBoldControl,
       ];
       bodyBoldControl.addEventListener("change", () => {
-        const val = bodyBoldControl.value === "1" ? "1" : "0";
+        const isChecked = bodyBoldControl.checked;
         masterBoldTargets.forEach((el) => {
-          if (el) el.value = val;
+          if (el) el.checked = isChecked;
         });
+        applyLayoutControls();
       });
       bodyFontControl.addEventListener("input", () => {
         if (state.layout.mcqFontLinked !== false) {
@@ -1611,7 +1116,8 @@
           String(bodyFontControl.value).trim();
       });
       const panel = document.querySelector(".panel");
-      const lead = panel.querySelector(".lead");
+      // lead এখন guide-box কে খুঁজবে, যাতে এরর না হয়
+      const lead = panel.querySelector(".guide-box") || panel.querySelector("h1");
       const panelFinalizeNodes = Array.from(
         panel.querySelectorAll(":scope > .toolbar")
       ).slice(0, 3);
@@ -1673,6 +1179,7 @@
       const uniformActionNodes = [
         panel.querySelector(":scope > .toolbar.four"),
         panelUndoToolbar,
+        saveStatus, // এটি যোগ করা হয়েছে
         fitStatus,
       ].filter(Boolean);
       const mcqImageFieldNodes = [
@@ -2031,16 +1538,12 @@
         footerAnswerFontControl.value = state.layout.footerAnswerFont;
         headerScaleControl.value = state.layout.headerScale;
         headerInfoScaleControl.value = state.layout.headerInfoScale ?? 1;
-        answerKeyBoldControl.value = state.layout.answerKeyBold ? "1" : "0";
-        answerNumBoldControl.value = state.layout.answerNumBold ? "1" : "0";
-        answerLetterBoldControl.value = state.layout.answerLetterBold
-          ? "1"
-          : "0";
-        headerBoxesBoldControl.value =
-          state.layout.headerBoxesBold === false ? "0" : "1";
-        optionBadgeBoldControl.value =
-          state.layout.optionBadgeBold === false ? "0" : "1";
-        mcqBoldControl.value = state.layout.mcqBold ? "1" : "0";
+        answerKeyBoldControl.checked = state.layout.answerKeyBold;
+        answerNumBoldControl.checked = state.layout.answerNumBold;
+        answerLetterBoldControl.checked = state.layout.answerLetterBold;
+        headerBoxesBoldControl.checked = state.layout.headerBoxesBold !== false;
+        optionBadgeBoldControl.checked = state.layout.optionBadgeBold !== false;
+        mcqBoldControl.checked = state.layout.mcqBold;
         mcqImageWidthControl.value = state.layout.mcqImageWidth;
         mcqImageHeightControl.value = state.layout.mcqImageHeight;
         cqFontControl.value = state.layout.cqFont ?? state.layout.bodyFont;
@@ -2048,8 +1551,7 @@
         cqImageHeightControl.value = state.layout.cqImageHeight;
         questionFontControl.value =
           state.layout.questionFont ?? state.layout.bodyFont;
-        questionNumberBoldControl.value =
-          state.layout.questionNumberBold === false ? "0" : "1";
+        questionNumberBoldControl.checked = state.layout.questionNumberBold !== false;
         questionImageWidthControl.value =
           state.layout.questionImageWidth ?? state.layout.cqImageWidth;
         questionImageHeightControl.value =
@@ -2094,14 +1596,14 @@
       <button type="button" class="ghost" onclick="removeCQPart()">Remove CQ Part</button>
     </div>
     <div class="field bulk-box">
-      <label for="cqBulkInput">সব CQ একবারে Paste করো</label>
+      <label for="cqBulkInput">Bulk Import CQs</label>
       <textarea id="cqBulkInput" placeholder="1. উদ্দীপক: ...&#10;ক. ...&#10;খ. ...&#10;গ. ...&#10;ঘ. ...&#10;সময়: ২০ মিনিট&#10;মান: ১০"></textarea>
       <div class="toolbar three" style="margin-top:10px;">
         <button type="button" onclick="applyCQBulkPaste()">Paste Apply</button>
         <button type="button" class="secondary" onclick="loadSampleCQPaste()">Sample Format</button>
         <button type="button" class="ghost" onclick="clearCQBulkInput()">Clear Box</button>
       </div>
-      <div class="tiny">CQ block-এ উদ্দীপক, ক/খ/গ/ঘ, সময়, মান লিখতে পারবে।</div>
+      <div class="tiny-hint"><i>i</i> Include stimulus, parts (ক, খ, গ, ঘ), time, and marks.</div>
     </div>`;
       }
       function renderOnlyQuestionSectionMount() {
@@ -2117,14 +1619,14 @@
       <button type="button" class="ghost" onclick="removeOnlyQuestionPart()">Remove Question Part</button>
     </div>
     <div class="field bulk-box">
-      <label for="onlyQuestionBulkInput">সব Question একবারে Paste করো</label>
+      <label for="onlyQuestionBulkInput">Bulk Import Questions</label>
       <textarea id="onlyQuestionBulkInput" placeholder="1. প্রথম প্রশ্ন...&#10;2. দ্বিতীয় প্রশ্ন..."></textarea>
       <div class="toolbar three" style="margin-top:10px;">
         <button type="button" onclick="applyOnlyQuestionBulkPaste()">Paste Apply</button>
         <button type="button" class="secondary" onclick="loadSampleOnlyQuestionPaste()">Sample Format</button>
         <button type="button" class="ghost" onclick="clearOnlyQuestionBulkInput()">Clear Box</button>
       </div>
-      <div class="tiny">এখানে শুধু প্রশ্ন থাকবে। numbering থাকলে সেটাও ধরা হবে।</div>
+      <div class="tiny-hint"><i>i</i> Paste raw questions. Numbers will be auto-detected.</div>
     </div>`;
       }
 
@@ -2697,14 +2199,13 @@
           1,
           headerInfoScaleControl.value
         );
-        state.layout.answerKeyBold = answerKeyBoldControl.value === "1";
-        state.layout.answerNumBold = answerNumBoldControl.value === "1";
-        state.layout.answerLetterBold = answerLetterBoldControl.value === "1";
-        state.layout.headerBoxesBold = headerBoxesBoldControl.value !== "0";
-        state.layout.optionBadgeBold = optionBadgeBoldControl.value !== "0";
-        state.layout.mcqBold = mcqBoldControl.value !== "0";
-        state.layout.questionNumberBold =
-          questionNumberBoldControl.value !== "0";
+        state.layout.answerKeyBold = answerKeyBoldControl.checked;
+        state.layout.answerNumBold = answerNumBoldControl.checked;
+        state.layout.answerLetterBold = answerLetterBoldControl.checked;
+        state.layout.headerBoxesBold = headerBoxesBoldControl.checked;
+        state.layout.optionBadgeBold = optionBadgeBoldControl.checked;
+        state.layout.mcqBold = mcqBoldControl.checked;
+        state.layout.questionNumberBold = questionNumberBoldControl.checked;
         if (state.layout.bodyBold) {
           state.layout.answerKeyBold = true;
           state.layout.answerNumBold = true;
@@ -2764,17 +2265,13 @@
         state.layout.padRight = numberValueOr(0.42, padRightControl.value);
         state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
         state.layout.padLeft = numberValueOr(0.42, padLeftControl.value);
-        answerKeyBoldControl.value = state.layout.answerKeyBold ? "1" : "0";
-        answerNumBoldControl.value = state.layout.answerNumBold ? "1" : "0";
-        answerLetterBoldControl.value = state.layout.answerLetterBold
-          ? "1"
-          : "0";
-        headerBoxesBoldControl.value = state.layout.headerBoxesBold ? "1" : "0";
-        optionBadgeBoldControl.value = state.layout.optionBadgeBold ? "1" : "0";
-        mcqBoldControl.value = state.layout.mcqBold ? "1" : "0";
-        questionNumberBoldControl.value = state.layout.questionNumberBold
-          ? "1"
-          : "0";
+        answerKeyBoldControl.checked = state.layout.answerKeyBold;
+        answerNumBoldControl.checked = state.layout.answerNumBold;
+        answerLetterBoldControl.checked = state.layout.answerLetterBold;
+        headerBoxesBoldControl.checked = state.layout.headerBoxesBold !== false;
+        optionBadgeBoldControl.checked = state.layout.optionBadgeBold !== false;
+        mcqBoldControl.checked = state.layout.mcqBold;
+        questionNumberBoldControl.checked = state.layout.questionNumberBold !== false;
         applyPageVars();
         renderAll();
       }
@@ -4451,6 +3948,10 @@
     <div class="cropper-wrap">
       <img id="cropperImg">
     </div>
+    <div class="toolbar" style="margin-bottom: 12px;">
+      <button type="button" class="secondary" onclick="rotateCrop(-90)">↺ Rotate Left</button>
+      <button type="button" class="secondary" onclick="rotateCrop(90)">Rotate Right ↻</button>
+    </div>
     <div class="toolbar">
       <button type="button" onclick="confirmCrop()">Crop & Save</button>
       <button type="button" class="ghost" onclick="cancelCrop()">Cancel</button>
@@ -4473,10 +3974,19 @@ function startCropping(event, type, index, imageIndex = -1) {
     const img = document.getElementById("cropperImg");
     img.src = e.target.result;
     modal.style.display = "flex";
+    document.body.style.overflow = "hidden"; // Lock background scroll on mobile
+    
     if (cropper) cropper.destroy();
-    cropper = new Cropper(img, { viewMode: 1, autoCropArea: 1 });
+    cropper = new Cropper(img, { 
+      viewMode: 1, 
+      autoCropArea: 1,
+      dragMode: 'move', // Better for mobile touch padding
+      responsive: true,
+      restore: true
+    });
   };
   reader.readAsDataURL(file);
+  event.target.value = ""; // Reset input so same file can be selected again
 }
 
 function triggerImageReplace(type, index, imageIndex) {
@@ -4494,7 +4004,16 @@ function triggerImageReplace(type, index, imageIndex) {
 
 function cancelCrop() {
   document.getElementById("cropperModal").style.display = "none";
+  document.body.style.overflow = ""; // Unlock background scroll
   if (cropper) cropper.destroy();
+}
+
+function rotateCrop(degree) {
+  if (cropper) {
+    cropper.clear();        // ১. আগের ক্রপ বক্সটি সাময়িকভাবে মুছে ফেলা হলো
+    cropper.rotate(degree); // ২. ছবিটি নির্বিঘ্নে রোটেট করা হলো
+    cropper.crop();         // ৩. নতুন সাইজ অনুযায়ী অটোমেটিক ফুল-সাইজ ক্রপ বক্স বসানো হলো
+  }
 }
 
 function confirmCrop() {
