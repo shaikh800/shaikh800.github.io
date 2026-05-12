@@ -80,7 +80,8 @@ a {
 .brand img {
   width: 36px;
   height: 36px;
-  border-radius: var(--radius);
+  border-radius: 50%; /* পুরোপুরি গোল করার জন্য */
+  object-fit: cover; /* ছবি যাতে চ্যাপ্টা না হয়ে যায় */
   box-shadow: 0 8px 20px rgba(47, 111, 237, 0.18);
 }
 
