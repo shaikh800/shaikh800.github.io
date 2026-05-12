@@ -1,16 +1,10 @@
 const myWorks = [
   {
-    title: "Modern Villa Render",
-    description: "A photorealistic exterior render created in Blender 4.2 using Cycles engine.",
-    image: "assets/render1.jpg", // আপনার ছবির সঠিক পাথ দিন
+    title: "Blender Character/Object Project",
+    description: "An ongoing detailed 3D modeling project. While still a work-in-progress, it showcases my focus on geometry and structure.",
+    image: "assets/image_8d6685.jpg", // Chobiti 'assets' folder-e rekhe ei nam-ti din
     tool: "Blender 4.2"
   },
-  {
-    title: "Structural Model",
-    description: "3D visualization of a steel structure project for Civil Engineering lab.",
-    image: "assets/structure1.jpg",
-    tool: "AutoCAD 2025"
-  }
   // নতুন কাজ যোগ করতে চাইলে এই অংশটুকু কপি করে নিচে পেস্ট করলেই হবে
 ];
 
