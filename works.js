@@ -2,7 +2,7 @@ const myWorks = [
   {
     title: "Blender Project",
     description: "Detailed 3D project made in Blender.",
-    image: "assets/image_8d6685.jpg",
+    image: "assets/assets/image_8d6685.jpg",
     tool: "Blender 4.2"
   }, // Ekhane ekti comma hobe jodi arekti jukto koren
   {
