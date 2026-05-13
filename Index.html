@@ -9,14 +9,67 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
+  <style>
+    /* Profile card — desktop only, sits in hero right side */
+    .profile-card {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+      width: 256px;
+      background: rgba(255,255,255,0.90);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+    .profile-card img {
+      width: 62px; height: 62px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--blue);
+      display: block; margin-bottom: 12px;
+    }
+    .pc-name { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2px; }
+    .pc-role {
+      font-size: 11px; color: var(--blue); font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
+    }
+    .pc-row {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 8px 0; border-top: 1px solid var(--line); font-size: 12.5px;
+    }
+    .pc-row i { color: var(--muted); font-size: 12px; margin-top: 2px; flex-shrink: 0; }
+    .pc-row span { color: var(--muted); line-height: 1.45; }
+    .pc-badge {
+      margin-top: 14px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(13,138,106,0.1); color: var(--green);
+      border: 1px solid rgba(13,138,106,0.22); border-radius: 100px;
+      padding: 4px 12px; font-size: 11px; font-weight: 700;
+    }
+    .pc-badge::before { content: '●'; font-size: 7px; }
+
+    /* Narrow the intro text so card doesn't overlap */
+    .intro-content { max-width: 600px; }
+    /* Shift the watermark so it doesn't fight the card */
+    .intro::after { right: 230px; opacity: 0.07; }
+
+    @media (max-width: 900px) {
+      .profile-card { display: none; }
+      .intro-content { max-width: 100%; }
+      .intro::after { right: -72px; opacity: 0.08; }
+    }
+  </style>
 </head>
 <body>
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
-  <img src="shaikh.png" alt="Shaikh" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-  <span>Md. Shaikh<small>Portfolio and tools</small></span>
-</a>
+        <img src="shaikh.png" alt="Shaikh">
+        <span>Md. Shaikh<small>Portfolio and tools</small></span>
+      </a>
       <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
         <i class="fas fa-bars"></i>
       </button>
@@ -24,17 +77,20 @@
         <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
         <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
         <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
+        <a href="webdev.html" data-page="webdev.html"><i class="fas fa-code"></i> Web</a>
         <a class="nav-cta" href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
       </nav>
     </div>
   </header>
 
   <main class="page">
+
+    <!-- HERO -->
     <section class="intro" aria-labelledby="intro-title">
       <div class="intro-content">
         <p class="eyebrow">Civil engineering student and maker</p>
         <h1 id="intro-title">Md. Shaikh Alam</h1>
-        <p class="lead">I build small, useful tools for study, printing and engineering workflows. Right now my main focus is CTRL-P, academic document utilities, Blender modeling and cleaner web interfaces that make everyday work easier.</p>
+        <p class="lead">I build small, useful tools for study, printing and engineering workflows. My main focus is CTRL-P, academic document utilities, Blender modeling and cleaner web interfaces that make everyday work easier.</p>
 
         <div class="actions">
           <a class="btn primary" href="print/index.html"><i class="fas fa-print"></i> Open CTRL-P Service</a>
@@ -56,13 +112,27 @@
           </div>
         </div>
       </div>
+
+      <!-- Profile card — desktop only -->
+      <aside class="profile-card" aria-label="Profile summary">
+        <img src="shaikh.png" alt="Md. Shaikh Alam">
+        <div class="pc-name">Md. Shaikh Alam</div>
+        <div class="pc-role">Civil Engineering Student</div>
+        <div class="pc-row"><i class="fas fa-graduation-cap"></i><span>Faridpur Engineering College</span></div>
+        <div class="pc-row"><i class="fas fa-map-pin"></i><span>Faridpur, Bangladesh</span></div>
+        <div class="pc-row"><i class="fas fa-envelope"></i><span>md.shaikh.alam.007@gmail.com</span></div>
+        <div class="pc-row"><i class="fas fa-phone"></i><span>01722592967</span></div>
+        <div class="pc-row"><i class="fab fa-facebook"></i><span>facebook.com/shaikh.069</span></div>
+        <div class="pc-badge">Available for projects</div>
+      </aside>
     </section>
 
+    <!-- FEATURED WORK -->
     <section class="section" aria-labelledby="featured-title">
       <div class="section-head">
         <div>
           <h2 id="featured-title">Featured Work</h2>
-          <p>The site now starts with the service and tools people are most likely to use first, then keeps the portfolio content close by.</p>
+          <p>The site starts with the service and tools people are most likely to use first, then keeps portfolio content close by.</p>
         </div>
       </div>
 
@@ -70,49 +140,56 @@
         <a class="project-card featured" href="print/index.html">
           <span class="card-icon"><i class="fas fa-print"></i></span>
           <h3>CTRL-P Service</h3>
-          <p>A direct print-order interface for documents, academic sheets and engineering materials. This is the main service, so it gets first priority on the site.</p>
-          <span class="card-meta">Open print service</span>
+          <p>A direct print-order interface for documents, academic sheets and engineering materials. The main service — fast to use from phone or desktop.</p>
+          <span class="card-meta">Open print service →</span>
           <img class="card-thumb" src="print/ctrlp_main.png" alt="CTRL-P app icon">
         </a>
 
         <a class="project-card" href="civil.html">
           <span class="card-icon"><i class="fas fa-ruler-combined"></i></span>
           <h3>Civil Engineering Tools</h3>
-          <p>Cover page maker, lab report index generator, MCQ builder and engineering study utilities are grouped here.</p>
-          <span class="card-meta">View academic tools</span>
+          <p>Cover page maker, lab report index generator, MCQ builder and engineering study utilities grouped in one place.</p>
+          <span class="card-meta">View academic tools →</span>
         </a>
 
         <a class="project-card" href="modeling.html">
           <span class="card-icon"><i class="fas fa-dice-d20"></i></span>
           <h3>3D Modeling</h3>
           <p>Blender practice, rigging, animation and visual project experiments for learning and creative work.</p>
-          <span class="card-meta">View 3D work</span>
+          <span class="card-meta">View 3D work →</span>
         </a>
 
         <a class="project-card" href="webdev.html">
           <span class="card-icon"><i class="fas fa-code"></i></span>
           <h3>Web Development</h3>
-          <p>A small overview of my web work: static sites, clean UI, GitHub Pages deployment and utility apps.</p>
-          <span class="card-meta">View web work</span>
+          <p>Static sites, clean UI, GitHub Pages deployment and utility apps that solve specific student and service problems.</p>
+          <span class="card-meta">View web work →</span>
         </a>
       </div>
     </section>
 
+    <!-- FOCUS / ABOUT -->
     <section class="section" aria-labelledby="focus-title">
       <div class="split-band">
         <div>
           <p class="eyebrow">What I am working on</p>
           <h2 id="focus-title">Useful tools first, portfolio second.</h2>
           <p class="lead">I like making practical things: a print service that saves time, civil engineering templates that reduce repetitive formatting, and clean web pages that are easy to use from phone or desktop.</p>
+          <ul class="note-list" style="margin-top: 20px;">
+            <li>CTRL-P — print service built for FEC students and local use.</li>
+            <li>Academic document tools that output submission-ready PDFs fast.</li>
+            <li>Blender 3D modeling for learning and visual project work.</li>
+          </ul>
         </div>
         <div class="media-note">
           <img src="Faridpur_Engineering_College.jpg" alt="Faridpur Engineering College logo">
           <h3>Engineering background</h3>
-          <p>The academic tools are built around the format and needs of Faridpur Engineering College students, especially civil engineering reports, indexes and printable documents.</p>
+          <p>The academic tools are built around the format and needs of Faridpur Engineering College students — especially civil engineering reports, indexes and printable documents.</p>
         </div>
       </div>
     </section>
 
+    <!-- CONTACT -->
     <section class="contact-strip" aria-label="Contact and GitHub">
       <div>
         <h2>Contact</h2>
@@ -121,15 +198,18 @@
       <div class="contact-links">
         <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
         <a href="tel:01722592967"><i class="fas fa-phone"></i> 01722592967</a>
-        <a href="https://github.com/shaikh800/shaikh800.github.io" target="_blank" rel="noopener"><i class="fab fa-github"></i> Site Repository</a>
+        <a href="https://www.facebook.com/shaikh.069" target="_blank" rel="noopener"><i class="fab fa-facebook"></i> Facebook</a>
+        <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+        <a href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
       </div>
     </section>
+
   </main>
 
   <footer class="site-footer">
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
-      <span>Built with GitHub Pages</span>
+      <span>Built with GitHub Pages · Faridpur, Bangladesh</span>
     </div>
   </footer>
 
