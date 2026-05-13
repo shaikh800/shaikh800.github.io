@@ -8,7 +8,7 @@ const myWorks = [
   {
     title: "New Post",
     description: "Another detailed work.",
-    image: "assets/image_8d0160.jpg",
+    image: "assets/assets/image_8d0160.jpg",
     tool: "Blender 4.2"
   }
 ]; // Bracket ebong semicolon diye shesh hobe
