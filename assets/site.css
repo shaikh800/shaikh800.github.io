@@ -56,7 +56,7 @@ a{color:inherit}
 .reveal-grid.is-visible>*:nth-child(4){transition-delay:0.30s}
 .reveal-grid.is-visible>*{opacity:1;transform:translateY(0)}
 
-/* ─── BACKGROUND ─────────────────────────────────────────── */
+/* ─── BACKGROUND & WATERMARK ─────────────────────────────── */
 body{
   margin:0;
   min-height:100vh;
@@ -67,13 +67,20 @@ body{
     radial-gradient(circle at 94% 18%,rgba(13,138,106,0.07),transparent 24%),
     linear-gradient(180deg,#fbfcfe 0%,var(--bg) 42%,#edf2f7 100%);
 }
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+
+/* Updated Stylized Background Watermark */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  /* Technical Grid Layer */
   background-image:
-    linear-gradient(rgba(23,32,51,0.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(23,32,51,0.035) 1px,transparent 1px);
-  background-size:34px 34px;
-  mask-image:linear-gradient(180deg,rgba(0,0,0,0.6),transparent 72%);
+    linear-gradient(rgba(23,32,51,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,32,51,0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.6), transparent 72%);
 }
 
 /* ─── HEADER ─────────────────────────────────────────────── */
@@ -137,13 +144,16 @@ body::before{
   position:relative;min-height:520px;
   display:flex;align-items:center;overflow:hidden;
 }
-/* watermark — path relative to assets/site.css */
+
+/* Subtler Hero Watermark */
 .intro::after{
   content:"";position:absolute;right:0;top:50%;
   width:min(360px,35vw);aspect-ratio:1;
   transform:translateY(-48%);
   background:url("images/shaikh.png") center/contain no-repeat;
-  opacity:0.08;filter:grayscale(100%);z-index:0;
+  opacity: 0.04; /* Reduced opacity for a softer look */
+  filter: grayscale(100%) blur(2px); /* Slight blur added */
+  z-index:0;
   animation:fadeIn 1.2s var(--ease-out) 0.4s both;
 }
 .intro-content{position:relative;z-index:1;max-width:600px}
