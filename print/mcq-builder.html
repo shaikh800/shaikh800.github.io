@@ -46,6 +46,7 @@
         --answer-key-weight: 400;
         --header-box-weight: 700;
         --option-mark-weight: 700;
+        --option-mark-scale: 1;
         --question-number-weight: 700;
         --answer-num-weight: 400;
         --answer-letter-weight: 400;
@@ -286,7 +287,7 @@
       .mcq-image { display: block; width: auto; object-fit: contain; border: 1px solid #bbb; }
       .options-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--option-col-gap); row-gap: 2px; padding-left: 18px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
       .option-item { display: flex; align-items: center; gap: 5px; min-width: 0; }
-      .option-mark { width: calc(var(--mcq-font-size) * 1.55); height: calc(var(--mcq-font-size) * 1.55); min-width: calc(var(--mcq-font-size) * 1.55); border: 1px solid #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: var(--option-mark-weight); font-size: calc(var(--mcq-font-size) * 0.94); line-height: 1; flex-shrink: 0; }
+      .option-mark { width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); height: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); min-width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); border: 1px solid #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: var(--option-mark-weight); font-size: calc(var(--mcq-font-size) * 0.88); line-height: 1; flex-shrink: 0; }
       .option-text { overflow-wrap: anywhere; flex: 1; }
       
       /* --- Footer --- */
@@ -351,7 +352,98 @@
       .cropper-wrap { flex-grow: 1; min-height: 45vh; overflow: hidden; margin-bottom: 12px; background: #f0f0f0; border-radius: 8px; touch-action: none; }
       #cropperImg { display: block; max-width: 100%; }
 
-      /* --- Print Styles --- */
+      /* ========== MOBILE TAB BAR ========== */
+      .mobile-tabbar {
+        display: none;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 56px;
+        background: #1e293b;
+        border-top: 1px solid #334155;
+        z-index: 9999;
+        grid-template-columns: 1fr 1fr;
+      }
+      .mobile-tab {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 3px; color: #94a3b8; font-size: 11px; font-weight: 700;
+        border: none; background: transparent; cursor: pointer;
+        transition: color 0.2s; letter-spacing: 0.3px; padding: 0;
+      }
+      .mobile-tab .tab-icon { font-size: 18px; line-height: 1; }
+      .mobile-tab.active { color: #38bdf8; }
+      .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
+
+      /* ========== MOBILE RESPONSIVE ========== */
+      @media (max-width: 768px) {
+        html, body { height: 100dvh; overflow: hidden; }
+
+        .app { position: relative; overflow: hidden; height: 100dvh; }
+
+        /* Panel: full-screen drawer on mobile */
+        .panel {
+          position: fixed; top: 0; left: 0;
+          width: 100% !important;
+          height: calc(100dvh - 56px);
+          padding: 16px 14px 8px;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          z-index: 200;
+          border-right: none;
+          transition: transform 0.25s ease;
+          transform: translateX(0);
+        }
+        .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
+
+        /* Page-wrap: full-screen preview on mobile */
+        .page-wrap {
+          position: fixed; top: 0; left: 0;
+          width: 100%; height: calc(100dvh - 56px);
+          padding: 12px 0 4px;
+          overflow: auto;
+          -webkit-overflow-scrolling: touch;
+          display: flex; flex-direction: column; align-items: center;
+          transition: transform 0.25s ease;
+          transform: translateX(100%);
+        }
+        .page-wrap.active-mobile { transform: translateX(0); }
+
+        .mobile-tabbar { display: grid; }
+
+        /* Scale A4 pages to fit mobile screen */
+        .page {
+          transform-origin: top center;
+          transform: scale(var(--mobile-page-scale, 0.45));
+          margin-bottom: var(--mobile-page-margin, -410px);
+          flex-shrink: 0;
+        }
+
+        /* Panel internal adjustments */
+        .panel h1 { font-size: 18px; margin-bottom: 8px; }
+        .field label { font-size: 12px; }
+        .field input, .field textarea, .field select { font-size: 14px; padding: 9px 10px; }
+        button { padding: 11px 10px; font-size: 13px; min-height: 44px; }
+        .icon-btn { padding: 5px 10px; font-size: 14px; min-height: 36px; }
+        .toggle-wrapper { padding: 8px 10px; }
+        .toggle-text { font-size: 13px; }
+        .tiny { font-size: 12px; }
+        .panel-flow-section { padding: 10px 10px; }
+
+        /* Compact grids on mobile */
+        .field-grid { grid-template-columns: 1fr; }
+        .control-grid { grid-template-columns: 1fr 1fr; }
+        .uniform-grid-three { grid-template-columns: 1fr 1fr; }
+
+        .toolbar { gap: 8px; }
+        .toolbar.three { grid-template-columns: 1fr 1fr; }
+        .toolbar.three > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+        .answer-buttons { gap: 6px; }
+        .answer-buttons label { padding: 10px 6px; font-size: 14px; min-height: 44px; }
+        .part-editor-row { grid-template-columns: 1fr 72px; }
+        .image-card-body { grid-template-columns: 80px minmax(0, 1fr); }
+        .image-preview { min-width: 80px; max-width: 80px; }
+      }
+
+      /* ========== PRINT ========== */
       @media print {
         @page { size: A4 portrait; margin: 0; }
         html, body { width: 100%; height: auto; display: block; overflow: visible; background: #fff !important; margin: 0; padding: 0; }
@@ -385,6 +477,14 @@
   </head>
   <body>
     <div class="app">
+      <nav class="mobile-tabbar" role="tablist">
+        <button class="mobile-tab active" id="tabEdit" onclick="switchMobileTab('edit')" role="tab" aria-selected="true">
+          <span class="tab-icon">✏️</span>Edit
+        </button>
+        <button class="mobile-tab" id="tabPreview" onclick="switchMobileTab('preview')" role="tab" aria-selected="false">
+          <span class="tab-icon">👁️</span>Preview
+        </button>
+      </nav>
       <aside class="panel">
         <h1>Question Builder</h1>
         <details class="guide-box">
@@ -612,6 +712,16 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
+            <label for="optionMarkScaleControl">Option Circle Scale</label
+            ><input
+              id="optionMarkScaleControl"
+              type="number"
+              min="0.6"
+              max="2.0"
+              step="0.05"
+            />
+          </div>
+          <div class="field" style="margin-bottom: 0">
             <label for="mcqImageWidthControl">MCQ Image Width %</label
             ><input
               id="mcqImageWidthControl"
@@ -808,6 +918,7 @@
           gap: 7,
           columnGap: 16,
           mcqBold: true,
+          optionMarkScale: 1,
           headerScale: 1,
           headerInfoScale: 1,
           answerKeyBold: false,
@@ -1042,9 +1153,13 @@
       ];
       bodyBoldControl.addEventListener("change", () => {
         const isChecked = bodyBoldControl.checked;
-        masterBoldTargets.forEach((el) => {
-          if (el) el.checked = isChecked;
-        });
+        if (isChecked) {
+          // Master ON → সব individual টগল true করো
+          masterBoldTargets.forEach((el) => {
+            if (el) el.checked = true;
+          });
+        }
+        // Master OFF হলে individual গুলো unchanged থাকে
         applyLayoutControls();
       });
       bodyFontControl.addEventListener("input", () => {
@@ -1085,6 +1200,7 @@
       const mcqImageHeightControl = document.getElementById(
         "mcqImageHeightControl"
       );
+      const optionMarkScaleControl = document.getElementById("optionMarkScaleControl");
       const cqFontControl = document.getElementById("cqFontControl");
       const cqImageWidthControl = document.getElementById(
         "cqImageWidthControl"
@@ -1146,6 +1262,7 @@
         mcqBoldControl.closest(".field"),
         mcqFontControl.closest(".field"),
         optionBadgeBoldControl.closest(".field"),
+        optionMarkScaleControl.closest(".field"),
       ].filter(Boolean);
       const uniformCqNodes = [
         cqFontControl.closest(".field"),
@@ -1372,7 +1489,6 @@
           .replace(/\\rightleftharpoons/g, "⇌")
           .replace(/\\leftrightarrow/g, "↔")
           .replace(/\\rightarrow/g, "→")
-          .replace(/\\leftarrow/g, "←")
           .replace(/\\Delta/g, "Δ")
           .replace(/\\cdot/g, "·")
           .replace(/\\times/g, "×")
@@ -1530,7 +1646,7 @@
         creditLine.value = state.creditLine || "";
         bodyFontControl.value = state.layout.bodyFont;
         mcqFontControl.value = state.layout.mcqFont ?? state.layout.bodyFont;
-        bodyBoldControl.value = state.layout.bodyBold ? "1" : "0";
+        bodyBoldControl.checked = !!state.layout.bodyBold;
         lineHeightControl.value = state.layout.lineHeight;
         gapControl.value = state.layout.gap;
         columnGapControl.value = state.layout.columnGap;
@@ -1546,6 +1662,7 @@
         mcqBoldControl.checked = state.layout.mcqBold;
         mcqImageWidthControl.value = state.layout.mcqImageWidth;
         mcqImageHeightControl.value = state.layout.mcqImageHeight;
+        optionMarkScaleControl.value = state.layout.optionMarkScale ?? 1;
         cqFontControl.value = state.layout.cqFont ?? state.layout.bodyFont;
         cqImageWidthControl.value = state.layout.cqImageWidth;
         cqImageHeightControl.value = state.layout.cqImageHeight;
@@ -2169,7 +2286,7 @@
 
       function applyLayoutControls() {
         state.layout.bodyFont = numberValueOr(11, bodyFontControl.value);
-        state.layout.bodyBold = bodyBoldControl.value === "1";
+        state.layout.bodyBold = bodyBoldControl.checked;
         state.layout.lineHeight = numberValueOr(1.24, lineHeightControl.value);
         state.layout.gap = numberValueOr(7, gapControl.value);
         state.layout.columnGap = numberValueOr(16, columnGapControl.value);
@@ -2207,6 +2324,7 @@
         state.layout.mcqBold = mcqBoldControl.checked;
         state.layout.questionNumberBold = questionNumberBoldControl.checked;
         if (state.layout.bodyBold) {
+          // Master ON → সব individual bold কে true করো এবং UI sync করো
           state.layout.answerKeyBold = true;
           state.layout.answerNumBold = true;
           state.layout.answerLetterBold = true;
@@ -2214,15 +2332,15 @@
           state.layout.optionBadgeBold = true;
           state.layout.mcqBold = true;
           state.layout.questionNumberBold = true;
-        } else {
-          state.layout.answerKeyBold = false;
-          state.layout.answerNumBold = false;
-          state.layout.answerLetterBold = false;
-          state.layout.headerBoxesBold = false;
-          state.layout.optionBadgeBold = false;
-          state.layout.mcqBold = false;
-          state.layout.questionNumberBold = false;
+          answerKeyBoldControl.checked = true;
+          answerNumBoldControl.checked = true;
+          answerLetterBoldControl.checked = true;
+          headerBoxesBoldControl.checked = true;
+          optionBadgeBoldControl.checked = true;
+          mcqBoldControl.checked = true;
+          questionNumberBoldControl.checked = true;
         }
+        // Master OFF হলে individual control গুলো তাদের নিজস্ব state ধরে রাখে
         state.layout.mcqImageWidth = numberValueOr(
           42,
           mcqImageWidthControl.value
@@ -2231,6 +2349,7 @@
           95,
           mcqImageHeightControl.value
         );
+        state.layout.optionMarkScale = numberValueOr(1, optionMarkScaleControl.value);
         if (state.layout.cqFontLinked !== false) {
           cqFontControl.value = bodyFontControl.value;
         }
@@ -2265,13 +2384,16 @@
         state.layout.padRight = numberValueOr(0.42, padRightControl.value);
         state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
         state.layout.padLeft = numberValueOr(0.42, padLeftControl.value);
-        answerKeyBoldControl.checked = state.layout.answerKeyBold;
-        answerNumBoldControl.checked = state.layout.answerNumBold;
-        answerLetterBoldControl.checked = state.layout.answerLetterBold;
-        headerBoxesBoldControl.checked = state.layout.headerBoxesBold !== false;
-        optionBadgeBoldControl.checked = state.layout.optionBadgeBold !== false;
-        mcqBoldControl.checked = state.layout.mcqBold;
-        questionNumberBoldControl.checked = state.layout.questionNumberBold !== false;
+        if (!state.layout.bodyBold) {
+          // Master OFF — individual controls এর actual checked state থেকে পড়ো
+          answerKeyBoldControl.checked = state.layout.answerKeyBold;
+          answerNumBoldControl.checked = state.layout.answerNumBold;
+          answerLetterBoldControl.checked = state.layout.answerLetterBold;
+          headerBoxesBoldControl.checked = state.layout.headerBoxesBold !== false;
+          optionBadgeBoldControl.checked = state.layout.optionBadgeBold !== false;
+          mcqBoldControl.checked = state.layout.mcqBold;
+          questionNumberBoldControl.checked = state.layout.questionNumberBold !== false;
+        }
         applyPageVars();
         renderAll();
       }
@@ -2410,6 +2532,10 @@
         root.setProperty(
           "--option-mark-weight",
           state.layout.optionBadgeBold === false ? "400" : "700"
+        );
+        root.setProperty(
+          "--option-mark-scale",
+          String(state.layout.optionMarkScale ?? 1)
         );
         root.setProperty(
           "--question-number-weight",
@@ -2973,6 +3099,7 @@
         state.creditLine = creditLine.value;
         renderPages();
         renderStatus();
+        if (window.innerWidth <= 768) applyMobilePageScale();
         if (recordHistory) recordHistorySnapshot();
         scheduleAutosave();
       }
@@ -3058,6 +3185,8 @@
 
         nextState.layout.headerInfoScale =
           nextState.layout.headerInfoScale ?? 1;
+        nextState.layout.optionMarkScale =
+          nextState.layout.optionMarkScale ?? 1;
         nextState.layout.answerKeyBold = !!nextState.layout.answerKeyBold;
         nextState.layout.questionNumberBold =
           nextState.layout.questionNumberBold !== false;
@@ -3926,6 +4055,124 @@
         }
       });
 
+      // ========== MOBILE TAB SWITCHING & PAGE SCALING ==========
+      let currentMobileTab = 'edit';
+
+      function switchMobileTab(tab) {
+        currentMobileTab = tab;
+        const panel = document.querySelector('.panel');
+        const pageWrap = document.getElementById('pagesWrap');
+        const tabEdit = document.getElementById('tabEdit');
+        const tabPreview = document.getElementById('tabPreview');
+        if (!panel || !pageWrap) return;
+        if (tab === 'edit') {
+          panel.classList.remove('hidden-mobile');
+          pageWrap.classList.remove('active-mobile');
+          tabEdit.classList.add('active');
+          tabPreview.classList.remove('active');
+          tabEdit.setAttribute('aria-selected', 'true');
+          tabPreview.setAttribute('aria-selected', 'false');
+        } else {
+          panel.classList.add('hidden-mobile');
+          pageWrap.classList.add('active-mobile');
+          tabEdit.classList.remove('active');
+          tabPreview.classList.add('active');
+          tabEdit.setAttribute('aria-selected', 'false');
+          tabPreview.setAttribute('aria-selected', 'true');
+          applyMobilePageScale();
+        }
+      }
+
+      function applyMobilePageScale() {
+        if (window.innerWidth > 768) return;
+        const pages = document.querySelectorAll('.page');
+        if (!pages.length) return;
+        const firstPage = pages[0];
+        const naturalW = firstPage.offsetWidth || 794;
+        const available = window.innerWidth;
+        const scale = Math.max(0.28, Math.min(1, available / naturalW));
+        const scaledH = (firstPage.offsetHeight || 1123) * scale;
+        const gap = 14;
+        const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+        document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
+        document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+      }
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          // Desktop: reset any mobile transforms
+          document.querySelector('.panel')?.classList.remove('hidden-mobile');
+          document.getElementById('pagesWrap')?.classList.remove('active-mobile');
+        }
+        applyMobilePageScale();
+      }, { passive: true });
+
+      // PDF export: temporarily show all pages even on mobile
+      const _origDownloadPDFDirect = window.downloadPDFDirect;
+      async function downloadPDFDirect() {
+        const pageWrap = document.getElementById('pagesWrap');
+        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
+        if (wasHidden && pageWrap) {
+          pageWrap.style.visibility = 'hidden';
+          pageWrap.style.transform = 'none';
+          pageWrap.style.position = 'fixed';
+          pageWrap.style.left = '-9999px';
+        }
+        try {
+          const blob = await generatePdfBlob();
+          await downloadBlob(
+            blob,
+            (state.examTitle || "sheet").replace(/[\\/:*?"<>|]+/g, " ").trim() + ".pdf"
+          );
+        } catch (err) {
+          console.error(err);
+          try { window.print(); } catch(e) {}
+        } finally {
+          if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = '';
+            pageWrap.style.transform = '';
+            pageWrap.style.position = '';
+            pageWrap.style.left = '';
+            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
+          }
+        }
+      }
+
+      async function sharePDFDirect() {
+        const pageWrap = document.getElementById('pagesWrap');
+        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
+        if (wasHidden && pageWrap) {
+          pageWrap.style.visibility = 'hidden';
+          pageWrap.style.transform = 'none';
+          pageWrap.style.position = 'fixed';
+          pageWrap.style.left = '-9999px';
+        }
+        try {
+          const blob = await generatePdfBlob();
+          const filename = ((state.examTitle || "sheet").replace(/[\\/:*?"<>|]+/g, " ").trim() || "sheet") + ".pdf";
+          const file = new File([blob], filename, { type: "application/pdf" });
+          if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+            await navigator.share({ title: state.examTitle || "Sheet PDF", files: [file] });
+          } else {
+            await downloadBlob(blob, filename);
+            alert("এই browser-এ direct file share support নেই। PDF download করে দেওয়া হয়েছে।");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Share PDF তৈরি করা যায়নি।");
+        } finally {
+          if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = '';
+            pageWrap.style.transform = '';
+            pageWrap.style.position = '';
+            pageWrap.style.left = '';
+            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
+          }
+        }
+      }
+
+      // ========================================================
+
       const loadedDraft = loadData(true);
       if (!loadedDraft) {
         syncNumbers();
@@ -3958,8 +4205,6 @@
     </div>
   </div>
 </div>
-</body>
-</html>
 <script>
 let cropper = null;
 let currentCropContext = { type: '', index: -1, imageIndex: -1 };
@@ -4070,3 +4315,5 @@ function confirmCrop() {
   initEditors();
 }
 </script>
+</body>
+</html>
