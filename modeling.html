@@ -10,21 +10,16 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
-    /* Profile pic and Watermark custom styling */
-    .brand img {
-      width: 36px;
-      height: 36px;
-      border-radius: 50% !important;
-      object-fit: cover;
-    }
-    /* Dynamic Gallery Image Styling */
-    .project-card img {
+    /* Gallery image inside project card */
+    .project-card img.work-img {
       width: 100%;
       aspect-ratio: 16/9;
       object-fit: cover;
-      border-radius: var(--radius);
-      margin-bottom: 15px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+      transition: transform 0.3s var(--ease-out);
     }
+    .project-card:hover img.work-img { transform: scale(1.02); }
   </style>
 </head>
 <body>
@@ -40,33 +35,41 @@
       <nav class="site-nav" aria-label="Main navigation">
         <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
         <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
-        <a href="modeling.html" class="is-active" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
+        <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
         <a class="nav-cta" href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
       </nav>
     </div>
   </header>
 
   <main class="page">
-    <section class="page-title">
+    <section class="page-title reveal">
+      <p class="eyebrow">Blender modeling and animation</p>
       <h1>3D Modeling Portfolio</h1>
-      <p>Showcasing my latest 3D renders, Blender rigging, and animation projects.</p>
+      <p>My latest 3D renders, Blender rigging and animation projects — updated as I learn.</p>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>My Latest Works</h2>
-        <p>This section updates automatically from works.js</p>
+    <section class="section" aria-labelledby="works-title">
+      <div class="section-head reveal">
+        <div>
+          <h2 id="works-title">Latest Works</h2>
+          <p>This section updates automatically from works.js — add new entries there to add new cards here.</p>
+        </div>
       </div>
-      <div id="works-container" class="card-grid">
-        <p>Loading projects...</p>
+      <div id="works-container" class="card-grid reveal-grid">
+        <p style="color:var(--muted)">Loading projects...</p>
       </div>
     </section>
 
     <section class="section" aria-labelledby="modeling-process">
-      <div class="split-band">
+      <div class="split-band reveal">
         <div>
           <h2 id="modeling-process">What I Want To Improve</h2>
           <p class="lead">My next goal is to make 3D assets that are cleaner, easier to reuse and useful for web visuals, product mockups and engineering presentations.</p>
+          <ul class="note-list" style="margin-top:20px">
+            <li>Cleaner topology and reusable base meshes.</li>
+            <li>Simple lighting setups that render fast and look good.</li>
+            <li>Animation loops useful for short-form video or presentations.</li>
+          </ul>
         </div>
         <div class="media-note">
           <img src="favicon.svg" alt="Md. Shaikh mark">
@@ -76,7 +79,7 @@
       </div>
     </section>
 
-    <section class="contact-strip" aria-label="Contact">
+    <section class="contact-strip reveal" aria-label="Contact">
       <div>
         <h2>Follow the work</h2>
         <p>My Blender learning and site work both live around small experiments that get better over time.</p>
@@ -84,7 +87,7 @@
       <div class="contact-links">
         <a href="https://www.youtube.com/@Blender0to1" target="_blank" rel="noopener"><i class="fab fa-youtube"></i> YouTube</a>
         <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
-        <a href="mailto:md.shaikh.alam.007@gmail.com\"><i class="fas fa-envelope"></i> Email</a>
+        <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
       </div>
     </section>
   </main>
@@ -97,16 +100,6 @@
   </footer>
 
   <script src="assets/works.js"></script>
-  <script>
-    // Mobile navigation toggle script
-    const navToggle = document.querySelector('.nav-toggle');
-    const siteNav = document.querySelector('.site-nav');
-    if (navToggle) {
-      navToggle.addEventListener('click', () => {
-        const isOpen = siteNav.classList.toggle('is-open');
-        navToggle.setAttribute('aria-expanded', isOpen);
-      });
-    }
-  </script>
+  <script src="assets/site.js"></script>
 </body>
 </html>

@@ -9,59 +9,6 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
-  <style>
-    /* Profile card — desktop only, sits in hero right side */
-    .profile-card {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 1;
-      width: 256px;
-      background: rgba(255,255,255,0.90);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-      backdrop-filter: blur(10px);
-    }
-    .profile-card img {
-      width: 62px; height: 62px;
-      border-radius: 50%; object-fit: cover;
-      border: 2px solid var(--blue);
-      display: block; margin-bottom: 12px;
-    }
-    .pc-name { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2px; }
-    .pc-role {
-      font-size: 11px; color: var(--blue); font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;
-    }
-    .pc-row {
-      display: flex; align-items: flex-start; gap: 9px;
-      padding: 8px 0; border-top: 1px solid var(--line); font-size: 12.5px;
-    }
-    .pc-row i { color: var(--muted); font-size: 12px; margin-top: 2px; flex-shrink: 0; }
-    .pc-row span { color: var(--muted); line-height: 1.45; }
-    .pc-badge {
-      margin-top: 14px;
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(13,138,106,0.1); color: var(--green);
-      border: 1px solid rgba(13,138,106,0.22); border-radius: 100px;
-      padding: 4px 12px; font-size: 11px; font-weight: 700;
-    }
-    .pc-badge::before { content: '●'; font-size: 7px; }
-
-    /* Narrow the intro text so card doesn't overlap */
-    .intro-content { max-width: 600px; }
-    /* Shift the watermark so it doesn't fight the card */
-    .intro::after { right: 230px; opacity: 0.07; }
-
-    @media (max-width: 900px) {
-      .profile-card { display: none; }
-      .intro-content { max-width: 100%; }
-      .intro::after { right: -72px; opacity: 0.08; }
-    }
-  </style>
 </head>
 <body>
   <header class="site-header">
@@ -89,7 +36,7 @@
       <div class="intro-content">
         <p class="eyebrow">Civil engineering student and maker</p>
         <h1 id="intro-title">Md. Shaikh Alam</h1>
-        <p class="lead">I build small, useful tools for study, printing and engineering workflows. My main focus is CTRL-P, academic document utilities, Blender modeling and cleaner web interfaces that make everyday work easier.</p>
+        <p class="lead">I build small, useful tools for study, printing and engineering workflows. My main focus is CTRL-P, academic document utilities, Blender modeling and cleaner web interfaces.</p>
 
         <div class="actions">
           <a class="btn primary" href="print/index.html"><i class="fas fa-print"></i> Open CTRL-P Service</a>
@@ -128,14 +75,14 @@
 
     <!-- FEATURED WORK -->
     <section class="section" aria-labelledby="featured-title">
-      <div class="section-head">
+      <div class="section-head reveal">
         <div>
           <h2 id="featured-title">Featured Work</h2>
-          <p>The site starts with the service and tools people are most likely to use first, then keeps portfolio content close by.</p>
+          <p>The tools and portfolio sections I am building and maintaining right now.</p>
         </div>
       </div>
 
-      <div class="card-grid">
+      <div class="card-grid reveal-grid">
         <a class="project-card featured" href="print/index.html">
           <span class="card-icon"><i class="fas fa-print"></i></span>
           <h3>CTRL-P Service</h3>
@@ -157,19 +104,12 @@
           <p>Blender practice, rigging, animation and visual project experiments for learning and creative work.</p>
           <span class="card-meta">View 3D work →</span>
         </a>
-
-        <a class="project-card" href="webdev.html">
-          <span class="card-icon"><i class="fas fa-code"></i></span>
-          <h3>Web Development</h3>
-          <p>Static sites, clean UI, GitHub Pages deployment and utility apps that solve specific student and service problems.</p>
-          <span class="card-meta">View web work →</span>
-        </a>
       </div>
     </section>
 
     <!-- FOCUS / ABOUT -->
     <section class="section" aria-labelledby="focus-title">
-      <div class="split-band">
+      <div class="split-band reveal">
         <div>
           <p class="eyebrow">What I am working on</p>
           <h2 id="focus-title">Useful tools first, portfolio second.</h2>
@@ -189,7 +129,7 @@
     </section>
 
     <!-- CONTACT -->
-    <section class="contact-strip" aria-label="Contact and GitHub">
+    <section class="contact-strip reveal" aria-label="Contact and GitHub">
       <div>
         <h2>Contact</h2>
         <p>For print orders, project feedback or collaboration, these are the fastest ways to reach me.</p>
