@@ -2,13 +2,13 @@ const myWorks = [
   {
     title: "Blender Project",
     description: "Detailed 3D project made in Blender.",
-    image: "assets/assets/image_8d6685.jpg",
+    image: "assets/images/image_8d6685.jpg",
     tool: "Blender 4.2"
   }, // Ekhane ekti comma hobe jodi arekti jukto koren
   {
     title: "New Post",
     description: "Another detailed work.",
-    image: "assets/assets/image_8d0160.jpg",
+    image: "assets/images/image_8d0160.jpg",
     tool: "Blender 4.2"
   }
 ]; // Bracket ebong semicolon diye shesh hobe
