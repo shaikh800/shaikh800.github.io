@@ -708,7 +708,7 @@
             if (pageWrap) pageWrap.classList.remove('active-mobile');
         }
         applyMobilePageScale();
-    });
+    }, { passive: true });
 
     // --- Core functionality with unified colors ---
     let experiments = [];
@@ -789,8 +789,8 @@
 
     function editExperiment(index) {
         const exp = experiments[index];
-        document.getElementById('in_date_exp').value = exp.dateExp;
-        document.getElementById('in_date_sub').value = exp.dateSub;
+        document.getElementById('in_date_exp').value = exp.dateExp || '';
+        document.getElementById('in_date_sub').value = exp.dateSub || '';
         document.getElementById('in_name').value = exp.name.replace(/\.$/, '');
         if (exp.page.includes('-')) {
             const parts = exp.page.split('-');
@@ -862,6 +862,7 @@
         isEvenlyDistributed = !isEvenlyDistributed;
         updateDistributeBtnUI();
         renderTable();
+        saveToCache();
     }
 
     function updateDistributeBtnUI() {
@@ -925,6 +926,7 @@
 
         if (experiments.length === 0) {
             controlList.innerHTML = '<div style="color: #64748b; font-size: 13px; text-align: center;">No experiments added yet.</div>';
+            tableElement.style.height = 'auto';
             document.getElementById('btn_inc_body').disabled = true;
             return;
         }
@@ -998,9 +1000,29 @@
         const element = document.getElementById('index-page');
         const btn = document.querySelector('.pdf-btn');
         const originalText = btn.innerText;
+
+        const pageWrap = document.getElementById('pagesWrap');
+        const isMobile = window.innerWidth <= 768;
+        const wasHidden = isMobile && pageWrap && !pageWrap.classList.contains('active-mobile');
+
+        // Mobile: temporarily make page visible (off-screen) for capture
+        if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = 'hidden';
+            pageWrap.style.transform = 'translateX(0)';
+        }
+
+        // Temporarily remove mobile scale transform so html2canvas captures full A4
+        const prevPageTransform = element.style.transform;
+        const prevPageMargin    = element.style.marginBottom;
+        if (isMobile) {
+            element.style.transform  = 'none';
+            element.style.marginBottom = '0';
+        }
+
         btn.innerText = "Generating PDF... Please wait.";
         btn.style.backgroundColor = "#555";
         element.style.boxShadow = 'none';
+
         const opt = {
             margin: 0,
             filename: 'lab-report-index.pdf',
@@ -1008,13 +1030,28 @@
             html2canvas: { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
+
         html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
             const totalPages = pdf.internal.getNumberOfPages();
             for (let i = totalPages; i > 1; i--) pdf.deletePage(i);
         }).save().then(() => {
-            element.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
             btn.innerText = originalText;
             btn.style.backgroundColor = "#111827";
+        }).catch(() => {
+            alert("PDF তৈরি করা যায়নি। আবার চেষ্টা করুন।");
+            btn.innerText = originalText;
+            btn.style.backgroundColor = "#111827";
+        }).finally(() => {
+            element.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+            // Restore mobile transforms
+            if (isMobile) {
+                element.style.transform  = prevPageTransform;
+                element.style.marginBottom = prevPageMargin;
+            }
+            if (wasHidden && pageWrap) {
+                pageWrap.style.visibility = '';
+                pageWrap.style.transform = '';
+            }
         });
     }
 </script>
