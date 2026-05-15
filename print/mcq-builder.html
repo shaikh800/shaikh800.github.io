@@ -429,9 +429,10 @@
           position: fixed; top: 0; left: 0;
           width: 100%; height: calc(100dvh - 56px);
           padding: 12px 0 4px;
-          overflow: auto;
+          overflow-y: auto;
+          overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
-          display: flex; flex-direction: column; align-items: center;
+          display: flex; flex-direction: column; align-items: flex-start;
           transition: transform 0.25s ease;
           transform: translateX(100%);
         }
@@ -440,8 +441,9 @@
         .mobile-tabbar { display: grid; }
 
         .page {
-          transform-origin: top center;
+          transform-origin: top left;
           transform: scale(var(--mobile-page-scale, 0.45));
+          margin-left: var(--mobile-page-offset, 0px) !important;
           margin-bottom: var(--mobile-page-margin, -410px);
           flex-shrink: 0;
         }
@@ -923,6 +925,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
       const optionLabels = ["ক", "খ", "গ", "ঘ"];
       const answerMap = { A: "ক", B: "খ", C: "গ", D: "ঘ" };
       const cqPartMarksDefault = { ক: 1, খ: 2, গ: 3, ঘ: 4 };
@@ -1773,6 +1783,10 @@
     </div>`;
       }
 
+      const debouncedRenderAll = debounce((recordHistory = true) => {
+        renderAll(recordHistory);
+      }, 400);
+
       function initEditors() {
         if (!lastFocusedSection) {
           const openMainSection = document.querySelector(
@@ -2129,7 +2143,8 @@
           );
         else if (type === "oqtext") state.onlyQuestions[idx].text = el.value;
         else if (type === "oqmark") state.onlyQuestions[idx].mark = el.value;
-        renderAll();
+        
+        debouncedRenderAll();
       }
 
       function updateImageProperty(item, imageIndex, prop, value) {
@@ -2306,7 +2321,7 @@
               el.value.trim() === String(state.prevAutoDuration || "");
           }
           state[el.id] = el.value;
-          renderAll();
+          debouncedRenderAll();
         });
       });
 
@@ -3905,9 +3920,10 @@
         await new Promise((r) => setTimeout(r, 120));
         const pages = [...document.querySelectorAll(".page")];
         const images = [];
+        const isMobile = window.innerWidth <= 768;
+        const renderScale = isMobile ? 1.5 : 2; 
         for (const page of pages) {
-          // ISSUE 1 FIXED: Scale changed to 2 to prevent memory crashes
-          images.push(await svgPageToJpegBytes(page, 2));
+          images.push(await svgPageToJpegBytes(page, renderScale));
         }
         return buildPdfFromJpegs(images);
       }
@@ -3923,6 +3939,14 @@
         setTimeout(() => URL.revokeObjectURL(url), 1500);
       }
       async function downloadPDFDirect() {
+        const pageWrap = document.getElementById('pagesWrap');
+        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
+        if (wasHidden && pageWrap) {
+          pageWrap.style.visibility = 'hidden';
+          pageWrap.style.transform = 'none';
+          pageWrap.style.position = 'fixed';
+          pageWrap.style.left = '-9999px';
+        }
         try {
           const blob = await generatePdfBlob();
           await downloadBlob(
@@ -3935,9 +3959,25 @@
           try {
             window.print();
           } catch (e) {}
+        } finally {
+          if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = '';
+            pageWrap.style.transform = '';
+            pageWrap.style.position = '';
+            pageWrap.style.left = '';
+            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
+          }
         }
       }
       async function sharePDFDirect() {
+        const pageWrap = document.getElementById('pagesWrap');
+        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
+        if (wasHidden && pageWrap) {
+          pageWrap.style.visibility = 'hidden';
+          pageWrap.style.transform = 'none';
+          pageWrap.style.position = 'fixed';
+          pageWrap.style.left = '-9999px';
+        }
         try {
           const blob = await generatePdfBlob();
           const filename =
@@ -3963,6 +4003,14 @@
         } catch (err) {
           console.error(err);
           alert("Share PDF তৈরি করা যায়নি।");
+        } finally {
+          if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = '';
+            pageWrap.style.transform = '';
+            pageWrap.style.position = '';
+            pageWrap.style.left = '';
+            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
+          }
         }
       }
       async function downloadAsImagesZipLike() {
@@ -4155,8 +4203,12 @@
         const scaledH = (firstPage.offsetHeight || 1123) * scale;
         const gap = 14;
         const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+
+        const offsetLeft = (available - (naturalW * scale)) / 2;
+
         document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
         document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+        document.documentElement.style.setProperty('--mobile-page-offset', offsetLeft.toFixed(0) + 'px');
       }
 
       window.addEventListener('resize', () => {
@@ -4166,69 +4218,6 @@
         }
         applyMobilePageScale();
       }, { passive: true });
-
-      const _origDownloadPDFDirect = window.downloadPDFDirect;
-      async function downloadPDFDirect() {
-        const pageWrap = document.getElementById('pagesWrap');
-        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
-        if (wasHidden && pageWrap) {
-          pageWrap.style.visibility = 'hidden';
-          pageWrap.style.transform = 'none';
-          pageWrap.style.position = 'fixed';
-          pageWrap.style.left = '-9999px';
-        }
-        try {
-          const blob = await generatePdfBlob();
-          await downloadBlob(
-            blob,
-            (state.examTitle || "sheet").replace(/[\\/:*?"<>|]+/g, " ").trim() + ".pdf"
-          );
-        } catch (err) {
-          console.error(err);
-          try { window.print(); } catch(e) {}
-        } finally {
-          if (wasHidden && pageWrap) {
-            pageWrap.style.visibility = '';
-            pageWrap.style.transform = '';
-            pageWrap.style.position = '';
-            pageWrap.style.left = '';
-            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
-          }
-        }
-      }
-
-      async function sharePDFDirect() {
-        const pageWrap = document.getElementById('pagesWrap');
-        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
-        if (wasHidden && pageWrap) {
-          pageWrap.style.visibility = 'hidden';
-          pageWrap.style.transform = 'none';
-          pageWrap.style.position = 'fixed';
-          pageWrap.style.left = '-9999px';
-        }
-        try {
-          const blob = await generatePdfBlob();
-          const filename = ((state.examTitle || "sheet").replace(/[\\/:*?"<>|]+/g, " ").trim() || "sheet") + ".pdf";
-          const file = new File([blob], filename, { type: "application/pdf" });
-          if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-            await navigator.share({ title: state.examTitle || "Sheet PDF", files: [file] });
-          } else {
-            await downloadBlob(blob, filename);
-            alert("এই browser-এ direct file share support নেই। PDF download করে দেওয়া হয়েছে।");
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Share PDF তৈরি করা যায়নি।");
-        } finally {
-          if (wasHidden && pageWrap) {
-            pageWrap.style.visibility = '';
-            pageWrap.style.transform = '';
-            pageWrap.style.position = '';
-            pageWrap.style.left = '';
-            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
-          }
-        }
-      }
 
       const loadedDraft = loadData(true);
       if (!loadedDraft) {
@@ -4300,7 +4289,6 @@ function startCropping(event, type, index, imageIndex = -1) {
   event.target.value = ""; 
 }
 
-// ISSUE 2 FIXED: DOM Leak fix.
 function triggerImageReplace(type, index, imageIndex) {
   const input = document.createElement("input");
   input.type = "file";
@@ -4331,7 +4319,7 @@ function zoomCrop(ratio) {
 
 function confirmCrop() {
   const canvas = cropper.getCroppedCanvas();
-  const dataUrl = canvas.toDataURL("image/jpeg");
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
   const { type, index, imageIndex } = currentCropContext;
   let target;
   let defaultWidth;
