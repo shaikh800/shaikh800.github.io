@@ -2,596 +2,1021 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FEC Index Generator for Lab Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FEC Index Generator | Lab Report Index Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        @page { size: A4 portrait; margin: 0; }
-
-        /* CUSTOM SCROLLBAR */
+        /* --- Custom Scrollbar (MCQ builder style) --- */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: #f8fafc; }
-        
-        /* --- SPLIT SCREEN LAYOUT --- */
-        .sidebar { width: 380px; background-color: #ffffff; padding: 25px; box-shadow: 2px 0 15px rgba(0,0,0,0.05); overflow-y: auto; z-index: 100; border-right: 1px solid #e2e8f0; box-sizing: border-box; }
-        .preview-container { flex-grow: 1; background-color: #1e293b; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        /* --- A4 Page Base Layout --- */
-        .page-scaler { position: relative; margin: 0; }
+        :root {
+            --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --ink: #111827;
+            --muted: #475569;
+            --line: #e2e8f0;
+            --paper: #ffffff;
+            --soft-bg: #f8fafc;
+            --primary: #111827;      /* unified dark slate for all buttons */
+            --primary-dark: #1e293b; /* hover state */
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            --shadow-hover: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--ui-font);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #1e293b;
+            color: #111827;
+        }
+
+        /* --- SIDEBAR (panel like MCQ builder) --- */
+        .panel {
+            width: 420px;
+            background-color: var(--paper);
+            padding: 24px;
+            box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            z-index: 100;
+            border-right: 1px solid #e2e8f0;
+            height: 100%;
+            border-radius: 0;
+            flex-shrink: 0;
+            transition: transform 0.25s ease;
+        }
+
+        /* --- PREVIEW CONTAINER (page-wrap like MCQ builder) --- */
+        .page-wrap {
+            flex-grow: 1;
+            background-color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px;
+            overflow-y: auto;
+            transition: transform 0.25s ease;
+        }
+
+        /* --- MOBILE TAB BAR (exactly like MCQ builder) --- */
+        .mobile-tabbar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: #1e293b;
+            border-top: 1px solid #334155;
+            z-index: 9999;
+            grid-template-columns: 1fr 1fr;
+        }
+        .mobile-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: color 0.2s;
+            letter-spacing: 0.3px;
+            padding: 0;
+        }
+        .mobile-tab .tab-icon { font-size: 18px; line-height: 1; }
+        .mobile-tab.active { color: #38bdf8; }
+        .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
+
+        /* --- A4 Page Layout (print-perfect) --- */
+        .page-scaler {
+            position: relative;
+            margin: 0;
+        }
+
         .page {
-            width: 210mm !important; min-width: 210mm !important; max-width: 210mm !important;
-            height: 297mm !important; min-height: 297mm !important; max-height: 297mm !important;
-            background: white; padding: 25mm 20mm; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; position: relative;
+            width: 210mm !important;
+            min-width: 210mm !important;
+            max-width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            max-height: 297mm !important;
+            background: white;
+            padding: 25mm 20mm;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            font-family: 'Times New Roman', Times, serif;
         }
 
-        .index-title { 
-            text-align: center; font-size: 20pt; font-weight: bold; margin: 0 0 20px 0; 
-            text-transform: uppercase; color: #000; font-family: 'Times New Roman', Times, serif;
+        .index-title {
+            text-align: center;
+            font-size: 20pt;
+            font-weight: bold;
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+            color: #000;
         }
-        .index-title span { border-bottom: 2px solid #000; padding-bottom: 4px; }
-        
-        /* THE PERFECT THIN BORDER ENGINE (UNTOUCHED) */
-        .table-container { flex: 1; display: flex; flex-direction: column; height: 100%; padding-bottom: 2px; box-sizing: border-box; } 
-        .index-table { 
-            width: 100%; border-collapse: separate; border-spacing: 0; 
-            border-top: 1px solid #000; border-left: 1px solid #000; 
-            height: 100%; table-layout: fixed; color: #000; box-sizing: border-box; font-family: 'Times New Roman', Times, serif;
-        } 
-        .index-table th, .index-table td { 
-            border-right: 1px solid #000; border-bottom: 1px solid #000;
-            padding: 6px 5px; text-align: center; vertical-align: middle; 
-            transition: height 0.2s; overflow: hidden; box-sizing: border-box;
+
+        .index-title span {
+            border-bottom: 2px solid #000;
+            padding-bottom: 4px;
         }
-        .index-table th { font-weight: bold; background-color: #f9f9f9; }
-        
-        .col-no { width: 12%; }
-        .col-date { width: 13%; } 
-        .col-name { width: auto; text-align: left !important; padding-left: 10px !important; } 
-        .col-page { width: 14%; }
-        .col-remark { width: 14%; }
-        .hidden { display: none !important; }
 
-        /* --- MODERN UI CONTROLS --- */
-        h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
-
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #334; }
-        .form-group input, .form-group select { 
-            width: 100%; padding: 8px 10px; box-sizing: border-box; border: 1px solid #cbd5e1; 
-            border-radius: 6px; font-family: inherit; font-size: 13px; background-color: #f8fafc; transition: all 0.2s;
+        .table-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding-bottom: 2px;
+            box-sizing: border-box;
         }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #0ea5e9; background-color: #ffffff; }
 
-        /* PERFECT BLUE TOGGLE SWITCHES */
-        .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
-        .toggle-text { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334; flex-grow: 1; }
-        .switch { position: relative; display: inline-block; width: 42px !important; height: 24px !important; flex-shrink: 0; flex-grow: 0 !important; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background-color: #0ea5e9; } /* Blue color */
-        input:checked + .slider:before { transform: translateX(18px); }
+        .index-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-top: 1px solid #000;
+            border-left: 1px solid #000;
+            height: 100%;
+            table-layout: fixed;
+            color: #000;
+            box-sizing: border-box;
+        }
 
-        /* Interactive List */
-        .exp-list-container { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 20px; max-height: 220px; overflow-y: auto; }
-        .exp-item { display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 12px; border: 1px solid #e2e8f0; margin-bottom: 8px; border-radius: 6px; font-size: 13px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s ease;}
-        .exp-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #cbd5e1; }
-        .exp-title-area { flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; color: #1e293b;}
-        .list-actions { display: flex; gap: 4px; }
-        
-        /* Buttons */
-        .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;}
-        .action-btn { background: #f1f5f9; color: #334; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
-        .action-btn:hover:not(:disabled) { background: #0ea5e9; color: white; border-color: #0ea5e9; }
-        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .toggle-btn { background: #f1f5f9; color: #334; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; width: 100%;}
-        .toggle-btn.active { background: #1d8a41; color: white; border-color: #1d8a41; }
-        
-        .add-btn { background: #1d8a41; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; width: 100%; transition: 0.2s; }
-        .add-btn:hover { background: #157335; }
-        .pdf-btn { display: block; width: 100%; padding: 14px; margin-top: 25px; background: #1d8a41; color: white; border: none; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(26,93,26,0.2); transition: 0.2s; }
-        .pdf-btn:hover { background: #157335; transform: translateY(-1px); box-shadow: 0 6px 12px rgba(26,93,26,0.3); }
-        
-        .reset-btn { background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; width: 100%; box-sizing: border-box;}
-        .reset-btn:hover { background: #dc2626; }
+        .index-table th,
+        .index-table td {
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 6px 5px;
+            text-align: center;
+            vertical-align: middle;
+            transition: height 0.2s;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
 
-        .move-btn, .remove-btn, .edit-btn { background: #f1f5f9; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; padding: 5px 8px; color: #64748b; transition: all 0.2s;}
-        .move-btn:hover, .edit-btn:hover { background: #0ea5e9; color: #fff; }
-        .remove-btn:hover { background: #ef4444; color: white; }
+        .index-table th {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        .col-no {
+            width: 12%;
+        }
+
+        .col-date {
+            width: 13%;
+        }
+
+        .col-name {
+            width: auto;
+            text-align: left !important;
+            padding-left: 10px !important;
+        }
+
+        .col-page {
+            width: 14%;
+        }
+
+        .col-remark {
+            width: 14%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- UNIFIED BUTTON STYLES — all use #111827 (dark slate) --- */
+        h3 {
+            margin-top: 0;
+            color: #1e293b;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            font-size: 14px;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: var(--ui-font);
+            font-size: 13px;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #111827;
+            background-color: #ffffff;
+        }
+
+        /* Toggle switches */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .toggle-text {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #334155;
+            flex-grow: 1;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: 0.3s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #111827;  /* unified dark slate */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+
+        /* experiments list card */
+        .exp-list-container {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .exp-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            transition: all 0.2s;
+        }
+
+        .exp-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
+        }
+
+        .exp-title-area {
+            flex: 1;
+            margin-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* ALL buttons — unified dark slate (#111827) */
+        .action-btn, .toggle-btn, .add-btn, .pdf-btn, .reset-btn, .move-btn, .remove-btn, .edit-btn {
+            background: #111827;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        /* Special case for inactive toggle button (light gray background) */
+        .toggle-btn {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        .toggle-btn.active {
+            background: #111827;
+            color: white;
+            border: none;
+        }
+
+        /* Hover effects: darker slate */
+        .action-btn:hover:not(:disabled),
+        .toggle-btn:hover:not(.active),
+        .add-btn:hover,
+        .pdf-btn:hover,
+        .reset-btn:hover,
+        .move-btn:hover,
+        .remove-btn:hover,
+        .edit-btn:hover,
+        .toggle-btn.active:hover {
+            background: #1e293b;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Adjust spacing for different button types */
+        .add-btn, .pdf-btn, .reset-btn {
+            padding: 12px;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .move-btn, .remove-btn, .edit-btn {
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            html, body {
+                height: 100dvh;
+                overflow: hidden;
+            }
+            body {
+                position: relative;
+                overflow: hidden;
+                flex-direction: column;
+            }
+            .panel {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100% !important;
+                height: calc(100dvh - 56px);
+                padding: 16px 14px 8px;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                z-index: 200;
+                border-right: none;
+                transition: transform 0.25s ease;
+                transform: translateX(0);
+            }
+            .panel.hidden-mobile {
+                transform: translateX(-100%);
+                pointer-events: none;
+            }
+            .page-wrap {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: calc(100dvh - 56px);
+                padding: 12px 0 4px;
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: transform 0.25s ease;
+                transform: translateX(100%);
+            }
+            .page-wrap.active-mobile {
+                transform: translateX(0);
+            }
+            .mobile-tabbar {
+                display: grid;
+            }
+            .page {
+                transform-origin: top center;
+                transform: scale(var(--mobile-page-scale, 0.45));
+                margin-bottom: var(--mobile-page-margin, -410px);
+                flex-shrink: 0;
+            }
+            .panel h3 {
+                font-size: 13px;
+                margin-bottom: 12px;
+            }
+            .form-group input, .form-group select {
+                font-size: 14px;
+                padding: 9px 10px;
+            }
+            button {
+                min-height: 44px;
+            }
+            .action-btn, .toggle-btn, .reset-btn {
+                min-height: 36px;
+            }
+            .exp-list-container {
+                max-height: 200px;
+            }
+        }
+
+        @media print {
+            .panel, .mobile-tabbar {
+                display: none;
+            }
+            .page-wrap {
+                background: white;
+                padding: 0;
+                position: static;
+                transform: none;
+                height: auto;
+                overflow: visible;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                page-break-after: avoid;
+                transform: none;
+            }
+        }
+
+        .tiny-hint {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 8px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar no-print">
+<!-- Mobile Tab Bar (exactly like MCQ builder) -->
+<div class="mobile-tabbar" role="tablist">
+    <button class="mobile-tab active" id="tabEdit" onclick="switchMobileTab('edit')" role="tab" aria-selected="true">
+        <span class="tab-icon">✏️</span>Edit
+    </button>
+    <button class="mobile-tab" id="tabPreview" onclick="switchMobileTab('preview')" role="tab" aria-selected="false">
+        <span class="tab-icon">👁️</span>Preview
+    </button>
+</div>
 
-        <h3>Experiments List</h3>
-        <div class="exp-list-container" id="control-list">
-            <div style="color: #64748b; font-size: 13px; text-align: center;">No experiments added yet.</div>
-        </div>
+<!-- Sidebar (Edit panel) -->
+<aside class="panel" id="sidebarPanel">
+    <h3>📋 Experiments List</h3>
+    <div class="exp-list-container" id="control-list">
+        <div style="color: #64748b; font-size: 13px; text-align: center;">No experiments added yet.</div>
+    </div>
 
-        <h3>Layout & Font Settings</h3>
-        <div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-            <div class="control-row">
-                <span style="font-weight: 600; color: #334; font-size: 12px; width: 80px;">Body Rows:</span>
+    <h3>⚙ Layout & Font Settings</h3>
+    <div style="background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+        <div class="control-row">
+            <span style="font-weight: 600; color: #334155; font-size: 12px;">Body Rows:</span>
+            <div style="display: flex; gap: 8px;">
                 <button class="action-btn" id="btn_inc_body" onclick="adjustHeight('body', 5)">+ Increase</button>
                 <button class="action-btn" onclick="adjustHeight('body', -5)">- Decrease</button>
             </div>
-            <div class="control-row">
-                <span style="font-weight: 600; color: #334; font-size: 12px; width: 80px;">Header Row:</span>
+        </div>
+        <div class="control-row">
+            <span style="font-weight: 600; color: #334155; font-size: 12px;">Header Row:</span>
+            <div style="display: flex; gap: 8px;">
                 <button class="action-btn" onclick="adjustHeight('header', 5)">+ Increase</button>
                 <button class="action-btn" onclick="adjustHeight('header', -5)">- Decrease</button>
             </div>
-            <div class="control-row" style="border-top: 1px dashed #cbd5e1; padding-top: 10px; margin-top: 5px;">
-                <span style="font-weight: 600; color: #334; font-size: 12px; width: 80px;">Font Size:</span>
+        </div>
+        <div class="control-row" style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 6px;">
+            <span style="font-weight: 600; color: #334155; font-size: 12px;">Font Size:</span>
+            <div style="display: flex; gap: 8px;">
                 <button class="action-btn" onclick="adjustFontSize(1)">+ Larger</button>
-                <button class="action-btn" onclick="resetFontSize()" style="background: #fff;">Default</button>
+                <button class="action-btn" onclick="resetFontSize()" style="background:#fff;">Default</button>
                 <button class="action-btn" onclick="adjustFontSize(-1)">- Smaller</button>
             </div>
-            <div style="margin-top: 10px;">
-                <button id="btn_distribute" class="toggle-btn active" onclick="toggleDistribute()">Distribute Rows Evenly (ON)</button>
-            </div>
         </div>
-
-        <h3>Column Settings</h3>
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <div class="form-group" style="flex: 1; margin: 0;">
-                <select id="in_format" onchange="liveFormatUpdate()">
-                    <option value="initial">Initial Caps</option>
-                    <option value="block">BLOCK LETTERS</option>
-                    <option value="none">As Typed</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <button class="reset-btn" onclick="resetAll()">Reset All Data</button>
-            </div>
-        </div>
-        
-        <div class="toggle-wrapper">
-            <label for="chk_date_exp" class="toggle-text">Show Date of Exp. Column</label>
-            <label class="switch"><input type="checkbox" id="chk_date_exp" checked onchange="toggleColumns();"><span class="slider"></span></label>
-        </div>
-        <div class="toggle-wrapper" style="margin-bottom: 20px;">
-            <label for="chk_date_sub" class="toggle-text">Show Date of Sub. Column</label>
-            <label class="switch"><input type="checkbox" id="chk_date_sub" checked onchange="toggleColumns();"><span class="slider"></span></label>
-        </div>
-
-        <h3>Add New Experiment</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Date Exp.</label>
-                <input type="text" id="in_date_exp" placeholder="DD/MM/YYYY">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Date Sub.</label>
-                <input type="text" id="in_date_sub" placeholder="DD/MM/YYYY">
-            </div>
-        </div>
-        <div class="form-group">
-            <label>Name of Experiment</label>
-            <input type="text" id="in_name" placeholder="Type the full experiment name here...">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Start Page</label>
-                <input type="text" id="in_page_start" value="1">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>End Page</label>
-                <input type="text" id="in_page_end" placeholder="Optional">
-            </div>
-        </div>
-        <button class="add-btn" id="main_action_btn" onclick="addExperiment()">+ Add to Index</button>
-
-        <button class="pdf-btn" onclick="generatePDF()">Download Index PDF</button>
-    </div>
-
-    <div class="preview-container">
-        <div class="page-scaler" id="pdf_container">
-            <div class="page" id="index-page">
-                <h1 class="index-title"><span>Index</span></h1>
-                
-                <div class="table-container" id="math_container">
-                    <table class="index-table" id="main_table" style="font-size: 12pt;">
-                        <thead>
-                            <tr id="header_row" style="height: 40px;">
-                                <th class="col-no">Exp. No.</th>
-                                <th class="col-date" id="head_date_exp">Date of Exp.</th>
-                                <th class="col-name">Name of Experiment</th>
-                                <th class="col-date" id="head_date_sub">Date of Sub.</th>
-                                <th class="col-page">Page No.</th>
-                                <th class="col-remark">Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody id="out_table_body">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
+        <div style="margin-top: 12px;">
+            <button id="btn_distribute" class="toggle-btn active" onclick="toggleDistribute()">📏 Distribute Rows Evenly (ON)</button>
         </div>
     </div>
 
-    <script>
-        let experiments = [];
-        let bodyRowHeight = 40; 
-        let headerRowHeight = 40;
-        let tableFontSize = 12;
-        let isEvenlyDistributed = true; 
-        let isEditingMode = -1;
+    <h3>📐 Column Settings</h3>
+    <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+        <div class="form-group" style="flex: 1; margin: 0;">
+            <select id="in_format" onchange="liveFormatUpdate()">
+                <option value="initial">Initial Caps</option>
+                <option value="block">BLOCK LETTERS</option>
+                <option value="none">As Typed</option>
+            </select>
+        </div>
+        <div style="flex: 1;">
+            <button class="reset-btn" onclick="resetAll()">🗑 Reset All Data</button>
+        </div>
+    </div>
 
-        window.onload = function() {
-            loadFromCache();
-            toggleColumns();
-            renderTable();
-            updateDistributeBtnUI();
-        };
+    <div class="toggle-wrapper">
+        <label for="chk_date_exp" class="toggle-text">📅 Show Date of Exp. Column</label>
+        <label class="switch"><input type="checkbox" id="chk_date_exp" checked onchange="toggleColumns();"><span class="slider"></span></label>
+    </div>
+    <div class="toggle-wrapper" style="margin-bottom: 20px;">
+        <label for="chk_date_sub" class="toggle-text">📅 Show Date of Sub. Column</label>
+        <label class="switch"><input type="checkbox" id="chk_date_sub" checked onchange="toggleColumns();"><span class="slider"></span></label>
+    </div>
 
-        function formatName(name) {
-            let formatted = name.trim();
-            const formatType = document.getElementById('in_format').value;
-            if (!formatted.endsWith('.')) formatted += '.';
-            if (formatType === 'block') return formatted.toUpperCase();
-            else if (formatType === 'initial') {
-                const lowerWords = ['of', 'in', 'the', 'and', 'a', 'an', 'for', 'to', 'on', 'with', 'by'];
-                return formatted.split(' ').map((word, index) => {
-                    if (index > 0 && lowerWords.includes(word.toLowerCase()) && !word.endsWith('.')) return word.toLowerCase();
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                }).join(' ');
-            }
-            return formatted;
+    <h3>✏ Add New Experiment</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label>Date Exp.</label>
+            <input type="text" id="in_date_exp" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label>Date Sub.</label>
+            <input type="text" id="in_date_sub" placeholder="DD/MM/YYYY">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Name of Experiment</label>
+        <input type="text" id="in_name" placeholder="Type the full experiment name here...">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label>Start Page</label>
+            <input type="text" id="in_page_start" value="1">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label>End Page</label>
+            <input type="text" id="in_page_end" placeholder="Optional">
+        </div>
+    </div>
+    <button class="add-btn" id="main_action_btn" onclick="addExperiment()">+ Add to Index</button>
+    <button class="pdf-btn" onclick="generatePDF()">📄 Download Index PDF</button>
+    <div class="tiny-hint">💡 Settings & data auto-save. All buttons use the same dark slate color.</div>
+</aside>
+
+<!-- Preview container (Page wrap) -->
+<main class="page-wrap" id="pagesWrap">
+    <div class="page-scaler" id="pdf_container">
+        <div class="page" id="index-page">
+            <h1 class="index-title"><span>Index</span></h1>
+            <div class="table-container" id="math_container">
+                <table class="index-table" id="main_table" style="font-size: 12pt;">
+                    <thead>
+                        <tr id="header_row" style="height: 40px;">
+                            <th class="col-no">Exp. No.</th>
+                            <th class="col-date" id="head_date_exp">Date of Exp.</th>
+                            <th class="col-name">Name of Experiment</th>
+                            <th class="col-date" id="head_date_sub">Date of Sub.</th>
+                            <th class="col-page">Page No.</th>
+                            <th class="col-remark">Remarks</th>
+                         </tr>
+                    </thead>
+                    <tbody id="out_table_body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // --- Mobile tab switching (exactly like MCQ builder) ---
+    let currentMobileTab = 'edit';
+    function switchMobileTab(tab) {
+        currentMobileTab = tab;
+        const panel = document.querySelector('.panel');
+        const pageWrap = document.getElementById('pagesWrap');
+        const tabEdit = document.getElementById('tabEdit');
+        const tabPreview = document.getElementById('tabPreview');
+        if (!panel || !pageWrap) return;
+        if (tab === 'edit') {
+            panel.classList.remove('hidden-mobile');
+            pageWrap.classList.remove('active-mobile');
+            tabEdit.classList.add('active');
+            tabPreview.classList.remove('active');
+            tabEdit.setAttribute('aria-selected', 'true');
+            tabPreview.setAttribute('aria-selected', 'false');
+        } else {
+            panel.classList.add('hidden-mobile');
+            pageWrap.classList.add('active-mobile');
+            tabEdit.classList.remove('active');
+            tabPreview.classList.add('active');
+            tabEdit.setAttribute('aria-selected', 'false');
+            tabPreview.setAttribute('aria-selected', 'true');
+            applyMobilePageScale();
         }
+    }
 
-        function liveFormatUpdate() {
-            experiments.forEach(exp => {
-                let rawName = exp.name.replace(/\.$/, ''); 
-                exp.name = formatName(rawName);
-            });
-            saveToCache();
-            renderTable();
-            let currentInput = document.getElementById('in_name').value;
-            if(currentInput) document.getElementById('in_name').value = formatName(currentInput.replace(/\.$/, ''));
+    function applyMobilePageScale() {
+        if (window.innerWidth > 768) return;
+        const pages = document.querySelectorAll('.page');
+        if (!pages.length) return;
+        const firstPage = pages[0];
+        const naturalW = firstPage.offsetWidth || 794;
+        const available = window.innerWidth;
+        const scale = Math.max(0.28, Math.min(1, available / naturalW));
+        const scaledH = (firstPage.offsetHeight || 1123) * scale;
+        const gap = 14;
+        const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+        document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
+        document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+    }
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            const panel = document.querySelector('.panel');
+            const pageWrap = document.getElementById('pagesWrap');
+            if (panel) panel.classList.remove('hidden-mobile');
+            if (pageWrap) pageWrap.classList.remove('active-mobile');
         }
+        applyMobilePageScale();
+    });
 
-        function addExperiment() {
-            const expDate = document.getElementById('in_date_exp').value;
-            const subDate = document.getElementById('in_date_sub').value;
-            let name = document.getElementById('in_name').value;
-            const pStart = document.getElementById('in_page_start').value;
-            const pEnd = document.getElementById('in_page_end').value;
+    // --- Core functionality with unified colors ---
+    let experiments = [];
+    let bodyRowHeight = 40;
+    let headerRowHeight = 40;
+    let tableFontSize = 12;
+    let isEvenlyDistributed = true;
+    let isEditingMode = -1;
 
-            if (!name) { alert("Please enter an Experiment Name."); return; }
-            name = formatName(name.replace(/\.$/, '')); 
-            
-            let pageStr = pStart;
-            if(pEnd && pEnd.trim() !== '') { pageStr += `-${pEnd}`; }
+    window.onload = function() {
+        loadFromCache();
+        toggleColumns();
+        renderTable();
+        updateDistributeBtnUI();
+        applyMobilePageScale();
+    };
 
-            if (isEditingMode === -1) {
-                experiments.push({ dateExp: expDate, dateSub: subDate, name: name, page: pageStr });
-                
-                if(pEnd && pEnd.trim() !== '') {
-                    let endNum = parseInt(pEnd);
-                    if(!isNaN(endNum)) document.getElementById('in_page_start').value = (endNum + 1);
-                } else {
-                    let startNum = parseInt(pStart);
-                    if(!isNaN(startNum)) document.getElementById('in_page_start').value = (startNum + 1);
-                }
-                document.getElementById('in_page_end').value = '';
+    function formatName(name) {
+        let formatted = name.trim();
+        const formatType = document.getElementById('in_format').value;
+        if (!formatted.endsWith('.')) formatted += '.';
+        if (formatType === 'block') return formatted.toUpperCase();
+        else if (formatType === 'initial') {
+            const lowerWords = ['of', 'in', 'the', 'and', 'a', 'an', 'for', 'to', 'on', 'with', 'by'];
+            return formatted.split(' ').map((word, index) => {
+                if (index > 0 && lowerWords.includes(word.toLowerCase()) && !word.endsWith('.')) return word.toLowerCase();
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+        }
+        return formatted;
+    }
 
+    function liveFormatUpdate() {
+        experiments.forEach(exp => {
+            let rawName = exp.name.replace(/\.$/, '');
+            exp.name = formatName(rawName);
+        });
+        saveToCache();
+        renderTable();
+        let currentInput = document.getElementById('in_name').value;
+        if (currentInput) document.getElementById('in_name').value = formatName(currentInput.replace(/\.$/, ''));
+    }
+
+    function addExperiment() {
+        const expDate = document.getElementById('in_date_exp').value;
+        const subDate = document.getElementById('in_date_sub').value;
+        let name = document.getElementById('in_name').value;
+        const pStart = document.getElementById('in_page_start').value;
+        const pEnd = document.getElementById('in_page_end').value;
+
+        if (!name) { alert("Please enter an Experiment Name."); return; }
+        name = formatName(name.replace(/\.$/, ''));
+        let pageStr = pStart;
+        if (pEnd && pEnd.trim() !== '') { pageStr += `-${pEnd}`; }
+
+        if (isEditingMode === -1) {
+            experiments.push({ dateExp: expDate, dateSub: subDate, name: name, page: pageStr });
+            if (pEnd && pEnd.trim() !== '') {
+                let endNum = parseInt(pEnd);
+                if (!isNaN(endNum)) document.getElementById('in_page_start').value = (endNum + 1);
             } else {
-                experiments[isEditingMode] = { dateExp: expDate, dateSub: subDate, name: name, page: pageStr };
-                isEditingMode = -1; 
-                const btn = document.getElementById('main_action_btn');
-                btn.innerText = "+ Add to Index";
-                btn.style.backgroundColor = "#1d8a41";
-                btn.style.color = "white";
-                document.getElementById('in_page_end').value = '';
+                let startNum = parseInt(pStart);
+                if (!isNaN(startNum)) document.getElementById('in_page_start').value = (startNum + 1);
             }
-            
-            document.getElementById('in_name').value = '';
-            document.getElementById('in_name').focus();
-            
-            saveToCache();
-            renderTable();
-        }
-
-        function editExperiment(index) {
-            const exp = experiments[index];
-            document.getElementById('in_date_exp').value = exp.dateExp;
-            document.getElementById('in_date_sub').value = exp.dateSub;
-            document.getElementById('in_name').value = exp.name.replace(/\.$/, ''); 
-            
-            if(exp.page.includes('-')) {
-                const parts = exp.page.split('-');
-                document.getElementById('in_page_start').value = parts[0];
-                document.getElementById('in_page_end').value = parts[1];
-            } else {
-                document.getElementById('in_page_start').value = exp.page;
-                document.getElementById('in_page_end').value = '';
-            }
-            
-            isEditingMode = index; 
+            document.getElementById('in_page_end').value = '';
+        } else {
+            experiments[isEditingMode] = { dateExp: expDate, dateSub: subDate, name: name, page: pageStr };
+            isEditingMode = -1;
             const btn = document.getElementById('main_action_btn');
-            btn.innerText = "✓ Update Experiment";
-            btn.style.backgroundColor = "#f59e0b"; // Custom edit color 
-            btn.style.color = "#fff";
-            document.getElementById('in_name').focus();
+            btn.innerText = "+ Add to Index";
+            document.getElementById('in_page_end').value = '';
         }
+        document.getElementById('in_name').value = '';
+        document.getElementById('in_name').focus();
+        saveToCache();
+        renderTable();
+    }
 
-        function removeExperiment(index) {
-            experiments.splice(index, 1);
+    function editExperiment(index) {
+        const exp = experiments[index];
+        document.getElementById('in_date_exp').value = exp.dateExp;
+        document.getElementById('in_date_sub').value = exp.dateSub;
+        document.getElementById('in_name').value = exp.name.replace(/\.$/, '');
+        if (exp.page.includes('-')) {
+            const parts = exp.page.split('-');
+            document.getElementById('in_page_start').value = parts[0];
+            document.getElementById('in_page_end').value = parts[1];
+        } else {
+            document.getElementById('in_page_start').value = exp.page;
+            document.getElementById('in_page_end').value = '';
+        }
+        isEditingMode = index;
+        const btn = document.getElementById('main_action_btn');
+        btn.innerText = "✓ Update Experiment";
+        document.getElementById('in_name').focus();
+    }
+
+    function removeExperiment(index) {
+        experiments.splice(index, 1);
+        saveToCache();
+        renderTable();
+        if (isEditingMode !== -1 && isEditingMode >= experiments.length) isEditingMode = -1;
+        const btn = document.getElementById('main_action_btn');
+        btn.innerText = "+ Add to Index";
+    }
+
+    function moveUp(index) {
+        if (index > 0) {
+            [experiments[index], experiments[index - 1]] = [experiments[index - 1], experiments[index]];
             saveToCache();
             renderTable();
         }
+    }
 
-        function moveUp(index) {
-            if (index > 0) {
-                const temp = experiments[index];
-                experiments[index] = experiments[index - 1];
-                experiments[index - 1] = temp;
-                saveToCache();
-                renderTable();
-            }
-        }
-
-        function moveDown(index) {
-            if (index < experiments.length - 1) {
-                const temp = experiments[index];
-                experiments[index] = experiments[index + 1];
-                experiments[index + 1] = temp;
-                saveToCache();
-                renderTable();
-            }
-        }
-
-        function resetAll() {
-            if(confirm("Are you sure you want to delete all experiments?")) {
-                experiments = [];
-                isEditingMode = -1;
-                document.getElementById('in_name').value = '';
-                document.getElementById('in_page_start').value = '1';
-                document.getElementById('in_page_end').value = '';
-                document.getElementById('in_date_exp').value = '';
-                document.getElementById('in_date_sub').value = '';
-                
-                const btn = document.getElementById('main_action_btn');
-                btn.innerText = "+ Add to Index";
-                btn.style.backgroundColor = "#1d8a41";
-
-                saveToCache();
-                renderTable();
-            }
-        }
-
-        function toggleColumns() {
-            const showExp = document.getElementById('chk_date_exp').checked;
-            const showSub = document.getElementById('chk_date_sub').checked;
-            const headExp = document.getElementById('head_date_exp');
-            const headSub = document.getElementById('head_date_sub');
-            
-            if(showExp) headExp.classList.remove('hidden'); else headExp.classList.add('hidden');
-            if(showSub) headSub.classList.remove('hidden'); else headSub.classList.add('hidden');
-            
-            renderTable();
+    function moveDown(index) {
+        if (index < experiments.length - 1) {
+            [experiments[index], experiments[index + 1]] = [experiments[index + 1], experiments[index]];
             saveToCache();
-        }
-
-        function toggleDistribute() {
-            isEvenlyDistributed = !isEvenlyDistributed;
-            updateDistributeBtnUI();
             renderTable();
         }
+    }
 
-        function updateDistributeBtnUI() {
-            const btn = document.getElementById('btn_distribute');
+    function resetAll() {
+        if (confirm("Are you sure you want to delete all experiments?")) {
+            experiments = [];
+            isEditingMode = -1;
+            document.getElementById('in_name').value = '';
+            document.getElementById('in_page_start').value = '1';
+            document.getElementById('in_page_end').value = '';
+            document.getElementById('in_date_exp').value = '';
+            document.getElementById('in_date_sub').value = '';
+            const btn = document.getElementById('main_action_btn');
+            btn.innerText = "+ Add to Index";
+            saveToCache();
+            renderTable();
+        }
+    }
+
+    function toggleColumns() {
+        const showExp = document.getElementById('chk_date_exp').checked;
+        const showSub = document.getElementById('chk_date_sub').checked;
+        const headExp = document.getElementById('head_date_exp');
+        const headSub = document.getElementById('head_date_sub');
+        if (showExp) headExp.classList.remove('hidden'); else headExp.classList.add('hidden');
+        if (showSub) headSub.classList.remove('hidden'); else headSub.classList.add('hidden');
+        renderTable();
+        saveToCache();
+    }
+
+    function toggleDistribute() {
+        isEvenlyDistributed = !isEvenlyDistributed;
+        updateDistributeBtnUI();
+        renderTable();
+    }
+
+    function updateDistributeBtnUI() {
+        const btn = document.getElementById('btn_distribute');
+        if (isEvenlyDistributed) {
+            btn.classList.add('active');
+            btn.innerText = "📏 Distribute Rows Evenly (ON)";
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = "📏 Distribute Rows Evenly (OFF)";
+        }
+    }
+
+    function adjustHeight(target, amount) {
+        const containerHeight = document.getElementById('math_container').clientHeight;
+        if (target === 'body') {
             if (isEvenlyDistributed) {
-                btn.classList.add('active');
-                btn.innerText = "Distribute Rows Evenly (ON)";
+                if (amount > 0) return;
+                isEvenlyDistributed = false;
+                updateDistributeBtnUI();
+                const mathHeight = (containerHeight - headerRowHeight) / Math.max(1, experiments.length);
+                bodyRowHeight = mathHeight + amount;
             } else {
-                btn.classList.remove('active');
-                btn.innerText = "Distribute Rows Evenly (OFF)";
+                const newHeight = bodyRowHeight + amount;
+                const maxPossibleHeight = (containerHeight - headerRowHeight) / Math.max(1, experiments.length);
+                bodyRowHeight = newHeight > maxPossibleHeight ? maxPossibleHeight : newHeight;
             }
+            if (bodyRowHeight < 20) bodyRowHeight = 20;
+        } else if (target === 'header') {
+            headerRowHeight += amount;
+            if (headerRowHeight < 20) headerRowHeight = 20;
+        }
+        renderTable();
+        saveToCache();
+    }
+
+    function adjustFontSize(amount) {
+        tableFontSize += amount;
+        if (tableFontSize < 8) tableFontSize = 8;
+        if (tableFontSize > 24) tableFontSize = 24;
+        renderTable();
+        saveToCache();
+    }
+
+    function resetFontSize() {
+        tableFontSize = 12;
+        renderTable();
+        saveToCache();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('out_table_body');
+        const controlList = document.getElementById('control-list');
+        const showExp = document.getElementById('chk_date_exp').checked;
+        const showSub = document.getElementById('chk_date_sub').checked;
+        tbody.innerHTML = '';
+        controlList.innerHTML = '';
+        document.getElementById('header_row').style.height = `${headerRowHeight}px`;
+        const tableElement = document.getElementById('main_table');
+        tableElement.style.fontSize = `${tableFontSize}pt`;
+
+        if (experiments.length === 0) {
+            controlList.innerHTML = '<div style="color: #64748b; font-size: 13px; text-align: center;">No experiments added yet.</div>';
+            document.getElementById('btn_inc_body').disabled = true;
+            return;
+        }
+        document.getElementById('btn_inc_body').disabled = false;
+
+        if (isEvenlyDistributed) {
+            tableElement.style.height = '100%';
+        } else {
+            tableElement.style.height = 'auto';
         }
 
-        function adjustHeight(target, amount) {
-            const containerHeight = document.getElementById('math_container').clientHeight;
-            
-            if (target === 'body') {
-                if (isEvenlyDistributed) {
-                    if (amount > 0) return; 
-                    
-                    isEvenlyDistributed = false;
-                    updateDistributeBtnUI();
-                    
-                    const mathHeight = (containerHeight - headerRowHeight) / experiments.length;
-                    bodyRowHeight = mathHeight + amount;
-                } else {
-                    const newHeight = bodyRowHeight + amount;
-                    const maxPossibleHeight = (containerHeight - headerRowHeight) / experiments.length;
-                    
-                    if (newHeight > maxPossibleHeight) {
-                        bodyRowHeight = maxPossibleHeight; 
-                    } else {
-                        bodyRowHeight = newHeight;
-                    }
-                }
-                if (bodyRowHeight < 20) bodyRowHeight = 20; 
-                
-            } else if (target === 'header') {
-                headerRowHeight += amount;
-                if (headerRowHeight < 20) headerRowHeight = 20;
-            }
-            renderTable();
-            saveToCache();
-        }
+        for (let i = 0; i < experiments.length; i++) {
+            const exp = experiments[i];
+            const calcNo = String(i + 1).padStart(2, '0');
+            let rowStyle = '';
+            if (!isEvenlyDistributed) rowStyle = `style="height: ${bodyRowHeight}px;"`;
+            let rowHTML = `<tr ${rowStyle}>`;
+            rowHTML += `<td>${calcNo}</td>`;
+            if (showExp) rowHTML += `<td>${exp.dateExp || '&#8203;'}</td>`;
+            rowHTML += `<td class="col-name">${exp.name}</td>`;
+            if (showSub) rowHTML += `<td>${exp.dateSub || '&#8203;'}</td>`;
+            rowHTML += `<td>${exp.page || '&#8203;'}</td>`;
+            rowHTML += `<td></td></tr>`;
+            tbody.innerHTML += rowHTML;
 
-        function updateButtonStates() {
-            const btnIncBody = document.getElementById('btn_inc_body');
-            if (!btnIncBody) return;
-            
-            if (experiments.length === 0) {
-                 btnIncBody.disabled = true;
-                 return;
-            }
-            
-            if (isEvenlyDistributed) {
-                btnIncBody.disabled = true;
-            } else {
-                const containerHeight = document.getElementById('math_container').clientHeight;
-                const maxPossibleHeight = (containerHeight - headerRowHeight) / experiments.length;
-                
-                if (bodyRowHeight >= maxPossibleHeight - 1) { 
-                    btnIncBody.disabled = true;
-                } else {
-                    btnIncBody.disabled = false;
-                }
-            }
-        }
-
-        function adjustFontSize(amount) {
-            tableFontSize += amount;
-            if (tableFontSize < 8) tableFontSize = 8;
-            if (tableFontSize > 24) tableFontSize = 24;
-            renderTable();
-            saveToCache();
-        }
-
-        function resetFontSize() {
-            tableFontSize = 12;
-            renderTable();
-            saveToCache();
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('out_table_body');
-            const controlList = document.getElementById('control-list');
-            const showExp = document.getElementById('chk_date_exp').checked;
-            const showSub = document.getElementById('chk_date_sub').checked;
-            
-            tbody.innerHTML = '';
-            controlList.innerHTML = '';
-
-            document.getElementById('header_row').style.height = `${headerRowHeight}px`;
-            const tableElement = document.getElementById('main_table');
-            tableElement.style.fontSize = `${tableFontSize}pt`;
-
-            if (experiments.length === 0) {
-                controlList.innerHTML = '<div style="color: #64748b; font-size: 13px; text-align: center;">No experiments added yet.</div>';
-                tableElement.style.height = 'auto'; 
-                updateButtonStates();
-                return;
-            }
-
-            const containerElement = document.getElementById('math_container');
-            let bodyStyle = '';
-            
-            if (isEvenlyDistributed) {
-                tableElement.style.height = '100%';
-            } else {
-                tableElement.style.height = 'auto'; 
-                bodyStyle = `height: ${bodyRowHeight}px;`;
-            }
-
-            for (let i = 0; i < experiments.length; i++) {
-                const exp = experiments[i];
-                const calcNo = String(i + 1).padStart(2, '0');
-
-                let rowHTML = `<tr style="${bodyStyle}">`;
-                rowHTML += `<td>${calcNo}</td>`;
-                if(showExp) rowHTML += `<td>${exp.dateExp || '&#8203;'}</td>`;
-                rowHTML += `<td class="col-name">${exp.name}</td>`;
-                if(showSub) rowHTML += `<td>${exp.dateSub || '&#8203;'}</td>`;
-                rowHTML += `<td>${exp.page || '&#8203;'}</td>`;
-                rowHTML += `<td></td>`; 
-                rowHTML += `</tr>`;
-                tbody.innerHTML += rowHTML;
-
-                controlList.innerHTML += `
-                    <div class="exp-item">
-                        <div class="exp-title-area"><strong>${calcNo}:</strong> ${exp.name}</div>
-                        <div class="list-actions">
-                            <button class="move-btn" onclick="moveUp(${i})" title="Move Up" ${i === 0 ? 'disabled style="opacity:0.3"' : ''}>↑</button>
-                            <button class="move-btn" onclick="moveDown(${i})" title="Move Down" ${i === experiments.length - 1 ? 'disabled style="opacity:0.3"' : ''}>↓</button>
-                            <button class="edit-btn" onclick="editExperiment(${i})">Edit</button>
-                            <button class="remove-btn" onclick="removeExperiment(${i})">X</button>
-                        </div>
+            controlList.innerHTML += `
+                <div class="exp-item">
+                    <div class="exp-title-area"><strong>${calcNo}:</strong> ${exp.name}</div>
+                    <div class="list-actions">
+                        <button class="move-btn" onclick="moveUp(${i})" ${i === 0 ? 'disabled style="opacity:0.4"' : ''}>↑</button>
+                        <button class="move-btn" onclick="moveDown(${i})" ${i === experiments.length - 1 ? 'disabled style="opacity:0.4"' : ''}>↓</button>
+                        <button class="edit-btn" onclick="editExperiment(${i})">Edit</button>
+                        <button class="remove-btn" onclick="removeExperiment(${i})">X</button>
                     </div>
-                `;
-            }
-
-            updateButtonStates();
+                </div>
+            `;
         }
+    }
 
-        function saveToCache() {
-            localStorage.setItem('fec_index_cache_data', JSON.stringify(experiments));
-            
-            const cacheSettings = {
-                showExp: document.getElementById('chk_date_exp').checked,
-                showSub: document.getElementById('chk_date_sub').checked,
-                format: document.getElementById('in_format').value,
-                bodyHeight: bodyRowHeight,
-                headHeight: headerRowHeight,
-                fontSize: tableFontSize,
-                isDistributed: isEvenlyDistributed
-            };
-            localStorage.setItem('fec_index_cache_settings', JSON.stringify(cacheSettings));
+    function saveToCache() {
+        localStorage.setItem('fec_index_cache_data', JSON.stringify(experiments));
+        const cacheSettings = {
+            showExp: document.getElementById('chk_date_exp').checked,
+            showSub: document.getElementById('chk_date_sub').checked,
+            format: document.getElementById('in_format').value,
+            bodyHeight: bodyRowHeight,
+            headHeight: headerRowHeight,
+            fontSize: tableFontSize,
+            isDistributed: isEvenlyDistributed
+        };
+        localStorage.setItem('fec_index_cache_settings', JSON.stringify(cacheSettings));
+    }
+
+    function loadFromCache() {
+        const cachedData = localStorage.getItem('fec_index_cache_data');
+        if (cachedData) experiments = JSON.parse(cachedData);
+        const cachedSettings = localStorage.getItem('fec_index_cache_settings');
+        if (cachedSettings) {
+            const set = JSON.parse(cachedSettings);
+            if (set.showExp !== undefined) document.getElementById('chk_date_exp').checked = set.showExp;
+            if (set.showSub !== undefined) document.getElementById('chk_date_sub').checked = set.showSub;
+            if (set.format !== undefined) document.getElementById('in_format').value = set.format;
+            if (set.bodyHeight) bodyRowHeight = set.bodyHeight;
+            if (set.headHeight) headerRowHeight = set.headHeight;
+            if (set.fontSize) tableFontSize = set.fontSize;
+            if (set.isDistributed !== undefined) isEvenlyDistributed = set.isDistributed;
         }
+    }
 
-        function loadFromCache() {
-            const cachedData = localStorage.getItem('fec_index_cache_data');
-            if (cachedData) experiments = JSON.parse(cachedData);
-            
-            const cachedSettings = localStorage.getItem('fec_index_cache_settings');
-            if(cachedSettings) {
-                const set = JSON.parse(cachedSettings);
-                if(set.showExp !== undefined) document.getElementById('chk_date_exp').checked = set.showExp;
-                if(set.showSub !== undefined) document.getElementById('chk_date_sub').checked = set.showSub;
-                if(set.format !== undefined) document.getElementById('in_format').value = set.format;
-                if(set.bodyHeight) bodyRowHeight = set.bodyHeight;
-                if(set.headHeight) headerRowHeight = set.headHeight;
-                if(set.fontSize) tableFontSize = set.fontSize;
-                if(set.isDistributed !== undefined) {
-                    isEvenlyDistributed = set.isDistributed;
-                }
-            }
-        }
-
-        function generatePDF() {
-            let saveName = 'lab-report-index.pdf';
-
-            const element = document.getElementById('index-page');
-            const btn = document.querySelector('.pdf-btn');
-            const scaler = document.getElementById('pdf_container');
-            const originalText = btn.innerText;
-            
-            btn.innerText = "Generating PDF... Please wait.";
-            btn.style.backgroundColor = "#555";
-            
-            element.style.boxShadow = 'none';
-            window.scrollTo(0, 0); 
-            
-            const opt = {
-                margin:       0,
-                filename:     saveName,
-                image:        { type: 'jpeg', quality: 1.0 },
-                html2canvas:  { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = totalPages; i > 1; i--) { pdf.deletePage(i); }
-            }).save().then(() => {
-                element.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-                btn.innerText = originalText;
-                btn.style.backgroundColor = "#1d8a41";
-            });
-        }
-    </script>
+    function generatePDF() {
+        const element = document.getElementById('index-page');
+        const btn = document.querySelector('.pdf-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "Generating PDF... Please wait.";
+        btn.style.backgroundColor = "#555";
+        element.style.boxShadow = 'none';
+        const opt = {
+            margin: 0,
+            filename: 'lab-report-index.pdf',
+            image: { type: 'jpeg', quality: 1.0 },
+            html2canvas: { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+            const totalPages = pdf.internal.getNumberOfPages();
+            for (let i = totalPages; i > 1; i--) pdf.deletePage(i);
+        }).save().then(() => {
+            element.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+            btn.innerText = originalText;
+            btn.style.backgroundColor = "#111827";
+        });
+    }
+</script>
 </body>
 </html>
