@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Professional FEC Cover Page Maker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FEC Cover Page Maker | Professional Cover Page Generator</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,21 +11,157 @@
 <style>
 @page { size: A4 portrait; margin: 0; }
 
+/* --- Custom Scrollbar (MCQ builder style) --- */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; height: 100vh; overflow: hidden; background-color: #f8fafc; }
-.sidebar { width: 360px; background-color: #ffffff; padding: 20px; box-shadow: 2px 0 15px rgba(0,0,0,0.05); overflow-y: auto; z-index: 100; border-right: 1px solid #e2e8f0; }
-.preview-container { flex-grow: 1; background-color: #1e293b; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-.page { width: 210mm; height: 297mm; padding: 0.25in 0.25in 0.25in 0.1in; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5); box-sizing: border-box; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+:root {
+    --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --ink: #111827;
+    --muted: #475569;
+    --line: #e2e8f0;
+    --paper: #ffffff;
+    --soft-bg: #f8fafc;
+    --primary: #111827;
+    --primary-dark: #1e293b;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+    --shadow-hover: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+}
 
-.watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 65%; opacity: 0.08; z-index: 0; pointer-events: none; display: none; }
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--ui-font);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #1e293b;
+    color: #111827;
+}
 
-.pin-dot { position: absolute; left: 0.04in; top: 50%; transform: translateY(-50%); width: 2px; height: 2px; background-color: #777; border-radius: 50%; }
-.inner-border { position: relative; z-index: 10; border: 3px solid #1d8a41; flex-grow: 1; padding: 40px 30px 40px 78px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; overflow: hidden; }
+/* --- SIDEBAR (panel like MCQ builder) --- */
+.panel {
+    width: 420px;
+    background-color: var(--paper);
+    padding: 24px;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    z-index: 100;
+    border-right: 1px solid #e2e8f0;
+    height: 100%;
+    border-radius: 0;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+}
+
+/* --- PREVIEW CONTAINER (page-wrap like MCQ builder) --- */
+.page-wrap {
+    flex-grow: 1;
+    background-color: #1e293b;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px;
+    overflow-y: auto;
+    transition: transform 0.25s ease;
+}
+
+/* --- MOBILE TAB BAR (exactly like MCQ builder) --- */
+.mobile-tabbar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #1e293b;
+    border-top: 1px solid #334155;
+    z-index: 9999;
+    grid-template-columns: 1fr 1fr;
+}
+.mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+    padding: 0;
+}
+.mobile-tab .tab-icon { font-size: 18px; line-height: 1; }
+.mobile-tab.active { color: #38bdf8; }
+.mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
+
+/* --- A4 Page Layout (print-perfect) --- */
+.page {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    background: white;
+    padding: 0.25in 0.25in 0.25in 0.1in;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 65%;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+    display: none;
+}
+
+.pin-dot {
+    position: absolute;
+    left: 0.04in;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 2px;
+    background-color: #777;
+    border-radius: 50%;
+}
+
+.inner-border {
+    position: relative;
+    z-index: 10;
+    border: 3px solid #1d8a41;
+    flex-grow: 1;
+    padding: 40px 30px 40px 78px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
 .header-section { text-align: center; }
 .logo { width: 140px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
 .college-name { font-size: 26px; font-weight: 800; color: #000; font-family: 'Georgia', 'Times New Roman', serif; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
@@ -44,59 +180,246 @@ body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, 
 .info-text { font-size: 14px; margin-bottom: 5px; text-transform: uppercase; font-weight: 500; color: #000; }
 .info-text.bold { font-weight: bold; }
 .info-text sup { font-size: 0.65em; font-weight: 600; text-transform: lowercase; }
-
 .footer-section { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; font-size: 14px; color: #333; margin-top: 10px; }
 .footer-dates { text-align: left; }
 .footer-dates div { margin-top: 5px; }
 
+/* --- UNIFIED BUTTON STYLES (all dark slate #111827) --- */
 .form-group { margin-bottom: 14px; }
-.form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #334; }
-.form-group input:not([type="checkbox"]), .form-group select { width: 100%; padding: 8px 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 13px; background-color: #f8fafc; }
-.form-group input:not([type="checkbox"]):focus, .form-group select:focus { outline: none; border-color: #0284c7; background-color: #ffffff; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #334155; }
+.form-group input:not([type="checkbox"]), .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-family: var(--ui-font);
+    font-size: 13px;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+}
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #111827;
+    background-color: #ffffff;
+}
 .form-group input[type="date"] { cursor: pointer; }
 
-.toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; }
-.toggle-text { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334; flex-grow: 1; }
-.switch { position: relative; display: inline-block; width: 42px !important; height: 24px !important; flex-shrink: 0; flex-grow: 0 !important; }
+.toggle-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+.toggle-text {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #334155;
+    flex-grow: 1;
+}
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+}
 .switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-input:checked + .slider { background-color: #0ea5e9; }
-input:checked + .slider:before { transform: translateX(18px); }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e2e8f0;
+    transition: 0.3s;
+    border-radius: 20px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+input:checked + .slider { background-color: #111827; }
+input:checked + .slider:before { transform: translateX(16px); }
 
-.form-header-inline { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.form-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
 .form-header-inline .toggle-text { margin-bottom: 0; }
 
-.sortable-item { position: relative; padding-right: 40px; background: #fff; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; }
+.sortable-item {
+    position: relative;
+    padding-right: 40px;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
 .sortable-item label { margin-bottom: 4px; font-size: 12px; }
-.move-controls { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 3px; }
-.move-btn { background: #f1f5f9; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; padding: 4px 6px; color: #64748b; transition: all 0.2s; }
-.move-btn:hover { background: #0ea5e9; color: #fff; }
+.move-controls {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.move-btn {
+    background: #111827;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 4px 6px;
+    transition: all 0.2s;
+}
+.move-btn:hover { background: #1e293b; }
 
-.font-control-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.font-control-group label { font-size: 12px; font-weight: 600; color: #334; }
-.font-control-group input { width: 50px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: center; }
+.font-control-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.font-control-group label { font-size: 12px; font-weight: 600; color: #334155; }
+.font-control-group input {
+    width: 50px;
+    padding: 4px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    text-align: center;
+    font-family: var(--ui-font);
+}
 
-h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; font-size: 14px; margin-bottom: 12px; text-transform: uppercase; font-weight: 800; }
+h3 {
+    margin-top: 0;
+    color: #1e293b;
+    text-align: left;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    font-weight: 800;
+}
 
-.teacher-btn { background: #f1f5f9; color: #334; border: 1px solid #cbd5e1; padding: 8px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 12px; font-size: 12px; }
-.print-btn { display: block; width: 100%; padding: 12px; background-color: #1d8a41; color: white; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: all 0.2s; }
-.print-btn:hover { background-color: #157335; }
+.teacher-btn, .print-btn {
+    background: #111827;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    transition: 0.2s;
+    margin-bottom: 12px;
+}
+.teacher-btn:hover, .print-btn:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+}
 
-#teacher-2-fields { display: none; background: #f8fafc; padding: 12px; border: 1px dashed #cbd5e1; border-radius: 6px; margin-top: 10px; }
+#teacher-2-fields {
+    display: none;
+    background: #f8fafc;
+    padding: 12px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    margin-top: 10px;
+}
 .exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
 
+/* Mobile responsive */
+@media (max-width: 768px) {
+    html, body { height: 100dvh; overflow: hidden; }
+    body { flex-direction: column; }
+    .panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: calc(100dvh - 56px);
+        padding: 16px 14px 8px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        z-index: 200;
+        border-right: none;
+        transition: transform 0.25s ease;
+        transform: translateX(0);
+    }
+    .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
+    .page-wrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100dvh - 56px);
+        padding: 12px 0 4px;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.25s ease;
+        transform: translateX(100%);
+    }
+    .page-wrap.active-mobile { transform: translateX(0); }
+    .mobile-tabbar { display: grid; }
+    .page {
+        transform-origin: top center;
+        transform: scale(var(--mobile-page-scale, 0.45));
+        margin-bottom: var(--mobile-page-margin, -410px);
+        flex-shrink: 0;
+    }
+    .panel h3 { font-size: 13px; margin-bottom: 12px; }
+    .form-group input, .form-group select { font-size: 14px; padding: 9px 10px; }
+    button { min-height: 44px; }
+    .move-btn { min-height: auto; }
+}
+
 @media print {
-    body { display: block; width: 210mm; height: 297mm; overflow: hidden; }
-    .sidebar { display: none; }
-    .preview-container { padding: 0; background: none; display: block; width: 210mm; height: 297mm; overflow: hidden; }
-    .page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; padding: 0.25in 0.25in 0.25in 0.1in; overflow: hidden; }
+    .panel, .mobile-tabbar { display: none; }
+    .page-wrap { background: white; padding: 0; position: static; transform: none; height: auto; overflow: visible; }
+    .page { box-shadow: none; margin: 0; page-break-after: avoid; transform: none; }
 }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
+<!-- Mobile Tab Bar (exactly like MCQ builder) -->
+<div class="mobile-tabbar" role="tablist">
+    <button class="mobile-tab active" id="tabEdit" onclick="switchMobileTab('edit')" role="tab" aria-selected="true">
+        <span class="tab-icon">✏️</span>Edit
+    </button>
+    <button class="mobile-tab" id="tabPreview" onclick="switchMobileTab('preview')" role="tab" aria-selected="false">
+        <span class="tab-icon">👁️</span>Preview
+    </button>
+</div>
+
+<!-- Sidebar (Edit panel) -->
+<aside class="panel" id="sidebarPanel">
     <h3>Font Sizes (px)</h3>
     <div class="font-control-group"><label>College Name:</label><input type="number" id="fs-college" value="26"></div>
     <div class="font-control-group"><label>Assignment Title:</label><input type="number" id="fs-title" value="18"></div>
@@ -217,14 +540,13 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
     </div>
 
     <button class="print-btn" onclick="downloadPDF()">Download PDF</button>
-</div>
+</aside>
 
-<div class="preview-container">
+<!-- Preview container (Page wrap) -->
+<main class="page-wrap" id="pagesWrap">
     <div class="page" id="printable-area">
         <div class="pin-dot"></div>
-
         <img src="assets/images/Faridpur_Engineering_College.jpg" alt="Watermark" class="watermark" id="watermark-img">
-
         <div class="inner-border">
             <div class="header-section">
                 <img src="assets/images/Faridpur_Engineering_College.jpg" alt="FEC Logo" class="logo">
@@ -282,9 +604,62 @@ h3 { margin-top: 0; color: #1e293b; text-align: left; border-bottom: 2px solid #
             </div>
         </div>
     </div>
-</div>
+</main>
 
 <script>
+// --- Mobile tab switching (exactly like MCQ builder) ---
+let currentMobileTab = 'edit';
+function switchMobileTab(tab) {
+    currentMobileTab = tab;
+    const panel = document.querySelector('.panel');
+    const pageWrap = document.getElementById('pagesWrap');
+    const tabEdit = document.getElementById('tabEdit');
+    const tabPreview = document.getElementById('tabPreview');
+    if (!panel || !pageWrap) return;
+    if (tab === 'edit') {
+        panel.classList.remove('hidden-mobile');
+        pageWrap.classList.remove('active-mobile');
+        tabEdit.classList.add('active');
+        tabPreview.classList.remove('active');
+        tabEdit.setAttribute('aria-selected', 'true');
+        tabPreview.setAttribute('aria-selected', 'false');
+    } else {
+        panel.classList.add('hidden-mobile');
+        pageWrap.classList.add('active-mobile');
+        tabEdit.classList.remove('active');
+        tabPreview.classList.add('active');
+        tabEdit.setAttribute('aria-selected', 'false');
+        tabPreview.setAttribute('aria-selected', 'true');
+        applyMobilePageScale();
+    }
+}
+
+function applyMobilePageScale() {
+    if (window.innerWidth > 768) return;
+    const pages = document.querySelectorAll('.page');
+    if (!pages.length) return;
+    const firstPage = pages[0];
+    const naturalW = firstPage.offsetWidth || 794;
+    const available = window.innerWidth;
+    const scale = Math.max(0.28, Math.min(1, available / naturalW));
+    const scaledH = (firstPage.offsetHeight || 1123) * scale;
+    const gap = 14;
+    const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+    document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
+    document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+}
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        const panel = document.querySelector('.panel');
+        const pageWrap = document.getElementById('pagesWrap');
+        if (panel) panel.classList.remove('hidden-mobile');
+        if (pageWrap) pageWrap.classList.remove('active-mobile');
+    }
+    applyMobilePageScale();
+});
+
+// --- All existing core functionality (preserved, only color unified) ---
 const courseData = [
     { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
     { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
@@ -371,15 +746,12 @@ function trigger(el) { if(el) el.dispatchEvent(new Event('input')); }
 document.getElementById('chk-watermark').addEventListener('change', function() {
     document.getElementById('watermark-img').style.display = this.checked ? 'block' : 'none';
 });
-
 document.getElementById('chk-signature').addEventListener('change', function() {
     document.getElementById('signature-block').style.display = this.checked ? 'block' : 'none';
 });
-
 document.getElementById('chk-date-exp').addEventListener('change', function() {
     document.getElementById('row-date-exp').style.display = this.checked ? 'block' : 'none';
 });
-
 document.getElementById('chk-date-sub').addEventListener('change', function() {
     document.getElementById('row-date-sub').style.display = this.checked ? 'block' : 'none';
 });
@@ -389,7 +761,6 @@ const docTypeOut = document.getElementById('out-doc-type');
 const chkDocType = document.getElementById('chk-doc-type');
 const outDateExpLabel = document.getElementById('out-date-exp-label');
 const lblInDateExp = document.getElementById('lbl-in-date-exp');
-// MODIFIED THIS LINE
 const outDateSubLabel = document.getElementById('out-date-sub-label');
 
 function updateDocTypeVisibility() {
@@ -399,181 +770,63 @@ function updateDocTypeVisibility() {
     } else {
         docTypeOut.style.display = 'none';
     }
-
     let baseType = docTypeSelect.value.replace(' ON', '');
     let titleCaseType = baseType.charAt(0).toUpperCase() + baseType.slice(1).toLowerCase();
     let dateLabel = 'Date of ' + titleCaseType;
-
     outDateExpLabel.textContent = caseToggle.checked ? dateLabel.toUpperCase() : dateLabel;
     lblInDateExp.textContent = dateLabel + ':';
-    
-    // MODIFIED THESE LINES
-    if (outDateSubLabel) {
-        outDateSubLabel.textContent = caseToggle.checked ? 'DATE OF SUBMISSION' : 'Date of Submission';
-    }
+    if (outDateSubLabel) outDateSubLabel.textContent = caseToggle.checked ? 'DATE OF SUBMISSION' : 'Date of Submission';
 }
 
 docTypeSelect.addEventListener('change', updateDocTypeVisibility);
 chkDocType.addEventListener('change', updateDocTypeVisibility);
 caseToggle.addEventListener('change', updateDocTypeVisibility);
 
-function syncUp(i, o) {
-    let el = document.getElementById(i);
-    if(!el) return;
-    const update = () => { document.getElementById(o).textContent = format(el.value); };
-    el.addEventListener('input', update);
-    caseToggle.addEventListener('change', update);
-}
-
-function syncSuper(i, o) {
-    let el = document.getElementById(i);
-    if(!el) return;
-    const update = () => {
-        let val = format(el.value);
-        document.getElementById(o).innerHTML = val.replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2.toLowerCase() + "</sup>");
-    };
-    el.addEventListener('input', update);
-    caseToggle.addEventListener('change', update);
-}
-
-function syncVisibility(i, rowId) {
-    let el = document.getElementById(i);
-    let row = document.getElementById(rowId);
-    if(!el || !row) return;
-    const updateVisibility = () => {
-        row.style.display = el.value.trim() === '' ? 'none' : 'block';
-    };
-    el.addEventListener('input', updateVisibility);
-    updateVisibility();
-}
+function syncUp(i, o) { let el = document.getElementById(i); if(!el) return; const update = () => { document.getElementById(o).textContent = format(el.value); }; el.addEventListener('input', update); caseToggle.addEventListener('change', update); }
+function syncSuper(i, o) { let el = document.getElementById(i); if(!el) return; const update = () => { let val = format(el.value); document.getElementById(o).innerHTML = val.replace(/(\d+)(st|nd|rd|th)/ig, (m, p1, p2) => p1 + "<sup>" + p2.toLowerCase() + "</sup>"); }; el.addEventListener('input', update); caseToggle.addEventListener('change', update); }
+function syncVisibility(i, rowId) { let el = document.getElementById(i); let row = document.getElementById(rowId); if(!el || !row) return; const updateVisibility = () => { row.style.display = el.value.trim() === '' ? 'none' : 'block'; }; el.addEventListener('input', updateVisibility); updateVisibility(); }
 
 syncUp('in-exp-no', 'out-exp-no'); syncVisibility('in-exp-no', 'row-exp-no');
 syncUp('in-topic', 'out-topic'); syncVisibility('in-topic', 'row-topic');
 syncUp('in-course-name', 'out-course-name'); syncVisibility('in-course-name', 'row-course-name');
 syncUp('in-course-no', 'out-course-no'); syncVisibility('in-course-no', 'row-course-no');
-
 syncUp('in-from-name', 'out-from-name'); syncVisibility('in-from-name', 'row-name');
 syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
 syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
-
 syncSuper('in-sem', 'out-sem'); syncVisibility('in-sem', 'row-sem');
 syncSuper('in-year', 'out-year'); syncVisibility('in-year', 'row-year');
 syncSuper('in-batch', 'out-batch'); syncVisibility('in-batch', 'row-batch');
-
 syncUp('in-to-name', 'out-to-name');
 syncUp('in-to-desig', 'out-to-desig');
 syncUp('in-to-name-2', 'out-to-name-2');
 syncUp('in-to-desig-2', 'out-to-desig-2');
 
 document.getElementById('in-date').addEventListener('input', function() {
-    if(this.value) {
-        let p = this.value.split('-');
-        document.getElementById('out-date').textContent = `${p[2]}/${p[1]}/${p[0]}`;
-    } else {
-        document.getElementById('out-date').textContent = '';
-    }
+    if(this.value) { let p = this.value.split('-'); document.getElementById('out-date').textContent = `${p[2]}/${p[1]}/${p[0]}`; }
+    else { document.getElementById('out-date').textContent = ''; }
 });
-
 document.getElementById('in-date-exp').addEventListener('input', function() {
-    if(this.value) {
-        let p = this.value.split('-');
-        document.getElementById('out-date-exp').textContent = `${p[2]}/${p[1]}/${p[0]}`;
-    } else {
-        document.getElementById('out-date-exp').textContent = '';
-    }
+    if(this.value) { let p = this.value.split('-'); document.getElementById('out-date-exp').textContent = `${p[2]}/${p[1]}/${p[0]}`; }
+    else { document.getElementById('out-date-exp').textContent = ''; }
 });
 
-const fillStudent = (m) => {
-    if(!m) return;
-    document.getElementById('in-from-name').value = m.name;
-    document.getElementById('in-reg').value = m.reg;
-    document.getElementById('in-session').value = m.session;
-    document.getElementById('in-year').value = "3rd Year";
-    document.getElementById('in-batch').value = "10th";
-    document.getElementById('in-sem').value = "1st";
-    ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
-};
+const fillStudent = (m) => { if(!m) return; document.getElementById('in-from-name').value = m.name; document.getElementById('in-reg').value = m.reg; document.getElementById('in-session').value = m.session; document.getElementById('in-year').value = "3rd Year"; document.getElementById('in-batch').value = "10th"; document.getElementById('in-sem').value = "1st"; ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id))); };
+document.getElementById('in-from-name').addEventListener('change', function() { fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase())); });
+document.getElementById('in-reg').addEventListener('change', function() { fillStudent(studentData.find(s => s.reg === this.value)); });
 
-document.getElementById('in-from-name').addEventListener('change', function() {
-    fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase()));
-});
+const fillCourse = (m) => { if(!m) return; document.getElementById('in-course-name').value = m.name; document.getElementById('in-course-no').value = m.code; document.getElementById('in-to-name').value = m.teacher; document.getElementById('in-to-desig').value = m.desig; ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id))); };
+document.getElementById('in-course-no').addEventListener('change', function() { fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase())); });
+document.getElementById('in-course-name').addEventListener('change', function() { fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase())); });
 
-document.getElementById('in-reg').addEventListener('change', function() {
-    fillStudent(studentData.find(s => s.reg === this.value));
-});
-
-const fillCourse = (m) => {
-    if(!m) return;
-    document.getElementById('in-course-name').value = m.name;
-    document.getElementById('in-course-no').value = m.code;
-    document.getElementById('in-to-name').value = m.teacher;
-    document.getElementById('in-to-desig').value = m.desig;
-    ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id)));
-};
-
-document.getElementById('in-course-no').addEventListener('change', function() {
-    fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase()));
-});
-
-document.getElementById('in-course-name').addEventListener('change', function() {
-    fillCourse(courseData.find(c => c.name.toLowerCase() === this.value.toLowerCase()));
-});
-
-const teacherSync = (id, outId) => {
-    document.getElementById(id).addEventListener('change', function() {
-        let m = courseData.find(c => c.teacher.toLowerCase() === this.value.toLowerCase()) || extraTeachers.find(t => t.name.toLowerCase() === this.value.toLowerCase());
-        if(m) {
-            document.getElementById(outId).value = m.desig;
-            trigger(document.getElementById(outId));
-        }
-    });
-};
-
+const teacherSync = (id, outId) => { document.getElementById(id).addEventListener('change', function() { let m = courseData.find(c => c.teacher.toLowerCase() === this.value.toLowerCase()) || extraTeachers.find(t => t.name.toLowerCase() === this.value.toLowerCase()); if(m) { document.getElementById(outId).value = m.desig; trigger(document.getElementById(outId)); } }); };
 teacherSync('in-to-name', 'in-to-desig');
 teacherSync('in-to-name-2', 'in-to-desig-2');
 
-function toggleTeacher2() {
-    const f = document.getElementById('teacher-2-fields');
-    const b = document.getElementById('teacher-2-block');
-    const h = window.getComputedStyle(f).display === 'none';
-    f.style.display = h ? 'block' : 'none';
-    b.style.display = h ? 'block' : 'none';
-}
+function toggleTeacher2() { const f = document.getElementById('teacher-2-fields'); const b = document.getElementById('teacher-2-block'); const h = window.getComputedStyle(f).display === 'none'; f.style.display = h ? 'block' : 'none'; b.style.display = h ? 'block' : 'none'; }
 
-function reorderPreview() {
-    const previewContainer = document.getElementById('preview-student-info');
-    const subHeader = document.getElementById('sub-header-by');
-
-    previewContainer.appendChild(subHeader);
-
-    const currentOrder = Array.from(document.querySelectorAll('.sortable-item')).map(el => el.dataset.id);
-    currentOrder.forEach(id => {
-        const row = document.getElementById('row-' + id);
-        if(row) previewContainer.appendChild(row);
-    });
-}
-
-document.querySelectorAll('.move-btn.up').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const item = this.closest('.sortable-item');
-        const prev = item.previousElementSibling;
-        if (prev) {
-            item.parentNode.insertBefore(item, prev);
-            reorderPreview();
-        }
-    });
-});
-
-document.querySelectorAll('.move-btn.down').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const item = this.closest('.sortable-item');
-        const next = item.nextElementSibling;
-        if (next) {
-            item.parentNode.insertBefore(next, item);
-            reorderPreview();
-        }
-    });
-});
+function reorderPreview() { const previewContainer = document.getElementById('preview-student-info'); const subHeader = document.getElementById('sub-header-by'); previewContainer.appendChild(subHeader); const currentOrder = Array.from(document.querySelectorAll('.sortable-item')).map(el => el.dataset.id); currentOrder.forEach(id => { const row = document.getElementById('row-' + id); if(row) previewContainer.appendChild(row); }); }
+document.querySelectorAll('.move-btn.up').forEach(btn => { btn.addEventListener('click', function() { const item = this.closest('.sortable-item'); const prev = item.previousElementSibling; if (prev) { item.parentNode.insertBefore(item, prev); reorderPreview(); } }); });
+document.querySelectorAll('.move-btn.down').forEach(btn => { btn.addEventListener('click', function() { const item = this.closest('.sortable-item'); const next = item.nextElementSibling; if (next) { item.parentNode.insertBefore(next, item); reorderPreview(); } }); });
 
 const fs = (id, sel) => document.getElementById(id).addEventListener('input', e => document.querySelectorAll(sel).forEach(el => el.style.fontSize = e.target.value+'px'));
 fs('fs-college', '.college-name');
@@ -581,35 +834,18 @@ fs('fs-title', '.assignment-title');
 fs('fs-sub', '.sub-header');
 fs('fs-info', '.info-text');
 
-window.onload = () => {
-    updateDocTypeVisibility();
-};
+window.onload = () => { updateDocTypeVisibility(); applyMobilePageScale(); };
 
-function waitForImages(root) {
-    const images = Array.from(root.querySelectorAll('img'));
-    return Promise.all(images.map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
-        });
-    }));
-}
+function waitForImages(root) { const images = Array.from(root.querySelectorAll('img')); return Promise.all(images.map(img => { if (img.complete) return Promise.resolve(); return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }); })); }
 
 function downloadPDF() {
     const original = document.getElementById('printable-area');
     const regInput = document.getElementById('in-reg').value.trim();
     const saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
-
-    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
-        alert('PDF library load hoyni. Internet connection check kore page reload din.');
-        return;
-    }
-
+    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) { alert('PDF library load hoyni. Internet connection check kore page reload din.'); return; }
     const clone = original.cloneNode(true);
     clone.id = 'pdf-export-area';
     clone.classList.add('exporting');
-
     clone.style.position = 'fixed';
     clone.style.left = '-10000px';
     clone.style.top = '0';
@@ -620,35 +856,8 @@ function downloadPDF() {
     clone.style.overflow = 'hidden';
     clone.style.background = '#ffffff';
     clone.style.zIndex = '999999';
-
     document.body.appendChild(clone);
-
-    waitForImages(clone).then(() => {
-        return html2canvas(clone, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: '#ffffff',
-            scrollX: 0,
-            scrollY: 0,
-            width: clone.offsetWidth,
-            height: clone.offsetHeight,
-            windowWidth: clone.offsetWidth,
-            windowHeight: clone.offsetHeight
-        });
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('portrait', 'mm', 'a4');
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-        pdf.save(saveName);
-    }).catch(error => {
-        console.error('PDF export failed:', error);
-        alert('PDF export failed. Logo image path ba browser console check korun.');
-    }).finally(() => {
-        clone.remove();
-    });
+    waitForImages(clone).then(() => { return html2canvas(clone, { scale: 3, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, width: clone.offsetWidth, height: clone.offsetHeight, windowWidth: clone.offsetWidth, windowHeight: clone.offsetHeight }); }).then(canvas => { const imgData = canvas.toDataURL('image/jpeg', 1.0); const { jsPDF } = window.jspdf; const pdf = new jsPDF('portrait', 'mm', 'a4'); pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297); pdf.save(saveName); }).catch(error => { console.error('PDF export failed:', error); alert('PDF export failed. Logo image path ba browser console check korun.'); }).finally(() => { clone.remove(); });
 }
 </script>
 </body>
