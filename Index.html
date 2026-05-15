@@ -28,6 +28,7 @@
       color: var(--ink);
       text-rendering: geometricPrecision;
       -webkit-font-smoothing: antialiased;
+      margin: 0;
     }
     h1, h2, h3 { font-family: var(--ui-font); color: #1e293b; }
     #intro-title { font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
@@ -74,11 +75,41 @@
     .pc-badge { display: inline-block; background: #eef2ff; border: 1px solid #dbeafe; color: #1d4ed8; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-top: 12px; }
     .note-list { padding-left: 20px; font-size: 14px; color: var(--muted); line-height: 1.6; }
     .note-list li { margin-bottom: 8px; }
+
+    /* ========== MOBILE TAB BAR ========== */
+    .mobile-tabbar {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 56px;
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      z-index: 9999;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .mobile-tab {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; color: #94a3b8; font-size: 11px; font-weight: 700;
+      text-decoration: none; transition: color 0.2s; letter-spacing: 0.3px;
+    }
+    .mobile-tab .tab-icon { font-size: 18px; line-height: 1; }
+    .mobile-tab.active { color: #38bdf8; }
+    .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
+
+    /* ========== MOBILE RESPONSIVE ========== */
+    @media (max-width: 768px) {
+      body { padding-bottom: 56px; } /* Tab bar er jonno bottom space */
+      .mobile-tabbar { display: grid; }
+      .nav-toggle, .site-nav { display: none !important; } /* Mobile e uporer menu hide */
+      .intro { grid-template-columns: 1fr !important; }
+      .split-band { grid-template-columns: 1fr !important; }
+      .profile-card { margin-top: 20px; }
+    }
   </style>
 </head>
 <body>
   <header class="site-header">
-    <div class="nav-shell">
+    <div class="nav-shell" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
         <img src="assets/images/shaikh.png" alt="Shaikh" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
         <span style="font-weight: 800; font-size: 16px; display: flex; flex-direction: column;">Md. Shaikh<small style="font-weight: 500; font-size: 11px; color: #64748b;">Portfolio and tools</small></span>
@@ -95,7 +126,7 @@
     </div>
   </header>
 
-  <main class="page" style="max-width: 1100px; margin: 0 auto; padding: 40px 20px;">
+  <main class="page" style="max-width: 1100px; margin: 0 auto; padding: 20px 20px 40px;">
 
     <section class="intro" aria-labelledby="intro-title" style="display: grid; grid-template-columns: 1fr 320px; gap: 40px; margin-bottom: 60px;">
       <div class="intro-content">
@@ -103,7 +134,7 @@
         <h1 id="intro-title">Md. Shaikh Alam</h1>
         <p class="lead">I build small, useful tools for study, printing and engineering workflows. My main focus is CTRL-P, academic document utilities, Blender modeling and cleaner web interfaces.</p>
 
-        <div class="actions" style="margin: 24px 0; display: flex; gap: 12px;">
+        <div class="actions" style="margin: 24px 0; display: flex; flex-wrap: wrap; gap: 12px;">
           <a class="btn primary" href="print/index.html"><i class="fas fa-print"></i> Open CTRL-P Service</a>
           <a class="btn secondary" href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub Profile</a>
         </div>
@@ -214,6 +245,25 @@
       <span>Built with GitHub Pages · Faridpur, Bangladesh</span>
     </div>
   </footer>
+
+  <nav class="mobile-tabbar">
+    <a href="index.html" class="mobile-tab active">
+      <i class="fas fa-house tab-icon"></i>
+      <span>Home</span>
+    </a>
+    <a href="civil.html" class="mobile-tab">
+      <i class="fas fa-helmet-safety tab-icon"></i>
+      <span>Civil</span>
+    </a>
+    <a href="modeling.html" class="mobile-tab">
+      <i class="fas fa-cube tab-icon"></i>
+      <span>3D</span>
+    </a>
+    <a href="print/index.html" class="mobile-tab">
+      <i class="fas fa-print tab-icon"></i>
+      <span>CTRL-P</span>
+    </a>
+  </nav>
 
   <script src="assets/site.js"></script>
 </body>
