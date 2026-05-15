@@ -46,6 +46,7 @@
         --answer-key-weight: 400;
         --header-box-weight: 700;
         --option-mark-weight: 700;
+        --option-mark-scale: 1;
         --question-number-weight: 700;
         --answer-num-weight: 400;
         --answer-letter-weight: 400;
@@ -286,7 +287,7 @@
       .mcq-image { display: block; width: auto; object-fit: contain; border: 1px solid #bbb; }
       .options-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--option-col-gap); row-gap: 2px; padding-left: 18px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
       .option-item { display: flex; align-items: center; gap: 5px; min-width: 0; }
-      .option-mark { width: calc(var(--mcq-font-size) * 1.55); height: calc(var(--mcq-font-size) * 1.55); min-width: calc(var(--mcq-font-size) * 1.55); border: 1px solid #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: var(--option-mark-weight); font-size: calc(var(--mcq-font-size) * 0.94); line-height: 1; flex-shrink: 0; }
+      .option-mark { width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); height: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); min-width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); border: 1px solid #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: var(--option-mark-weight); font-size: calc(var(--mcq-font-size) * 0.88); line-height: 1; flex-shrink: 0; }
       .option-text { overflow-wrap: anywhere; flex: 1; }
       
       /* --- Footer --- */
@@ -345,13 +346,144 @@
       
       hr.soft { border: none; border-top: 1px solid #dbe3ed; margin: 14px 0; }
 
-      /* Cropper Modal - Mobile Optimized */
-      #cropperModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; }
-      .cropper-content { background: #fff; padding: 15px; border-radius: 12px; width: 95%; max-width: 600px; text-align: center; display: flex; flex-direction: column; max-height: 90vh; }
-      .cropper-wrap { flex-grow: 1; min-height: 45vh; overflow: hidden; margin-bottom: 12px; background: #f0f0f0; border-radius: 8px; touch-action: none; }
-      #cropperImg { display: block; max-width: 100%; }
+      /* Cropper Modal */
+      #cropperModal {
+        display: none; position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92);
+        z-index: 10100;
+        align-items: center; justify-content: center;
+        overscroll-behavior: contain;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      .cropper-content {
+        background: #fff; padding: 14px; border-radius: 12px;
+        width: 100%; max-width: 640px;
+        text-align: center; display: flex; flex-direction: column; gap: 9px;
+        max-height: 94dvh; max-height: 94vh;
+        overflow: hidden;
+      }
+      .cropper-content h3 { margin: 0; font-size: 15px; font-weight: 700; color: #1e293b; flex-shrink: 0; }
+      .cropper-wrap {
+        flex: 1 1 auto; min-height: 160px; max-height: 54dvh; max-height: 54vh;
+        overflow: hidden;
+        background: #0f172a; border-radius: 8px;
+        touch-action: none; position: relative;
+      }
+      .cropper-wrap img { display: block; max-width: 100%; }
+      .cropper-zoom-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; flex-shrink: 0; }
+      .cropper-confirm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0; }
+      @media (max-width: 768px) {
+        #cropperModal { padding: 6px; }
+        .cropper-content { padding: 10px; border-radius: 10px; gap: 7px; }
+        .cropper-wrap { min-height: 38dvh; min-height: 38vh; max-height: 44dvh; max-height: 44vh; }
+        .cropper-content h3 { font-size: 13px; }
+      }
 
-      /* --- Print Styles --- */
+      /* Image source selector */
+      .img-source-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+      .img-url-row { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-bottom: 8px; align-items: end; }
+      .img-url-row input[type="url"], .img-url-row input[type="text"] {
+        padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+        font-size: 13px; background: #f8fafc; width: 100%; box-sizing: border-box;
+        font-family: inherit;
+      }
+      .img-url-row input:focus { outline: none; border-color: #0284c7; background: #fff; }
+      .img-url-row button { white-space: nowrap; }
+
+      /* ========== MOBILE TAB BAR ========== */
+      .mobile-tabbar {
+        display: none;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 56px;
+        background: #1e293b;
+        border-top: 1px solid #334155;
+        z-index: 9999;
+        grid-template-columns: 1fr 1fr;
+      }
+      .mobile-tab {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 3px; color: #94a3b8; font-size: 11px; font-weight: 700;
+        border: none; background: transparent; cursor: pointer;
+        transition: color 0.2s; letter-spacing: 0.3px; padding: 0;
+      }
+      .mobile-tab .tab-icon { font-size: 18px; line-height: 1; }
+      .mobile-tab.active { color: #38bdf8; }
+      .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
+
+      /* ========== MOBILE RESPONSIVE ========== */
+      @media (max-width: 768px) {
+        html, body { height: 100dvh; overflow: hidden; }
+
+        .app { position: relative; overflow: hidden; height: 100dvh; }
+
+        /* Panel: full-screen drawer on mobile */
+        .panel {
+          position: fixed; top: 0; left: 0;
+          width: 100% !important;
+          height: calc(100dvh - 56px);
+          padding: 16px 14px 8px;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          z-index: 200;
+          border-right: none;
+          transition: transform 0.25s ease;
+          transform: translateX(0);
+        }
+        .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
+
+        /* Page-wrap: full-screen preview on mobile */
+        .page-wrap {
+          position: fixed; top: 0; left: 0;
+          width: 100%; height: calc(100dvh - 56px);
+          padding: 12px 0 4px;
+          overflow: auto;
+          -webkit-overflow-scrolling: touch;
+          display: flex; flex-direction: column; align-items: center;
+          transition: transform 0.25s ease;
+          transform: translateX(100%);
+        }
+        .page-wrap.active-mobile { transform: translateX(0); }
+
+        .mobile-tabbar { display: grid; }
+
+        /* Scale A4 pages to fit mobile screen */
+        .page {
+          transform-origin: top center;
+          transform: scale(var(--mobile-page-scale, 0.45));
+          margin-bottom: var(--mobile-page-margin, -410px);
+          flex-shrink: 0;
+        }
+
+        /* Panel internal adjustments */
+        .panel h1 { font-size: 18px; margin-bottom: 8px; }
+        .field label { font-size: 12px; }
+        .field input, .field textarea, .field select { font-size: 14px; padding: 9px 10px; }
+        button { padding: 11px 10px; font-size: 13px; min-height: 44px; }
+        .icon-btn { padding: 5px 10px; font-size: 14px; min-height: 36px; }
+        .toggle-wrapper { padding: 8px 10px; }
+        .toggle-text { font-size: 13px; }
+        .tiny { font-size: 12px; }
+        .panel-flow-section { padding: 10px 10px; }
+
+        /* Compact grids on mobile */
+        .field-grid { grid-template-columns: 1fr; }
+        .control-grid { grid-template-columns: 1fr 1fr; }
+        .uniform-grid-three { grid-template-columns: 1fr 1fr; }
+
+        .toolbar { gap: 8px; }
+        .toolbar.three { grid-template-columns: 1fr 1fr; }
+        .toolbar.three > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+        .answer-buttons { gap: 6px; }
+        .answer-buttons label { padding: 10px 6px; font-size: 14px; min-height: 44px; }
+        .part-editor-row { grid-template-columns: 1fr 72px; }
+        .image-card-body { grid-template-columns: 80px minmax(0, 1fr); }
+        .image-preview { min-width: 80px; max-width: 80px; }
+      }
+
+      /* ========== PRINT ========== */
       @media print {
         @page { size: A4 portrait; margin: 0; }
         html, body { width: 100%; height: auto; display: block; overflow: visible; background: #fff !important; margin: 0; padding: 0; }
@@ -385,6 +517,14 @@
   </head>
   <body>
     <div class="app">
+      <nav class="mobile-tabbar" role="tablist">
+        <button class="mobile-tab active" id="tabEdit" onclick="switchMobileTab('edit')" role="tab" aria-selected="true">
+          <span class="tab-icon">✏️</span>Edit
+        </button>
+        <button class="mobile-tab" id="tabPreview" onclick="switchMobileTab('preview')" role="tab" aria-selected="false">
+          <span class="tab-icon">👁️</span>Preview
+        </button>
+      </nav>
       <aside class="panel">
         <h1>Question Builder</h1>
         <details class="guide-box">
@@ -612,6 +752,16 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
+            <label for="optionMarkScaleControl">Option Circle Scale</label
+            ><input
+              id="optionMarkScaleControl"
+              type="number"
+              min="0.6"
+              max="2.0"
+              step="0.05"
+            />
+          </div>
+          <div class="field" style="margin-bottom: 0">
             <label for="mcqImageWidthControl">MCQ Image Width %</label
             ><input
               id="mcqImageWidthControl"
@@ -808,6 +958,7 @@
           gap: 7,
           columnGap: 16,
           mcqBold: true,
+          optionMarkScale: 1,
           headerScale: 1,
           headerInfoScale: 1,
           answerKeyBold: false,
@@ -1042,9 +1193,13 @@
       ];
       bodyBoldControl.addEventListener("change", () => {
         const isChecked = bodyBoldControl.checked;
-        masterBoldTargets.forEach((el) => {
-          if (el) el.checked = isChecked;
-        });
+        if (isChecked) {
+          // Master ON → সব individual টগল true করো
+          masterBoldTargets.forEach((el) => {
+            if (el) el.checked = true;
+          });
+        }
+        // Master OFF হলে individual গুলো unchanged থাকে
         applyLayoutControls();
       });
       bodyFontControl.addEventListener("input", () => {
@@ -1085,6 +1240,7 @@
       const mcqImageHeightControl = document.getElementById(
         "mcqImageHeightControl"
       );
+      const optionMarkScaleControl = document.getElementById("optionMarkScaleControl");
       const cqFontControl = document.getElementById("cqFontControl");
       const cqImageWidthControl = document.getElementById(
         "cqImageWidthControl"
@@ -1146,6 +1302,7 @@
         mcqBoldControl.closest(".field"),
         mcqFontControl.closest(".field"),
         optionBadgeBoldControl.closest(".field"),
+        optionMarkScaleControl.closest(".field"),
       ].filter(Boolean);
       const uniformCqNodes = [
         cqFontControl.closest(".field"),
@@ -1372,7 +1529,6 @@
           .replace(/\\rightleftharpoons/g, "⇌")
           .replace(/\\leftrightarrow/g, "↔")
           .replace(/\\rightarrow/g, "→")
-          .replace(/\\leftarrow/g, "←")
           .replace(/\\Delta/g, "Δ")
           .replace(/\\cdot/g, "·")
           .replace(/\\times/g, "×")
@@ -1386,44 +1542,49 @@
           .replace(/\n/g, "<br>");
       }
       function renderImageControls(kind, idx, images, defaultWidth, defaultHeight) {
-        const label =
-          kind === "mcq"
-            ? "MCQ Images"
-            : kind === "cq"
-            ? "CQ Images"
-            : "Question Images";
+        const label = kind === "mcq" ? "MCQ Images" : kind === "cq" ? "CQ Images" : "Question Images";
         const prefix = kind === "mcq" ? "qimg" : kind === "cq" ? "cqimg" : "oqimg";
         const inputId = `${kind}ImageInput-${idx}`;
-        return `
-  <div class="field">
-    <label>${label}</label>
-    <input id="${inputId}" type="file" accept="image/*" onchange="startCropping(event, '${kind}', ${idx})">
-    ${Array.isArray(images) && images.length
-      ? `<div class="tiny">${images.length} image(s) added</div>`
-      : "<div class=\"tiny\">Upload one or more images for this item.</div>"}
-    ${Array.isArray(images)
-      ? images
-          .map(
-            (img, imageIndex) => `
+        const urlRowId = `${kind}UrlRow-${idx}`;
+        const urlFieldId = `${kind}UrlField-${idx}`;
+        const imgCards = Array.isArray(images) ? images.map((img, imageIndex) => `
       <div class="image-card">
         <div class="image-card-body">
           <img class="image-preview" src="${img.src}" alt="image preview" />
           <div>
             <div class="image-field-grid">
-              <div class="field"><label>Align</label><select data-type="${prefix}align" data-index="${idx}" data-image-index="${imageIndex}"><option value="left" ${img.align==='left'?'selected':''}>Left</option><option value="center" ${img.align==='center'||!img.align?'selected':''}>Center</option><option value="right" ${img.align==='right'?'selected':''}>Right</option></select></div>
+              <div class="field"><label>Align</label><select data-type="${prefix}align" data-index="${idx}" data-image-index="${imageIndex}">
+                <option value="left" ${img.align==='left'?'selected':''}>Left</option>
+                <option value="center" ${img.align==='center'||!img.align?'selected':''}>Center</option>
+                <option value="right" ${img.align==='right'?'selected':''}>Right</option>
+              </select></div>
               <div class="field"><label>Width %</label><input data-type="${prefix}width" data-index="${idx}" data-image-index="${imageIndex}" type="number" min="15" max="100" step="1" value="${img.width || defaultWidth}"></div>
               <div class="field"><label>Height px</label><input data-type="${prefix}height" data-index="${idx}" data-image-index="${imageIndex}" type="number" min="50" max="260" step="1" value="${img.height || defaultHeight}"></div>
             </div>
             <div class="image-card-actions">
-              <button type="button" class="ghost" onclick="triggerImageReplace('${kind}', ${idx}, ${imageIndex})">Edit</button>
-              <button type="button" class="ghost" onclick="remove${kind === 'mcq' ? 'Question' : kind === 'cq' ? 'CQ' : 'OnlyQuestion'}Image(${idx}, ${imageIndex})">Delete</button>
+              <button type="button" class="ghost" onclick="triggerImageReplace('${kind}', ${idx}, ${imageIndex})">✎ Edit</button>
+              <button type="button" class="ghost" onclick="remove${kind === 'mcq' ? 'Question' : kind === 'cq' ? 'CQ' : 'OnlyQuestion'}Image(${idx}, ${imageIndex})">✕ Delete</button>
             </div>
           </div>
         </div>
-      </div>`
-          )
-          .join("")
-      : ""}
+      </div>`).join("") : "";
+
+        return `
+  <div class="field">
+    <label>${label}</label>
+    <div class="img-source-row">
+      <input id="${inputId}" type="file" accept="image/*" style="display:none" onchange="startCropping(event,'${kind}',${idx})">
+      <button type="button" class="secondary" onclick="document.getElementById('${inputId}').click()">📁 Upload File</button>
+      <button type="button" class="ghost" onclick="toggleImgUrlRow('${urlRowId}')">🔗 Image URL</button>
+    </div>
+    <div class="img-url-row hidden" id="${urlRowId}">
+      <input type="url" id="${urlFieldId}" placeholder="https://i.imgur.com/..." autocomplete="off" autocorrect="off" spellcheck="false">
+      <button type="button" onclick="addImageFromUrl('${kind}',${idx},'${urlFieldId}','${urlRowId}')">Add</button>
+    </div>
+    ${Array.isArray(images) && images.length
+      ? `<div class="tiny">${images.length} image(s) added</div>`
+      : `<div class="tiny">Upload থেকে crop করো, অথবা URL সরাসরি paste করো।</div>`}
+    ${imgCards}
   </div>`;
       }
       function bn(v) {
@@ -1530,7 +1691,7 @@
         creditLine.value = state.creditLine || "";
         bodyFontControl.value = state.layout.bodyFont;
         mcqFontControl.value = state.layout.mcqFont ?? state.layout.bodyFont;
-        bodyBoldControl.value = state.layout.bodyBold ? "1" : "0";
+        bodyBoldControl.checked = !!state.layout.bodyBold;
         lineHeightControl.value = state.layout.lineHeight;
         gapControl.value = state.layout.gap;
         columnGapControl.value = state.layout.columnGap;
@@ -1546,6 +1707,7 @@
         mcqBoldControl.checked = state.layout.mcqBold;
         mcqImageWidthControl.value = state.layout.mcqImageWidth;
         mcqImageHeightControl.value = state.layout.mcqImageHeight;
+        optionMarkScaleControl.value = state.layout.optionMarkScale ?? 1;
         cqFontControl.value = state.layout.cqFont ?? state.layout.bodyFont;
         cqImageWidthControl.value = state.layout.cqImageWidth;
         cqImageHeightControl.value = state.layout.cqImageHeight;
@@ -2169,7 +2331,7 @@
 
       function applyLayoutControls() {
         state.layout.bodyFont = numberValueOr(11, bodyFontControl.value);
-        state.layout.bodyBold = bodyBoldControl.value === "1";
+        state.layout.bodyBold = bodyBoldControl.checked;
         state.layout.lineHeight = numberValueOr(1.24, lineHeightControl.value);
         state.layout.gap = numberValueOr(7, gapControl.value);
         state.layout.columnGap = numberValueOr(16, columnGapControl.value);
@@ -2207,6 +2369,7 @@
         state.layout.mcqBold = mcqBoldControl.checked;
         state.layout.questionNumberBold = questionNumberBoldControl.checked;
         if (state.layout.bodyBold) {
+          // Master ON → সব individual bold কে true করো এবং UI sync করো
           state.layout.answerKeyBold = true;
           state.layout.answerNumBold = true;
           state.layout.answerLetterBold = true;
@@ -2214,15 +2377,15 @@
           state.layout.optionBadgeBold = true;
           state.layout.mcqBold = true;
           state.layout.questionNumberBold = true;
-        } else {
-          state.layout.answerKeyBold = false;
-          state.layout.answerNumBold = false;
-          state.layout.answerLetterBold = false;
-          state.layout.headerBoxesBold = false;
-          state.layout.optionBadgeBold = false;
-          state.layout.mcqBold = false;
-          state.layout.questionNumberBold = false;
+          answerKeyBoldControl.checked = true;
+          answerNumBoldControl.checked = true;
+          answerLetterBoldControl.checked = true;
+          headerBoxesBoldControl.checked = true;
+          optionBadgeBoldControl.checked = true;
+          mcqBoldControl.checked = true;
+          questionNumberBoldControl.checked = true;
         }
+        // Master OFF হলে individual control গুলো তাদের নিজস্ব state ধরে রাখে
         state.layout.mcqImageWidth = numberValueOr(
           42,
           mcqImageWidthControl.value
@@ -2231,6 +2394,7 @@
           95,
           mcqImageHeightControl.value
         );
+        state.layout.optionMarkScale = numberValueOr(1, optionMarkScaleControl.value);
         if (state.layout.cqFontLinked !== false) {
           cqFontControl.value = bodyFontControl.value;
         }
@@ -2265,13 +2429,16 @@
         state.layout.padRight = numberValueOr(0.42, padRightControl.value);
         state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
         state.layout.padLeft = numberValueOr(0.42, padLeftControl.value);
-        answerKeyBoldControl.checked = state.layout.answerKeyBold;
-        answerNumBoldControl.checked = state.layout.answerNumBold;
-        answerLetterBoldControl.checked = state.layout.answerLetterBold;
-        headerBoxesBoldControl.checked = state.layout.headerBoxesBold !== false;
-        optionBadgeBoldControl.checked = state.layout.optionBadgeBold !== false;
-        mcqBoldControl.checked = state.layout.mcqBold;
-        questionNumberBoldControl.checked = state.layout.questionNumberBold !== false;
+        if (!state.layout.bodyBold) {
+          // Master OFF — individual controls এর actual checked state থেকে পড়ো
+          answerKeyBoldControl.checked = state.layout.answerKeyBold;
+          answerNumBoldControl.checked = state.layout.answerNumBold;
+          answerLetterBoldControl.checked = state.layout.answerLetterBold;
+          headerBoxesBoldControl.checked = state.layout.headerBoxesBold !== false;
+          optionBadgeBoldControl.checked = state.layout.optionBadgeBold !== false;
+          mcqBoldControl.checked = state.layout.mcqBold;
+          questionNumberBoldControl.checked = state.layout.questionNumberBold !== false;
+        }
         applyPageVars();
         renderAll();
       }
@@ -2410,6 +2577,10 @@
         root.setProperty(
           "--option-mark-weight",
           state.layout.optionBadgeBold === false ? "400" : "700"
+        );
+        root.setProperty(
+          "--option-mark-scale",
+          String(state.layout.optionMarkScale ?? 1)
         );
         root.setProperty(
           "--question-number-weight",
@@ -2973,6 +3144,7 @@
         state.creditLine = creditLine.value;
         renderPages();
         renderStatus();
+        if (window.innerWidth <= 768) applyMobilePageScale();
         if (recordHistory) recordHistorySnapshot();
         scheduleAutosave();
       }
@@ -3058,6 +3230,8 @@
 
         nextState.layout.headerInfoScale =
           nextState.layout.headerInfoScale ?? 1;
+        nextState.layout.optionMarkScale =
+          nextState.layout.optionMarkScale ?? 1;
         nextState.layout.answerKeyBold = !!nextState.layout.answerKeyBold;
         nextState.layout.questionNumberBold =
           nextState.layout.questionNumberBold !== false;
@@ -3926,6 +4100,165 @@
         }
       });
 
+      // ========== IMAGE URL HELPERS ==========
+      function toggleImgUrlRow(rowId) {
+        const row = document.getElementById(rowId);
+        if (!row) return;
+        row.classList.toggle("hidden");
+        if (!row.classList.contains("hidden")) {
+          const input = row.querySelector("input");
+          if (input) setTimeout(() => input.focus(), 60);
+        }
+      }
+
+      function addImageFromUrl(kind, idx, fieldId, rowId) {
+        const input = document.getElementById(fieldId);
+        const url = input ? input.value.trim() : "";
+        if (!url) { alert("Image URL দাও।"); return; }
+
+        let target, defaultWidth, defaultHeight;
+        if (kind === "mcq") {
+          target = state.questions[idx];
+          defaultWidth = state.layout.mcqImageWidth;
+          defaultHeight = state.layout.mcqImageHeight;
+        } else if (kind === "cq") {
+          target = state.cqs[idx];
+          defaultWidth = state.layout.cqImageWidth;
+          defaultHeight = state.layout.cqImageHeight;
+        } else {
+          target = state.onlyQuestions[idx];
+          defaultWidth = state.layout.questionImageWidth;
+          defaultHeight = state.layout.questionImageHeight;
+        }
+        if (!target) return;
+        if (!Array.isArray(target.images)) target.images = [];
+        target.images.push({ src: url, align: "center", width: String(defaultWidth), height: String(defaultHeight) });
+
+        if (input) input.value = "";
+        const row = document.getElementById(rowId);
+        if (row) row.classList.add("hidden");
+        renderAll();
+        initEditors();
+      }
+
+      // ========== MOBILE TAB SWITCHING & PAGE SCALING ==========
+      let currentMobileTab = 'edit';
+
+      function switchMobileTab(tab) {
+        currentMobileTab = tab;
+        const panel = document.querySelector('.panel');
+        const pageWrap = document.getElementById('pagesWrap');
+        const tabEdit = document.getElementById('tabEdit');
+        const tabPreview = document.getElementById('tabPreview');
+        if (!panel || !pageWrap) return;
+        if (tab === 'edit') {
+          panel.classList.remove('hidden-mobile');
+          pageWrap.classList.remove('active-mobile');
+          tabEdit.classList.add('active');
+          tabPreview.classList.remove('active');
+          tabEdit.setAttribute('aria-selected', 'true');
+          tabPreview.setAttribute('aria-selected', 'false');
+        } else {
+          panel.classList.add('hidden-mobile');
+          pageWrap.classList.add('active-mobile');
+          tabEdit.classList.remove('active');
+          tabPreview.classList.add('active');
+          tabEdit.setAttribute('aria-selected', 'false');
+          tabPreview.setAttribute('aria-selected', 'true');
+          applyMobilePageScale();
+        }
+      }
+
+      function applyMobilePageScale() {
+        if (window.innerWidth > 768) return;
+        const pages = document.querySelectorAll('.page');
+        if (!pages.length) return;
+        const firstPage = pages[0];
+        const naturalW = firstPage.offsetWidth || 794;
+        const available = window.innerWidth;
+        const scale = Math.max(0.28, Math.min(1, available / naturalW));
+        const scaledH = (firstPage.offsetHeight || 1123) * scale;
+        const gap = 14;
+        const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+        document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
+        document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+      }
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+          // Desktop: reset any mobile transforms
+          document.querySelector('.panel')?.classList.remove('hidden-mobile');
+          document.getElementById('pagesWrap')?.classList.remove('active-mobile');
+        }
+        applyMobilePageScale();
+      }, { passive: true });
+
+      // PDF export: temporarily show all pages even on mobile
+      const _origDownloadPDFDirect = window.downloadPDFDirect;
+      async function downloadPDFDirect() {
+        const pageWrap = document.getElementById('pagesWrap');
+        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
+        if (wasHidden && pageWrap) {
+          pageWrap.style.visibility = 'hidden';
+          pageWrap.style.transform = 'none';
+          pageWrap.style.position = 'fixed';
+          pageWrap.style.left = '-9999px';
+        }
+        try {
+          const blob = await generatePdfBlob();
+          await downloadBlob(
+            blob,
+            (state.examTitle || "sheet").replace(/[\\/:*?"<>|]+/g, " ").trim() + ".pdf"
+          );
+        } catch (err) {
+          console.error(err);
+          try { window.print(); } catch(e) {}
+        } finally {
+          if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = '';
+            pageWrap.style.transform = '';
+            pageWrap.style.position = '';
+            pageWrap.style.left = '';
+            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
+          }
+        }
+      }
+
+      async function sharePDFDirect() {
+        const pageWrap = document.getElementById('pagesWrap');
+        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
+        if (wasHidden && pageWrap) {
+          pageWrap.style.visibility = 'hidden';
+          pageWrap.style.transform = 'none';
+          pageWrap.style.position = 'fixed';
+          pageWrap.style.left = '-9999px';
+        }
+        try {
+          const blob = await generatePdfBlob();
+          const filename = ((state.examTitle || "sheet").replace(/[\\/:*?"<>|]+/g, " ").trim() || "sheet") + ".pdf";
+          const file = new File([blob], filename, { type: "application/pdf" });
+          if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+            await navigator.share({ title: state.examTitle || "Sheet PDF", files: [file] });
+          } else {
+            await downloadBlob(blob, filename);
+            alert("এই browser-এ direct file share support নেই। PDF download করে দেওয়া হয়েছে।");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Share PDF তৈরি করা যায়নি।");
+        } finally {
+          if (wasHidden && pageWrap) {
+            pageWrap.style.visibility = '';
+            pageWrap.style.transform = '';
+            pageWrap.style.position = '';
+            pageWrap.style.left = '';
+            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
+          }
+        }
+      }
+
+      // ========================================================
+
       const loadedDraft = loadData(true);
       if (!loadedDraft) {
         syncNumbers();
@@ -3944,22 +4277,22 @@
     </script>
   <div id="cropperModal">
   <div class="cropper-content">
-    <h3>ইমেজ ক্রপ করুন</h3>
+    <h3>✂ Image Crop করুন</h3>
     <div class="cropper-wrap">
-      <img id="cropperImg">
+      <img id="cropperImg" alt="crop target">
     </div>
-    <div class="toolbar" style="margin-bottom: 12px;">
-      <button type="button" class="secondary" onclick="rotateCrop(-90)">↺ Rotate Left</button>
-      <button type="button" class="secondary" onclick="rotateCrop(90)">Rotate Right ↻</button>
+    <div class="cropper-zoom-row">
+      <button type="button" class="secondary" onclick="zoomCrop(0.15)" title="Zoom In">🔍+</button>
+      <button type="button" class="secondary" onclick="zoomCrop(-0.15)" title="Zoom Out">🔍−</button>
+      <button type="button" class="ghost" onclick="rotateCrop(-90)" title="Rotate Left">↺ Left</button>
+      <button type="button" class="ghost" onclick="rotateCrop(90)" title="Rotate Right">Right ↻</button>
     </div>
-    <div class="toolbar">
-      <button type="button" onclick="confirmCrop()">Crop & Save</button>
-      <button type="button" class="ghost" onclick="cancelCrop()">Cancel</button>
+    <div class="cropper-confirm-row">
+      <button type="button" onclick="confirmCrop()">✔ Crop & Save</button>
+      <button type="button" class="ghost" onclick="cancelCrop()">✕ Cancel</button>
     </div>
   </div>
 </div>
-</body>
-</html>
 <script>
 let cropper = null;
 let currentCropContext = { type: '', index: -1, imageIndex: -1 };
@@ -3977,12 +4310,19 @@ function startCropping(event, type, index, imageIndex = -1) {
     document.body.style.overflow = "hidden"; // Lock background scroll on mobile
     
     if (cropper) cropper.destroy();
-    cropper = new Cropper(img, { 
-      viewMode: 1, 
+    cropper = new Cropper(img, {
+      viewMode: 1,
       autoCropArea: 1,
-      dragMode: 'move', // Better for mobile touch padding
+      dragMode: 'move',
       responsive: true,
-      restore: true
+      restore: true,
+      movable: true,
+      zoomable: true,
+      zoomOnWheel: true,
+      wheelZoomRatio: 0.08,
+      zoomOnTouch: true,
+      toggleDragModeOnDblclick: false,
+      minContainerHeight: 160,
     });
   };
   reader.readAsDataURL(file);
@@ -4010,10 +4350,14 @@ function cancelCrop() {
 
 function rotateCrop(degree) {
   if (cropper) {
-    cropper.clear();        // ১. আগের ক্রপ বক্সটি সাময়িকভাবে মুছে ফেলা হলো
-    cropper.rotate(degree); // ২. ছবিটি নির্বিঘ্নে রোটেট করা হলো
-    cropper.crop();         // ৩. নতুন সাইজ অনুযায়ী অটোমেটিক ফুল-সাইজ ক্রপ বক্স বসানো হলো
+    cropper.clear();
+    cropper.rotate(degree);
+    cropper.crop();
   }
+}
+
+function zoomCrop(ratio) {
+  if (cropper) cropper.zoom(ratio);
 }
 
 function confirmCrop() {
@@ -4070,3 +4414,5 @@ function confirmCrop() {
   initEditors();
 }
 </script>
+</body>
+</html>
