@@ -5,23 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Question Builder</title>
     <style>
-      /* --- Custom Scrollbar like Cover Page --- */
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
       ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-      /* Alignment Classes */
       .img-left { margin-right: auto !important; margin-left: 0 !important; display: block; }
       .img-center { margin-left: auto !important; margin-right: auto !important; display: block; }
       .img-right { margin-left: auto !important; margin-right: 0 !important; display: block; }
       
       :root {
-        /* UI Font — Inter first like cover page */
         --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-        /* Page/Content Font */
         --bangla-font: "Noto Serif Bengali", "Noto Sans Bengali", "Hind Siliguri", "SolaimanLipi", "Segoe UI", Arial, sans-serif;
-        /* Shadow tokens (same as cover page) */
         --shadow-sm:    0 4px 12px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
         --shadow-md:    0 10px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.02);
         --shadow-hover: 0 20px 30px -12px rgba(0,0,0,0.15);
@@ -61,16 +56,13 @@
         --header-box-font: calc(11px * var(--header-scale));
         --header-box-pad: calc(8px * var(--header-scale));
         --body-weight: 400;
-        --bangla-font: "Noto Serif Bengali", "Noto Sans Bengali",
-          "Hind Siliguri", "Bangla Sangam MN", "Nirmala UI", "SolaimanLipi",
-          "Kalpurush", "Vrinda", "Segoe UI", Arial, sans-serif;
         --ink: #111827;
         --muted: #475569;
         --line: #cbd5e1;
         --paper: #ffffff;
         --panel: #ffffff;
         --soft: #f8fafc;
-        --shadow: rgba(0, 0, 0, 0.5); /* Darker shadow from cover page */
+        --shadow: rgba(0, 0, 0, 0.5);
       }
       * {
         box-sizing: border-box;
@@ -82,7 +74,7 @@
         overflow: hidden;
       }
       body {
-        font-family: var(--ui-font); /* Puro UI ekhon Segoe UI hobe */
+        font-family: var(--ui-font);
         background-color: #1e293b;
         color: var(--ink);
         text-rendering: geometricPrecision;
@@ -97,7 +89,7 @@
         align-items: flex-start;
       }
       .panel {
-        width: 440px; /* Kept 440px to fit MCQ settings properly */
+        width: 440px;
         background-color: #ffffff;
         padding: 24px;
         box-shadow: 2px 0 15px rgba(0,0,0,0.05);
@@ -110,7 +102,7 @@
       }
       .page-wrap {
         flex-grow: 1;
-        background-color: #1e293b; /* Dark preview background */
+        background-color: #1e293b;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -119,7 +111,6 @@
         height: 100%;
       }
       
-      /* --- Sidebar Internal Styling Updates --- */
       .panel h1 {
         margin: 0 0 12px;
         font-size: 22px; 
@@ -158,7 +149,6 @@
         line-height: 1.65;
       }
       
-      /* Form fields synced with cover page design */
       .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .field { margin-bottom: 12px; }
       .field label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #334; }
@@ -167,7 +157,7 @@
         padding: 8px 10px;
         box-sizing: border-box;
         border: 1px solid #cbd5e1;
-        border-radius: 6px; /* Sharper corners */
+        border-radius: 6px;
         font-family: inherit;
         font-size: 13px;
         background-color: #f8fafc;
@@ -180,7 +170,6 @@
       .field textarea { resize: vertical; min-height: 88px; line-height: 1.45; }
       .bulk-box textarea { min-height: 210px; font-size: 12.5px; font-family: Consolas, var(--bangla-font); white-space: pre-wrap; }
       
-      /* Image Controls */
       .image-card { padding: 14px; border: 1px solid #e2e8f0; border-radius: 6px; background: #ffffff; margin-top: 10px; max-width: 100%; overflow: hidden; }
       .image-card-body { display: grid; gap: 12px; grid-template-columns: 120px minmax(0, 1fr); align-items: start; min-width: 0; }
       .image-card-body > * { min-width: 0; }
@@ -191,7 +180,6 @@
       .image-card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: flex-start; }
       .image-card-actions button { flex: 1 1 120px; min-width: 0; }
       
-      /* Buttons styled like cover page */
       .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
       .toolbar.three { grid-template-columns: 1fr 1fr 1fr; }
       .toolbar.four { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -244,7 +232,6 @@
       
       .hidden { display: none !important; }
 
-      /* --- Page Layout --- */
       .page { font-family: var(--bangla-font); }
       .page-header, .page-header * { font-family: 'Georgia', 'Times New Roman', serif; }
       .page {
@@ -257,7 +244,7 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        margin: 0 auto 18px; /* Spacing between pages */
+        margin: 0 auto 18px;
         page-break-after: always;
         flex-shrink: 0;
       }
@@ -286,7 +273,6 @@
       .page-section-title { text-align: center; font-size: 10px; letter-spacing: 0.45px; font-weight: 700; margin: 0 0 6px; }
       .content-area { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
       
-      /* --- MCQ and Question Styling --- */
       .mcq-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-content: start; }
       .mcq-column { display: grid; gap: var(--mcq-gap); align-content: start; min-height: 0; }
       .q-item { font-size: var(--mcq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
@@ -300,7 +286,6 @@
       .option-mark { width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); height: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); min-width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); border: 1px solid #111; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: var(--option-mark-weight); font-size: calc(var(--mcq-font-size) * 0.88); line-height: 1; flex-shrink: 0; }
       .option-text { overflow-wrap: anywhere; flex: 1; }
       
-      /* --- Footer --- */
       .footer-box { margin-top: auto; padding-top: 6px; flex: 0 0 auto; }
       .answer-cut { display: flex; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 4px; }
       .answer-cut .scissor { font-size: 11px; line-height: 1; }
@@ -357,7 +342,6 @@
       
       hr.soft { border: none; border-top: 1px solid #dbe3ed; margin: 14px 0; }
 
-      /* Cropper Modal */
       #cropperModal {
         display: none; position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
@@ -392,7 +376,6 @@
         .cropper-content h3 { font-size: 13px; }
       }
 
-      /* Image source selector */
       .img-source-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
       .img-url-row { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-bottom: 8px; align-items: end; }
       .img-url-row input[type="url"], .img-url-row input[type="text"] {
@@ -403,7 +386,6 @@
       .img-url-row input:focus { outline: none; border-color: #111827; background: #fff; }
       .img-url-row button { white-space: nowrap; }
 
-      /* ========== MOBILE TAB BAR ========== */
       .mobile-tabbar {
         display: none;
         position: fixed;
@@ -424,13 +406,11 @@
       .mobile-tab.active { color: #38bdf8; }
       .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
 
-      /* ========== MOBILE RESPONSIVE ========== */
       @media (max-width: 768px) {
         html, body { height: 100dvh; overflow: hidden; }
 
         .app { position: relative; overflow: hidden; height: 100dvh; }
 
-        /* Panel: full-screen drawer on mobile */
         .panel {
           position: fixed; top: 0; left: 0;
           width: 100% !important;
@@ -445,7 +425,6 @@
         }
         .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
 
-        /* Page-wrap: full-screen preview on mobile */
         .page-wrap {
           position: fixed; top: 0; left: 0;
           width: 100%; height: calc(100dvh - 56px);
@@ -460,7 +439,6 @@
 
         .mobile-tabbar { display: grid; }
 
-        /* Scale A4 pages to fit mobile screen */
         .page {
           transform-origin: top center;
           transform: scale(var(--mobile-page-scale, 0.45));
@@ -468,7 +446,6 @@
           flex-shrink: 0;
         }
 
-        /* Panel internal adjustments */
         .panel h1 { font-size: 18px; margin-bottom: 8px; }
         .field label { font-size: 12px; }
         .field input, .field textarea, .field select { font-size: 14px; padding: 9px 10px; }
@@ -479,7 +456,6 @@
         .tiny { font-size: 12px; }
         .panel-flow-section { padding: 10px 10px; }
 
-        /* Compact grids on mobile */
         .field-grid { grid-template-columns: 1fr; }
         .control-grid { grid-template-columns: 1fr 1fr; }
         .uniform-grid-three { grid-template-columns: 1fr 1fr; }
@@ -494,7 +470,6 @@
         .image-preview { min-width: 80px; max-width: 80px; }
       }
 
-      /* ========== PRINT ========== */
       @media print {
         @page { size: A4 portrait; margin: 0; }
         html, body { width: 100%; height: auto; display: block; overflow: visible; background: #fff !important; margin: 0; padding: 0; }
@@ -503,7 +478,6 @@
         .page-wrap { display: block; background: none !important; padding: 0 !important; height: auto; overflow: visible; }
         .page { width: 210mm; height: 297mm; min-height: 297mm; box-shadow: none; margin: 0; overflow: hidden; page-break-after: always; }
       }
-    /* --- Slider Toggle Switch Styling --- */
       .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0px; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       .toggle-text { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334155; flex-grow: 1; }
       .switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
@@ -512,7 +486,6 @@
       .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
       input:checked + .slider { background-color: #111827; }
       input:checked + .slider:before { transform: translateX(16px); }
-      /* --- Smart Info Boxes --- */
       .guide-box { margin-bottom: 18px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; overflow: hidden; }
       .guide-box summary { padding: 10px 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
       .guide-box summary::-webkit-details-marker { display: none; }
@@ -1205,12 +1178,10 @@
       bodyBoldControl.addEventListener("change", () => {
         const isChecked = bodyBoldControl.checked;
         if (isChecked) {
-          // Master ON → সব individual টগল true করো
           masterBoldTargets.forEach((el) => {
             if (el) el.checked = true;
           });
         }
-        // Master OFF হলে individual গুলো unchanged থাকে
         applyLayoutControls();
       });
       bodyFontControl.addEventListener("input", () => {
@@ -1283,7 +1254,6 @@
           String(bodyFontControl.value).trim();
       });
       const panel = document.querySelector(".panel");
-      // lead এখন guide-box কে খুঁজবে, যাতে এরর না হয়
       const lead = panel.querySelector(".guide-box") || panel.querySelector("h1");
       const panelFinalizeNodes = Array.from(
         panel.querySelectorAll(":scope > .toolbar")
@@ -1347,7 +1317,7 @@
       const uniformActionNodes = [
         panel.querySelector(":scope > .toolbar.four"),
         panelUndoToolbar,
-        saveStatus, // এটি যোগ করা হয়েছে
+        saveStatus,
         fitStatus,
       ].filter(Boolean);
       const mcqImageFieldNodes = [
@@ -2380,7 +2350,6 @@
         state.layout.mcqBold = mcqBoldControl.checked;
         state.layout.questionNumberBold = questionNumberBoldControl.checked;
         if (state.layout.bodyBold) {
-          // Master ON → সব individual bold কে true করো এবং UI sync করো
           state.layout.answerKeyBold = true;
           state.layout.answerNumBold = true;
           state.layout.answerLetterBold = true;
@@ -2396,7 +2365,6 @@
           mcqBoldControl.checked = true;
           questionNumberBoldControl.checked = true;
         }
-        // Master OFF হলে individual control গুলো তাদের নিজস্ব state ধরে রাখে
         state.layout.mcqImageWidth = numberValueOr(
           42,
           mcqImageWidthControl.value
@@ -2441,7 +2409,6 @@
         state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
         state.layout.padLeft = numberValueOr(0.42, padLeftControl.value);
         if (!state.layout.bodyBold) {
-          // Master OFF — individual controls এর actual checked state থেকে পড়ো
           answerKeyBoldControl.checked = state.layout.answerKeyBold;
           answerNumBoldControl.checked = state.layout.answerNumBold;
           answerLetterBoldControl.checked = state.layout.answerLetterBold;
@@ -3520,7 +3487,6 @@
           .map((x) => x.trim())
           .filter(Boolean);
         
-        // এখানে অপশনের আগের ব্র্যাকেটসহ স্প্লিট করার লজিক ঠিক করা হয়েছে
         const lines = rawLines
           .flatMap((line) =>
             line
@@ -3539,12 +3505,9 @@
         const extraLines = [];
 
         for (const line of lines) {
-          // যদি লাইনটি একটি অপশন হয় (যেমন (ক) বা ক)), তবেই সেটি অপশন লিস্টে যাবে
           if (looksLikeOption(line)) {
             optionLines.push(stripOptionPrefix(line));
           } else {
-            // অন্যথায় সেটি বাড়তি টেক্সট হিসেবে প্রশ্নের সাথে যোগ হবে
-            // কিন্তু শুধু ব্র্যাকেট বা স্পেস হলে সেটিকে আমরা বাদ দিব
             if (line.trim() !== "(" && line.trim() !== ")" && line.trim() !== "") {
                 extraLines.push(line);
             }
@@ -3793,7 +3756,7 @@
         }
         window.location.reload();
       }
-      // PDF generation
+      
       function uint8FromString(str) {
         return new TextEncoder().encode(str);
       }
@@ -3936,16 +3899,19 @@
         chunks.push(uint8FromString(trailer));
         return new Blob([concatUint8(chunks)], { type: "application/pdf" });
       }
+
       async function generatePdfBlob() {
         renderAll();
         await new Promise((r) => setTimeout(r, 120));
         const pages = [...document.querySelectorAll(".page")];
         const images = [];
         for (const page of pages) {
-          images.push(await svgPageToJpegBytes(page, 6));
+          // ISSUE 1 FIXED: Scale changed to 2 to prevent memory crashes
+          images.push(await svgPageToJpegBytes(page, 2));
         }
         return buildPdfFromJpegs(images);
       }
+      
       async function downloadBlob(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -4111,7 +4077,6 @@
         }
       });
 
-      // ========== IMAGE URL HELPERS ==========
       function toggleImgUrlRow(rowId) {
         const row = document.getElementById(rowId);
         if (!row) return;
@@ -4152,7 +4117,6 @@
         initEditors();
       }
 
-      // ========== MOBILE TAB SWITCHING & PAGE SCALING ==========
       let currentMobileTab = 'edit';
 
       function switchMobileTab(tab) {
@@ -4197,14 +4161,12 @@
 
       window.addEventListener('resize', () => {
         if (window.innerWidth > 768) {
-          // Desktop: reset any mobile transforms
           document.querySelector('.panel')?.classList.remove('hidden-mobile');
           document.getElementById('pagesWrap')?.classList.remove('active-mobile');
         }
         applyMobilePageScale();
       }, { passive: true });
 
-      // PDF export: temporarily show all pages even on mobile
       const _origDownloadPDFDirect = window.downloadPDFDirect;
       async function downloadPDFDirect() {
         const pageWrap = document.getElementById('pagesWrap');
@@ -4268,8 +4230,6 @@
         }
       }
 
-      // ========================================================
-
       const loadedDraft = loadData(true);
       if (!loadedDraft) {
         syncNumbers();
@@ -4318,7 +4278,7 @@ function startCropping(event, type, index, imageIndex = -1) {
     const img = document.getElementById("cropperImg");
     img.src = e.target.result;
     modal.style.display = "flex";
-    document.body.style.overflow = "hidden"; // Lock background scroll on mobile
+    document.body.style.overflow = "hidden"; 
     
     if (cropper) cropper.destroy();
     cropper = new Cropper(img, {
@@ -4337,25 +4297,23 @@ function startCropping(event, type, index, imageIndex = -1) {
     });
   };
   reader.readAsDataURL(file);
-  event.target.value = ""; // Reset input so same file can be selected again
+  event.target.value = ""; 
 }
 
+// ISSUE 2 FIXED: DOM Leak fix.
 function triggerImageReplace(type, index, imageIndex) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
-  input.style.display = "none";
-  input.addEventListener("change", (event) => {
+  input.onchange = (event) => {
     startCropping(event, type, index, imageIndex);
-    document.body.removeChild(input);
-  });
-  document.body.appendChild(input);
+  };
   input.click();
 }
 
 function cancelCrop() {
   document.getElementById("cropperModal").style.display = "none";
-  document.body.style.overflow = ""; // Unlock background scroll
+  document.body.style.overflow = ""; 
   if (cropper) cropper.destroy();
 }
 
