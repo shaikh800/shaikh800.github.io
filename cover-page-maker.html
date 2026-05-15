@@ -11,7 +11,6 @@
 <style>
 @page { size: A4 portrait; margin: 0; }
 
-/* --- Custom Scrollbar (MCQ builder style) --- */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -48,7 +47,6 @@ body {
     color: #111827;
 }
 
-/* --- SIDEBAR (panel like MCQ builder) --- */
 .panel {
     width: 420px;
     background-color: var(--paper);
@@ -63,7 +61,6 @@ body {
     transition: transform 0.25s ease;
 }
 
-/* --- PREVIEW CONTAINER (page-wrap like MCQ builder) --- */
 .page-wrap {
     flex-grow: 1;
     background-color: #1e293b;
@@ -75,7 +72,6 @@ body {
     transition: transform 0.25s ease;
 }
 
-/* --- MOBILE TAB BAR (exactly like MCQ builder) --- */
 .mobile-tabbar {
     display: none;
     position: fixed;
@@ -108,7 +104,6 @@ body {
 .mobile-tab.active { color: #38bdf8; }
 .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
 
-/* --- A4 Page Layout (print-perfect) --- */
 .page {
     width: 210mm !important;
     min-width: 210mm !important;
@@ -184,7 +179,6 @@ body {
 .footer-dates { text-align: left; }
 .footer-dates div { margin-top: 5px; }
 
-/* --- UNIFIED BUTTON STYLES (all dark slate #111827) --- */
 .form-group { margin-bottom: 14px; }
 .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #334155; }
 .form-group input:not([type="checkbox"]), .form-group select {
@@ -351,7 +345,6 @@ h3 {
 }
 .exporting [id^="out-"]:empty::before { display: none !important; visibility: hidden !important; }
 
-/* Mobile responsive */
 @media (max-width: 768px) {
     html, body { height: 100dvh; overflow: hidden; }
     body { flex-direction: column; }
@@ -388,8 +381,9 @@ h3 {
     .page-wrap.active-mobile { transform: translateX(0); }
     .mobile-tabbar { display: grid; }
     .page {
-        transform-origin: top center;
+        transform-origin: top left;
         transform: scale(var(--mobile-page-scale, 0.45));
+        margin-left: var(--mobile-page-offset, 0px) !important;
         margin-bottom: var(--mobile-page-margin, -410px);
         flex-shrink: 0;
     }
@@ -408,7 +402,6 @@ h3 {
 </head>
 <body>
 
-<!-- Mobile Tab Bar (exactly like MCQ builder) -->
 <div class="mobile-tabbar" role="tablist">
     <button class="mobile-tab active" id="tabEdit" onclick="switchMobileTab('edit')" role="tab" aria-selected="true">
         <span class="tab-icon">✏️</span>Edit
@@ -418,7 +411,6 @@ h3 {
     </button>
 </div>
 
-<!-- Sidebar (Edit panel) -->
 <aside class="panel" id="sidebarPanel">
     <h3>Font Sizes (px)</h3>
     <div class="font-control-group"><label>College Name:</label><input type="number" id="fs-college" value="26"></div>
@@ -475,11 +467,6 @@ h3 {
             <input type="text" id="in-from-name" list="name-list" placeholder="Your Name">
             <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
         </div>
-        <div class="sortable-item" data-id="reg">
-            <label>Registration No:</label>
-            <input type="text" id="in-reg" list="reg-list" placeholder="Reg. No">
-            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
-        </div>
         <div class="sortable-item" data-id="year">
             <label>Year:</label>
             <input type="text" id="in-year" list="year-list" placeholder="3rd Year">
@@ -503,7 +490,6 @@ h3 {
     </div>
 
     <datalist id="name-list"></datalist>
-    <datalist id="reg-list"></datalist>
     <datalist id="sem-list"><option value="1st"><option value="2nd"></datalist>
     <datalist id="year-list"><option value="1st Year"><option value="2nd Year"><option value="3rd Year"><option value="4th Year"></datalist>
 
@@ -542,7 +528,6 @@ h3 {
     <button class="print-btn" onclick="downloadPDF()">Download PDF</button>
 </aside>
 
-<!-- Preview container (Page wrap) -->
 <main class="page-wrap" id="pagesWrap">
     <div class="page" id="printable-area">
         <div class="pin-dot"></div>
@@ -568,7 +553,6 @@ h3 {
                 <div class="col left" id="preview-student-info">
                     <div class="sub-header" id="sub-header-by">SUBMITTED BY</div>
                     <div class="info-text bold preview-item" id="row-name" data-id="name"><span id="out-from-name"></span></div>
-                    <div class="info-text preview-item" id="row-reg" data-id="reg">REGISTRATION NO: <span id="out-reg"></span></div>
                     <div class="info-text preview-item" id="row-year" data-id="year">YEAR: <span id="out-year"></span></div>
                     <div class="info-text preview-item" id="row-sem" data-id="sem">SEMESTER: <span id="out-sem"></span></div>
                     <div class="info-text preview-item" id="row-session" data-id="session">SESSION: <span id="out-session"></span></div>
@@ -607,7 +591,6 @@ h3 {
 </main>
 
 <script>
-// --- Mobile tab switching (exactly like MCQ builder) ---
 let currentMobileTab = 'edit';
 function switchMobileTab(tab) {
     currentMobileTab = tab;
@@ -645,8 +628,10 @@ function applyMobilePageScale() {
     const scaledH = (firstPage.offsetHeight || 1123) * scale;
     const gap = 14;
     const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+    const offsetLeft = (available - (naturalW * scale)) / 2;
     document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
     document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+    document.documentElement.style.setProperty('--mobile-page-offset', offsetLeft.toFixed(0) + 'px');
 }
 
 window.addEventListener('resize', () => {
@@ -659,7 +644,6 @@ window.addEventListener('resize', () => {
     applyMobilePageScale();
 });
 
-// --- All existing core functionality (preserved, only color unified) ---
 const courseData = [
     { code: "CE 501", name: "Structural Analysis and Design-I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
     { code: "CE 502", name: "Structural Analysis and Design Sessional-I", teacher: "Anwar Hossain", desig: "Adjunct Lecturer" },
@@ -678,54 +662,53 @@ const extraTeachers = [
 ];
 
 const studentData = [
-    { reg: "2022754800", session: "2022-2023", name: "MD. SHAIKH ALAM" },
-    { reg: "2022354778", session: "2022-2023", name: "PROTIK SAHA PIAL" },
-    { reg: "2022854782", session: "2022-2023", name: "Md. Showrov Hossain" },
-    { reg: "2022954772", session: "2022-2023", name: "Shoiab Hosen" },
-    { reg: "878", session: "2021-2022", name: "MASHUDUR RAHMAN" },
-    { reg: "2022954808", session: "2022-2023", name: "Shazid Rownok Ayon" },
-    { reg: "2022554785", session: "2022-2023", name: "MD.HASIB" },
-    { reg: "2022154798", session: "2022-2023", name: "Sardar All-Fahat (Rabin)" },
-    { reg: "2022854773", session: "2022-2023", name: "MD. Mubtasim Rahman Mitul" },
-    { reg: "2022054780", session: "2022-2023", name: "TAHER AHMAD" },
-    { reg: "883", session: "2021-2022", name: "MD.SHARIF SARDAR" },
-    { reg: "2022054799", session: "2022-2023", name: "Md Sihab" },
-    { reg: "860", session: "2021-2022", name: "Jannatul Hoque Akondo" },
-    { reg: "2022454803", session: "2022-2023", name: "MD. TANVIR AHMED" },
-    { reg: "2022954781", session: "2022-2023", name: "MD. MINHAZUR RAHMAN" },
-    { reg: "2022554776", session: "2022-2023", name: "AZIZUL HAKIM MIRAZ" },
-    { reg: "1040", session: "2020-2021", name: "NOWFEL HOSSAIN" },
-    { reg: "2022354813", session: "2022-2023", name: "Md.Rakib Munshi" },
-    { reg: "881", session: "2021-2022", name: "Samrat Fakir" },
-    { reg: "2022154815", session: "2022-2023", name: "Mst.Zermoon Nisa" },
-    { reg: "2022454786", session: "2022-2023", name: "Maniruzzaman" },
-    { reg: "2022654793", session: "2022-2023", name: "Md Nurmohammad Shanto" },
-    { reg: "2022454821", session: "2022-2023", name: "Shuvashis Chakma" },
-    { reg: "866", session: "2021-2022", name: "MD. SAKIB FARDOUS" },
-    { reg: "862", session: "2021-2022", name: "S. M. Rafat Uddin" },
-    { reg: "2022154789", session: "2022-2023", name: "SHADMAN SHAKIB SHIRSHO" },
-    { reg: "2022554811", session: "2022-2023", name: "MOHAMMAD TAMJED HASAN" },
-    { reg: "2022254779", session: "2022-2023", name: "MD. Mahfuzur Rahman" },
-    { reg: "2022754774", session: "2022-2023", name: "Md. Saiful Islam" },
-    { reg: "2022054807", session: "2022-2023", name: "Mahathir Mohammad" },
-    { reg: "2022354804", session: "2022-2023", name: "Md Marjabin Islam Mafi" },
-    { reg: "2022454768", session: "2022-2023", name: "Ali Asgar Talukder" },
-    { reg: "2022754783", session: "2022-2023", name: "Abdullah Al Mamun" },
-    { reg: "886", session: "2021-2022", name: "Shariful Islam Siam" },
-    { reg: "2022254814", session: "2022-2023", name: "Md.Nazmul Haq Bhuiya" },
-    { reg: "2022654775", session: "2022-2023", name: "MD. AFIF ALL ABIR" },
-    { reg: "2022054816", session: "2022-2023", name: "Md.Naimur Rahman" },
-    { reg: "889", session: "2021-2022", name: "MEHERAN MAHTHIR SROBON" },
-    { reg: "2022154770", session: "2022-2023", name: "Raduan Ahammad Shuvo" },
-    { reg: "2022554802", session: "2022-2023", name: "Talha Hamim Antor" },
-    { reg: "2022254797", session: "2022-2023", name: "Md.Abu bokor" },
-    { reg: "2022354796", session: "2022-2023", name: "MD.MIFTAUL JANNAT TASIN" }
+    { session: "2022-2023", name: "MD. SHAIKH ALAM" },
+    { session: "2022-2023", name: "PROTIK SAHA PIAL" },
+    { session: "2022-2023", name: "Md. Showrov Hossain" },
+    { session: "2022-2023", name: "Shoiab Hosen" },
+    { session: "2021-2022", name: "MASHUDUR RAHMAN" },
+    { session: "2022-2023", name: "Shazid Rownok Ayon" },
+    { session: "2022-2023", name: "MD.HASIB" },
+    { session: "2022-2023", name: "Sardar All-Fahat (Rabin)" },
+    { session: "2022-2023", name: "MD. Mubtasim Rahman Mitul" },
+    { session: "2022-2023", name: "TAHER AHMAD" },
+    { session: "2021-2022", name: "MD.SHARIF SARDAR" },
+    { session: "2022-2023", name: "Md Sihab" },
+    { session: "2021-2022", name: "Jannatul Hoque Akondo" },
+    { session: "2022-2023", name: "MD. TANVIR AHMED" },
+    { session: "2022-2023", name: "MD. MINHAZUR RAHMAN" },
+    { session: "2022-2023", name: "AZIZUL HAKIM MIRAZ" },
+    { session: "2020-2021", name: "NOWFEL HOSSAIN" },
+    { session: "2022-2023", name: "Md.Rakib Munshi" },
+    { session: "2021-2022", name: "Samrat Fakir" },
+    { session: "2022-2023", name: "Mst.Zermoon Nisa" },
+    { session: "2022-2023", name: "Maniruzzaman" },
+    { session: "2022-2023", name: "Md Nurmohammad Shanto" },
+    { session: "2022-2023", name: "Shuvashis Chakma" },
+    { session: "2021-2022", name: "MD. SAKIB FARDOUS" },
+    { session: "2021-2022", name: "S. M. Rafat Uddin" },
+    { session: "2022-2023", name: "SHADMAN SHAKIB SHIRSHO" },
+    { session: "2022-2023", name: "MOHAMMAD TAMJED HASAN" },
+    { session: "2022-2023", name: "MD. Mahfuzur Rahman" },
+    { session: "2022-2023", name: "Md. Saiful Islam" },
+    { session: "2022-2023", name: "Mahathir Mohammad" },
+    { session: "2022-2023", name: "Md Marjabin Islam Mafi" },
+    { session: "2022-2023", name: "Ali Asgar Talukder" },
+    { session: "2022-2023", name: "Abdullah Al Mamun" },
+    { session: "2021-2022", name: "Shariful Islam Siam" },
+    { session: "2022-2023", name: "Md.Nazmul Haq Bhuiya" },
+    { session: "2022-2023", name: "MD. AFIF ALL ABIR" },
+    { session: "2022-2023", name: "Md.Naimur Rahman" },
+    { session: "2021-2022", name: "MEHERAN MAHTHIR SROBON" },
+    { session: "2022-2023", name: "Raduan Ahammad Shuvo" },
+    { session: "2022-2023", name: "Talha Hamim Antor" },
+    { session: "2022-2023", name: "Md.Abu bokor" },
+    { session: "2022-2023", name: "MD.MIFTAUL JANNAT TASIN" }
 ];
 
 const cCodeL = document.getElementById('course-code-list');
 const cNameL = document.getElementById('course-name-list');
 const nList = document.getElementById('name-list');
-const rList = document.getElementById('reg-list');
 const tList = document.getElementById('teacher-list');
 
 courseData.forEach(c => {
@@ -736,7 +719,6 @@ courseData.forEach(c => {
 extraTeachers.forEach(t => { tList.innerHTML += `<option value="${t.name}">`; });
 studentData.forEach(s => {
     nList.innerHTML += `<option value="${s.name}">`;
-    if(s.reg) rList.innerHTML += `<option value="${s.reg}">`;
 });
 
 const caseToggle = document.getElementById('case-toggle');
@@ -791,7 +773,6 @@ syncUp('in-topic', 'out-topic'); syncVisibility('in-topic', 'row-topic');
 syncUp('in-course-name', 'out-course-name'); syncVisibility('in-course-name', 'row-course-name');
 syncUp('in-course-no', 'out-course-no'); syncVisibility('in-course-no', 'row-course-no');
 syncUp('in-from-name', 'out-from-name'); syncVisibility('in-from-name', 'row-name');
-syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
 syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
 syncSuper('in-sem', 'out-sem'); syncVisibility('in-sem', 'row-sem');
 syncSuper('in-year', 'out-year'); syncVisibility('in-year', 'row-year');
@@ -810,9 +791,8 @@ document.getElementById('in-date-exp').addEventListener('input', function() {
     else { document.getElementById('out-date-exp').textContent = ''; }
 });
 
-const fillStudent = (m) => { if(!m) return; document.getElementById('in-from-name').value = m.name; document.getElementById('in-reg').value = m.reg; document.getElementById('in-session').value = m.session; document.getElementById('in-year').value = "3rd Year"; document.getElementById('in-batch').value = "10th"; document.getElementById('in-sem').value = "1st"; ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id))); };
+const fillStudent = (m) => { if(!m) return; document.getElementById('in-from-name').value = m.name; document.getElementById('in-session').value = m.session; document.getElementById('in-year').value = "3rd Year"; document.getElementById('in-batch').value = "10th"; document.getElementById('in-sem').value = "1st"; ['in-from-name','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id))); };
 document.getElementById('in-from-name').addEventListener('change', function() { fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase())); });
-document.getElementById('in-reg').addEventListener('change', function() { fillStudent(studentData.find(s => s.reg === this.value)); });
 
 const fillCourse = (m) => { if(!m) return; document.getElementById('in-course-name').value = m.name; document.getElementById('in-course-no').value = m.code; document.getElementById('in-to-name').value = m.teacher; document.getElementById('in-to-desig').value = m.desig; ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id))); };
 document.getElementById('in-course-no').addEventListener('change', function() { fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase())); });
@@ -840,9 +820,25 @@ function waitForImages(root) { const images = Array.from(root.querySelectorAll('
 
 function downloadPDF() {
     const original = document.getElementById('printable-area');
-    const regInput = document.getElementById('in-reg').value.trim();
-    const saveName = 'cover-' + (regInput.slice(-3) || 'page') + '.pdf';
-    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) { alert('PDF library load hoyni. Internet connection check kore page reload din.'); return; }
+    const btn = document.querySelector('.print-btn');
+    const origText = btn.innerText;
+    
+    // UI Feedback
+    btn.innerText = "Generating PDF...";
+    btn.style.opacity = "0.7";
+    btn.style.pointerEvents = "none";
+    
+    const nameInput = document.getElementById('in-from-name').value.trim().split(' ')[0] || 'page';
+    const saveName = 'cover-' + nameInput.toLowerCase() + '.pdf';
+    
+    if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) { 
+        alert('PDF library load hoyni. Internet connection check kore page reload din.'); 
+        btn.innerText = origText;
+        btn.style.opacity = "1";
+        btn.style.pointerEvents = "auto";
+        return; 
+    }
+    
     const clone = original.cloneNode(true);
     clone.id = 'pdf-export-area';
     clone.classList.add('exporting');
@@ -857,7 +853,39 @@ function downloadPDF() {
     clone.style.background = '#ffffff';
     clone.style.zIndex = '999999';
     document.body.appendChild(clone);
-    waitForImages(clone).then(() => { return html2canvas(clone, { scale: 3, useCORS: true, allowTaint: false, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, width: clone.offsetWidth, height: clone.offsetHeight, windowWidth: clone.offsetWidth, windowHeight: clone.offsetHeight }); }).then(canvas => { const imgData = canvas.toDataURL('image/jpeg', 1.0); const { jsPDF } = window.jspdf; const pdf = new jsPDF('portrait', 'mm', 'a4'); pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297); pdf.save(saveName); }).catch(error => { console.error('PDF export failed:', error); alert('PDF export failed. Logo image path ba browser console check korun.'); }).finally(() => { clone.remove(); });
+    
+    // Scale adjustment for mobile RAM handling
+    const isMobile = window.innerWidth <= 768;
+    const renderScale = isMobile ? 1.5 : 3;
+
+    waitForImages(clone).then(() => { 
+        return html2canvas(clone, { 
+            scale: renderScale, 
+            useCORS: true, 
+            allowTaint: false, 
+            backgroundColor: '#ffffff', 
+            scrollX: 0, 
+            scrollY: 0, 
+            width: clone.offsetWidth, 
+            height: clone.offsetHeight, 
+            windowWidth: clone.offsetWidth, 
+            windowHeight: clone.offsetHeight 
+        }); 
+    }).then(canvas => { 
+        const imgData = canvas.toDataURL('image/jpeg', 1.0); 
+        const { jsPDF } = window.jspdf; 
+        const pdf = new jsPDF('portrait', 'mm', 'a4'); 
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297); 
+        pdf.save(saveName); 
+    }).catch(error => { 
+        console.error('PDF export failed:', error); 
+        alert('PDF export failed. Logo image path ba browser console check korun.'); 
+    }).finally(() => { 
+        clone.remove(); 
+        btn.innerText = origText;
+        btn.style.opacity = "1";
+        btn.style.pointerEvents = "auto";
+    });
 }
 </script>
 </body>
