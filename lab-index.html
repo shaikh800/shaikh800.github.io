@@ -7,7 +7,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        /* --- Custom Scrollbar (MCQ builder style) --- */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -26,8 +25,8 @@
             --line: #e2e8f0;
             --paper: #ffffff;
             --soft-bg: #f8fafc;
-            --primary: #111827;      /* unified dark slate for all buttons */
-            --primary-dark: #1e293b; /* hover state */
+            --primary: #111827;
+            --primary-dark: #1e293b;
             --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
             --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
             --shadow-hover: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
@@ -44,7 +43,6 @@
             color: #111827;
         }
 
-        /* --- SIDEBAR (panel like MCQ builder) --- */
         .panel {
             width: 420px;
             background-color: var(--paper);
@@ -59,7 +57,6 @@
             transition: transform 0.25s ease;
         }
 
-        /* --- PREVIEW CONTAINER (page-wrap like MCQ builder) --- */
         .page-wrap {
             flex-grow: 1;
             background-color: #1e293b;
@@ -71,7 +68,6 @@
             transition: transform 0.25s ease;
         }
 
-        /* --- MOBILE TAB BAR (exactly like MCQ builder) --- */
         .mobile-tabbar {
             display: none;
             position: fixed;
@@ -104,7 +100,6 @@
         .mobile-tab.active { color: #38bdf8; }
         .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
 
-        /* --- A4 Page Layout (print-perfect) --- */
         .page-scaler {
             position: relative;
             margin: 0;
@@ -179,33 +174,17 @@
             background-color: #f9f9f9;
         }
 
-        .col-no {
-            width: 12%;
-        }
-
-        .col-date {
-            width: 13%;
-        }
-
+        .col-no { width: 12%; }
+        .col-date { width: 13%; }
         .col-name {
             width: auto;
             text-align: left !important;
             padding-left: 10px !important;
         }
+        .col-page { width: 14%; }
+        .col-remark { width: 14%; }
+        .hidden { display: none !important; }
 
-        .col-page {
-            width: 14%;
-        }
-
-        .col-remark {
-            width: 14%;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* --- UNIFIED BUTTON STYLES — all use #111827 (dark slate) --- */
         h3 {
             margin-top: 0;
             color: #1e293b;
@@ -219,10 +198,7 @@
             letter-spacing: 0.5px;
         }
 
-        .form-group {
-            margin-bottom: 14px;
-        }
-
+        .form-group { margin-bottom: 14px; }
         .form-group label {
             display: block;
             font-weight: 600;
@@ -251,7 +227,6 @@
             background-color: #ffffff;
         }
 
-        /* Toggle switches */
         .toggle-wrapper {
             display: flex;
             align-items: center;
@@ -280,45 +255,28 @@
             flex-shrink: 0;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: #e2e8f0;
             transition: 0.3s;
             border-radius: 20px;
         }
-
         .slider:before {
             position: absolute;
             content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
             background-color: white;
             transition: 0.3s;
             border-radius: 50%;
         }
 
-        input:checked + .slider {
-            background-color: #111827;  /* unified dark slate */
-        }
+        input:checked + .slider { background-color: #111827; }
+        input:checked + .slider:before { transform: translateX(16px); }
 
-        input:checked + .slider:before {
-            transform: translateX(16px);
-        }
-
-        /* experiments list card */
         .exp-list-container {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -358,12 +316,8 @@
             color: #1e293b;
         }
 
-        .list-actions {
-            display: flex;
-            gap: 5px;
-        }
+        .list-actions { display: flex; gap: 5px; }
 
-        /* ALL buttons — unified dark slate (#111827) */
         .action-btn, .toggle-btn, .add-btn, .pdf-btn, .reset-btn, .move-btn, .remove-btn, .edit-btn {
             background: #111827;
             color: white;
@@ -376,7 +330,6 @@
             transition: 0.2s;
         }
 
-        /* Special case for inactive toggle button (light gray background) */
         .toggle-btn {
             background: #f1f5f9;
             color: #334155;
@@ -388,7 +341,6 @@
             border: none;
         }
 
-        /* Hover effects: darker slate */
         .action-btn:hover:not(:disabled),
         .toggle-btn:hover:not(.active),
         .add-btn:hover,
@@ -409,7 +361,6 @@
             transform: none;
         }
 
-        /* Adjust spacing for different button types */
         .add-btn, .pdf-btn, .reset-btn {
             padding: 12px;
             font-size: 14px;
@@ -417,10 +368,7 @@
             margin-top: 4px;
         }
 
-        .move-btn, .remove-btn, .edit-btn {
-            padding: 5px 8px;
-            font-size: 11px;
-        }
+        .move-btn, .remove-btn, .edit-btn { padding: 5px 8px; font-size: 11px; }
 
         .control-row {
             display: flex;
@@ -429,112 +377,70 @@
             margin-bottom: 12px;
         }
 
-        /* Mobile responsive */
         @media (max-width: 768px) {
-            html, body {
-                height: 100dvh;
-                overflow: hidden;
-            }
-            body {
-                position: relative;
-                overflow: hidden;
-                flex-direction: column;
-            }
+            html, body { height: 100dvh; overflow: hidden; }
+            body { position: relative; overflow: hidden; flex-direction: column; }
             .panel {
-                position: fixed;
-                top: 0;
-                left: 0;
+                position: fixed; top: 0; left: 0;
                 width: 100% !important;
                 height: calc(100dvh - 56px);
                 padding: 16px 14px 8px;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
-                z-index: 200;
-                border-right: none;
+                z-index: 200; border-right: none;
                 transition: transform 0.25s ease;
                 transform: translateX(0);
             }
-            .panel.hidden-mobile {
-                transform: translateX(-100%);
-                pointer-events: none;
-            }
+            .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
             .page-wrap {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: calc(100dvh - 56px);
-                padding: 12px 0 4px;
-                overflow: auto;
+                position: fixed; top: 0; left: 0;
+                width: 100%; height: calc(100dvh - 56px);
+                padding: 12px 0 4px; overflow: auto;
                 -webkit-overflow-scrolling: touch;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+                display: flex; flex-direction: column; align-items: flex-start;
                 transition: transform 0.25s ease;
                 transform: translateX(100%);
             }
-            .page-wrap.active-mobile {
-                transform: translateX(0);
-            }
-            .mobile-tabbar {
-                display: grid;
-            }
+            .page-wrap.active-mobile { transform: translateX(0); }
+            .mobile-tabbar { display: grid; }
+            
+            /* ISSUE 2 FIXED: Center page correctly on mobile */
             .page {
-                transform-origin: top center;
+                transform-origin: top left;
                 transform: scale(var(--mobile-page-scale, 0.45));
+                margin-left: var(--mobile-page-offset, 0px) !important;
                 margin-bottom: var(--mobile-page-margin, -410px);
                 flex-shrink: 0;
             }
-            .panel h3 {
-                font-size: 13px;
-                margin-bottom: 12px;
-            }
-            .form-group input, .form-group select {
-                font-size: 14px;
-                padding: 9px 10px;
-            }
-            button {
-                min-height: 44px;
-            }
-            .action-btn, .toggle-btn, .reset-btn {
-                min-height: 36px;
-            }
-            .exp-list-container {
-                max-height: 200px;
-            }
+
+            .panel h3 { font-size: 13px; margin-bottom: 12px; }
+            .form-group input, .form-group select { font-size: 14px; padding: 9px 10px; }
+            button { min-height: 44px; }
+            .action-btn, .toggle-btn, .reset-btn { min-height: 36px; }
+            .exp-list-container { max-height: 200px; }
         }
 
         @media print {
-            .panel, .mobile-tabbar {
-                display: none;
-            }
+            .panel, .mobile-tabbar { display: none; }
             .page-wrap {
-                background: white;
-                padding: 0;
-                position: static;
-                transform: none;
-                height: auto;
-                overflow: visible;
+                background: white; padding: 0;
+                position: static; transform: none;
+                height: auto; overflow: visible;
             }
             .page {
-                box-shadow: none;
-                margin: 0;
-                page-break-after: avoid;
-                transform: none;
+                box-shadow: none; margin: 0;
+                page-break-after: avoid; transform: none;
             }
         }
 
         .tiny-hint {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 8px;
-            text-align: center;
+            font-size: 11px; color: #64748b;
+            margin-top: 8px; text-align: center;
         }
     </style>
 </head>
 <body>
 
-<!-- Mobile Tab Bar (exactly like MCQ builder) -->
 <div class="mobile-tabbar" role="tablist">
     <button class="mobile-tab active" id="tabEdit" onclick="switchMobileTab('edit')" role="tab" aria-selected="true">
         <span class="tab-icon">✏️</span>Edit
@@ -544,7 +450,6 @@
     </button>
 </div>
 
-<!-- Sidebar (Edit panel) -->
 <aside class="panel" id="sidebarPanel">
     <h3>📋 Experiments List</h3>
     <div class="exp-list-container" id="control-list">
@@ -633,7 +538,6 @@
     <div class="tiny-hint">💡 Settings & data auto-save. All buttons use the same dark slate color.</div>
 </aside>
 
-<!-- Preview container (Page wrap) -->
 <main class="page-wrap" id="pagesWrap">
     <div class="page-scaler" id="pdf_container">
         <div class="page" id="index-page">
@@ -658,7 +562,6 @@
 </main>
 
 <script>
-    // --- Mobile tab switching (exactly like MCQ builder) ---
     let currentMobileTab = 'edit';
     function switchMobileTab(tab) {
         currentMobileTab = tab;
@@ -696,8 +599,11 @@
         const scaledH = (firstPage.offsetHeight || 1123) * scale;
         const gap = 14;
         const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
+        const offsetLeft = (available - (naturalW * scale)) / 2;
+
         document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
         document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
+        document.documentElement.style.setProperty('--mobile-page-offset', offsetLeft.toFixed(0) + 'px');
     }
 
     window.addEventListener('resize', () => {
@@ -710,7 +616,6 @@
         applyMobilePageScale();
     }, { passive: true });
 
-    // --- Core functionality with unified colors ---
     let experiments = [];
     let bodyRowHeight = 40;
     let headerRowHeight = 40;
@@ -918,13 +823,13 @@
         const controlList = document.getElementById('control-list');
         const showExp = document.getElementById('chk_date_exp').checked;
         const showSub = document.getElementById('chk_date_sub').checked;
-        tbody.innerHTML = '';
-        controlList.innerHTML = '';
+        
         document.getElementById('header_row').style.height = `${headerRowHeight}px`;
         const tableElement = document.getElementById('main_table');
         tableElement.style.fontSize = `${tableFontSize}pt`;
 
         if (experiments.length === 0) {
+            tbody.innerHTML = '';
             controlList.innerHTML = '<div style="color: #64748b; font-size: 13px; text-align: center;">No experiments added yet.</div>';
             tableElement.style.height = 'auto';
             document.getElementById('btn_inc_body').disabled = true;
@@ -938,11 +843,16 @@
             tableElement.style.height = 'auto';
         }
 
+        // ISSUE 1 FIXED: Preventing DOM thrashing by using string concatenation
+        let tbodyHTML = "";
+        let controlListHTML = "";
+
         for (let i = 0; i < experiments.length; i++) {
             const exp = experiments[i];
             const calcNo = String(i + 1).padStart(2, '0');
             let rowStyle = '';
             if (!isEvenlyDistributed) rowStyle = `style="height: ${bodyRowHeight}px;"`;
+            
             let rowHTML = `<tr ${rowStyle}>`;
             rowHTML += `<td>${calcNo}</td>`;
             if (showExp) rowHTML += `<td>${exp.dateExp || '&#8203;'}</td>`;
@@ -950,9 +860,10 @@
             if (showSub) rowHTML += `<td>${exp.dateSub || '&#8203;'}</td>`;
             rowHTML += `<td>${exp.page || '&#8203;'}</td>`;
             rowHTML += `<td></td></tr>`;
-            tbody.innerHTML += rowHTML;
+            
+            tbodyHTML += rowHTML;
 
-            controlList.innerHTML += `
+            controlListHTML += `
                 <div class="exp-item">
                     <div class="exp-title-area"><strong>${calcNo}:</strong> ${exp.name}</div>
                     <div class="list-actions">
@@ -964,6 +875,9 @@
                 </div>
             `;
         }
+
+        tbody.innerHTML = tbodyHTML;
+        controlList.innerHTML = controlListHTML;
     }
 
     function saveToCache() {
@@ -1005,13 +919,14 @@
         const isMobile = window.innerWidth <= 768;
         const wasHidden = isMobile && pageWrap && !pageWrap.classList.contains('active-mobile');
 
-        // Mobile: temporarily make page visible (off-screen) for capture
+        // ISSUE 3 FIXED: Using fixed positioning instead of just visibility hidden to avoid blank PDF captures on mobile
         if (wasHidden && pageWrap) {
             pageWrap.style.visibility = 'hidden';
-            pageWrap.style.transform = 'translateX(0)';
+            pageWrap.style.transform = 'none';
+            pageWrap.style.position = 'fixed';
+            pageWrap.style.left = '-9999px';
         }
 
-        // Temporarily remove mobile scale transform so html2canvas captures full A4
         const prevPageTransform = element.style.transform;
         const prevPageMargin    = element.style.marginBottom;
         if (isMobile) {
@@ -1023,11 +938,14 @@
         btn.style.backgroundColor = "#555";
         element.style.boxShadow = 'none';
 
+        // Reduced scale for mobile to prevent memory crashes
+        const renderScale = isMobile ? 1.5 : 3;
+
         const opt = {
             margin: 0,
             filename: 'lab-report-index.pdf',
             image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { scale: 3, useCORS: true, scrollY: 0, scrollX: 0 },
+            html2canvas: { scale: renderScale, useCORS: true, scrollY: 0, scrollX: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
@@ -1043,7 +961,6 @@
             btn.style.backgroundColor = "#111827";
         }).finally(() => {
             element.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-            // Restore mobile transforms
             if (isMobile) {
                 element.style.transform  = prevPageTransform;
                 element.style.marginBottom = prevPageMargin;
@@ -1051,6 +968,8 @@
             if (wasHidden && pageWrap) {
                 pageWrap.style.visibility = '';
                 pageWrap.style.transform = '';
+                pageWrap.style.position = '';
+                pageWrap.style.left = '';
             }
         });
     }
