@@ -392,23 +392,27 @@
                 transform: translateX(0);
             }
             .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
+            
+            /* CSS FIXED: Scroll logic and centering for mobile */
             .page-wrap {
                 position: fixed; top: 0; left: 0;
                 width: 100%; height: calc(100dvh - 56px);
-                padding: 12px 0 4px; overflow: auto;
+                padding: 12px 0 4px; 
+                overflow-y: auto;
+                overflow-x: hidden; /* Remove horizontal scrolling */
                 -webkit-overflow-scrolling: touch;
-                display: flex; flex-direction: column; align-items: flex-start;
+                display: flex; flex-direction: column; align-items: center; /* Center horizontally */
                 transition: transform 0.25s ease;
                 transform: translateX(100%);
             }
             .page-wrap.active-mobile { transform: translateX(0); }
             .mobile-tabbar { display: grid; }
             
-            /* ISSUE 2 FIXED: Center page correctly on mobile */
+            /* CSS FIXED: Page scaling for mobile */
             .page {
-                transform-origin: top left;
+                transform-origin: top center; /* Scale from top center */
                 transform: scale(var(--mobile-page-scale, 0.45));
-                margin-left: var(--mobile-page-offset, 0px) !important;
+                margin-left: 0 !important; /* Remove offset calculations */
                 margin-bottom: var(--mobile-page-margin, -410px);
                 flex-shrink: 0;
             }
@@ -588,22 +592,23 @@
         }
     }
 
+    // JS FIXED: Simplify margin calculation
     function applyMobilePageScale() {
         if (window.innerWidth > 768) return;
         const pages = document.querySelectorAll('.page');
         if (!pages.length) return;
+        
         const firstPage = pages[0];
         const naturalW = firstPage.offsetWidth || 794;
         const available = window.innerWidth;
+        
         const scale = Math.max(0.28, Math.min(1, available / naturalW));
         const scaledH = (firstPage.offsetHeight || 1123) * scale;
         const gap = 14;
         const margin = scaledH - (firstPage.offsetHeight || 1123) + gap;
-        const offsetLeft = (available - (naturalW * scale)) / 2;
 
         document.documentElement.style.setProperty('--mobile-page-scale', String(scale.toFixed(4)));
         document.documentElement.style.setProperty('--mobile-page-margin', margin.toFixed(0) + 'px');
-        document.documentElement.style.setProperty('--mobile-page-offset', offsetLeft.toFixed(0) + 'px');
     }
 
     window.addEventListener('resize', () => {
