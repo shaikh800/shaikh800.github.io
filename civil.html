@@ -435,6 +435,29 @@
           <select id="r-type"><option value="pdf">PDF Document</option><option value="image">Image</option></select>
         </div>
 
+        <div class="path-builder form-group">
+          <label>Folder / Subject Path</label>
+          <div class="path-input-wrap">
+            <i class="fas fa-folder-open"></i>
+            <input type="text" id="r-drive-path" placeholder="e.g. CE 501 / Books">
+          </div>
+          <div class="path-suggestions" id="path-suggestions">
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 501</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 502</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 503</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 504</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 505</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 506</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 507</span>
+            <span class="path-chip"><i class="fas fa-folder"></i> CE 508</span>
+            <span class="path-chip"><i class="fas fa-book"></i> Books</span>
+            <span class="path-chip"><i class="fas fa-file-pdf"></i> PDFs</span>
+            <span class="path-chip"><i class="fas fa-clipboard-question"></i> Questions</span>
+            <span class="path-chip"><i class="fas fa-pen-to-square"></i> Notes</span>
+            <span class="path-chip clear-path" title="Reset Path"><i class="fas fa-undo"></i> Reset</span>
+          </div>
+        </div>
+
         <div class="form-tabs" id="src-tabs">
           <button class="form-tab" data-tab="gdrive-panel"><i class="fab fa-google-drive"></i> Google Drive</button>
           <button class="form-tab active" data-tab="url-panel">🔗 Direct URL</button>
@@ -455,7 +478,6 @@
             <div class="access-label">Access Control</div>
             <label class="access-option"><input type="radio" name="gdrive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — Download button থাকবে না</span></label>
             <label class="access-option"><input type="radio" name="gdrive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
-            <p class="access-info"><i class="fas fa-info-circle" style="color:var(--blue);"></i> Drive sharing <b>Restricted</b> রাখলে শুধু তুমি দেখতে পাবে। <b>Anyone with link</b> করলে সবাই দেখতে পাবে।</p>
           </div>
         </div>
 
@@ -467,35 +489,7 @@
         </div>
 
         <div class="form-tab-panel" id="upload-panel">
-          
-          <div class="path-builder form-group">
-            <label>Drive Folder Path</label>
-            <div class="path-input-wrap">
-              <i class="fas fa-folder-open"></i>
-              <input type="text" id="r-drive-path" placeholder="e.g. Semester 1 / Books">
-            </div>
-            <div class="path-suggestions" id="path-suggestions">
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 501 (Structural-I)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 502 (Structural Lab)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 503 (Concrete-I)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 504 (Environment-I)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 505 (Soil Mechanics)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 506 (Geotech Lab)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 507 (OCF)</span>
-              <span class="path-chip"><i class="fas fa-folder"></i> CE 508 (OCF Lab)</span>
-              
-              <span class="path-chip"><i class="fas fa-book"></i> Books</span>
-              <span class="path-chip"><i class="fas fa-file-pdf"></i> PDFs</span>
-              <span class="path-chip"><i class="fas fa-clipboard-question"></i> Questions</span>
-              <span class="path-chip"><i class="fas fa-person-chalkboard"></i> Lecture</span>
-              <span class="path-chip"><i class="fas fa-pen-to-square"></i> Notes</span>
-              <span class="path-chip"><i class="fas fa-flask"></i> Lab Reports</span>
-              <span class="path-chip"><i class="fas fa-file-contract"></i> Assignments</span>
-              <span class="path-chip clear-path" title="Reset Path"><i class="fas fa-undo"></i> Reset</span>
-        </div>
-      </div>
-
-      <div class="form-group" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:8px;">
             <label>Select File</label>
             <div class="file-drop-zone" id="file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
@@ -895,35 +889,59 @@
         grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources yet.</p></div>`;
         return;
       }
-      grid.innerHTML = items.map(it => {
-        const isPdf = it.type === 'pdf';
-        let thumbHtml = '';
-        const fid = extractDriveId(it.src);
 
-        if (fid) {
-          thumbHtml = `<img src="https://drive.google.com/thumbnail?id=${fid}&sz=w400" alt="${esc(it.title)}" loading="lazy">`;
-        } else if (!isPdf && it.thumb) {
-          thumbHtml = `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">`;
-        } else {
-          thumbHtml = `<i class="rc-icon fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
-        }
+      // Grouping files by Folder Path
+      const groups = {};
+      items.forEach(it => {
+        let f = (it.folder && it.folder.trim() !== '' && it.folder !== `Semester ${n}`) ? it.folder : 'General';
+        if (!groups[f]) groups[f] = [];
+        groups[f].push(it);
+      });
 
-        return `
-          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
-            <div class="rc-thumb">${thumbHtml}</div>
-            <div class="rc-body">
-              <div class="rc-title">${esc(it.title)}</div>
-              ${it.desc ? `<div class="rc-desc">${esc(it.desc)}</div>` : ''}
-            </div>
-            <div class="rc-meta">
-              <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
-              <div class="rc-actions">
-                <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
-                <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+      let finalHtml = '';
+      for (const [folderName, fItems] of Object.entries(groups)) {
+        // Folder Header
+        finalHtml += `
+          <div style="grid-column: 1 / -1; margin-top: 10px; margin-bottom: 2px; padding-bottom: 6px; border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-folder" style="color: var(--blue); font-size: 18px;"></i>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--ink);">${esc(folderName)}</h3>
+            <span style="font-size: 11px; font-weight: 700; color: var(--muted); background: var(--surface-soft); padding: 2px 8px; border-radius: 100px;">${fItems.length}</span>
+          </div>
+        `;
+
+        // Cards inside this folder
+        finalHtml += fItems.map(it => {
+          const isPdf = it.type === 'pdf';
+          let thumbHtml = '';
+          const fid = extractDriveId(it.src);
+
+          if (fid) {
+            thumbHtml = `<img src="https://drive.google.com/thumbnail?id=${fid}&sz=w400" alt="${esc(it.title)}" loading="lazy">`;
+          } else if (!isPdf && it.thumb) {
+            thumbHtml = `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">`;
+          } else {
+            thumbHtml = `<i class="rc-icon fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
+          }
+
+          return `
+            <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
+              <div class="rc-thumb">${thumbHtml}</div>
+              <div class="rc-body">
+                <div class="rc-title">${esc(it.title)}</div>
+                ${it.desc ? `<div class="rc-desc">${esc(it.desc)}</div>` : ''}
               </div>
-            </div>
-          </div>`;
-      }).join('');
+              <div class="rc-meta">
+                <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
+                <div class="rc-actions">
+                  <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
+                  <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      grid.innerHTML = finalHtml;
 
       grid.querySelectorAll('.resource-card').forEach(card => {
         card.addEventListener('click', async e => {
@@ -1107,7 +1125,8 @@
           reader.onload = async ev => {
             const dataUrl = ev.target.result;
             await saveFile(id, dataUrl);
-            const item = { id, title, desc, type, src:'idb:'+id, thumb: type==='image'?dataUrl:null };
+            const folderPath = document.getElementById('r-drive-path').value.trim();
+            const item = { id, title, desc, type, src:'idb:'+id, thumb: type==='image'?dataUrl:null, folder: folderPath };
             const sems = loadSems();
             if (!sems[activeSem]) sems[activeSem]=[];
             sems[activeSem].push(item);
@@ -1130,7 +1149,8 @@
         }
       }
 
-      const item = { id, title, desc, type, src, thumb:null };
+      const folderPath = document.getElementById('r-drive-path').value.trim();
+      const item = { id, title, desc, type, src, thumb:null, folder: folderPath };
       const sems = loadSems();
       if (!sems[activeSem]) sems[activeSem] = [];
       sems[activeSem].push(item);
