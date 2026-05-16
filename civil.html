@@ -237,6 +237,32 @@
     .admin-badge { display:none; align-items:center; gap:6px; padding:4px 12px; background:rgba(37,99,235,0.1); color:var(--blue); border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
     body.admin-mode .admin-badge { display:inline-flex; }
 
+    /* ── FILE SYSTEM & VIEW UI ─────────────────────────── */
+    .fs-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; padding: 12px 16px; background: var(--surface-soft); border-radius: var(--radius); border: 1px solid var(--line); }
+    .fs-breadcrumb { font-size: 14px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .fs-breadcrumb .crumb { cursor: pointer; color: var(--muted); transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+    .fs-breadcrumb .crumb:hover { color: var(--blue); }
+    .fs-breadcrumb .sep { color: var(--line); font-size: 11px; }
+    .fs-breadcrumb .crumb.active { color: var(--blue); pointer-events: none; }
+    
+    .fs-folder-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow); }
+    .fs-folder-card:hover { border-color: var(--blue); transform: translateY(-3px); box-shadow: var(--shadow-lg); background: rgba(37,99,235,0.02); }
+    .fs-folder-card i { font-size: 28px; color: var(--blue); }
+    .fs-folder-card span { font-weight: 700; font-size: 15px; color: var(--ink); }
+
+    .view-controls { display: flex; gap: 6px; }
+    .view-btn { background: var(--surface); border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; color: var(--muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; }
+    .view-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .view-btn:hover:not(.active) { color: var(--ink); background: var(--surface-soft); }
+
+    /* VIEW MODES */
+    .resource-grid.view-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .resource-grid.view-large { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .resource-grid.view-list { grid-template-columns: 1fr; }
+    .resource-grid.view-list .resource-card { flex-direction: row; height: 110px; align-items: center; }
+    .resource-grid.view-list .rc-thumb { width: 110px; height: 100%; flex-shrink: 0; border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+    .resource-grid.view-list .rc-body { display: flex; flex-direction: column; justify-content: center; flex: 1; }
+    .resource-grid.view-list .rc-meta { border-top: none; border-left: 1px solid var(--line); flex-direction: column; justify-content: center; align-items: flex-end; width: 140px; height: 100%; flex-shrink: 0; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
     /* ── MISC ──────────────────────────────────────────── */
     .tool-list { display:flex; flex-wrap:wrap; gap:10px; }
     .tool-pill { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:100px; border:1px solid var(--line); background:var(--surface); font-size:13px; font-weight:600; color:var(--muted); transition:all 0.2s ease; }
@@ -872,6 +898,23 @@
     const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
     let activeSem = 1;
 
+    /* ── Semester panels ───────────────────── */
+    const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
+    let activeSem = 1;
+    let currentSemPath = "";
+    let currentViewMode = localStorage.getItem('civil_view_mode') || 'view-grid';
+
+    window.navigateFolder = function(sem, path) {
+      currentSemPath = path;
+      renderSem(sem);
+    };
+
+    window.setViewMode = function(mode) {
+      currentViewMode = mode;
+      localStorage.setItem('civil_view_mode', mode);
+      renderSem(activeSem);
+    };
+
     function buildPanels() {
       document.getElementById('sem-panels').innerHTML = Array.from({length:8},(_,i)=>`
         <div class="sem-panel${i===0?' active':''}" id="sem-panel-${i+1}">
@@ -884,62 +927,107 @@
       const items = (loadSems()[n] || []);
       const grid = document.getElementById(`sem-grid-${n}`);
       const countEl = document.getElementById(`sem-count-${n}`);
-      if (countEl) countEl.textContent = items.length ? `${items.length} file${items.length>1?'s':''}` : '';
+      if (countEl) countEl.textContent = items.length ? `${items.length} files` : '';
+      
+      let targetSegs = currentSemPath.split('/').map(x=>x.trim()).filter(x=>x);
+      
+      // Breadcrumb Header
+      let breadcrumbHtml = `<span class="crumb ${targetSegs.length===0?'active':''}" onclick="navigateFolder(${n}, '')"><i class="fas fa-home"></i> Root File</span>`;
+      let buildPath = "";
+      targetSegs.forEach((seg, idx) => {
+        buildPath += (idx===0?'':' / ') + seg;
+        let isLast = idx === targetSegs.length - 1;
+        breadcrumbHtml += `<i class="fas fa-chevron-right sep"></i><span class="crumb ${isLast?'active':''}" onclick="navigateFolder(${n}, '${buildPath}')">${esc(seg)}</span>`;
+      });
+
+      let viewControlsHtml = `
+        <div class="view-controls admin-only">
+          <button class="view-btn ${currentViewMode==='view-list'?'active':''}" onclick="setViewMode('view-list')" title="List View"><i class="fas fa-list"></i></button>
+          <button class="view-btn ${currentViewMode==='view-grid'?'active':''}" onclick="setViewMode('view-grid')" title="Normal Grid"><i class="fas fa-th"></i></button>
+          <button class="view-btn ${currentViewMode==='view-large'?'active':''}" onclick="setViewMode('view-large')" title="Large Grid"><i class="fas fa-th-large"></i></button>
+        </div>
+      `;
+
+      let headerHtml = `
+        <div style="grid-column: 1/-1;">
+          <div class="fs-header">
+            <div class="fs-breadcrumb">${breadcrumbHtml}</div>
+            ${viewControlsHtml}
+          </div>
+        </div>
+      `;
+
       if (!items.length) {
-        grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources yet.</p></div>`;
+        grid.className = `resource-grid ${currentViewMode}`;
+        grid.innerHTML = headerHtml + `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources yet.</p></div>`;
         return;
       }
 
-      // Grouping files by Folder Path
-      const groups = {};
+      // Folder Sorting System
+      let files = [];
+      let folders = new Set();
+
       items.forEach(it => {
-        let f = (it.folder && it.folder.trim() !== '' && it.folder !== `Semester ${n}`) ? it.folder : 'General';
-        if (!groups[f]) groups[f] = [];
-        groups[f].push(it);
+        let folderStr = (it.folder && it.folder.trim() !== '' && !it.folder.startsWith('Semester')) ? it.folder : 'General';
+        let itSegs = folderStr.split('/').map(x=>x.trim()).filter(x=>x);
+        
+        let match = true;
+        for(let i=0; i<targetSegs.length; i++) {
+          if(itSegs[i] !== targetSegs[i]) { match = false; break; }
+        }
+        if(match) {
+          if(itSegs.length === targetSegs.length) {
+            files.push(it);
+          } else {
+            folders.add(itSegs[targetSegs.length]);
+          }
+        }
       });
 
-      let finalHtml = '';
-      for (const [folderName, fItems] of Object.entries(groups)) {
-        // Folder Header
+      grid.className = `resource-grid ${currentViewMode}`;
+      let finalHtml = headerHtml;
+
+      if (folders.size === 0 && files.length === 0) {
+        finalHtml += `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>This folder is empty.</p></div>`;
+      }
+
+      // Render Folders
+      Array.from(folders).sort().forEach(f => {
+        let nextPath = targetSegs.length > 0 ? currentSemPath + ' / ' + f : f;
         finalHtml += `
-          <div style="grid-column: 1 / -1; margin-top: 10px; margin-bottom: 2px; padding-bottom: 6px; border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-folder" style="color: var(--blue); font-size: 18px;"></i>
-            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--ink);">${esc(folderName)}</h3>
-            <span style="font-size: 11px; font-weight: 700; color: var(--muted); background: var(--surface-soft); padding: 2px 8px; border-radius: 100px;">${fItems.length}</span>
+          <div class="fs-folder-card" onclick="navigateFolder(${n}, '${nextPath}')">
+            <i class="fas fa-folder"></i>
+            <span>${esc(f)}</span>
           </div>
         `;
+      });
 
-        // Cards inside this folder
-        finalHtml += fItems.map(it => {
-          const isPdf = it.type === 'pdf';
-          let thumbHtml = '';
-          const fid = extractDriveId(it.src);
+      // Render Files
+      files.forEach(it => {
+        const isPdf = it.type === 'pdf';
+        let thumbHtml = '';
+        const fid = extractDriveId(it.src);
 
-          if (fid) {
-            thumbHtml = `<img src="https://drive.google.com/thumbnail?id=${fid}&sz=w400" alt="${esc(it.title)}" loading="lazy">`;
-          } else if (!isPdf && it.thumb) {
-            thumbHtml = `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">`;
-          } else {
-            thumbHtml = `<i class="rc-icon fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
-          }
+        if (fid) thumbHtml = `<img src="https://drive.google.com/thumbnail?id=${fid}&sz=w400" alt="${esc(it.title)}" loading="lazy">`;
+        else if (!isPdf && it.thumb) thumbHtml = `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">`;
+        else thumbHtml = `<i class="rc-icon fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
 
-          return `
-            <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
-              <div class="rc-thumb">${thumbHtml}</div>
-              <div class="rc-body">
-                <div class="rc-title">${esc(it.title)}</div>
-                ${it.desc ? `<div class="rc-desc">${esc(it.desc)}</div>` : ''}
+        finalHtml += `
+          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
+            <div class="rc-thumb">${thumbHtml}</div>
+            <div class="rc-body">
+              <div class="rc-title">${esc(it.title)}</div>
+              ${it.desc ? `<div class="rc-desc">${esc(it.desc)}</div>` : ''}
+            </div>
+            <div class="rc-meta">
+              <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
+              <div class="rc-actions">
+                <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
+                <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
               </div>
-              <div class="rc-meta">
-                <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
-                <div class="rc-actions">
-                  <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
-                  <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </div>
-              </div>
-            </div>`;
-        }).join('');
-      }
+            </div>
+          </div>`;
+      });
 
       grid.innerHTML = finalHtml;
 
@@ -968,7 +1056,9 @@
       const n = parseInt(tab.dataset.sem);
       document.querySelectorAll('.sem-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${n}`));
+      currentSemPath = ""; 
       activeSem = n;
+      renderSem(n); 
     });
 
     /* ── Open resource ─────────────────────── */
