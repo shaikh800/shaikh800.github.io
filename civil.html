@@ -263,6 +263,7 @@
     .resource-grid.view-list .rc-thumb { width: 110px; height: 100%; flex-shrink: 0; border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
     .resource-grid.view-list .rc-body { display: flex; flex-direction: column; justify-content: center; flex: 1; }
     .resource-grid.view-list .rc-meta { border-top: none; border-left: 1px solid var(--line); flex-direction: column; justify-content: center; align-items: flex-end; width: 140px; height: 100%; flex-shrink: 0; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+
     /* ── MISC ──────────────────────────────────────────── */
     .tool-list { display:flex; flex-wrap:wrap; gap:10px; }
     .tool-pill { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:100px; border:1px solid var(--line); background:var(--surface); font-size:13px; font-weight:600; color:var(--muted); transition:all 0.2s ease; }
@@ -893,10 +894,6 @@
       notices.unshift({ id:uid(), title, text:document.getElementById('n-text').value.trim(), type:document.getElementById('n-type').value, date:new Date().toLocaleDateString('en-BD',{day:'2-digit',month:'short',year:'numeric'}) });
       saveNotices(notices); renderNotices(); closeModal('modal-notice'); toast('Notice added ✓', 'success');
     });
-
-    /* ── Semester panels ───────────────────── */
-    const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
-    let activeSem = 1;
 
     /* ── Semester panels ───────────────────── */
     const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
