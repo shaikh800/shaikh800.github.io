@@ -259,10 +259,11 @@
     .resource-grid.view-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
     .resource-grid.view-large { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
     .resource-grid.view-list { grid-template-columns: 1fr; }
-    .resource-grid.view-list .resource-card { flex-direction: row; height: 110px; align-items: center; }
+    .resource-grid.view-list .resource-card { display: flex; flex-direction: row; height: 110px; align-items: center; overflow: hidden; }
     .resource-grid.view-list .rc-thumb { width: 110px; height: 100%; flex-shrink: 0; border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
-    .resource-grid.view-list .rc-body { display: flex; flex-direction: column; justify-content: center; flex: 1; }
-    .resource-grid.view-list .rc-meta { border-top: none; border-left: 1px solid var(--line); flex-direction: column; justify-content: center; align-items: flex-end; width: 140px; height: 100%; flex-shrink: 0; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+    .resource-grid.view-list .rc-body { display: flex; flex-direction: column; justify-content: center; flex: 1; min-width: 0; padding: 0 16px; }
+    .resource-grid.view-list .rc-title { word-break: break-all; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+    .resource-grid.view-list .rc-meta { display: flex !important; border-top: none; border-left: 1px solid var(--line); flex-direction: column; justify-content: space-between; align-items: flex-end; width: 140px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
 
     /* ── MISC ──────────────────────────────────────────── */
     .tool-list { display:flex; flex-wrap:wrap; gap:10px; }
@@ -1190,6 +1191,7 @@
 
       const id = uid();
       let src = '';
+      const folderPath = document.getElementById('r-drive-path').value.trim();
 
       if (activeTab === 'gdrive-panel') {
         const gUrl = document.getElementById('r-gdrive').value.trim();
@@ -1212,7 +1214,6 @@
           reader.onload = async ev => {
             const dataUrl = ev.target.result;
             await saveFile(id, dataUrl);
-            const folderPath = document.getElementById('r-drive-path').value.trim();
             const item = { id, title, desc, type, src:'idb:'+id, thumb: type==='image'?dataUrl:null, folder: folderPath };
             const sems = loadSems();
             if (!sems[activeSem]) sems[activeSem]=[];
@@ -1226,7 +1227,6 @@
         // Drive upload Custom Path
         try {
           const mode = document.querySelector('input[name="upload-access"]:checked').value;
-          const folderPath = document.getElementById('r-drive-path').value.trim();
           const result = await uploadFileToDrive(_pendingFile, folderPath, mode);
           src = result.embedUrl;
         } catch (err) {
@@ -1236,7 +1236,6 @@
         }
       }
 
-      const folderPath = document.getElementById('r-drive-path').value.trim();
       const item = { id, title, desc, type, src, thumb:null, folder: folderPath };
       const sems = loadSems();
       if (!sems[activeSem]) sems[activeSem] = [];
