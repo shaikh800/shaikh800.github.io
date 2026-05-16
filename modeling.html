@@ -3,240 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Civil Engineering | Md. Shaikh Alam</title>
-  <meta name="description" content="Civil engineering tools and semester resources — Faridpur Engineering College.">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>3D Modeling | Md. Shaikh Alam</title>
+  <meta name="description" content="3D modeling, Blender practice, rigging and animation work by Md. Shaikh Alam.">
+  <link class="work-thumb-placeholder" rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
-    /* ── NOTICE BOARD ────────────────────────────────────── */
-    .notice-board { padding: 0 0 40px; }
-    .notice-board-head {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    /* ── CSS VARIABLES FALLBACK ──────────────────────────── */
+    :root {
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --line: #e2e8f0;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
     }
-    .notice-board-head h2 { margin: 0; font-size: clamp(22px,3vw,30px); letter-spacing: -0.02em; }
-    .notices-grid { display: grid; gap: 12px; }
-    .notice-card {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 16px 20px; border-radius: var(--radius);
-      border-left: 4px solid; background: var(--surface); box-shadow: var(--shadow);
-      position: relative; animation: fadeSlideUp 0.4s var(--ease-out) both;
-    }
-    .notice-card.info    { border-color: var(--blue); }
-    .notice-card.warning { border-color: #f59e0b; }
-    .notice-card.urgent  { border-color: #ef4444; }
-    .notice-card .n-icon {
-      width: 36px; height: 36px; border-radius: 8px; display: flex;
-      align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
-    }
-    .notice-card.info    .n-icon { background: rgba(37,99,235,0.1); color: var(--blue); }
-    .notice-card.warning .n-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
-    .notice-card.urgent  .n-icon { background: rgba(239,68,68,0.1);  color: #ef4444; }
-    .notice-card .n-body { flex: 1; min-width: 0; }
-    .notice-card .n-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
-    .notice-card .n-text  { color: var(--muted); font-size: 13px; line-height: 1.6; }
-    .notice-card .n-date  { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .notice-card .n-delete {
-      position: absolute; top: 10px; right: 12px;
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      font-size: 13px; opacity: 0; transition: opacity 0.2s; padding: 4px;
-    }
-    @media (hover: hover) and (pointer: fine) {
-      .notice-card:hover .n-delete { opacity: 1; }
-    }
-    .notice-card .n-delete:hover { color: #ef4444; }
-    .notices-empty {
-      text-align: center; padding: 40px 20px; color: var(--muted);
-      border: 2px dashed var(--line); border-radius: var(--radius);
-    }
-    .notices-empty i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
 
-    /* ── SEMESTER TABS ───────────────────────────────────── */
-    .sem-section { padding: 40px 0; border-top: 1px solid var(--line); }
-    .sem-section-head {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    /* ── FILTER TABS ─────────────────────────────────────── */
+    .filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
+    .filter-btn {
+      padding:7px 16px; border-radius:100px; border:1px solid var(--line);
+      background:var(--surface); color:var(--muted); font-size:13px; font-weight:700;
+      cursor:pointer; transition:all 0.2s ease;
     }
-    .sem-section-head h2 { margin: 0; font-size: clamp(22px,3vw,30px); letter-spacing: -0.02em; }
-    .sem-tabs-wrap { overflow-x: auto; padding-bottom: 4px; margin-bottom: 28px; }
-    .sem-tabs { display: flex; gap: 8px; min-width: max-content; }
-    .sem-tab {
-      padding: 8px 18px; border-radius: 100px; border: 1px solid var(--line);
-      background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
-    }
-    .sem-tab:hover { border-color: var(--blue); color: var(--blue); }
-    .sem-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .sem-panel { display: none; }
-    .sem-panel.active { display: block; animation: fadeIn 0.3s var(--ease-out); }
-    .sem-panel-head {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
-    }
-    .sem-panel-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
-    .sem-panel-title span { color: var(--muted); font-weight: 600; font-size: 13px; margin-left: 8px; }
+    .filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
 
-    /* ── RESOURCE CARDS ──────────────────────────────────── */
-    .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-    .resource-card {
-      border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
-      box-shadow: var(--shadow); overflow: hidden; cursor: pointer;
-      transition: all 0.25s var(--ease-spring);
-      animation: fadeSlideUp 0.4s var(--ease-out) both;
+    /* ── WORKS GRID ──────────────────────────────────────── */
+    #works-container { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+    .work-card {
+      position:relative; border:1px solid var(--line); border-radius:var(--radius-lg);
+      background:var(--surface); box-shadow:var(--shadow); overflow:hidden;
+      transition:all 0.25s var(--ease-spring);
+      animation:fadeSlideUp 0.4s var(--ease-out) both;
     }
-    @media (hover: hover) and (pointer: fine) {
-      .resource-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(37,99,235,0.3); }
+    .work-thumb {
+      width:100%; aspect-ratio:16/9; object-fit:cover; display:block;
+      background:var(--surface-soft); transition:transform 0.4s var(--ease-out);
     }
-    .resource-card .rc-thumb {
-      height: 140px; display: flex; align-items: center; justify-content: center;
-      background: var(--surface-soft); overflow: hidden; position: relative;
+    .work-thumb-wrap { overflow:hidden; position:relative; }
+    .work-thumb-wrap .play-badge {
+      position:absolute; top:10px; right:10px;
+      background:rgba(255,0,0,0.85); color:#fff; border-radius:6px;
+      padding:3px 8px; font-size:11px; font-weight:700; display:flex; align-items:center; gap:5px;
     }
-    .resource-card.type-pdf .rc-thumb { background: rgba(37,99,235,0.06); }
-    .resource-card.type-image .rc-thumb { background: #000; }
-    .resource-card .rc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .resource-card .rc-thumb .rc-icon { font-size: 48px; color: var(--blue); opacity: 0.7; }
-    .resource-card .rc-body { padding: 14px 16px; }
-    .resource-card .rc-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .resource-card .rc-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-    .resource-card .rc-meta {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted);
+    .work-thumb-placeholder {
+      width:100%; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg, var(--surface-soft), rgba(37,99,235,0.06));
+      color:var(--blue); font-size:48px; opacity:0.6;
     }
-    .resource-card .rc-meta .rc-type { display: flex; align-items: center; gap: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-    .resource-card.type-pdf .rc-type { color: var(--blue); }
-    .resource-card.type-image .rc-type { color: var(--green); }
-    .rc-delete {
-      background: none; border: none; color: var(--muted); cursor: pointer;
-      padding: 4px 6px; border-radius: 6px; font-size: 13px; transition: all 0.2s;
+    .work-body { padding:18px 20px; }
+    .work-cat {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;
+      color:var(--blue); background:rgba(37,99,235,0.08);
+      border-radius:100px; padding:3px 10px; margin-bottom:10px;
     }
-    .rc-delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-    .sem-empty {
-      text-align: center; padding: 60px 20px; color: var(--muted);
-      border: 2px dashed var(--line); border-radius: var(--radius-lg);
+    .work-title { font-size:17px; font-weight:800; letter-spacing:-0.01em; margin-bottom:6px; }
+    .work-desc { color:var(--muted); font-size:13px; line-height:1.6; margin-bottom:14px; }
+    .work-footer {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+      padding-top:12px; border-top:1px solid var(--line);
     }
-    .sem-empty i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.3; }
-    .sem-empty p { margin: 0; font-size: 14px; }
+    .work-tool { font-size:12px; color:var(--muted); font-weight:600; display:flex; align-items:center; gap:5px; }
+    .work-link {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:12px; font-weight:700; color:var(--blue); text-decoration:none;
+      transition:gap 0.2s; cursor:pointer;
+    }
+    .work-link:hover { gap:10px; }
+    .work-actions {
+      position:absolute; top:10px; left:10px; display:flex; gap:6px;
+    }
+    .work-action-btn {
+      width:30px; height:30px; border-radius:8px; border:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; font-size:12px;
+      backdrop-filter:blur(8px); transition:all 0.2s;
+    }
+    .work-action-btn.edit-btn { background:rgba(255,255,255,0.9); color:var(--blue); }
+    .work-action-btn.del-btn  { background:rgba(255,255,255,0.9); color:#ef4444; }
+
+    /* ── ADMIN-ONLY ELEMENTS FIX ── */
+    .admin-actions { display: none !important; }
+    body.admin-mode .admin-actions { display: flex !important; }
+    body.admin-mode button.admin-actions { display: inline-flex !important; }
+
+    /* ── SECTION HEAD ROW ────────────────────────────────── */
+    .section-head-row {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:12px; margin-bottom:20px;
+    }
+    .section-head-row h2 { margin:0; font-size:clamp(22px,3vw,30px); letter-spacing:-0.02em; }
+
+    /* ── EMPTY STATE ─────────────────────────────────────── */
+    .works-empty {
+      grid-column:1/-1; text-align:center; padding:80px 20px; color:var(--muted);
+      border:2px dashed var(--line); border-radius:var(--radius-lg);
+    }
+    .works-empty i { font-size:48px; display:block; margin-bottom:16px; opacity:0.3; }
+    .works-empty p { margin:0; font-size:15px; }
+
+    /* ── ADMIN BADGE ─────────────────────────────────────── */
+    .admin-badge {
+      display:none; align-items:center; gap:6px; padding:4px 12px;
+      background:rgba(37,99,235,0.1); color:var(--blue); border-radius:100px;
+      font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;
+    }
+    body.admin-mode .admin-badge { display:inline-flex; }
+
+    /* ── ADMIN FAB ───────────────────────────────────────── */
+    .admin-fab {
+      position:fixed; bottom:24px; right:24px; z-index:500;
+      width:46px; height:46px; border-radius:50%; border:none;
+      background:var(--ink); color:#fff; font-size:16px; cursor:pointer;
+      box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:all 0.2s var(--ease-spring);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .admin-fab.active { background:var(--blue); }
 
     /* ── MODALS ──────────────────────────────────────────── */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000;
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
-      backdrop-filter: blur(4px);
+      position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      opacity:0; pointer-events:none; transition:opacity 0.25s ease;
+      backdrop-filter:blur(4px);
     }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
     .modal-box {
-      background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
-      width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
-      transform: translateY(20px) scale(0.97); transition: transform 0.3s var(--ease-out);
+      background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+      width:100%; max-width:540px; max-height:90vh; overflow-y:auto;
+      transform:translateY(20px) scale(0.97); transition:transform 0.3s var(--ease-out);
     }
-    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
-    .modal-box.modal-wide { max-width: 900px; max-height: 92vh; }
+    .modal-overlay.open .modal-box { transform:translateY(0) scale(1); }
     .modal-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid var(--line); position: sticky; top: 0;
-      background: var(--surface); z-index: 1; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:20px 24px; border-bottom:1px solid var(--line); position:sticky; top:0;
+      background:var(--surface); z-index:1; border-radius:var(--radius-lg) var(--radius-lg) 0 0;
     }
-    .modal-head h3 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
+    .modal-head h3 { margin:0; font-size:17px; letter-spacing:-0.01em; }
     .modal-close {
-      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line);
-      background: none; cursor: pointer; color: var(--muted); font-size: 14px;
-      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+      width:32px; height:32px; border-radius:8px; border:1px solid var(--line);
+      background:none; cursor:pointer; color:var(--muted); font-size:14px;
+      display:flex; align-items:center; justify-content:center; transition:all 0.2s;
     }
-    .modal-close:hover { background: var(--surface-soft); color: var(--ink); }
-    .modal-body { padding: 24px; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-close:hover { background:var(--surface-soft); color:var(--ink); }
+    .modal-body { padding:24px; }
+    .modal-footer { padding:16px 24px; border-top:1px solid var(--line); display:flex; gap:10px; justify-content:flex-end; }
 
-    /* ── FORM ELEMENTS ───────────────────────────────────── */
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 7px; }
+    /* ── FORM ────────────────────────────────────────────── */
+    .form-group { margin-bottom:16px; }
+    .form-group label { display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:7px; }
     .form-group input, .form-group textarea, .form-group select {
-      width: 100%; padding: 10px 14px; border: 1px solid var(--line);
-      border-radius: var(--radius); background: var(--surface-soft); color: var(--ink);
-      font-size: 14px; font-family: inherit; transition: border-color 0.2s; -webkit-appearance: none;
+      width:100%; padding:10px 14px; border:1px solid var(--line);
+      border-radius:var(--radius); background:var(--surface-soft); color:var(--ink);
+      font-size:14px; font-family:inherit; transition:border-color 0.2s; -webkit-appearance:none;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-      outline: none; border-color: var(--blue); background: var(--surface);
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+      outline:none; border-color:var(--blue); background:var(--surface);
+      box-shadow:0 0 0 3px rgba(37,99,235,0.08);
     }
-    .form-group textarea { resize: vertical; min-height: 80px; }
-    .form-tabs { display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-    .form-tab { flex: 1; padding: 9px 12px; border: none; background: var(--surface-soft); color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-    .form-tab.active { background: var(--blue); color: #fff; }
-    .form-tab-panel { display: none; }
-    .form-tab-panel.active { display: block; }
+    .form-group textarea { resize:vertical; min-height:72px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .thumb-preview {
+      width:100%; aspect-ratio:16/9; border-radius:var(--radius); overflow:hidden;
+      border:1px solid var(--line); background:var(--surface-soft); margin-top:10px;
+      display:none;
+    }
+    .thumb-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+    .thumb-preview.show { display:block; }
     .file-drop-zone {
-      border: 2px dashed var(--line); border-radius: var(--radius); padding: 30px 20px;
-      text-align: center; cursor: pointer; transition: all 0.2s; color: var(--muted);
+      border:2px dashed var(--line); border-radius:var(--radius); padding:24px 16px;
+      text-align:center; cursor:pointer; transition:all 0.2s; color:var(--muted);
     }
-    .file-drop-zone:hover, .file-drop-zone.dragover { border-color: var(--blue); background: rgba(37,99,235,0.04); color: var(--blue); }
-    .file-drop-zone i { font-size: 28px; display: block; margin-bottom: 8px; }
-    .file-drop-zone p { margin: 0; font-size: 13px; }
-    .file-drop-zone input[type=file] { display: none; }
-    .file-selected { font-size: 13px; margin-top: 8px; color: var(--green); font-weight: 600; }
+    .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(37,99,235,0.04); color:var(--blue); }
+    .file-drop-zone i { font-size:24px; display:block; margin-bottom:6px; }
+    .file-drop-zone p { margin:0; font-size:13px; }
+    .file-drop-zone input[type=file] { display:none; }
+    .src-tabs { display:flex; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; }
+    .src-tab { flex:1; padding:8px; border:none; background:var(--surface-soft); color:var(--muted); font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .src-tab.active { background:var(--blue); color:#fff; }
+    .src-panel { display:none; }
+    .src-panel.active { display:block; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:38px; padding:0 16px; border-radius:var(--radius); text-decoration:none; font-weight:700; font-size:14px; transition:all 0.2s var(--ease-spring); border:1px solid transparent; cursor:pointer; }
+    .btn:hover { transform:translateY(-1px); }
+    .btn.primary { color:#fff; background:var(--blue); box-shadow:0 6px 14px rgba(37,99,235,0.2); }
+    .btn.primary:hover { background:var(--blue-dark); }
+    .btn.secondary { color:var(--ink); background:var(--surface); border-color:var(--line); }
+    .btn.secondary:hover { border-color:var(--blue); color:var(--blue); }
+    .btn.sm { min-height:34px; padding:0 14px; font-size:13px; }
 
-    /* ── PDF VIEWER ──────────────────────────────────────── */
-    .pdf-viewer-wrap { display: flex; flex-direction: column; gap: 0; height: calc(85vh - 80px); }
-    .pdf-viewer-wrap iframe { flex: 1; border: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); min-height: 400px; }
-    .pdf-viewer-wrap .pdf-bar {
-      display: flex; align-items: center; gap: 10px; padding: 12px 16px;
-      background: var(--surface-soft); border-bottom: 1px solid var(--line); font-size: 13px; flex-wrap: wrap;
+    /* ── STATS BAR ───────────────────────────────────────── */
+    .stats-bar { display:flex; gap:24px; flex-wrap:wrap; margin-bottom:8px; }
+    .stat-item { text-align:center; }
+    .stat-num { font-size:28px; font-weight:800; letter-spacing:-0.03em; color:var(--blue); display:block; }
+    .stat-label { font-size:11px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; }
+
+    /* ── PAGE TITLE ──────────────────────────────────────── */
+    .page-title { padding-bottom:40px; }
+    .page-title h1 { font-size:clamp(32px,5vw,54px); margin-bottom:10px; }
+
+    /* ── HOVER EFFECTS FOR DESKTOP ONLY ──────────────────── */
+    @media (hover: hover) and (pointer: fine) {
+      .filter-btn:hover { border-color:var(--blue); color:var(--blue); }
+      .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
+      .work-card:hover .work-thumb { transform:scale(1.03); }
+      .work-action-btn:hover { transform:scale(1.1); }
+      .admin-fab:hover { transform:scale(1.1); }
     }
-    .pdf-bar a { color: var(--blue); text-decoration: none; font-weight: 600; font-size: 13px; }
 
-    /* ── IMAGE VIEWER ────────────────────────────────────── */
-    .img-viewer-wrap img { width: 100%; height: auto; border-radius: var(--radius); max-height: 75vh; object-fit: contain; display: block; }
-
-    /* ── ADMIN BUTTON ────────────────────────────────────── */
-    .admin-fab {
-      position: fixed; bottom: 24px; right: 24px; z-index: 500;
-      width: 46px; height: 46px; border-radius: 50%; border: none;
-      background: var(--ink); color: #fff; font-size: 16px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: all 0.2s var(--ease-spring);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .admin-fab:hover { transform: scale(1.1); }
-    .admin-fab.active { background: var(--blue); }
-
-    /* ── ADMIN-ONLY ELEMENTS (MOBILE FIXED) ──────────────── */
-    .admin-only { display: none !important; }
-    body.admin-mode .admin-only { display: inline-flex !important; }
-    body.admin-mode .rc-delete { display: inline-flex !important; opacity: 1; }
-    body.admin-mode .n-delete  { display: block !important; opacity: 1; }
-    .admin-badge {
-      display: none; align-items: center; gap: 6px; padding: 4px 12px;
-      background: rgba(37,99,235,0.1); color: var(--blue); border-radius: 100px;
-      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    body.admin-mode .admin-badge { display: inline-flex; }
-
-    /* ── TOOL PILLS ──────────────────────────────────────── */
-    .tool-list { display: flex; flex-wrap: wrap; gap: 10px; }
-    .tool-pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 16px; border-radius: 100px; border: 1px solid var(--line);
-      background: var(--surface); font-size: 13px; font-weight: 600; color: var(--muted);
-      transition: all 0.2s ease;
-    }
-    .tool-pill:hover { border-color: var(--blue); color: var(--blue); }
-    .tool-pill i { color: var(--blue); }
-
-    /* ── CARD GRID 3 ─────────────────────────────────────── */
-    .card-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    @media (max-width: 900px) { .card-grid.three { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px) { .card-grid.three { grid-template-columns: 1fr; } }
-
-    /* ── MOBILE UI FIXES ─────────────────────────────────── */
-    .page-title { padding-bottom: 40px; }
-    .page-title h1 { font-size: clamp(32px,5vw,54px); margin-bottom: 10px; }
-    .btn.sm { min-height: 34px; padding: 0 14px; font-size: 13px; }
-    .text-muted { color: var(--muted); font-size: 13px; }
-    .mt-0 { margin-top: 0 !important; }
-
-    @media (max-width: 560px) {
-      .resource-grid { grid-template-columns: 1fr; }
+    /* ── MOBILE OPTIMIZATION ─────────────────────────────── */
+    @media (max-width: 600px) {
+      #works-container { grid-template-columns:1fr; }
+      .form-row { grid-template-columns:1fr; }
+      
+      .work-action-btn { width:40px; height:40px; font-size:16px; }
+      .admin-actions { top:15px; left:15px; gap:10px; }
+      
       .modal-box { max-height: 85dvh; display: flex; flex-direction: column; }
       .modal-body { overflow-y: auto; overscroll-behavior: contain; }
     }
@@ -265,105 +254,63 @@
   <main class="page">
 
     <section class="page-title reveal">
-      <p class="eyebrow">FEC Civil Engineering · Batch 10</p>
-      <h1>Civil Section</h1>
-      <p class="lead" style="margin-bottom:0;">Tools, semester resources, and notices — all in one place.</p>
+      <p class="eyebrow">Blender · 3D Modeling · Animation</p>
+      <h1>3D Portfolio</h1>
+      <p class="lead" style="margin-bottom:16px;">Renders, rigging and animation experiments — updated as I learn.</p>
+      <div class="stats-bar" id="stats-bar">
+        <div class="stat-item"><span class="stat-num" id="stat-total">0</span><span class="stat-label">Projects</span></div>
+        <div class="stat-item"><span class="stat-num" id="stat-renders">0</span><span class="stat-label">Renders</span></div>
+        <div class="stat-item"><span class="stat-num" id="stat-videos">0</span><span class="stat-label">Videos</span></div>
+      </div>
     </section>
 
-    <section class="notice-board reveal" id="notice-section">
-      <div class="notice-board-head">
-        <h2><i class="fas fa-bell" style="color:var(--blue);font-size:22px;margin-right:8px;"></i>Notice Board</h2>
-        <div style="display:flex;align-items:center;gap:10px;">
+    <section class="section" aria-labelledby="works-title">
+      <div class="section-head-row reveal">
+        <div>
+          <h2 id="works-title">All Works</h2>
           <span class="admin-badge"><i class="fas fa-lock-open"></i> Admin Mode</span>
-          <button class="btn primary sm admin-only" id="add-notice-btn">
-            <i class="fas fa-plus"></i> Add Notice
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div class="filter-bar" id="filter-bar" style="margin-bottom:0;">
+            <button class="filter-btn active" data-cat="all">All</button>
+          </div>
+          <button class="btn primary sm admin-actions" id="add-work-btn">
+            <i class="fas fa-plus"></i> Add Project
           </button>
         </div>
       </div>
-      <div id="notices-container">
-        <div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="color:var(--blue); font-size:24px;"></i></div>
-      </div>
+
+      <div id="works-container"></div>
     </section>
 
-    <section class="section" aria-labelledby="academic-tools">
-      <div class="section-head reveal">
+    <section class="section" aria-labelledby="direction">
+      <div class="split-band reveal">
         <div>
-          <h2 id="academic-tools">Academic Utilities</h2>
-          <p>Cover pages, index sheets and question builders — submission-ready in seconds.</p>
+          <h2 id="direction">What I Want To Improve</h2>
+          <p class="lead">My next goal is to make 3D assets that are cleaner, easier to reuse and useful for web visuals, product mockups and engineering presentations.</p>
+          <ul class="note-list" style="margin-top:20px;">
+            <li>Cleaner topology and reusable base meshes.</li>
+            <li>Simple lighting setups that render fast and look good.</li>
+            <li>Animation loops useful for short-form video or presentations.</li>
+          </ul>
         </div>
-      </div>
-      <div class="card-grid three reveal-grid">
-        <a class="project-card" href="cover-page-maker.html">
-          <span class="card-icon"><i class="fas fa-file-lines"></i></span>
-          <h3>FEC Cover Page Maker</h3>
-          <p>Create a clean Faridpur Engineering College cover page, fill course and student details, then export as PDF.</p>
-          <span class="card-meta">Open cover page maker →</span>
-        </a>
-        <a class="project-card" href="lab-index.html">
-          <span class="card-icon"><i class="fas fa-table-list"></i></span>
-          <h3>Lab Report Index Generator</h3>
-          <p>Generate professional lab report index pages with dynamic rows, experiment titles and A4 PDF export.</p>
-          <span class="card-meta">Open index generator →</span>
-        </a>
-        <a class="project-card" href="print/mcq-builder.html">
-          <span class="card-icon"><i class="fas fa-list-check"></i></span>
-          <h3>Question Builder</h3>
-          <p>Build printable MCQ and question layouts for academic use with export-friendly formatting.</p>
-          <span class="card-meta">Open MCQ builder →</span>
-        </a>
-      </div>
-    </section>
-
-    <section class="sem-section reveal" id="semester-section">
-      <div class="sem-section-head">
-        <h2><i class="fas fa-books" style="color:var(--blue);font-size:22px;margin-right:8px;"></i>Semester Resources</h2>
-        <button class="btn primary sm admin-only" id="add-resource-btn">
-          <i class="fas fa-plus"></i> Add Resource
-        </button>
-      </div>
-
-      <div class="sem-tabs-wrap">
-        <div class="sem-tabs" id="sem-tabs">
-          <button class="sem-tab active" data-sem="1">1st Semester</button>
-          <button class="sem-tab" data-sem="2">2nd Semester</button>
-          <button class="sem-tab" data-sem="3">3rd Semester</button>
-          <button class="sem-tab" data-sem="4">4th Semester</button>
-          <button class="sem-tab" data-sem="5">5th Semester</button>
-          <button class="sem-tab" data-sem="6">6th Semester</button>
-          <button class="sem-tab" data-sem="7">7th Semester</button>
-          <button class="sem-tab" data-sem="8">8th Semester</button>
+        <div class="media-note">
+          <img src="favicon.svg" alt="Md. Shaikh mark">
+          <h3>Blender 0 to 1</h3>
+          <p>YouTube channel documenting 3D learning — tutorials, tips, and workflow experiments for an international audience.</p>
         </div>
-      </div>
-
-      <div id="sem-panels"></div>
-    </section>
-
-    <section class="section" aria-labelledby="skills-title">
-      <div class="section-head reveal">
-        <div>
-          <h2 id="skills-title">Working Areas</h2>
-          <p>A quick map of the engineering skills and software I am currently practicing.</p>
-        </div>
-      </div>
-      <div class="tool-list reveal-grid">
-        <div class="tool-pill"><i class="fas fa-building-columns"></i> Structural Analysis</div>
-        <div class="tool-pill"><i class="fas fa-drafting-compass"></i> AutoCAD Drafting</div>
-        <div class="tool-pill"><i class="fas fa-file-pdf"></i> PDF Formatting</div>
-        <div class="tool-pill"><i class="fas fa-water"></i> Surveying</div>
-        <div class="tool-pill"><i class="fas fa-calculator"></i> Engineering Statistics</div>
-        <div class="tool-pill"><i class="fas fa-print"></i> Print Workflow</div>
       </div>
     </section>
 
     <section class="contact-strip reveal" aria-label="Contact">
       <div>
-        <h2>Need one of these tools?</h2>
-        <p>Open the tool directly or contact me if a format needs adjusting.</p>
+        <h2>Follow the work</h2>
+        <p>Blender tutorials and experiments — new uploads as I keep learning.</p>
       </div>
       <div class="contact-links">
-        <a href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
-        <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+        <a href="https://www.youtube.com/@Blender0to1" target="_blank" rel="noopener"><i class="fab fa-youtube"></i> YouTube</a>
         <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+        <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
       </div>
     </section>
 
@@ -372,7 +319,7 @@
   <footer class="site-footer">
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
-      <span>Civil Engineering · FEC Batch 10</span>
+      <span>Blender modeling and animation practice</span>
     </div>
   </footer>
 
@@ -403,120 +350,84 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-notice">
+  <div class="modal-overlay" id="modal-work">
     <div class="modal-box">
       <div class="modal-head">
-        <h3><i class="fas fa-bell" style="color:var(--blue);margin-right:8px;"></i>Add Notice</h3>
-        <button class="modal-close" data-close="modal-notice"><i class="fas fa-times"></i></button>
+        <h3 id="work-modal-title"><i class="fas fa-cube" style="color:var(--blue);margin-right:8px;"></i>Add Project</h3>
+        <button class="modal-close" data-close="modal-work"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Notice Title</label>
-          <input type="text" id="n-title" placeholder="e.g. Mid-term exam schedule updated">
-        </div>
-        <div class="form-group">
-          <label>Notice Text</label>
-          <textarea id="n-text" placeholder="Write the notice details here..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select id="n-type">
-            <option value="info">ℹ️  Info</option>
-            <option value="warning">⚠️  Warning</option>
-            <option value="urgent">🔴  Urgent</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-notice">Cancel</button>
-        <button class="btn primary sm" id="save-notice-btn"><i class="fas fa-check"></i> Save Notice</button>
-      </div>
-    </div>
-  </div>
+        <input type="hidden" id="edit-id">
 
-  <div class="modal-overlay" id="modal-resource">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3><i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Resource</h3>
-        <button class="modal-close" data-close="modal-resource"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Title</label>
-          <input type="text" id="r-title" placeholder="e.g. Surveying Lab Report 1">
-        </div>
-        <div class="form-group">
-          <label>Description (optional)</label>
-          <input type="text" id="r-desc" placeholder="Short description">
-        </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select id="r-type">
-            <option value="pdf">PDF Document</option>
-            <option value="image">Image / Screenshot</option>
-          </select>
-        </div>
-
-        <div class="form-tabs" id="src-tabs">
-          <button class="form-tab active" data-tab="url-panel">🔗 Link (URL)</button>
-          <button class="form-tab" data-tab="upload-panel">📁 Upload Image</button>
-        </div>
-
-        <div class="form-tab-panel active" id="url-panel">
-          <div class="form-group mt-0">
-            <label>File URL</label>
-            <input type="url" id="r-url" placeholder="https://... (Google Drive / GitHub / direct link)">
-            <p class="text-muted" style="margin:6px 0 0;">For PDF/Docs use Google Drive: Share → "Anyone with link".</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Project Title *</label>
+            <input type="text" id="w-title" placeholder="e.g. Swordfish Ship">
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="w-cat">
+              <option value="Render">🖼️  Render</option>
+              <option value="Animation">🎬  Animation</option>
+              <option value="Rigging">🦴  Rigging</option>
+              <option value="Tutorial">📹  Tutorial</option>
+              <option value="Shader">✨  Shader</option>
+              <option value="Other">📦  Other</option>
+            </select>
           </div>
         </div>
 
-        <div class="form-tab-panel" id="upload-panel">
-          <div class="form-group mt-0">
-            <label>Upload Image</label>
-            <div class="file-drop-zone" id="file-drop">
-              <i class="fas fa-cloud-upload-alt"></i>
-              <p>Click to browse image</p>
-              <p style="font-size:11px;margin-top:4px;">(Images only. For PDFs, use the Link tab)</p>
-              <input type="file" id="r-file" accept="image/*">
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="w-desc" placeholder="Brief description of the project..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tool / Software</label>
+            <input type="text" id="w-tool" placeholder="e.g. Blender 4.2">
+          </div>
+          <div class="form-group">
+            <label>External Link (optional)</label>
+            <input type="url" id="w-link" placeholder="https://youtube.com/...">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Thumbnail</label>
+          <div class="src-tabs" id="thumb-src-tabs">
+            <button class="src-tab active" data-panel="thumb-url-panel">🔗 URL</button>
+            <button class="src-tab" data-panel="thumb-upload-panel">📁 Upload</button>
+          </div>
+          <div class="src-panel active" id="thumb-url-panel">
+            <input type="url" id="w-img-url" placeholder="https://... (image URL)">
+          </div>
+          <div class="src-panel" id="thumb-upload-panel">
+            <div class="file-drop-zone" id="thumb-drop">
+              <i class="fas fa-image"></i>
+              <p>Click to upload thumbnail image</p>
+              <input type="file" id="w-img-file" accept="image/*">
             </div>
-            <div class="file-selected" id="file-name"></div>
           </div>
+          <div class="thumb-preview" id="thumb-preview"><img id="thumb-preview-img" src="" alt=""></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-resource">Cancel</button>
-        <button class="btn primary sm" id="save-resource-btn"><i class="fas fa-check"></i> Add to Semester</button>
+        <button class="btn secondary sm" data-close="modal-work">Cancel</button>
+        <button class="btn primary sm" id="save-work-btn"><i class="fas fa-check"></i> Save</button>
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-pdf">
-    <div class="modal-box modal-wide">
+  <div class="modal-overlay" id="modal-img">
+    <div class="modal-box" style="max-width:860px;">
       <div class="modal-head">
-        <h3 id="pdf-modal-title"><i class="fas fa-file-pdf" style="color:var(--blue);margin-right:8px;"></i>PDF Viewer</h3>
-        <button class="modal-close" data-close="modal-pdf"><i class="fas fa-times"></i></button>
+        <h3 id="img-view-title"><i class="fas fa-image" style="color:var(--blue);margin-right:8px;"></i></h3>
+        <button class="modal-close" data-close="modal-img"><i class="fas fa-times"></i></button>
       </div>
-      <div class="pdf-viewer-wrap">
-        <div class="pdf-bar">
-          <span id="pdf-bar-title" style="font-weight:600;"></span>
-          <a id="pdf-open-link" href="#" target="_blank"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
-        </div>
-        <iframe id="pdf-frame" src="" allow="fullscreen"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-image">
-    <div class="modal-box modal-wide">
-      <div class="modal-head">
-        <h3 id="img-modal-title"><i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i>Image Viewer</h3>
-        <button class="modal-close" data-close="modal-image"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body" style="padding:16px;">
-        <div class="img-viewer-wrap">
-          <img id="img-view" src="" alt="">
-        </div>
-        <p id="img-desc" style="margin-top:12px;color:var(--muted);font-size:13px;text-align:center;"></p>
+      <div class="modal-body" style="padding:12px;">
+        <img id="img-view-src" src="" alt="" style="width:100%;border-radius:var(--radius);display:block;">
+        <p id="img-view-desc" style="margin:12px 0 0;color:var(--muted);font-size:13px;text-align:center;"></p>
       </div>
     </div>
   </div>
@@ -541,23 +452,25 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
+    
     const ADMIN_EMAIL = "md.shaikh.alam.007@gmail.com";
     let adminMode = false;
-    let noticesData = [];
-    let semestersData = {};
-    let activeSem = 1;
-    const semLabels = ['','1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'];
+    let worksData = [];
+    let activeFilter = 'all';
+    let pendingThumb = null;
 
     function applyAdmin() {
       document.body.classList.toggle('admin-mode', adminMode);
       document.getElementById('admin-fab').classList.toggle('active', adminMode);
       document.getElementById('admin-fab-icon').className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
-      document.getElementById('admin-fab').title = adminMode ? 'Log out' : 'Admin Login';
     }
 
     onAuthStateChanged(auth, (user) => {
-      adminMode = (user && user.email === ADMIN_EMAIL);
+      if (user && user.email === ADMIN_EMAIL) {
+        adminMode = true;
+      } else {
+        adminMode = false;
+      }
       applyAdmin();
     });
 
@@ -604,256 +517,237 @@
       }
     });
 
-    function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
-    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
-    document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
-    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-    async function fetchAllData() {
+    async function fetchWorks() {
       try {
-        const snapNotices = await getDocs(collection(db, "notices"));
-        noticesData = [];
-        snapNotices.forEach(d => noticesData.push(d.data()));
-        noticesData.sort((a, b) => b.timestamp - a.timestamp);
-        renderNotices();
-
-        const snapResources = await getDocs(collection(db, "resources"));
-        semestersData = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[]};
-        snapResources.forEach(d => {
-          const item = d.data();
-          if(semestersData[item.sem]) semestersData[item.sem].push(item);
-        });
-        renderAllSems();
-      } catch (err) { console.error("Error fetching data:", err); }
+        const snap = await getDocs(collection(db, "works"));
+        worksData = [];
+        snap.forEach(d => worksData.push(d.data()));
+        worksData.sort((a, b) => b.timestamp - a.timestamp);
+        renderWorks();
+      } catch (err) {
+        console.error("Error fetching works: ", err);
+      }
     }
 
-    function renderNotices() {
-      const c = document.getElementById('notices-container');
-      if (!noticesData.length) {
-        c.innerHTML = `<div class="notices-empty"><i class="fas fa-bell-slash"></i><p>No notices yet.</p></div>`;
-        return;
-      }
-      const icons = { info:'fa-info-circle', warning:'fa-triangle-exclamation', urgent:'fa-circle-exclamation' };
-      c.innerHTML = `<div class="notices-grid">${noticesData.map(n => `
-        <div class="notice-card ${n.type}">
-          <div class="n-icon"><i class="fas ${icons[n.type]||'fa-info-circle'}"></i></div>
-          <div class="n-body">
-            <div class="n-title">${esc(n.title)}</div>
-            <div class="n-text">${esc(n.text)}</div>
-            <div class="n-date"><i class="far fa-calendar-alt"></i> ${n.date}</div>
-          </div>
-          <button class="n-delete admin-only" data-id="${n.id}" title="Delete Notice"><i class="fas fa-trash-alt"></i></button>
-        </div>`).join('')}</div>`;
-      
-      c.querySelectorAll('.n-delete').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          e.stopPropagation();
-          if(!confirm('Delete this notice?')) return;
-          await deleteDoc(doc(db, "notices", btn.dataset.id));
-          fetchAllData();
+    function buildFilters() {
+      const cats = ['all', ...new Set(worksData.map(w => w.cat).filter(Boolean))];
+      const bar = document.getElementById('filter-bar');
+      bar.innerHTML = cats.map(c => `<button class="filter-btn${c===activeFilter?' active':''}" data-cat="${c}">${c === 'all' ? 'All' : c}</button>`).join('');
+      bar.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeFilter = btn.dataset.cat;
+          renderWorks();
         });
       });
     }
 
-    document.getElementById('add-notice-btn').addEventListener('click', () => {
-      document.getElementById('n-title').value = '';
-      document.getElementById('n-text').value  = '';
-      document.getElementById('n-type').value  = 'info';
-      openModal('modal-notice');
-    });
-
-    document.getElementById('save-notice-btn').addEventListener('click', async () => {
-      const title = document.getElementById('n-title').value.trim();
-      const text  = document.getElementById('n-text').value.trim();
-      if (!title) return;
-
-      const saveBtn = document.getElementById('save-notice-btn');
-      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; saveBtn.disabled = true;
-
-      const id = Date.now().toString();
-      const notice = {
-        id, title, text, type: document.getElementById('n-type').value,
-        date: new Date().toLocaleDateString('en-BD', { day:'2-digit', month:'short', year:'numeric' }),
-        timestamp: Date.now()
-      };
+    function renderWorks() {
+      const filtered = activeFilter === 'all' ? worksData : worksData.filter(w => w.cat === activeFilter);
+      const container = document.getElementById('works-container');
       
-      await setDoc(doc(db, "notices", id), notice);
-      saveBtn.innerHTML = '<i class="fas fa-check"></i> Save Notice'; saveBtn.disabled = false;
-      closeModal('modal-notice');
-      fetchAllData();
-    });
+      document.getElementById('stat-total').textContent = worksData.length;
+      document.getElementById('stat-renders').textContent = worksData.filter(w => w.cat === 'Render').length;
+      document.getElementById('stat-videos').textContent = worksData.filter(w => w.link).length;
+      
+      buildFilters();
 
-    function buildPanels() {
-      const wrap = document.getElementById('sem-panels');
-      wrap.innerHTML = Array.from({length:8},(_,i) => `
-        <div class="sem-panel${i===0?' active':''}" id="sem-panel-${i+1}">
-          <div class="sem-panel-head">
-            <div class="sem-panel-title">${semLabels[i+1]} <span id="sem-count-${i+1}"></span></div>
-          </div>
-          <div class="resource-grid" id="sem-grid-${i+1}"></div>
-        </div>`).join('');
-    }
-
-    function renderSem(n) {
-      const items = semestersData[n] || [];
-      const grid  = document.getElementById(`sem-grid-${n}`);
-      const countEl = document.getElementById(`sem-count-${n}`);
-      if (countEl) countEl.textContent = items.length ? `${items.length} file${items.length>1?'s':''}` : '';
-      if (!items.length) {
-        grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources found for this semester.</p></div>`;
+      if (!filtered.length) {
+        container.innerHTML = `<div class="works-empty"><i class="fas fa-folder-open"></i><p>No projects found. Log in as admin to add some!</p></div>`;
         return;
       }
-      grid.innerHTML = items.map(it => {
-        const isPdf = it.type === 'pdf';
-        const thumb = (!isPdf && it.src) ? `<img src="${esc(it.src)}" alt="${esc(it.title)}" loading="lazy">` : `<i class="rc-icon fas ${isPdf?'fa-file-pdf':'fa-image'}"></i>`;
-        return `
-          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}" data-type="${it.type}">
-            <div class="rc-thumb">${thumb}</div>
-            <div class="rc-body">
-              <div class="rc-title">${esc(it.title)}</div>
-              ${it.desc ? `<div class="rc-desc">${esc(it.desc)}</div>` : ''}
+
+      const cards = filtered.map(w => {
+        const imgHtml = w.img ? `<img class="work-thumb" src="${esc(w.img)}" alt="${esc(w.title)}" loading="lazy">` : `<div class="work-thumb-placeholder"><i class="fas fa-cube"></i></div>`;
+        const hasVideo = w.link && (w.link.includes('youtube') || w.link.includes('youtu.be'));
+        return `<div class="work-card" data-id="${w.id}">
+            <div class="work-thumb-wrap">
+              ${imgHtml}
+              ${hasVideo ? `<div class="play-badge"><i class="fab fa-youtube"></i> Video</div>` : ''}
             </div>
-            <div class="rc-meta">
-              <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
-              <button class="rc-delete admin-only" data-id="${it.id}" title="Delete File"><i class="fas fa-trash-alt"></i></button>
+            <div class="admin-actions work-actions">
+              <button class="work-action-btn edit-btn" data-id="${w.id}"><i class="fas fa-pen"></i></button>
+              <button class="work-action-btn del-btn" data-id="${w.id}"><i class="fas fa-trash-alt"></i></button>
+            </div>
+            <div class="work-body">
+              <div class="work-cat">${esc(w.cat||'Other')}</div>
+              <div class="work-title">${esc(w.title)}</div>
+              ${w.desc ? `<div class="work-desc">${esc(w.desc)}</div>` : ''}
+              <div class="work-footer">
+                <div class="work-tool"><i class="fas fa-cube" style="color:var(--blue)"></i> ${esc(w.tool||'Blender')}</div>
+                ${w.link ? `<a class="work-link" href="${esc(w.link)}" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> Open</a>` : ''}
+              </div>
             </div>
           </div>`;
-      }).join('');
-
-      grid.querySelectorAll('.resource-card').forEach(card => {
-        card.addEventListener('click', e => {
-          if (e.target.closest('.rc-delete')) return;
-          const item = semestersData[n].find(i => i.id === card.dataset.id);
-          if(!item) return;
-          if (item.type === 'pdf') {
-            document.getElementById('pdf-modal-title').innerHTML = `<i class="fas fa-file-pdf" style="color:var(--blue);margin-right:8px;"></i>${esc(item.title)}`;
-            document.getElementById('pdf-bar-title').textContent = item.title;
-            document.getElementById('pdf-open-link').href = item.src;
-            document.getElementById('pdf-frame').src = item.src;
-            openModal('modal-pdf');
-          } else {
-            document.getElementById('img-modal-title').innerHTML = `<i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i>${esc(item.title)}`;
-            document.getElementById('img-view').src = item.src;
-            document.getElementById('img-desc').textContent = item.desc || '';
-            openModal('modal-image');
-          }
-        });
       });
 
-      grid.querySelectorAll('.rc-delete').forEach(btn => {
-        btn.addEventListener('click', async e => {
-          e.stopPropagation();
-          if(!confirm('Delete this file permanently?')) return;
-          await deleteDoc(doc(db, "resources", btn.dataset.id));
-          fetchAllData();
+      container.innerHTML = cards.join('');
+
+      container.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id); }));
+      container.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deleteWork(btn.dataset.id); }));
+      
+      container.querySelectorAll('.work-card').forEach(card => {
+        card.addEventListener('click', e => {
+          if (e.target.closest('.work-action-btn') || e.target.closest('.work-link')) return;
+          const w = worksData.find(x => x.id === card.dataset.id);
+          if (!w || !w.img) return;
+          document.getElementById('img-view-title').innerHTML = `<i class="fas fa-image" style="color:var(--blue);margin-right:8px;"></i>${esc(w.title)}`;
+          document.getElementById('img-view-src').src = w.img;
+          document.getElementById('img-view-desc').textContent = w.desc || '';
+          openModal('modal-img');
         });
       });
     }
 
-    function renderAllSems() { for(let i=1;i<=8;i++) renderSem(i); }
-
-    document.getElementById('sem-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.sem-tab'); if (!tab) return;
-      activeSem = parseInt(tab.dataset.sem);
-      document.querySelectorAll('.sem-tab').forEach(t => t.classList.toggle('active', t===tab));
-      document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${activeSem}`));
-    });
-
-    let pendingImage = null;
-
-    document.getElementById('src-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.form-tab'); if (!tab) return;
-      if (tab.dataset.tab === 'upload-panel' && document.getElementById('r-type').value === 'pdf') {
-        alert("To prevent the website from crashing, PDF uploads are disabled. Please upload your PDF to Google Drive and paste the link in the URL tab.");
-        return;
+    async function deleteWork(id) {
+      if (!confirm('Are you sure you want to delete this project?')) return;
+      try {
+        await deleteDoc(doc(db, "works", id));
+        fetchWorks();
+      } catch(err) {
+        console.error("Error deleting document: ", err);
       }
-      document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t===tab));
-      document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
+    }
+
+    document.getElementById('thumb-src-tabs').addEventListener('click', e => {
+      const tab = e.target.closest('.src-tab'); if (!tab) return;
+      document.querySelectorAll('.src-tab').forEach(t => t.classList.toggle('active', t===tab));
+      document.querySelectorAll('.src-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.panel));
     });
 
-    document.getElementById('r-type').addEventListener('change', e => {
-      if(e.target.value === 'pdf') {
-         document.querySelector('[data-tab="url-panel"]').click();
-      }
-    });
-
-    const fileInput = document.getElementById('r-file');
-    document.getElementById('file-drop').addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files[0];
-      if (!f || !f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+    const thumbFile = document.getElementById('w-img-file');
+    document.getElementById('thumb-drop').addEventListener('click', () => thumbFile.click());
+    
+    thumbFile.addEventListener('change', () => {
+      const f = thumbFile.files[0];
+      if (!f || !f.type.startsWith('image/')) return;
       const reader = new FileReader();
       reader.onload = ev => {
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
           let w = img.width, h = img.height;
-          if (w > 1200) { h = Math.round((h * 1200) / w); w = 1200; }
-          canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
-          pendingImage = canvas.toDataURL('image/jpeg', 0.6);
-          document.getElementById('file-name').textContent = `✓ Image selected and compressed`;
+          if (w > 800) { h = Math.round((h * 800) / w); w = 800; }
+          canvas.width = w; canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
+          pendingThumb = canvas.toDataURL('image/jpeg', 0.7);
+          document.getElementById('thumb-preview-img').src = pendingThumb;
+          document.getElementById('thumb-preview').classList.add('show');
         };
         img.src = ev.target.result;
       };
       reader.readAsDataURL(f);
     });
 
-    document.getElementById('add-resource-btn').addEventListener('click', () => {
-      document.getElementById('r-title').value = '';
-      document.getElementById('r-desc').value  = '';
-      document.getElementById('r-url').value   = '';
-      document.getElementById('file-name').textContent = '';
-      document.getElementById('r-type').value  = 'pdf';
-      pendingImage = null;
-      document.querySelector('[data-tab="url-panel"]').click();
-      openModal('modal-resource');
+    document.getElementById('w-img-url').addEventListener('input', function() {
+      if (this.value.trim()) {
+        document.getElementById('thumb-preview-img').src = this.value.trim();
+        document.getElementById('thumb-preview').classList.add('show');
+        pendingThumb = null;
+      }
     });
 
-    document.getElementById('save-resource-btn').addEventListener('click', async () => {
-      const title = document.getElementById('r-title').value.trim();
-      const type = document.getElementById('r-type').value;
-      const useUrl = document.querySelector('.form-tab.active').dataset.tab === 'url-panel';
-      
-      if (!title) return alert("Title is required!");
-      let src = '';
+    function resetForm() {
+      ['w-title','w-desc','w-tool','w-link','w-img-url','edit-id'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('w-cat').value = 'Render';
+      document.getElementById('thumb-preview').classList.remove('show');
+      pendingThumb = null;
+      document.querySelectorAll('.src-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+      document.querySelectorAll('.src-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+    }
 
-      if (useUrl) {
-        src = document.getElementById('r-url').value.trim();
-        if(!src) return alert("Please enter the file URL.");
-      } else {
-        if(type === 'pdf') return alert("PDF uploads are disabled. Please use a URL link.");
-        if(!pendingImage) return alert("Please select an image to upload.");
-        src = pendingImage;
+    document.getElementById('add-work-btn').addEventListener('click', () => {
+      resetForm();
+      document.getElementById('work-modal-title').innerHTML = '<i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Project';
+      document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Save to Cloud';
+      openModal('modal-work');
+    });
+
+    function openEditModal(id) {
+      const w = worksData.find(x => x.id === id);
+      if (!w) return;
+      resetForm();
+      document.getElementById('edit-id').value = w.id;
+      document.getElementById('w-title').value = w.title || '';
+      document.getElementById('w-desc').value = w.desc || '';
+      document.getElementById('w-tool').value = w.tool || '';
+      document.getElementById('w-link').value = w.link || '';
+      document.getElementById('w-cat').value = w.cat || 'Render';
+      document.getElementById('work-modal-title').innerHTML = '<i class="fas fa-pen" style="color:var(--blue);margin-right:8px;"></i>Edit Project';
+      document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Update Cloud';
+
+      if (w.img) {
+        document.getElementById('thumb-preview-img').src = w.img;
+        document.getElementById('thumb-preview').classList.add('show');
+        if(w.img.startsWith('data:')) pendingThumb = w.img;
+        else document.getElementById('w-img-url').value = w.img;
+      }
+      openModal('modal-work');
+    }
+
+    document.getElementById('save-work-btn').addEventListener('click', async () => {
+      const title = document.getElementById('w-title').value.trim();
+      if (!title) {
+        alert("Project Title is required!");
+        return;
       }
 
-      const saveBtn = document.getElementById('save-resource-btn');
-      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; saveBtn.disabled = true;
+      const saveBtn = document.getElementById('save-work-btn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      saveBtn.disabled = true;
 
-      const id = Date.now().toString();
-      const item = {
-        id, sem: activeSem, title, desc: document.getElementById('r-desc').value.trim(),
-        type, src, timestamp: Date.now()
-      };
+      try {
+        const editId = document.getElementById('edit-id').value;
+        const id = editId || Date.now().toString();
+        const useSrc = document.querySelector('.src-tab.active').dataset.panel;
+        
+        let img = useSrc === 'thumb-upload-panel' && pendingThumb ? pendingThumb : document.getElementById('w-img-url').value.trim();
+        
+        if(editId && !img && !pendingThumb && !document.getElementById('w-img-url').value.trim()){
+          const existing = worksData.find(w=>w.id===editId);
+          img = existing?.img || '';
+        }
 
-      await setDoc(doc(db, "resources", id), item);
-      saveBtn.innerHTML = '<i class="fas fa-check"></i> Add to Semester'; saveBtn.disabled = false;
-      closeModal('modal-resource');
-      fetchAllData();
+        const work = {
+          id, title, img,
+          desc: document.getElementById('w-desc').value.trim(),
+          cat: document.getElementById('w-cat').value,
+          tool: document.getElementById('w-tool').value.trim(),
+          link: document.getElementById('w-link').value.trim(),
+          timestamp: editId ? worksData.find(w=>w.id===editId).timestamp : Date.now()
+        };
+
+        await setDoc(doc(db, "works", id), work);
+        closeModal('modal-work');
+        fetchWorks();
+      } catch (err) {
+        console.error("Error saving document: ", err);
+        alert("Failed to save. Check console for details.");
+      } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+      }
     });
 
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+    
+    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+    document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (ov && e.target === ov) closeModal(ov.id); }));
+    
     /* ────────── ESC KEY ────────── */
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        ['modal-pdf','modal-image','modal-notice','modal-resource','modal-admin'].forEach(id => {
+        ['modal-work','modal-img','modal-admin'].forEach(id => {
           const el = document.getElementById(id);
           if (el && el.classList.contains('open')) closeModal(id);
         });
       }
     });
 
-    buildPanels();
-    fetchAllData();
+    fetchWorks();
   </script>
 </body>
 </html>
