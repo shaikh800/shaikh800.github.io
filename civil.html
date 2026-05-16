@@ -935,10 +935,6 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
   .filter(x => x);
 
 // remove semester
-if (targetSegs.length && /^semester\s*\d+/.test(targetSegs[0])) {
-  targetSegs.shift();
-}
-      // normalize target (remove Semester)
 if (targetSegs.length && /^semester\s*\d+/i.test(targetSegs[0])) {
   targetSegs.shift();
 }
@@ -989,27 +985,28 @@ if (targetSegs.length && /^semester\s*\d+/i.test(targetSegs[0])) {
   .filter(x => x);
 
 // remove semester
-if (itSegs.length && /^semester\s*\d+/.test(itSegs[0])) {
-  itSegs.shift();
-}
-
-// ❗ remove "Semester X" from UI structure
 if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
   itSegs.shift();
 }
         
         let match = itSegs.slice(0, targetSegs.length).join('/') === targetSegs.join('/');
         if(match) {
-          if(itSegs.length > targetSegs.length) {
-  if(itSegs.length === targetSegs.length + 1) {
+          if (itSegs.length > targetSegs.length) {
+  let originalSegs = folderStr.split('/').map(x => x.trim()).filter(x => x);
+
+  // remove semester
+  if (originalSegs.length && /^semester\s*\d+/i.test(originalSegs[0])) {
+    originalSegs.shift();
+  }
+
+  let nextLevel = originalSegs[targetSegs.length];
+
+  if (itSegs.length === targetSegs.length + 1) {
+    // ✅ last level → file
     files.push(it);
   } else {
-    let originalSegs = folderStr.split('/').map(x=>x.trim()).filter(x=>x);
-if (originalSegs.length && /^semester\s*\d+/i.test(originalSegs[0])) {
-  originalSegs.shift();
-}
-
-folders.add(originalSegs[targetSegs.length]);
+    // ✅ middle level → folder
+    folders.add(nextLevel);
   }
 }
         }
