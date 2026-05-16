@@ -1126,6 +1126,7 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
     document.getElementById('path-suggestions').addEventListener('click', e => {
   const input = document.getElementById('r-drive-path');
 
+  // Clear button
   if (e.target.closest('.clear-path')) {
     input.value = '';
     return;
@@ -1134,10 +1135,25 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
   const chip = e.target.closest('.path-chip');
   if (!chip) return;
 
-  const val = chip.textContent.trim();
+  let val = chip.textContent.trim();
 
-  // Only subject folder
-  input.value = val;
+  // remove Semester if exists
+  val = val.replace(/Semester\s*\d+/gi, '').trim();
+
+  let current = input.value.trim();
+
+  // split existing path
+  let parts = current ? current.split('/').map(s => s.trim()).filter(Boolean) : [];
+
+  // toggle logic
+  if (parts.includes(val)) {
+    parts = parts.filter(p => p !== val); // remove
+  } else {
+    parts.push(val); // add
+  }
+
+  // rebuild path
+  input.value = parts.join('/');
 });
 
     // File drop zone
