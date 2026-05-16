@@ -5,28 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Modeling | Md. Shaikh Alam</title>
   <meta name="description" content="3D modeling, Blender practice, rigging and animation work by Md. Shaikh Alam.">
-  <link class="work-thumb-placeholder" rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
-    /* ── CSS VARIABLES FALLBACK ──────────────────────────── */
-    :root {
-      --blue: #2563eb;
-      --blue-dark: #1d4ed8;
-      --surface: #ffffff;
-      --surface-soft: #f8fafc;
-      --line: #e2e8f0;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --radius: 8px;
-      --radius-lg: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      --ease-out: cubic-bezier(0, 0, 0.2, 1);
-    }
-
     /* ── FILTER TABS ─────────────────────────────────────── */
     .filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
     .filter-btn {
@@ -34,6 +17,7 @@
       background:var(--surface); color:var(--muted); font-size:13px; font-weight:700;
       cursor:pointer; transition:all 0.2s ease;
     }
+    .filter-btn:hover { border-color:var(--blue); color:var(--blue); }
     .filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
 
     /* ── WORKS GRID ──────────────────────────────────────── */
@@ -44,10 +28,12 @@
       transition:all 0.25s var(--ease-spring);
       animation:fadeSlideUp 0.4s var(--ease-out) both;
     }
+    .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
     .work-thumb {
       width:100%; aspect-ratio:16/9; object-fit:cover; display:block;
       background:var(--surface-soft); transition:transform 0.4s var(--ease-out);
     }
+    .work-card:hover .work-thumb { transform:scale(1.03); }
     .work-thumb-wrap { overflow:hidden; position:relative; }
     .work-thumb-wrap .play-badge {
       position:absolute; top:10px; right:10px;
@@ -89,11 +75,9 @@
     }
     .work-action-btn.edit-btn { background:rgba(255,255,255,0.9); color:var(--blue); }
     .work-action-btn.del-btn  { background:rgba(255,255,255,0.9); color:#ef4444; }
-
-    /* ── ADMIN-ONLY ELEMENTS FIX ── */
-    .admin-actions { display: none !important; }
-    body.admin-mode .admin-actions { display: flex !important; }
-    body.admin-mode button.admin-actions { display: inline-flex !important; }
+    .work-action-btn:hover { transform:scale(1.1); }
+    .admin-actions { display:none; }
+    body.admin-mode .admin-actions { display:flex; }
 
     /* ── SECTION HEAD ROW ────────────────────────────────── */
     .section-head-row {
@@ -126,6 +110,7 @@
       box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:all 0.2s var(--ease-spring);
       display:flex; align-items:center; justify-content:center;
     }
+    .admin-fab:hover { transform:scale(1.1); }
     .admin-fab.active { background:var(--blue); }
 
     /* ── MODALS ──────────────────────────────────────────── */
@@ -209,30 +194,15 @@
     .page-title { padding-bottom:40px; }
     .page-title h1 { font-size:clamp(32px,5vw,54px); margin-bottom:10px; }
 
-    /* ── HOVER EFFECTS FOR DESKTOP ONLY ──────────────────── */
-    @media (hover: hover) and (pointer: fine) {
-      .filter-btn:hover { border-color:var(--blue); color:var(--blue); }
-      .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
-      .work-card:hover .work-thumb { transform:scale(1.03); }
-      .work-action-btn:hover { transform:scale(1.1); }
-      .admin-fab:hover { transform:scale(1.1); }
-    }
-
-    /* ── MOBILE OPTIMIZATION ─────────────────────────────── */
-    @media (max-width: 600px) {
+    @media (max-width:600px) {
       #works-container { grid-template-columns:1fr; }
       .form-row { grid-template-columns:1fr; }
-      
-      .work-action-btn { width:40px; height:40px; font-size:16px; }
-      .admin-actions { top:15px; left:15px; gap:10px; }
-      
-      .modal-box { max-height: 85dvh; display: flex; flex-direction: column; }
-      .modal-body { overflow-y: auto; overscroll-behavior: contain; }
     }
   </style>
 </head>
 <body>
 
+  <!-- ── HEADER ─────────────────────────────────────────── -->
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
@@ -251,8 +221,10 @@
     </div>
   </header>
 
+  <!-- ── MAIN ───────────────────────────────────────────── -->
   <main class="page">
 
+    <!-- Page Title -->
     <section class="page-title reveal">
       <p class="eyebrow">Blender · 3D Modeling · Animation</p>
       <h1>3D Portfolio</h1>
@@ -264,6 +236,7 @@
       </div>
     </section>
 
+    <!-- ── WORKS ─────────────────────────────────────────── -->
     <section class="section" aria-labelledby="works-title">
       <div class="section-head-row reveal">
         <div>
@@ -271,6 +244,7 @@
           <span class="admin-badge"><i class="fas fa-lock-open"></i> Admin Mode</span>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <!-- Filter bar -->
           <div class="filter-bar" id="filter-bar" style="margin-bottom:0;">
             <button class="filter-btn active" data-cat="all">All</button>
           </div>
@@ -283,6 +257,7 @@
       <div id="works-container"></div>
     </section>
 
+    <!-- ── ABOUT / DIRECTION ──────────────────────────────── -->
     <section class="section" aria-labelledby="direction">
       <div class="split-band reveal">
         <div>
@@ -302,6 +277,7 @@
       </div>
     </section>
 
+    <!-- ── CONTACT ────────────────────────────────────────── -->
     <section class="contact-strip reveal" aria-label="Contact">
       <div>
         <h2>Follow the work</h2>
@@ -316,6 +292,7 @@
 
   </main>
 
+  <!-- ── FOOTER ─────────────────────────────────────────── -->
   <footer class="site-footer">
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
@@ -323,33 +300,12 @@
     </div>
   </footer>
 
+  <!-- ── ADMIN FAB ──────────────────────────────────────── -->
   <button class="admin-fab" id="admin-fab" title="Admin mode">
     <i class="fas fa-lock" id="admin-fab-icon"></i>
   </button>
 
-  <div class="modal-overlay" id="modal-admin">
-    <div class="modal-box" style="max-width:380px;">
-      <div class="modal-head">
-        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
-        <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Admin Password</label>
-          <input type="password" id="admin-pass" placeholder="Enter password" autocomplete="current-password">
-        </div>
-        <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:12px;">
-          <a href="#" id="forget-pass-btn" style="font-size:12px; color:var(--blue); text-decoration:none; font-weight:700;">Forgot Password?</a>
-        </div>
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:4px;"></p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
-        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- ── MODAL: ADD / EDIT WORK ─────────────────────────── -->
   <div class="modal-overlay" id="modal-work">
     <div class="modal-box">
       <div class="modal-head">
@@ -393,6 +349,7 @@
           </div>
         </div>
 
+        <!-- Thumbnail source -->
         <div class="form-group">
           <label>Thumbnail</label>
           <div class="src-tabs" id="thumb-src-tabs">
@@ -419,6 +376,28 @@
     </div>
   </div>
 
+  <!-- ── MODAL: ADMIN LOGIN ─────────────────────────────── -->
+  <div class="modal-overlay" id="modal-admin">
+    <div class="modal-box" style="max-width:380px;">
+      <div class="modal-head">
+        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
+        <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
+        </div>
+        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:-8px;">Incorrect password.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
+        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: VIEW IMAGE ──────────────────────────────── -->
   <div class="modal-overlay" id="modal-img">
     <div class="modal-box" style="max-width:860px;">
       <div class="modal-head">
@@ -432,141 +411,171 @@
     </div>
   </div>
 
+  <!-- ── SCRIPTS ────────────────────────────────────────── -->
   <script src="assets/site.js"></script>
-  
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <script>
+  (() => {
+    /* ── CONFIG ── */
+    const ADMIN_PW_KEY = 'civil_admin_pw'; // shared with civil page
+    const DEFAULT_PW   = 'fec2024';
+    const STORE_KEY    = 'modeling_works';
+    const DB_NAME = 'modelingDB'; const DB_VER = 1; const STORE = 'thumbs';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDHzrA90SIuUIoPEuVGrMpc2OlpT8dbFrM",
-      authDomain: "shaikh-portfolio.firebaseapp.com",
-      projectId: "shaikh-portfolio",
-      storageBucket: "shaikh-portfolio.firebasestorage.app",
-      messagingSenderId: "132917714279",
-      appId: "1:132917714279:web:d03261e67ec77b21f063c2",
-      measurementId: "G-C6T7CCS4EH"
-    };
+    /* ── SEED DATA (shown when localStorage is empty) ── */
+    const SEED_WORKS = [
+      { id:'seed1', title:'Blender Project', desc:'Detailed 3D project made in Blender.', cat:'Render', tool:'Blender 4.2', link:'', img:'assets/images/image_8d6685.jpg', imgSrc:'url' },
+      { id:'seed2', title:'New Post', desc:'Another detailed work.', cat:'Render', tool:'Blender 4.2', link:'', img:'assets/images/image_8d0160.jpg', imgSrc:'url' }
+    ];
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
-    const ADMIN_EMAIL = "md.shaikh.alam.007@gmail.com";
-    let adminMode = false;
-    let worksData = [];
-    let activeFilter = 'all';
-    let pendingThumb = null;
-
-    function applyAdmin() {
-      document.body.classList.toggle('admin-mode', adminMode);
-      document.getElementById('admin-fab').classList.toggle('active', adminMode);
-      document.getElementById('admin-fab-icon').className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
+    /* ── INDEXEDDB FOR THUMBNAILS ── */
+    let db;
+    function openDB() {
+      return new Promise((res,rej) => {
+        if (db) { res(db); return; }
+        const req = indexedDB.open(DB_NAME, DB_VER);
+        req.onupgradeneeded = e => e.target.result.createObjectStore(STORE, {keyPath:'id'});
+        req.onsuccess = e => { db = e.target.result; res(db); };
+        req.onerror = () => rej();
+      });
+    }
+    async function saveThumb(id, dataUrl) {
+      const d = await openDB();
+      return new Promise((res,rej) => {
+        const tx = d.transaction(STORE,'readwrite');
+        tx.objectStore(STORE).put({id, dataUrl});
+        tx.oncomplete = res; tx.onerror = rej;
+      });
+    }
+    async function getThumb(id) {
+      const d = await openDB();
+      return new Promise((res,rej) => {
+        const req = d.transaction(STORE,'readonly').objectStore(STORE).get(id);
+        req.onsuccess = () => res(req.result ? req.result.dataUrl : null);
+        req.onerror = rej;
+      });
+    }
+    async function delThumb(id) {
+      const d = await openDB();
+      return new Promise((res,rej) => {
+        const tx = d.transaction(STORE,'readwrite');
+        tx.objectStore(STORE).delete(id);
+        tx.oncomplete = res; tx.onerror = rej;
+      });
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.email === ADMIN_EMAIL) {
-        adminMode = true;
-      } else {
-        adminMode = false;
-      }
-      applyAdmin();
-    });
+    /* ── STORAGE ── */
+    function loadWorks() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return [...SEED_WORKS];
+        return JSON.parse(raw);
+      } catch { return [...SEED_WORKS]; }
+    }
+    function saveWorks(arr) { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
-    document.getElementById('admin-fab').addEventListener('click', async () => {
-      if (adminMode) {
-        await signOut(auth);
-        return;
-      }
+    /* ── ADMIN MODE ── */
+    let adminMode = sessionStorage.getItem('civil_admin') === '1';
+    function applyAdmin() {
+      document.body.classList.toggle('admin-mode', adminMode);
+      const fab = document.getElementById('admin-fab');
+      const ic  = document.getElementById('admin-fab-icon');
+      fab.classList.toggle('active', adminMode);
+      ic.className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
+    }
+    applyAdmin();
+
+    document.getElementById('admin-fab').addEventListener('click', () => {
+      if (adminMode) { adminMode = false; sessionStorage.removeItem('civil_admin'); applyAdmin(); return; }
+      openModal('modal-admin');
       document.getElementById('admin-pass').value = '';
       document.getElementById('admin-error').style.display = 'none';
-      openModal('modal-admin');
       setTimeout(() => document.getElementById('admin-pass').focus(), 300);
     });
-
-    document.getElementById('admin-login-btn').addEventListener('click', async () => {
-      const password = document.getElementById('admin-pass').value;
-      const errorEl = document.getElementById('admin-error');
-      if (!password) return;
-
-      try {
-        errorEl.style.display = 'none';
-        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
-        closeModal('modal-admin');
-      } catch (err) {
-        errorEl.textContent = "Incorrect password or login failed.";
-        errorEl.style.display = 'block';
+    document.getElementById('admin-login-btn').addEventListener('click', () => {
+      const pw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+      if (document.getElementById('admin-pass').value === pw) {
+        adminMode = true; sessionStorage.setItem('civil_admin','1');
+        applyAdmin(); closeModal('modal-admin');
+      } else {
+        document.getElementById('admin-error').style.display = 'block';
+        document.getElementById('admin-pass').select();
       }
     });
-
     document.getElementById('admin-pass').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('admin-login-btn').click();
     });
 
-    document.getElementById('forget-pass-btn').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const errorEl = document.getElementById('admin-error');
-      try {
-        await sendPasswordResetEmail(auth, ADMIN_EMAIL);
-        alert(`A password reset link has been sent to your Google Email (${ADMIN_EMAIL}). Please check your inbox or spam folder.`);
-        closeModal('modal-admin');
-      } catch (err) {
-        errorEl.textContent = "Failed to send reset email. Try again.";
-        errorEl.style.display = 'block';
-      }
+    /* ── MODAL ── */
+    function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+    document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') ['modal-work','modal-admin','modal-img'].forEach(closeModal);
     });
 
-    async function fetchWorks() {
-      try {
-        const snap = await getDocs(collection(db, "works"));
-        worksData = [];
-        snap.forEach(d => worksData.push(d.data()));
-        worksData.sort((a, b) => b.timestamp - a.timestamp);
-        renderWorks();
-      } catch (err) {
-        console.error("Error fetching works: ", err);
-      }
-    }
+    /* ── FILTER ── */
+    let activeFilter = 'all';
 
-    function buildFilters() {
-      const cats = ['all', ...new Set(worksData.map(w => w.cat).filter(Boolean))];
+    function buildFilters(works) {
+      const cats = ['all', ...new Set(works.map(w => w.cat).filter(Boolean))];
       const bar = document.getElementById('filter-bar');
-      bar.innerHTML = cats.map(c => `<button class="filter-btn${c===activeFilter?' active':''}" data-cat="${c}">${c === 'all' ? 'All' : c}</button>`).join('');
+      bar.innerHTML = cats.map(c => `
+        <button class="filter-btn${c===activeFilter?' active':''}" data-cat="${c}">
+          ${c === 'all' ? 'All' : c}
+        </button>`).join('');
       bar.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           activeFilter = btn.dataset.cat;
+          bar.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b===btn));
           renderWorks();
         });
       });
     }
 
-    function renderWorks() {
-      const filtered = activeFilter === 'all' ? worksData : worksData.filter(w => w.cat === activeFilter);
+    /* ── RENDER WORKS ── */
+    async function renderWorks() {
+      const works = loadWorks();
+      const filtered = activeFilter === 'all' ? works : works.filter(w => w.cat === activeFilter);
       const container = document.getElementById('works-container');
-      
-      document.getElementById('stat-total').textContent = worksData.length;
-      document.getElementById('stat-renders').textContent = worksData.filter(w => w.cat === 'Render').length;
-      document.getElementById('stat-videos').textContent = worksData.filter(w => w.link).length;
-      
-      buildFilters();
+
+      // Stats
+      document.getElementById('stat-total').textContent   = works.length;
+      document.getElementById('stat-renders').textContent = works.filter(w => w.cat === 'Render').length;
+      document.getElementById('stat-videos').textContent  = works.filter(w => w.link).length;
+
+      // Filters
+      buildFilters(works);
 
       if (!filtered.length) {
-        container.innerHTML = `<div class="works-empty"><i class="fas fa-folder-open"></i><p>No projects found. Log in as admin to add some!</p></div>`;
+        container.innerHTML = `<div class="works-empty"><i class="fas fa-folder-open"></i><p>${works.length ? 'No projects in this category.' : 'No projects yet. Add your first project!'}</p></div>`;
         return;
       }
 
-      const cards = filtered.map(w => {
-        const imgHtml = w.img ? `<img class="work-thumb" src="${esc(w.img)}" alt="${esc(w.title)}" loading="lazy">` : `<div class="work-thumb-placeholder"><i class="fas fa-cube"></i></div>`;
+      // Render cards (thumbnail may be in IndexedDB)
+      const cards = await Promise.all(filtered.map(async w => {
+        let imgHtml;
+        if (w.imgSrc === 'idb') {
+          const data = await getThumb(w.id);
+          imgHtml = data
+            ? `<img class="work-thumb" src="${data}" alt="${esc(w.title)}" loading="lazy">`
+            : `<div class="work-thumb-placeholder"><i class="fas fa-cube"></i></div>`;
+        } else if (w.img) {
+          imgHtml = `<img class="work-thumb" src="${esc(w.img)}" alt="${esc(w.title)}" loading="lazy">`;
+        } else {
+          imgHtml = `<div class="work-thumb-placeholder"><i class="fas fa-cube"></i></div>`;
+        }
         const hasVideo = w.link && (w.link.includes('youtube') || w.link.includes('youtu.be'));
-        return `<div class="work-card" data-id="${w.id}">
+        return `
+          <div class="work-card" data-id="${w.id}">
             <div class="work-thumb-wrap">
               ${imgHtml}
               ${hasVideo ? `<div class="play-badge"><i class="fab fa-youtube"></i> Video</div>` : ''}
             </div>
             <div class="admin-actions work-actions">
-              <button class="work-action-btn edit-btn" data-id="${w.id}"><i class="fas fa-pen"></i></button>
-              <button class="work-action-btn del-btn" data-id="${w.id}"><i class="fas fa-trash-alt"></i></button>
+              <button class="work-action-btn edit-btn" data-id="${w.id}" title="Edit"><i class="fas fa-pen"></i></button>
+              <button class="work-action-btn del-btn"  data-id="${w.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
             </div>
             <div class="work-body">
               <div class="work-cat">${esc(w.cat||'Other')}</div>
@@ -574,84 +583,95 @@
               ${w.desc ? `<div class="work-desc">${esc(w.desc)}</div>` : ''}
               <div class="work-footer">
                 <div class="work-tool"><i class="fas fa-cube" style="color:var(--blue)"></i> ${esc(w.tool||'Blender')}</div>
-                ${w.link ? `<a class="work-link" href="${esc(w.link)}" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> Open</a>` : ''}
+                ${w.link ? `<a class="work-link" href="${esc(w.link)}" target="_blank" rel="noopener">
+                  ${hasVideo ? '<i class="fab fa-youtube"></i> Watch' : '<i class="fas fa-external-link-alt"></i> Open'} →
+                </a>` : ''}
               </div>
             </div>
           </div>`;
-      });
+      }));
 
       container.innerHTML = cards.join('');
 
-      container.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id); }));
-      container.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deleteWork(btn.dataset.id); }));
-      
+      // Click to view image (non-link area)
       container.querySelectorAll('.work-card').forEach(card => {
-        card.addEventListener('click', e => {
+        card.addEventListener('click', async e => {
           if (e.target.closest('.work-action-btn') || e.target.closest('.work-link')) return;
-          const w = worksData.find(x => x.id === card.dataset.id);
-          if (!w || !w.img) return;
+          const id = card.dataset.id;
+          const w = loadWorks().find(x => x.id === id);
+          if (!w) return;
+          let src = w.img;
+          if (w.imgSrc === 'idb') src = await getThumb(id);
+          if (!src) return;
           document.getElementById('img-view-title').innerHTML = `<i class="fas fa-image" style="color:var(--blue);margin-right:8px;"></i>${esc(w.title)}`;
-          document.getElementById('img-view-src').src = w.img;
+          document.getElementById('img-view-src').src = src;
           document.getElementById('img-view-desc').textContent = w.desc || '';
           openModal('modal-img');
         });
       });
+
+      // Edit / Delete buttons
+      container.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id); }));
+      container.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deleteWork(btn.dataset.id); }));
     }
 
+    /* ── DELETE ── */
     async function deleteWork(id) {
-      if (!confirm('Are you sure you want to delete this project?')) return;
-      try {
-        await deleteDoc(doc(db, "works", id));
-        fetchWorks();
-      } catch(err) {
-        console.error("Error deleting document: ", err);
-      }
+      if (!confirm('Delete this project?')) return;
+      const works = loadWorks().filter(w => w.id !== id);
+      await delThumb(id);
+      saveWorks(works);
+      renderWorks();
     }
 
+    /* ── THUMBNAIL SOURCE TABS ── */
+    let pendingThumb = null; // { dataUrl }
     document.getElementById('thumb-src-tabs').addEventListener('click', e => {
       const tab = e.target.closest('.src-tab'); if (!tab) return;
       document.querySelectorAll('.src-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.src-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.panel));
     });
-
+    const thumbDrop = document.getElementById('thumb-drop');
     const thumbFile = document.getElementById('w-img-file');
-    document.getElementById('thumb-drop').addEventListener('click', () => thumbFile.click());
-    
-    thumbFile.addEventListener('change', () => {
-      const f = thumbFile.files[0];
-      if (!f || !f.type.startsWith('image/')) return;
+    thumbDrop.addEventListener('click', () => thumbFile.click());
+    thumbDrop.addEventListener('dragover', e => { e.preventDefault(); thumbDrop.classList.add('dragover'); });
+    thumbDrop.addEventListener('dragleave', () => thumbDrop.classList.remove('dragover'));
+    thumbDrop.addEventListener('drop', e => { e.preventDefault(); thumbDrop.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleThumbFile(e.dataTransfer.files[0]); });
+    thumbFile.addEventListener('change', () => { if (thumbFile.files[0]) handleThumbFile(thumbFile.files[0]); });
+
+    function handleThumbFile(f) {
+      if (!f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
       const reader = new FileReader();
       reader.onload = ev => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          let w = img.width, h = img.height;
-          if (w > 800) { h = Math.round((h * 800) / w); w = 800; }
-          canvas.width = w; canvas.height = h;
-          ctx.drawImage(img, 0, 0, w, h);
-          pendingThumb = canvas.toDataURL('image/jpeg', 0.7);
-          document.getElementById('thumb-preview-img').src = pendingThumb;
-          document.getElementById('thumb-preview').classList.add('show');
-        };
-        img.src = ev.target.result;
+        pendingThumb = ev.target.result;
+        document.getElementById('thumb-preview-img').src = pendingThumb;
+        document.getElementById('thumb-preview').classList.add('show');
+        document.getElementById('w-img-url').value = '';
       };
       reader.readAsDataURL(f);
-    });
+    }
 
+    // URL preview
     document.getElementById('w-img-url').addEventListener('input', function() {
-      if (this.value.trim()) {
-        document.getElementById('thumb-preview-img').src = this.value.trim();
+      const v = this.value.trim();
+      if (v) {
+        document.getElementById('thumb-preview-img').src = v;
         document.getElementById('thumb-preview').classList.add('show');
         pendingThumb = null;
+      } else {
+        document.getElementById('thumb-preview').classList.remove('show');
       }
     });
 
+    /* ── ADD PROJECT ── */
     function resetForm() {
-      ['w-title','w-desc','w-tool','w-link','w-img-url','edit-id'].forEach(id => document.getElementById(id).value = '');
+      ['w-title','w-desc','w-tool','w-link','w-img-url'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('w-cat').value = 'Render';
+      document.getElementById('edit-id').value = '';
       document.getElementById('thumb-preview').classList.remove('show');
+      document.getElementById('thumb-preview-img').src = '';
       pendingThumb = null;
+      // reset to URL tab
       document.querySelectorAll('.src-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.src-panel').forEach((p,i) => p.classList.toggle('active', i===0));
     }
@@ -659,95 +679,86 @@
     document.getElementById('add-work-btn').addEventListener('click', () => {
       resetForm();
       document.getElementById('work-modal-title').innerHTML = '<i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Project';
-      document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Save to Cloud';
+      document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Save';
       openModal('modal-work');
+      setTimeout(() => document.getElementById('w-title').focus(), 300);
     });
 
     function openEditModal(id) {
-      const w = worksData.find(x => x.id === id);
+      const w = loadWorks().find(x => x.id === id);
       if (!w) return;
       resetForm();
-      document.getElementById('edit-id').value = w.id;
-      document.getElementById('w-title').value = w.title || '';
-      document.getElementById('w-desc').value = w.desc || '';
-      document.getElementById('w-tool').value = w.tool || '';
-      document.getElementById('w-link').value = w.link || '';
-      document.getElementById('w-cat').value = w.cat || 'Render';
+      document.getElementById('edit-id').value  = w.id;
+      document.getElementById('w-title').value  = w.title || '';
+      document.getElementById('w-desc').value   = w.desc  || '';
+      document.getElementById('w-tool').value   = w.tool  || '';
+      document.getElementById('w-link').value   = w.link  || '';
+      document.getElementById('w-cat').value    = w.cat   || 'Render';
       document.getElementById('work-modal-title').innerHTML = '<i class="fas fa-pen" style="color:var(--blue);margin-right:8px;"></i>Edit Project';
-      document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Update Cloud';
+      document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Update';
 
-      if (w.img) {
+      if (w.img && w.imgSrc !== 'idb') {
+        document.getElementById('w-img-url').value = w.img;
         document.getElementById('thumb-preview-img').src = w.img;
         document.getElementById('thumb-preview').classList.add('show');
-        if(w.img.startsWith('data:')) pendingThumb = w.img;
-        else document.getElementById('w-img-url').value = w.img;
+      } else if (w.imgSrc === 'idb') {
+        getThumb(w.id).then(data => {
+          if (data) { pendingThumb = data; document.getElementById('thumb-preview-img').src = data; document.getElementById('thumb-preview').classList.add('show'); }
+        });
       }
       openModal('modal-work');
     }
 
+    /* ── SAVE WORK ── */
     document.getElementById('save-work-btn').addEventListener('click', async () => {
       const title = document.getElementById('w-title').value.trim();
-      if (!title) {
-        alert("Project Title is required!");
-        return;
-      }
+      if (!title) { document.getElementById('w-title').focus(); return; }
 
-      const saveBtn = document.getElementById('save-work-btn');
-      const originalText = saveBtn.innerHTML;
-      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-      saveBtn.disabled = true;
+      const editId  = document.getElementById('edit-id').value;
+      const urlVal  = document.getElementById('w-img-url').value.trim();
+      const useSrc  = document.querySelector('.src-tab.active').dataset.panel;
+      const useUpload = useSrc === 'thumb-upload-panel';
 
-      try {
-        const editId = document.getElementById('edit-id').value;
-        const id = editId || Date.now().toString();
-        const useSrc = document.querySelector('.src-tab.active').dataset.panel;
-        
-        let img = useSrc === 'thumb-upload-panel' && pendingThumb ? pendingThumb : document.getElementById('w-img-url').value.trim();
-        
-        if(editId && !img && !pendingThumb && !document.getElementById('w-img-url').value.trim()){
-          const existing = worksData.find(w=>w.id===editId);
-          img = existing?.img || '';
+      const id = editId || uid();
+      let imgSrc = '', img = '';
+
+      if (useUpload && pendingThumb) {
+        await saveThumb(id, pendingThumb);
+        imgSrc = 'idb'; img = '';
+      } else if (urlVal) {
+        imgSrc = 'url'; img = urlVal;
+        if (editId && loadWorks().find(w=>w.id===editId)?.imgSrc === 'idb') await delThumb(editId);
+      } else {
+        // keep existing if editing
+        if (editId) {
+          const existing = loadWorks().find(w=>w.id===editId);
+          imgSrc = existing?.imgSrc || ''; img = existing?.img || '';
         }
-
-        const work = {
-          id, title, img,
-          desc: document.getElementById('w-desc').value.trim(),
-          cat: document.getElementById('w-cat').value,
-          tool: document.getElementById('w-tool').value.trim(),
-          link: document.getElementById('w-link').value.trim(),
-          timestamp: editId ? worksData.find(w=>w.id===editId).timestamp : Date.now()
-        };
-
-        await setDoc(doc(db, "works", id), work);
-        closeModal('modal-work');
-        fetchWorks();
-      } catch (err) {
-        console.error("Error saving document: ", err);
-        alert("Failed to save. Check console for details.");
-      } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
       }
+
+      const work = {
+        id, title,
+        desc : document.getElementById('w-desc').value.trim(),
+        cat  : document.getElementById('w-cat').value,
+        tool : document.getElementById('w-tool').value.trim() || 'Blender 4.2',
+        link : document.getElementById('w-link').value.trim(),
+        img, imgSrc
+      };
+
+      let works = loadWorks();
+      if (editId) works = works.map(w => w.id === editId ? work : w);
+      else works.unshift(work);
+      saveWorks(works);
+      closeModal('modal-work');
+      renderWorks();
     });
 
+    /* ── UTIL ── */
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
-    
-    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
-    document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (ov && e.target === ov) closeModal(ov.id); }));
-    
-    /* ────────── ESC KEY ────────── */
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        ['modal-work','modal-img','modal-admin'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el && el.classList.contains('open')) closeModal(id);
-        });
-      }
-    });
 
-    fetchWorks();
+    /* ── INIT ── */
+    renderWorks();
+  })();
   </script>
 </body>
 </html>
