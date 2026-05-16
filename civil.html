@@ -9,145 +9,245 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <style>
+    /* ── NOTICE BOARD ──────────────────────────────────── */
     .notice-board { padding: 0 0 40px; }
-    .notice-board-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .notice-board-head h2 { margin: 0; font-size: clamp(22px,3vw,30px); letter-spacing: -0.02em; }
-    .notices-grid { display: grid; gap: 12px; }
-    .notice-card { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-radius: var(--radius); border-left: 4px solid; background: var(--surface); box-shadow: var(--shadow); position: relative; animation: fadeSlideUp 0.4s var(--ease-out) both; }
-    .notice-card.info { border-color: var(--blue); }
-    .notice-card.warning { border-color: #f59e0b; }
-    .notice-card.urgent { border-color: #ef4444; }
-    .notice-card .n-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-    .notice-card.info .n-icon { background: rgba(37,99,235,0.1); color: var(--blue); }
-    .notice-card.warning .n-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
-    .notice-card.urgent .n-icon { background: rgba(239,68,68,0.1); color: #ef4444; }
-    .notice-card .n-body { flex: 1; min-width: 0; }
-    .notice-card .n-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
-    .notice-card .n-text { color: var(--muted); font-size: 13px; line-height: 1.6; }
-    .notice-card .n-date { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .notice-card .n-actions { position: absolute; top: 10px; right: 12px; display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; }
-    .notice-card:hover .n-actions { opacity: 1; }
-    .action-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 6px; border-radius: 6px; transition: all 0.2s; }
-    .action-btn:hover { background: var(--surface-soft); color: var(--ink); }
-    .action-btn.delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-    .notices-empty { text-align: center; padding: 40px 20px; color: var(--muted); border: 2px dashed var(--line); border-radius: var(--radius); }
-    .notices-empty i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
+    .notice-board-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+    .notice-board-head h2 { margin:0; font-size:clamp(22px,3vw,30px); letter-spacing:-0.02em; }
+    .notices-grid { display:grid; gap:12px; }
+    .notice-card {
+      display:flex; align-items:flex-start; gap:14px;
+      padding:16px 20px; border-radius:var(--radius); border-left:4px solid;
+      background:var(--surface); box-shadow:var(--shadow);
+      position:relative; animation:fadeSlideUp 0.4s var(--ease-out) both;
+    }
+    .notice-card.info    { border-color:var(--blue); }
+    .notice-card.warning { border-color:#f59e0b; }
+    .notice-card.urgent  { border-color:#ef4444; }
+    .notice-card .n-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .notice-card.info    .n-icon { background:rgba(37,99,235,0.1); color:var(--blue); }
+    .notice-card.warning .n-icon { background:rgba(245,158,11,0.1); color:#f59e0b; }
+    .notice-card.urgent  .n-icon { background:rgba(239,68,68,0.1);  color:#ef4444; }
+    .notice-card .n-body { flex:1; min-width:0; }
+    .notice-card .n-title { font-weight:700; font-size:14px; margin-bottom:3px; }
+    .notice-card .n-text  { color:var(--muted); font-size:13px; line-height:1.6; }
+    .notice-card .n-date  { font-size:11px; color:var(--muted); margin-top:4px; }
+    .notice-card .n-delete {
+      position:absolute; top:10px; right:12px;
+      background:none; border:none; color:var(--muted); cursor:pointer;
+      font-size:13px; opacity:0; transition:opacity 0.2s; padding:4px;
+    }
+    .notice-card:hover .n-delete { opacity:1; }
+    .notice-card .n-delete:hover { color:#ef4444; }
+    .notices-empty { text-align:center; padding:40px 20px; color:var(--muted); border:2px dashed var(--line); border-radius:var(--radius); }
+    .notices-empty i { font-size:32px; display:block; margin-bottom:10px; opacity:0.4; }
 
-    .sem-section { padding: 40px 0; border-top: 1px solid var(--line); }
-    .sem-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .sem-section-head h2 { margin: 0; font-size: clamp(22px,3vw,30px); letter-spacing: -0.02em; }
-    .sem-tabs-wrap { overflow-x: auto; padding-bottom: 4px; margin-bottom: 28px; }
-    .sem-tabs { display: flex; gap: 8px; min-width: max-content; }
-    .sem-tab { padding: 8px 18px; border-radius: 100px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; white-space: nowrap; }
-    .sem-tab:hover { border-color: var(--blue); color: var(--blue); }
-    .sem-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .sem-panel { display: none; }
-    .sem-panel.active { display: block; animation: fadeIn 0.3s var(--ease-out); }
-    .sem-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-    .sem-panel-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
-    .sem-panel-title span { color: var(--muted); font-weight: 600; font-size: 13px; margin-left: 8px; }
+    /* ── SEMESTER TABS ─────────────────────────────────── */
+    .sem-section { padding:40px 0; border-top:1px solid var(--line); }
+    .sem-section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+    .sem-section-head h2 { margin:0; font-size:clamp(22px,3vw,30px); letter-spacing:-0.02em; }
+    .sem-tabs-wrap { overflow-x:auto; padding-bottom:4px; margin-bottom:28px; }
+    .sem-tabs { display:flex; gap:8px; min-width:max-content; }
+    .sem-tab { padding:8px 18px; border-radius:100px; border:1px solid var(--line); background:var(--surface); color:var(--muted); font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s ease; white-space:nowrap; }
+    .sem-tab:hover { border-color:var(--blue); color:var(--blue); }
+    .sem-tab.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+    .sem-panel { display:none; }
+    .sem-panel.active { display:block; animation:fadeIn 0.3s var(--ease-out); }
+    .sem-panel-title { font-size:18px; font-weight:800; letter-spacing:-0.02em; margin-bottom:20px; }
+    .sem-panel-title span { color:var(--muted); font-weight:600; font-size:13px; margin-left:8px; }
 
-    .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-    .resource-card { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; cursor: pointer; transition: all 0.25s var(--ease-spring); animation: fadeSlideUp 0.4s var(--ease-out) both; display: flex; flex-direction: column; }
-    .resource-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(37,99,235,0.3); }
-    .resource-card .rc-thumb { height: 140px; display: flex; align-items: center; justify-content: center; background: var(--surface-soft); overflow: hidden; position: relative; }
-    .resource-card.type-pdf .rc-thumb { background: rgba(37,99,235,0.06); }
-    .resource-card.type-image .rc-thumb { background: #000; }
-    .resource-card .rc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .resource-card .rc-thumb .rc-icon { font-size: 48px; color: var(--blue); opacity: 0.7; }
-    .resource-card .rc-body { padding: 14px 16px; flex: 1; }
-    .resource-card .rc-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-    .resource-card .rc-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-    .resource-card .rc-meta { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); background: var(--surface); }
-    .resource-card .rc-meta .rc-type { display: flex; align-items: center; gap: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-    .resource-card.type-pdf .rc-type { color: var(--blue); }
-    .resource-card.type-image .rc-type { color: var(--green); }
-    .rc-actions { display: flex; gap: 4px; }
-    .sem-empty { text-align: center; padding: 60px 20px; color: var(--muted); border: 2px dashed var(--line); border-radius: var(--radius-lg); }
-    .sem-empty i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.3; }
-    .sem-empty p { margin: 0; font-size: 14px; }
+    /* ── RESOURCE CARDS ────────────────────────────────── */
+    .resource-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+    .resource-card {
+      border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--surface);
+      box-shadow:var(--shadow); overflow:hidden; cursor:pointer;
+      transition:all 0.25s var(--ease-spring); animation:fadeSlideUp 0.4s var(--ease-out) both;
+      position:relative;
+    }
+    .resource-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
+    .resource-card .rc-thumb { height:140px; display:flex; align-items:center; justify-content:center; background:var(--surface-soft); overflow:hidden; }
+    .resource-card.type-pdf .rc-thumb { background:rgba(37,99,235,0.06); }
+    .resource-card.type-image .rc-thumb { background:#000; }
+    .resource-card .rc-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .resource-card .rc-thumb .rc-icon { font-size:48px; color:var(--blue); opacity:0.7; }
+    .resource-card .rc-body { padding:14px 16px; }
+    .resource-card .rc-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .resource-card .rc-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+    .resource-card .rc-meta { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-top:1px solid var(--line); font-size:11px; color:var(--muted); }
+    .rc-type { display:flex; align-items:center; gap:5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; }
+    .resource-card.type-pdf .rc-type { color:var(--blue); }
+    .resource-card.type-image .rc-type { color:var(--green); }
+    .rc-actions { display:flex; gap:4px; }
+    .rc-btn {
+      background:none; border:none; cursor:pointer; padding:4px 7px;
+      border-radius:6px; font-size:13px; transition:all 0.2s; color:var(--muted);
+    }
+    .rc-btn.edit:hover { color:var(--blue); background:rgba(37,99,235,0.1); }
+    .rc-btn.del:hover  { color:#ef4444; background:rgba(239,68,68,0.1); }
+    .rc-btn.admin-only { display:none !important; }
+    body.admin-mode .rc-btn.admin-only { display:inline-flex !important; }
+    .sem-empty { text-align:center; padding:60px 20px; color:var(--muted); border:2px dashed var(--line); border-radius:var(--radius-lg); }
+    .sem-empty i { font-size:40px; display:block; margin-bottom:12px; opacity:0.3; }
+    .sem-empty p { margin:0; font-size:14px; }
 
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(4px); }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal-box { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; transform: translateY(20px) scale(0.97); transition: transform 0.3s var(--ease-out); display: flex; flex-direction: column; }
-    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
-    .modal-box.modal-fullscreen { max-width: 98vw; height: 96vh; max-height: 96vh; }
-    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--surface); z-index: 1; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-    .modal-head h3 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
-    .modal-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: none; cursor: pointer; color: var(--muted); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-    .modal-close:hover { background: var(--surface-soft); color: var(--ink); }
-    .modal-body { padding: 24px; flex: 1; overflow-y: auto; }
-    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--line); display: flex; gap: 10px; justify-content: flex-end; background: var(--surface); }
+    /* ── FULL-SCREEN PDF VIEWER ────────────────────────── */
+    .pdf-fullscreen {
+      position:fixed; inset:0; z-index:2000;
+      display:flex; flex-direction:column;
+      opacity:0; pointer-events:none; transition:opacity 0.2s;
+    }
+    .pdf-fullscreen.open { opacity:1; pointer-events:all; }
+    .pdf-topbar {
+      display:flex; align-items:center; gap:12px; padding:0 16px;
+      height:52px; background:var(--ink); color:#fff; flex-shrink:0; flex-wrap:wrap;
+    }
+    .pdf-topbar-title { flex:1; font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pdf-topbar-btn {
+      display:inline-flex; align-items:center; gap:6px; padding:6px 14px;
+      border-radius:var(--radius); border:1px solid rgba(255,255,255,0.2);
+      background:rgba(255,255,255,0.1); color:#fff; font-size:12px; font-weight:700;
+      cursor:pointer; text-decoration:none; transition:background 0.2s; white-space:nowrap;
+    }
+    .pdf-topbar-btn:hover { background:rgba(255,255,255,0.2); }
+    .pdf-topbar-btn.close { background:rgba(239,68,68,0.3); border-color:rgba(239,68,68,0.4); }
+    .pdf-topbar-btn.close:hover { background:rgba(239,68,68,0.5); }
+    .pdf-fullscreen iframe { flex:1; border:none; display:block; width:100%; }
 
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 7px; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); color: var(--ink); font-size: 14px; font-family: inherit; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
-    .form-group textarea { resize: vertical; min-height: 80px; }
-    .form-tabs { display: flex; gap: 0; margin-bottom: 20px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-    .form-tab { flex: 1; padding: 9px 12px; border: none; background: var(--surface-soft); color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-    .form-tab.active { background: var(--blue); color: #fff; }
-    .form-tab-panel { display: none; }
-    .form-tab-panel.active { display: block; }
-    .file-drop-zone { border: 2px dashed var(--line); border-radius: var(--radius); padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.2s; color: var(--muted); }
-    .file-drop-zone:hover, .file-drop-zone.dragover { border-color: var(--blue); background: rgba(37,99,235,0.04); color: var(--blue); }
-    .file-drop-zone i { font-size: 28px; display: block; margin-bottom: 8px; }
-    .file-drop-zone p { margin: 0; font-size: 13px; }
-    .file-drop-zone input[type=file] { display: none; }
-    .file-selected { font-size: 13px; margin-top: 8px; color: var(--green); font-weight: 600; }
+    /* ── IMAGE VIEWER ──────────────────────────────────── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      opacity:0; pointer-events:none; transition:opacity 0.25s ease; backdrop-filter:blur(4px);
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal-box {
+      background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+      width:100%; max-width:520px; max-height:90vh; overflow-y:auto;
+      transform:translateY(20px) scale(0.97); transition:transform 0.3s var(--ease-out);
+    }
+    .modal-overlay.open .modal-box { transform:translateY(0) scale(1); }
+    .modal-box.wide { max-width:800px; }
+    .modal-head {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:20px 24px; border-bottom:1px solid var(--line); position:sticky; top:0;
+      background:var(--surface); z-index:1; border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .modal-head h3 { margin:0; font-size:17px; letter-spacing:-0.01em; }
+    .modal-close { width:32px; height:32px; border-radius:8px; border:1px solid var(--line); background:none; cursor:pointer; color:var(--muted); font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+    .modal-close:hover { background:var(--surface-soft); color:var(--ink); }
+    .modal-body { padding:24px; }
+    .modal-footer { padding:16px 24px; border-top:1px solid var(--line); display:flex; gap:10px; justify-content:flex-end; }
+    .img-viewer-wrap img { width:100%; height:auto; border-radius:var(--radius); max-height:75vh; object-fit:contain; display:block; }
 
-    .pdf-viewer-wrap { display: flex; flex-direction: column; height: 100%; }
-    .pdf-viewer-wrap iframe { flex: 1; border: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); width: 100%; height: 100%; }
-    .pdf-viewer-wrap .pdf-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface-soft); border-bottom: 1px solid var(--line); font-size: 13px; flex-wrap: wrap; }
-    .pdf-bar a { color: var(--blue); text-decoration: none; font-weight: 600; font-size: 13px; }
+    /* ── FORM ──────────────────────────────────────────── */
+    .form-group { margin-bottom:18px; }
+    .form-group label { display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:7px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width:100%; padding:10px 14px; border:1px solid var(--line);
+      border-radius:var(--radius); background:var(--surface-soft); color:var(--ink);
+      font-size:14px; font-family:inherit; transition:border-color 0.2s; -webkit-appearance:none;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline:none; border-color:var(--blue); background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+    }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .form-tabs { display:flex; margin-bottom:16px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+    .form-tab { flex:1; padding:9px 8px; border:none; background:var(--surface-soft); color:var(--muted); font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .form-tab.active { background:var(--blue); color:#fff; }
+    .form-tab-panel { display:none; }
+    .form-tab-panel.active { display:block; }
+    .file-drop-zone {
+      border:2px dashed var(--line); border-radius:var(--radius); padding:28px 16px;
+      text-align:center; cursor:pointer; transition:all 0.2s; color:var(--muted);
+    }
+    .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(37,99,235,0.04); color:var(--blue); }
+    .file-drop-zone i { font-size:28px; display:block; margin-bottom:8px; }
+    .file-drop-zone p { margin:0; font-size:13px; }
+    .file-drop-zone input[type=file] { display:none; }
+    .file-status { font-size:13px; margin-top:8px; font-weight:600; }
+    .file-status.ok { color:var(--green); }
+    .file-status.loading { color:var(--muted); }
+    .file-status.error { color:#ef4444; }
+    .access-box { padding:14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); margin-top:4px; }
+    .access-box .access-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:10px; }
+    .access-option { display:flex; align-items:center; gap:10px; padding:6px 0; cursor:pointer; font-size:13px; font-weight:600; }
+    .access-option input { accent-color:var(--blue); }
+    .access-info { font-size:12px; color:var(--muted); margin-top:10px; padding-top:10px; border-top:1px solid var(--line); line-height:1.6; }
 
-    .img-viewer-wrap { display: flex; justify-content: center; align-items: center; height: 100%; }
-    .img-viewer-wrap img { width: 100%; height: auto; border-radius: var(--radius); max-height: 80vh; object-fit: contain; display: block; }
+    /* ── DRIVE UPLOAD PROGRESS ─────────────────────────── */
+    .drive-progress {
+      display:none; padding:12px 14px; background:rgba(37,99,235,0.06);
+      border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius); margin-top:8px;
+    }
+    .drive-progress.show { display:block; }
+    .drive-progress-bar { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-top:8px; }
+    .drive-progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width 0.3s; }
+    .drive-progress-text { font-size:12px; color:var(--muted); font-weight:600; }
 
-    .admin-fab { position: fixed; bottom: 24px; right: 24px; z-index: 500; width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--ink); color: #fff; font-size: 16px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: all 0.2s var(--ease-spring); display: flex; align-items: center; justify-content: center; }
-    .admin-fab:hover { transform: scale(1.1); }
-    .admin-fab.active { background: var(--blue); }
+    /* ── TOAST ─────────────────────────────────────────── */
+    .toast-wrap { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+    .toast {
+      padding:10px 20px; border-radius:100px; font-size:13px; font-weight:700;
+      box-shadow:0 4px 20px rgba(0,0,0,0.15); animation:toastIn 0.3s var(--ease-out) both;
+      pointer-events:none; white-space:nowrap;
+    }
+    .toast.success { background:#10b981; color:#fff; }
+    .toast.error   { background:#ef4444; color:#fff; }
+    .toast.info    { background:var(--ink); color:#fff; }
+    @keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes toastOut { to{opacity:0;transform:translateY(10px)} }
 
-    .admin-only { display: none !important; }
-    body.admin-mode .admin-only { display: inline-flex !important; }
-    body.admin-mode .rc-actions { display: flex !important; }
-    body.admin-mode .n-actions { display: flex !important; opacity: 1; }
-    .admin-badge { display: none; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(37,99,235,0.1); color: var(--blue); border-radius: 100px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
-    body.admin-mode .admin-badge { display: inline-flex; }
+    /* ── CONFIRM DIALOG ────────────────────────────────── */
+    .confirm-box { max-width:360px; }
+    .confirm-box .modal-body { padding:20px 24px 16px; font-size:14px; line-height:1.6; color:var(--muted); }
 
-    .tool-list { display: flex; flex-wrap: wrap; gap: 10px; }
-    .tool-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 100px; border: 1px solid var(--line); background: var(--surface); font-size: 13px; font-weight: 600; color: var(--muted); transition: all 0.2s ease; }
-    .tool-pill:hover { border-color: var(--blue); color: var(--blue); }
-    .tool-pill i { color: var(--blue); }
+    /* ── ADMIN ─────────────────────────────────────────── */
+    .admin-fab {
+      position:fixed; bottom:24px; right:24px; z-index:500;
+      width:46px; height:46px; border-radius:50%; border:none;
+      background:var(--ink); color:#fff; font-size:16px; cursor:pointer;
+      box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:all 0.2s var(--ease-spring);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .admin-fab:hover { transform:scale(1.1); }
+    .admin-fab.active { background:var(--blue); }
+    .admin-only { display:none !important; }
+    body.admin-mode .admin-only { display:inline-flex !important; }
+    body.admin-mode .n-delete { display:block !important; opacity:0; }
+    .admin-badge { display:none; align-items:center; gap:6px; padding:4px 12px; background:rgba(37,99,235,0.1); color:var(--blue); border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
+    body.admin-mode .admin-badge { display:inline-flex; }
 
-    .card-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    @media (max-width: 900px) { .card-grid.three { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px) { .card-grid.three { grid-template-columns: 1fr; } .resource-grid { grid-template-columns: 1fr 1fr; } }
-
-    .page-title { padding-bottom: 40px; }
-    .page-title h1 { font-size: clamp(32px,5vw,54px); margin-bottom: 10px; }
-    .btn.sm { min-height: 34px; padding: 0 14px; font-size: 13px; }
-    .btn.danger { color: #fff; background: #ef4444; border-color: #ef4444; }
-    .btn.danger:hover { background: #dc2626; border-color: #dc2626; }
-    .text-muted { color: var(--muted); font-size: 13px; }
-    .mt-0 { margin-top: 0 !important; }
+    /* ── MISC ──────────────────────────────────────────── */
+    .tool-list { display:flex; flex-wrap:wrap; gap:10px; }
+    .tool-pill { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:100px; border:1px solid var(--line); background:var(--surface); font-size:13px; font-weight:600; color:var(--muted); transition:all 0.2s ease; }
+    .tool-pill:hover { border-color:var(--blue); color:var(--blue); }
+    .tool-pill i { color:var(--blue); }
+    .card-grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .page-title { padding-bottom:40px; }
+    .page-title h1 { font-size:clamp(32px,5vw,54px); margin-bottom:10px; }
+    .btn.sm { min-height:34px; padding:0 14px; font-size:13px; }
+    .text-muted { color:var(--muted); font-size:12px; margin-top:6px; line-height:1.5; }
+    @media (max-width:900px) { .card-grid.three { grid-template-columns:1fr 1fr; } }
+    @media (max-width:560px) { .card-grid.three { grid-template-columns:1fr; } .resource-grid { grid-template-columns:1fr 1fr; } }
   </style>
 </head>
 <body>
 
   <header class="site-header">
     <div class="nav-shell">
-      <a class="brand" href="index.html" aria-label="Md. Shaikh home">
+      <a class="brand" href="index.html">
         <img src="assets/images/shaikh.png" alt="Shaikh">
         <span>Md. Shaikh<small>Portfolio and tools</small></span>
       </a>
       <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
         <i class="fas fa-bars"></i>
       </button>
-      <nav class="site-nav" aria-label="Main navigation">
-        <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
-        <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+      <nav class="site-nav">
+        <a href="index.html"    data-page="index.html"><i class="fas fa-house"></i> Home</a>
+        <a href="civil.html"   data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
         <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
         <a class="nav-cta" href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
       </nav>
@@ -155,6 +255,7 @@
   </header>
 
   <main class="page">
+
     <section class="page-title reveal">
       <p class="eyebrow">FEC Civil Engineering · Batch 10</p>
       <h1>Civil Section</h1>
@@ -163,23 +264,19 @@
 
     <section class="notice-board reveal" id="notice-section">
       <div class="notice-board-head">
-        <h2><i class="fas fa-bell" style="color:var(--blue);font-size:22px;margin-right:8px;"></i>Notice Board</h2>
+        <h2><i class="fas fa-bell" style="color:var(--blue);font-size:20px;margin-right:8px;"></i>Notice Board</h2>
         <div style="display:flex;align-items:center;gap:10px;">
-          <span class="admin-badge"><i class="fas fa-lock-open"></i> Admin Mode</span>
-          <button class="btn primary sm admin-only" id="add-notice-btn">
-            <i class="fas fa-plus"></i> Add Notice
-          </button>
+          <span class="admin-badge"><i class="fas fa-lock-open"></i> Admin</span>
+          <button class="btn primary sm admin-only" id="add-notice-btn"><i class="fas fa-plus"></i> Add Notice</button>
         </div>
       </div>
       <div id="notices-container"></div>
     </section>
 
-    <section class="section" aria-labelledby="academic-tools">
+    <section class="section">
       <div class="section-head reveal">
-        <div>
-          <h2 id="academic-tools">Academic Utilities</h2>
-          <p>Cover pages, index sheets and question builders — submission-ready in seconds.</p>
-        </div>
+        <h2>Academic Utilities</h2>
+        <p>Cover pages, index sheets and question builders — submission-ready in seconds.</p>
       </div>
       <div class="card-grid three reveal-grid">
         <a class="project-card" href="cover-page-maker.html">
@@ -205,34 +302,26 @@
 
     <section class="sem-section reveal" id="semester-section">
       <div class="sem-section-head">
-        <h2><i class="fas fa-books" style="color:var(--blue);font-size:22px;margin-right:8px;"></i>Semester Resources</h2>
-        <button class="btn primary sm admin-only" id="add-resource-btn">
-          <i class="fas fa-plus"></i> Add Resource
-        </button>
+        <h2><i class="fas fa-books" style="color:var(--blue);font-size:20px;margin-right:8px;"></i>Semester Resources</h2>
+        <button class="btn primary sm admin-only" id="add-resource-btn"><i class="fas fa-plus"></i> Add Resource</button>
       </div>
-
-      <div class="sem-tabs-wrap">
-        <div class="sem-tabs" id="sem-tabs">
-          <button class="sem-tab active" data-sem="1">1st Semester</button>
-          <button class="sem-tab" data-sem="2">2nd Semester</button>
-          <button class="sem-tab" data-sem="3">3rd Semester</button>
-          <button class="sem-tab" data-sem="4">4th Semester</button>
-          <button class="sem-tab" data-sem="5">5th Semester</button>
-          <button class="sem-tab" data-sem="6">6th Semester</button>
-          <button class="sem-tab" data-sem="7">7th Semester</button>
-          <button class="sem-tab" data-sem="8">8th Semester</button>
-        </div>
-      </div>
-
+      <div class="sem-tabs-wrap"><div class="sem-tabs" id="sem-tabs">
+        <button class="sem-tab active" data-sem="1">1st Semester</button>
+        <button class="sem-tab" data-sem="2">2nd Semester</button>
+        <button class="sem-tab" data-sem="3">3rd Semester</button>
+        <button class="sem-tab" data-sem="4">4th Semester</button>
+        <button class="sem-tab" data-sem="5">5th Semester</button>
+        <button class="sem-tab" data-sem="6">6th Semester</button>
+        <button class="sem-tab" data-sem="7">7th Semester</button>
+        <button class="sem-tab" data-sem="8">8th Semester</button>
+      </div></div>
       <div id="sem-panels"></div>
     </section>
 
-    <section class="section" aria-labelledby="skills-title">
+    <section class="section">
       <div class="section-head reveal">
-        <div>
-          <h2 id="skills-title">Working Areas</h2>
-          <p>A quick map of the engineering skills and software I am currently practicing.</p>
-        </div>
+        <h2>Working Areas</h2>
+        <p>A quick map of the engineering skills and software I am currently practicing.</p>
       </div>
       <div class="tool-list reveal-grid">
         <div class="tool-pill"><i class="fas fa-building-columns"></i> Structural Analysis</div>
@@ -244,11 +333,8 @@
       </div>
     </section>
 
-    <section class="contact-strip reveal" aria-label="Contact">
-      <div>
-        <h2>Need one of these tools?</h2>
-        <p>Open the tool directly or contact me if a format needs adjusting.</p>
-      </div>
+    <section class="contact-strip reveal">
+      <div><h2>Need one of these tools?</h2><p>Open the tool directly or contact me.</p></div>
       <div class="contact-links">
         <a href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
         <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
@@ -264,20 +350,32 @@
     </div>
   </footer>
 
-  <button class="admin-fab" id="admin-fab" title="Admin mode">
-    <i class="fas fa-lock" id="admin-fab-icon"></i>
-  </button>
+  <button class="admin-fab" id="admin-fab"><i class="fas fa-lock" id="admin-fab-icon"></i></button>
 
-  <div class="modal-overlay" id="modal-confirm">
-    <div class="modal-box" style="max-width:350px; text-align:center; padding-top:10px;">
-      <div class="modal-body">
-        <i class="fas fa-exclamation-circle" style="font-size:48px; color:#ef4444; margin-bottom:16px;"></i>
-        <h3 style="margin:0 0 8px; font-size:18px;">Are you sure?</h3>
-        <p id="confirm-msg" style="color:var(--muted); font-size:14px; margin-bottom:24px; line-height:1.5;"></p>
-        <div style="display:flex; gap:12px; justify-content:center;">
-          <button class="btn secondary" data-close="modal-confirm" style="flex:1;">Cancel</button>
-          <button class="btn danger" id="confirm-yes-btn" style="flex:1;">Delete</button>
-        </div>
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <div class="pdf-fullscreen" id="pdf-fullscreen">
+    <div class="pdf-topbar">
+      <div class="pdf-topbar-title" id="pdf-title">Loading...</div>
+      <a class="pdf-topbar-btn" id="pdf-open-tab" href="#" target="_blank" rel="noopener">
+        <i class="fas fa-external-link-alt"></i> New tab
+      </a>
+      <button class="pdf-topbar-btn close" id="pdf-close">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+    <iframe id="pdf-frame" src="" allow="fullscreen"></iframe>
+  </div>
+
+  <div class="modal-overlay" id="modal-image">
+    <div class="modal-box wide">
+      <div class="modal-head">
+        <h3 id="img-modal-title"><i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i></h3>
+        <button class="modal-close" data-close="modal-image"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="padding:16px;">
+        <div class="img-viewer-wrap"><img id="img-view" src="" alt=""></div>
+        <p id="img-desc" style="margin:12px 0 0;color:var(--muted);font-size:13px;text-align:center;"></p>
       </div>
     </div>
   </div>
@@ -289,26 +387,19 @@
         <button class="modal-close" data-close="modal-notice"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Notice Title</label>
-          <input type="text" id="n-title" placeholder="e.g. Mid-term exam schedule updated">
-        </div>
-        <div class="form-group">
-          <label>Notice Text</label>
-          <textarea id="n-text" placeholder="Write the notice details here..."></textarea>
-        </div>
-        <div class="form-group">
-          <label>Type</label>
+        <div class="form-group"><label>Title</label><input type="text" id="n-title" placeholder="Notice title..."></div>
+        <div class="form-group"><label>Text</label><textarea id="n-text" placeholder="Notice details..."></textarea></div>
+        <div class="form-group"><label>Type</label>
           <select id="n-type">
-            <option value="info">ℹ️  Info</option>
-            <option value="warning">⚠️  Warning</option>
-            <option value="urgent">🔴  Urgent</option>
+            <option value="info">ℹ️ Info</option>
+            <option value="warning">⚠️ Warning</option>
+            <option value="urgent">🔴 Urgent</option>
           </select>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn secondary sm" data-close="modal-notice">Cancel</button>
-        <button class="btn primary sm" id="save-notice-btn"><i class="fas fa-check"></i> Save Notice</button>
+        <button class="btn primary sm" id="save-notice-btn"><i class="fas fa-check"></i> Save</button>
       </div>
     </div>
   </div>
@@ -316,142 +407,80 @@
   <div class="modal-overlay" id="modal-resource">
     <div class="modal-box">
       <div class="modal-head">
-        <h3><i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Resource</h3>
+        <h3 id="resource-modal-title"><i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Resource</h3>
         <button class="modal-close" data-close="modal-resource"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Title</label>
-          <input type="text" id="r-title" placeholder="e.g. Surveying Lab Report 1">
-        </div>
-        <div class="form-group">
-          <label>Description (optional)</label>
-          <input type="text" id="r-desc" placeholder="Short description">
-        </div>
-        <div class="form-group">
-          <label>Type</label>
-          <select id="r-type">
-            <option value="pdf">PDF Document</option>
-            <option value="image">Image</option>
-          </select>
+        <input type="hidden" id="r-edit-id">
+        <div class="form-group"><label>Title *</label><input type="text" id="r-title" placeholder="e.g. Surveying Lab Report 1"></div>
+        <div class="form-group"><label>Description (optional)</label><input type="text" id="r-desc" placeholder="Short description"></div>
+        <div class="form-group"><label>Type</label>
+          <select id="r-type"><option value="pdf">PDF Document</option><option value="image">Image</option></select>
         </div>
 
         <div class="form-tabs" id="src-tabs">
           <button class="form-tab" data-tab="gdrive-panel"><i class="fab fa-google-drive"></i> Google Drive</button>
           <button class="form-tab active" data-tab="url-panel">🔗 Direct URL</button>
-          <button class="form-tab" data-tab="upload-panel">📁 Upload (Local)</button>
+          <button class="form-tab" data-tab="upload-panel">📁 Upload</button>
         </div>
 
         <div class="form-tab-panel" id="gdrive-panel">
-          <div class="form-group mt-0">
+          <div class="form-group" style="margin-bottom:8px;">
             <label>Google Drive Share Link</label>
             <input type="url" id="r-gdrive" placeholder="https://drive.google.com/file/d/...">
-            <p class="text-muted" style="margin:6px 0 0;">Drive → <b>Share</b> → Link copy করো → এখানে paste করো।</p>
+            <p class="text-muted">Drive → Share → Link copy করো → এখানে paste করো।</p>
           </div>
-          <div id="gdrive-id-preview" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(37,99,235,0.06);border-radius:var(--radius);border:1px solid rgba(37,99,235,0.15);">
-            <span style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Detected File ID</span>
-            <div id="gdrive-id-text" style="font-family:monospace;font-size:13px;margin-top:4px;word-break:break-all;color:var(--ink);"></div>
+          <div id="gdrive-detected" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(37,99,235,0.06);border-radius:var(--radius);border:1px solid rgba(37,99,235,0.15);font-size:12px;">
+            <span style="color:var(--muted);font-weight:700;">FILE ID: </span>
+            <span id="gdrive-id-text" style="font-family:monospace;color:var(--ink);"></span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);">
-            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-bottom:2px;">Access Control</div>
-            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;">
-              <input type="radio" name="gdrive-access" id="gdrive-viewonly" value="preview" checked style="accent-color:var(--blue);">
-              <span><i class="fas fa-eye" style="color:var(--blue);margin-right:4px;"></i> View only — Download button লুকানো থাকবে</span>
-            </label>
-            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;">
-              <input type="radio" name="gdrive-access" id="gdrive-download" value="view" style="accent-color:var(--blue);">
-              <span><i class="fas fa-download" style="color:var(--muted);margin-right:4px;"></i> Download allowed</span>
-            </label>
+          <div class="access-box">
+            <div class="access-label">Access Control</div>
+            <label class="access-option"><input type="radio" name="gdrive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — Download button থাকবে না</span></label>
+            <label class="access-option"><input type="radio" name="gdrive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+            <p class="access-info"><i class="fas fa-info-circle" style="color:var(--blue);"></i> Drive sharing <b>Restricted</b> রাখলে শুধু তুমি দেখতে পাবে। <b>Anyone with link</b> করলে সবাই দেখতে পাবে।</p>
           </div>
         </div>
 
         <div class="form-tab-panel active" id="url-panel">
-          <div class="form-group mt-0">
+          <div class="form-group" style="margin-bottom:0;">
             <label>File URL</label>
             <input type="url" id="r-url" placeholder="https://... (GitHub raw / direct link)">
           </div>
         </div>
 
         <div class="form-tab-panel" id="upload-panel">
-          <div class="form-group mt-0">
-            <label>Upload File (Browser Storage)</label>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label>Upload from Device → Auto-save to Google Drive</label>
             <div class="file-drop-zone" id="file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
-              <p>Click to browse or drag & drop here</p>
-              <p style="font-size:11px;margin-top:4px;opacity:0.7;">PDF বা image, যেকোনো size — IndexedDB তে store হবে</p>
+              <p>Click to browse or drag & drop</p>
+              <p style="font-size:11px;margin-top:4px;opacity:0.7;">File টা Google Drive এ upload হবে</p>
               <input type="file" id="r-file" accept=".pdf,image/*">
             </div>
-            <div class="file-selected" id="file-name"></div>
+            <div class="file-status" id="file-status"></div>
+            <div class="drive-progress" id="drive-progress">
+              <div class="drive-progress-text" id="drive-progress-text">Uploading to Drive...</div>
+              <div class="drive-progress-bar"><div class="drive-progress-fill" id="drive-progress-fill" style="width:0%"></div></div>
+            </div>
           </div>
+          <div class="access-box" style="margin-top:8px;">
+            <div class="access-label">Access Control</div>
+            <label class="access-option"><input type="radio" name="upload-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only</span></label>
+            <label class="access-option"><input type="radio" name="upload-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+          </div>
+          <p class="text-muted" style="margin-top:8px;"><i class="fas fa-info-circle" style="color:var(--blue);"></i> Drive এ <b>"Civil Engineering → Semester X"</b> folder এ organized ভাবে save হবে।</p>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn secondary sm" data-close="modal-resource">Cancel</button>
-        <button class="btn primary sm" id="save-resource-btn"><i class="fas fa-check"></i> Add to Semester</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-edit-resource">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3><i class="fas fa-edit" style="color:var(--blue);margin-right:8px;"></i>Edit Resource</h3>
-        <button class="modal-close" data-close="modal-edit-resource"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="edit-r-id">
-        <input type="hidden" id="edit-r-sem">
-        <div class="form-group">
-          <label>Title</label>
-          <input type="text" id="edit-r-title">
-        </div>
-        <div class="form-group">
-          <label>Description (optional)</label>
-          <input type="text" id="edit-r-desc">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-edit-resource">Cancel</button>
-        <button class="btn primary sm" id="update-resource-btn"><i class="fas fa-save"></i> Save Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-pdf">
-    <div class="modal-box modal-fullscreen">
-      <div class="modal-head">
-        <h3 id="pdf-modal-title"><i class="fas fa-file-pdf" style="color:var(--blue);margin-right:8px;"></i>PDF Viewer</h3>
-        <button class="modal-close" data-close="modal-pdf"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="pdf-viewer-wrap">
-        <div class="pdf-bar">
-          <span id="pdf-bar-title" style="font-weight:600;"></span>
-          <a id="pdf-open-link" href="#" target="_blank"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
-        </div>
-        <iframe id="pdf-frame" src="" allow="fullscreen"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-image">
-    <div class="modal-box modal-fullscreen">
-      <div class="modal-head">
-        <h3 id="img-modal-title"><i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i>Image Viewer</h3>
-        <button class="modal-close" data-close="modal-image"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body" style="padding:0; background:#000;">
-        <div class="img-viewer-wrap">
-          <img id="img-view" src="" alt="">
-        </div>
-      </div>
-      <div class="modal-footer" style="background:#111; border-color:#333;">
-        <p id="img-desc" style="margin:0; color:#ccc; font-size:14px; text-align:center; width:100%;"></p>
+        <button class="btn primary sm" id="save-resource-btn"><i class="fas fa-check"></i> <span id="save-resource-label">Add to Semester</span></button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="modal-admin">
-    <div class="modal-box" style="max-width:380px;">
+    <div class="modal-box" style="max-width:360px;">
       <div class="modal-head">
         <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
         <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
@@ -461,7 +490,7 @@
           <label>Password</label>
           <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
         </div>
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:-8px;">Incorrect password.</p>
+        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;">Incorrect password.</p>
       </div>
       <div class="modal-footer">
         <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
@@ -470,107 +499,296 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-confirm">
+    <div class="modal-box confirm-box">
+      <div class="modal-head">
+        <h3 id="confirm-title"><i class="fas fa-triangle-exclamation" style="color:#f59e0b;margin-right:8px;"></i>Confirm</h3>
+        <button class="modal-close" data-close="modal-confirm"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="confirm-msg">Are you sure?</div>
+      <div class="modal-footer">
+        <button class="btn secondary sm" data-close="modal-confirm" id="confirm-no">Cancel</button>
+        <button class="btn primary sm" id="confirm-yes" style="background:#ef4444;box-shadow:none;"><i class="fas fa-trash-alt"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-edit">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="modal-head">
+        <h3><i class="fas fa-pen" style="color:var(--blue);margin-right:8px;"></i>Edit Resource</h3>
+        <button class="modal-close" data-close="modal-edit"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-id">
+        <input type="hidden" id="edit-sem">
+        <div class="form-group"><label>Title</label><input type="text" id="edit-title" placeholder="Title..."></div>
+        <div class="form-group"><label>Description</label><input type="text" id="edit-desc" placeholder="Description..."></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary sm" data-close="modal-edit">Cancel</button>
+        <button class="btn primary sm" id="save-edit-btn"><i class="fas fa-check"></i> Save Changes</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/site.js"></script>
   <script>
   (() => {
-    const ADMIN_PW_KEY = 'civil_admin_pw';
-    const DEFAULT_PW = 'fec2024';
+    /* ════════════════════════════════════════
+       CONFIG — Google Drive
+       ════════════════════════════════════════
+       Setup steps:
+       1. console.cloud.google.com → New Project
+       2. APIs & Services → Enable "Google Drive API"
+       3. Credentials → OAuth 2.0 Client ID → Web Application
+       4. Authorized JS Origins: https://mdshaikh.me
+       5. Copy Client ID below
+    ════════════════════════════════════════ */
+    const GDRIVE_CLIENT_ID = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
+    const GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.file';
+    const ADMIN_PW_KEY     = 'civil_admin_pw';
+    const DEFAULT_PW       = 'fec2024';
+    const STORE_KEY        = 'civil_semesters';
+    const NOTICE_KEY       = 'civil_notices';
+    const DB_NAME = 'civilDB2'; const DB_VER = 1; const ISTORE = 'files';
 
-    const DB_NAME = 'civilDB'; const DB_VER = 1; const STORE = 'files';
-    let db;
-
+    /* ── IndexedDB ─────────────────────────── */
+    let _db;
     function openDB() {
-      return new Promise((res, rej) => {
-        if (db) { res(db); return; }
+      return new Promise((res,rej) => {
+        if (_db) { res(_db); return; }
         const req = indexedDB.open(DB_NAME, DB_VER);
-        req.onupgradeneeded = e => e.target.result.createObjectStore(STORE, { keyPath: 'id' });
-        req.onsuccess = e => { db = e.target.result; res(db); };
-        req.onerror = () => rej('DB error');
+        req.onupgradeneeded = e => e.target.result.createObjectStore(ISTORE, {keyPath:'id'});
+        req.onsuccess = e => { _db = e.target.result; res(_db); };
+        req.onerror   = () => rej();
       });
     }
     async function saveFile(id, dataUrl) {
       const d = await openDB();
       return new Promise((res,rej) => {
-        const tx = d.transaction(STORE, 'readwrite');
-        tx.objectStore(STORE).put({ id, dataUrl });
+        const tx = d.transaction(ISTORE,'readwrite');
+        tx.objectStore(ISTORE).put({id, dataUrl});
         tx.oncomplete = res; tx.onerror = rej;
       });
     }
     async function getFile(id) {
       const d = await openDB();
       return new Promise((res,rej) => {
-        const req = d.transaction(STORE,'readonly').objectStore(STORE).get(id);
+        const req = d.transaction(ISTORE,'readonly').objectStore(ISTORE).get(id);
         req.onsuccess = () => res(req.result ? req.result.dataUrl : null);
-        req.onerror = rej;
+        req.onerror   = rej;
       });
     }
-    async function deleteFile(id) {
+    async function delFile(id) {
       const d = await openDB();
       return new Promise((res,rej) => {
-        const tx = d.transaction(STORE,'readwrite');
-        tx.objectStore(STORE).delete(id);
+        const tx = d.transaction(ISTORE,'readwrite');
+        tx.objectStore(ISTORE).delete(id);
         tx.oncomplete = res; tx.onerror = rej;
       });
     }
 
-    function loadNotices() { try { return JSON.parse(localStorage.getItem('civil_notices') || '[]'); } catch { return []; } }
-    function saveNotices(a) { localStorage.setItem('civil_notices', JSON.stringify(a)); }
-    function loadSemesters() { try { return JSON.parse(localStorage.getItem('civil_semesters') || '{}'); } catch { return {}; } }
-    function saveSemesters(o) { localStorage.setItem('civil_semesters', JSON.stringify(o)); }
-    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+    /* ── Storage helpers ───────────────────── */
+    function loadSems()    { try { return JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); } catch { return {}; } }
+    function saveSems(o)   { localStorage.setItem(STORE_KEY, JSON.stringify(o)); }
+    function loadNotices() { try { return JSON.parse(localStorage.getItem(NOTICE_KEY)||'[]'); } catch { return []; } }
+    function saveNotices(a){ localStorage.setItem(NOTICE_KEY, JSON.stringify(a)); }
+    function uid()         { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
+    /* ── Toast ─────────────────────────────── */
+    function toast(msg, type='info', ms=3000) {
+      const wrap = document.getElementById('toast-wrap');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => { el.style.animation='toastOut 0.3s forwards'; setTimeout(()=>el.remove(), 300); }, ms);
+    }
+
+    /* ── Confirm dialog ────────────────────── */
+    let _confirmCb = null;
+    function showConfirm(msg, cb) {
+      document.getElementById('confirm-msg').textContent = msg;
+      _confirmCb = cb;
+      openModal('modal-confirm');
+    }
+    document.getElementById('confirm-yes').addEventListener('click', () => {
+      closeModal('modal-confirm'); if (_confirmCb) { _confirmCb(); _confirmCb = null; }
+    });
+
+    /* ── Modal helpers ─────────────────────── */
+    function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+    document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
+    document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) closeModal(ov.id); }));
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        ['modal-image','modal-notice','modal-resource','modal-admin','modal-confirm','modal-edit']
+          .forEach(id => { if(document.getElementById(id).classList.contains('open')) closeModal(id); });
+        closePdfViewer();
+      }
+    });
+
+    /* ── Admin mode ────────────────────────── */
     let adminMode = sessionStorage.getItem('civil_admin') === '1';
     function applyAdmin() {
       document.body.classList.toggle('admin-mode', adminMode);
       const fab = document.getElementById('admin-fab');
-      const ic = document.getElementById('admin-fab-icon');
       fab.classList.toggle('active', adminMode);
-      ic.className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
-      fab.title = adminMode ? 'Exit admin mode' : 'Admin mode';
+      document.getElementById('admin-fab-icon').className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
     }
     applyAdmin();
 
     document.getElementById('admin-fab').addEventListener('click', () => {
-      if (adminMode) { adminMode = false; sessionStorage.removeItem('civil_admin'); applyAdmin(); return; }
-      openModal('modal-admin');
+      if (adminMode) { adminMode = false; sessionStorage.removeItem('civil_admin'); applyAdmin(); toast('Admin mode off', 'info'); return; }
       document.getElementById('admin-pass').value = '';
       document.getElementById('admin-error').style.display = 'none';
+      openModal('modal-admin');
       setTimeout(() => document.getElementById('admin-pass').focus(), 300);
     });
-
     document.getElementById('admin-login-btn').addEventListener('click', () => {
-      const stored = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
-      const val = document.getElementById('admin-pass').value;
-      if (val === stored) {
+      const pw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+      if (document.getElementById('admin-pass').value === pw) {
         adminMode = true; sessionStorage.setItem('civil_admin','1');
-        applyAdmin(); closeModal('modal-admin');
+        applyAdmin(); closeModal('modal-admin'); toast('Admin mode on 🔓', 'success');
       } else {
         document.getElementById('admin-error').style.display = 'block';
         document.getElementById('admin-pass').select();
       }
     });
-    document.getElementById('admin-pass').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('admin-login-btn').click(); });
+    document.getElementById('admin-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('admin-login-btn').click(); });
 
-    function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
-    document.querySelectorAll('[data-close]').forEach(btn => { btn.addEventListener('click', () => closeModal(btn.dataset.close)); });
-    document.querySelectorAll('.modal-overlay').forEach(ov => { ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }); });
-
-    let confirmAction = null;
-    function showConfirm(msg, action) {
-      document.getElementById('confirm-msg').textContent = msg;
-      confirmAction = action;
-      openModal('modal-confirm');
+    /* ── Full-screen PDF viewer ────────────── */
+    function openPdfViewer(src, title) {
+      document.getElementById('pdf-title').textContent = title || 'PDF';
+      document.getElementById('pdf-open-tab').href = src;
+      document.getElementById('pdf-frame').src = src;
+      document.getElementById('pdf-fullscreen').classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
-    document.getElementById('confirm-yes-btn').addEventListener('click', () => {
-      if (confirmAction) confirmAction();
-      closeModal('modal-confirm');
+    function closePdfViewer() {
+      const el = document.getElementById('pdf-fullscreen');
+      if (!el.classList.contains('open')) return;
+      el.classList.remove('open');
+      document.getElementById('pdf-frame').src = '';
+      document.body.style.overflow = '';
+    }
+    document.getElementById('pdf-close').addEventListener('click', closePdfViewer);
+
+    /* ── Google Drive helpers ──────────────── */
+    let _driveToken = null;
+    let _tokenClient = null;
+
+    function initDriveAuth() {
+      if (!window.google || GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') return;
+      _tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: GDRIVE_SCOPE,
+        callback: () => {}
+      });
+    }
+    window.addEventListener('load', () => { setTimeout(initDriveAuth, 1500); });
+
+    async function getDriveToken() {
+      if (_driveToken && Date.now() < _driveToken.expiry) return _driveToken.token;
+      if (!_tokenClient) throw new Error('Google Drive not configured. CLIENT_ID set করো।');
+      return new Promise((res, rej) => {
+        _tokenClient.callback = (resp) => {
+          if (resp.error) { rej(resp); return; }
+          _driveToken = { token: resp.access_token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+          res(_driveToken.token);
+        };
+        _tokenClient.requestAccessToken({ prompt: '' });
+      });
+    }
+
+    async function driveAPI(method, endpoint, body, token, isUpload=false) {
+      const base = isUpload ? 'https://www.googleapis.com/upload/drive/v3' : 'https://www.googleapis.com/drive/v3';
+      const res = await fetch(base + endpoint, {
+        method,
+        headers: { 'Authorization': 'Bearer ' + token, ...(body && !isUpload ? {'Content-Type':'application/json'} : {}) },
+        body: body ? (isUpload ? body : JSON.stringify(body)) : undefined
+      });
+      return res.json();
+    }
+
+    async function findOrCreateFolder(name, parentId, token) {
+      const q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
+      const list = await driveAPI('GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, null, token);
+      if (list.files && list.files.length) return list.files[0].id;
+      const folder = await driveAPI('POST', '/files', { name, mimeType:'application/vnd.google-apps.folder', parents:[parentId] }, token);
+      return folder.id;
+    }
+
+    async function uploadFileToDrive(file, semNumber, accessMode) {
+      const token = await getDriveToken();
+      // Show progress
+      const prog = document.getElementById('drive-progress');
+      const fill = document.getElementById('drive-progress-fill');
+      const txt  = document.getElementById('drive-progress-text');
+      prog.classList.add('show'); fill.style.width = '10%'; txt.textContent = 'Connecting to Drive...';
+
+      const rootId  = await findOrCreateFolder('Civil Engineering', 'root', token);
+      fill.style.width = '25%'; txt.textContent = `Creating Semester ${semNumber} folder...`;
+
+      const semId = await findOrCreateFolder(`Semester ${semNumber}`, rootId, token);
+      fill.style.width = '40%'; txt.textContent = 'Uploading file...';
+
+      // Multipart upload
+      const meta = JSON.stringify({ name: file.name, parents: [semId] });
+      const boundary = '-------civil_upload_boundary';
+      const body = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type}\r\n\r\n`;
+      const bodyEnd = `\r\n--${boundary}--`;
+
+      const bodyBlob = new Blob([body, file, bodyEnd]);
+      fill.style.width = '70%';
+
+      const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body: bodyBlob
+      });
+      const uploaded = await uploadRes.json();
+      fill.style.width = '85%'; txt.textContent = 'Setting permissions...';
+
+      // Set permission: anyone can view (role: reader)
+      await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
+
+      // Disable download if view-only
+      if (accessMode === 'preview') {
+        await driveAPI('PATCH', `/files/${uploaded.id}?fields=copyRequiresWriterPermission`, { copyRequiresWriterPermission: true }, token);
+      }
+
+      fill.style.width = '100%'; txt.textContent = 'Done!';
+      setTimeout(() => prog.classList.remove('show'), 1500);
+
+      const embedUrl = `https://drive.google.com/file/d/${uploaded.id}/${accessMode}?usp=sharing`;
+      return { fileId: uploaded.id, embedUrl };
+    }
+
+    /* ── Google Drive link → extract ID ─── */
+    function extractDriveId(url) {
+      const patterns = [/\/file\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/d\/([a-zA-Z0-9_-]+)/];
+      for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+      return null;
+    }
+
+    document.getElementById('r-gdrive').addEventListener('input', function() {
+      const id = extractDriveId(this.value.trim());
+      const box = document.getElementById('gdrive-detected');
+      if (id) { box.style.display='block'; document.getElementById('gdrive-id-text').textContent = id; }
+      else { box.style.display='none'; }
     });
 
+    /* ── Notice render ─────────────────────── */
     function renderNotices() {
-      const c = document.getElementById('notices-container');
       const notices = loadNotices();
-      if (!notices.length) { c.innerHTML = `<div class="notices-empty"><i class="fas fa-bell-slash"></i><p>No notices yet.</p></div>`; return; }
+      const c = document.getElementById('notices-container');
+      if (!notices.length) {
+        c.innerHTML = `<div class="notices-empty"><i class="fas fa-bell-slash"></i><p>No notices yet.</p></div>`;
+        return;
+      }
       const icons = { info:'fa-info-circle', warning:'fa-triangle-exclamation', urgent:'fa-circle-exclamation' };
       c.innerHTML = `<div class="notices-grid">${notices.map(n => `
         <div class="notice-card ${n.type}">
@@ -580,59 +798,59 @@
             <div class="n-text">${esc(n.text)}</div>
             <div class="n-date"><i class="far fa-calendar-alt"></i> ${n.date}</div>
           </div>
-          <div class="n-actions admin-only">
-            <button class="action-btn delete" data-id="${n.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
-          </div>
+          <button class="n-delete admin-only" data-id="${n.id}"><i class="fas fa-trash-alt"></i></button>
         </div>`).join('')}</div>`;
-      c.querySelectorAll('.action-btn.delete').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); showConfirm('Are you sure you want to delete this notice?', () => {
-          const updated = loadNotices().filter(n => n.id !== btn.dataset.id);
-          saveNotices(updated); renderNotices();
-        });});
+      c.querySelectorAll('.n-delete').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          showConfirm('Delete this notice?', () => {
+            saveNotices(loadNotices().filter(n => n.id !== btn.dataset.id));
+            renderNotices(); toast('Notice deleted', 'info');
+          });
+        });
       });
     }
 
     document.getElementById('add-notice-btn').addEventListener('click', () => {
-      document.getElementById('n-title').value = ''; document.getElementById('n-text').value = ''; document.getElementById('n-type').value = 'info';
-      openModal('modal-notice'); setTimeout(() => document.getElementById('n-title').focus(), 300);
+      ['n-title','n-text'].forEach(id => document.getElementById(id).value='');
+      document.getElementById('n-type').value = 'info';
+      openModal('modal-notice');
+      setTimeout(() => document.getElementById('n-title').focus(), 300);
     });
-
     document.getElementById('save-notice-btn').addEventListener('click', () => {
       const title = document.getElementById('n-title').value.trim();
-      const text = document.getElementById('n-text').value.trim();
-      const type = document.getElementById('n-type').value;
-      if (!title) { document.getElementById('n-title').focus(); return; }
+      if (!title) { toast('Title দাও', 'error'); return; }
       const notices = loadNotices();
-      notices.unshift({ id: uid(), title, text, type, date: new Date().toLocaleDateString('en-BD', { day:'2-digit', month:'short', year:'numeric' }) });
-      saveNotices(notices); renderNotices(); closeModal('modal-notice');
+      notices.unshift({ id:uid(), title, text:document.getElementById('n-text').value.trim(), type:document.getElementById('n-type').value, date:new Date().toLocaleDateString('en-BD',{day:'2-digit',month:'short',year:'numeric'}) });
+      saveNotices(notices); renderNotices(); closeModal('modal-notice'); toast('Notice added ✓', 'success');
     });
 
-    const semLabels = ['','1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'];
+    /* ── Semester panels ───────────────────── */
+    const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
     let activeSem = 1;
 
     function buildPanels() {
-      const wrap = document.getElementById('sem-panels');
-      wrap.innerHTML = Array.from({length:8},(_,i) => `
+      document.getElementById('sem-panels').innerHTML = Array.from({length:8},(_,i)=>`
         <div class="sem-panel${i===0?' active':''}" id="sem-panel-${i+1}">
-          <div class="sem-panel-head">
-            <div class="sem-panel-title">${semLabels[i+1]} <span id="sem-count-${i+1}"></span></div>
-          </div>
+          <div class="sem-panel-title">${semLabels[i+1]} Semester <span id="sem-count-${i+1}"></span></div>
           <div class="resource-grid" id="sem-grid-${i+1}"></div>
         </div>`).join('');
     }
 
     function renderSem(n) {
-      const sems = loadSemesters();
-      const items = sems[n] || [];
+      const items = (loadSems()[n] || []);
       const grid = document.getElementById(`sem-grid-${n}`);
       const countEl = document.getElementById(`sem-count-${n}`);
       if (countEl) countEl.textContent = items.length ? `${items.length} file${items.length>1?'s':''}` : '';
-      if (!items.length) { grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources yet. Add PDFs or images here.</p></div>`; return; }
+      if (!items.length) {
+        grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources yet.</p></div>`;
+        return;
+      }
       grid.innerHTML = items.map(it => {
-        const isPdf = it.type === 'pdf';
+        const isPdf = it.type==='pdf';
         const thumb = (!isPdf && it.thumb) ? `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">` : `<i class="rc-icon fas ${isPdf?'fa-file-pdf':'fa-image'}"></i>`;
         return `
-          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}" data-type="${it.type}">
+          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
             <div class="rc-thumb">${thumb}</div>
             <div class="rc-body">
               <div class="rc-title">${esc(it.title)}</div>
@@ -640,198 +858,212 @@
             </div>
             <div class="rc-meta">
               <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
-              <div class="rc-actions admin-only">
-                <button class="action-btn edit" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-edit"></i></button>
-                <button class="action-btn delete" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+              <div class="rc-actions">
+                <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
+                <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
               </div>
             </div>
           </div>`;
       }).join('');
 
       grid.querySelectorAll('.resource-card').forEach(card => {
-        card.addEventListener('click', e => {
-          if (e.target.closest('.action-btn')) return;
-          openResource(card.dataset.id, card.dataset.sem, card.dataset.type);
+        card.addEventListener('click', async e => {
+          if (e.target.closest('.rc-btn')) return;
+          await openResource(card.dataset.id, card.dataset.sem);
         });
       });
-      grid.querySelectorAll('.action-btn.delete').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); deleteResource(btn.dataset.id, btn.dataset.sem); });
+      grid.querySelectorAll('.rc-btn.edit').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id, btn.dataset.sem); });
       });
-      grid.querySelectorAll('.action-btn.edit').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); editResource(btn.dataset.id, btn.dataset.sem); });
+      grid.querySelectorAll('.rc-btn.del').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          showConfirm('Delete this resource?', () => deleteResource(btn.dataset.id, btn.dataset.sem));
+        });
       });
     }
 
     function renderAllSems() { for(let i=1;i<=8;i++) renderSem(i); }
 
+    /* ── Semester tabs ─────────────────────── */
     document.getElementById('sem-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.sem-tab');
-      if (!tab) return;
+      const tab = e.target.closest('.sem-tab'); if(!tab) return;
       const n = parseInt(tab.dataset.sem);
       document.querySelectorAll('.sem-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${n}`));
       activeSem = n;
     });
 
-    let pendingFileData = null;
-    document.getElementById('src-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.form-tab');
-      if (!tab) return;
-      document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t===tab));
-      document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
-    });
-
-    const dropZone = document.getElementById('file-drop');
-    const fileInput = document.getElementById('r-file');
-    dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
-    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
-
-    function handleFile(f) {
-      const mb = (f.size / 1024 / 1024).toFixed(1);
-      document.getElementById('file-name').textContent = `⏳ Loading... (${mb} MB)`;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        pendingFileData = ev.target.result;
-        document.getElementById('file-name').textContent = `✓ ${f.name} (${(f.size/1024).toFixed(0)} KB)`;
-        if (!document.getElementById('r-title').value) document.getElementById('r-title').value = f.name.replace(/\.[^.]+$/,'');
-        if (f.type.startsWith('image/')) document.getElementById('r-type').value = 'image';
-        else if (f.type === 'application/pdf') document.getElementById('r-type').value = 'pdf';
-      };
-      reader.readAsDataURL(f);
-    }
-
-    function extractDriveId(url) {
-      const patterns = [/\/file\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/d\/([a-zA-Z0-9_-]+)/];
-      for (const p of patterns) { const m = url.match(p); if (m) return m[1]; } return null;
-    }
-    const gdriveInput = document.getElementById('r-gdrive');
-    if (gdriveInput) {
-      gdriveInput.addEventListener('input', function() {
-        const id = extractDriveId(this.value.trim());
-        const preview = document.getElementById('gdrive-id-preview');
-        const text = document.getElementById('gdrive-id-text');
-        if (id && preview && text) { preview.style.display='block'; text.textContent = id; }
-        else if (preview) { preview.style.display='none'; }
-      });
-    }
-
-    document.getElementById('add-resource-btn').addEventListener('click', () => {
-      document.getElementById('r-title').value = ''; document.getElementById('r-desc').value = ''; document.getElementById('r-url').value = '';
-      if (document.getElementById('r-gdrive')) document.getElementById('r-gdrive').value = '';
-      if (document.getElementById('gdrive-id-preview')) document.getElementById('gdrive-id-preview').style.display = 'none';
-      document.getElementById('file-name').textContent = ''; document.getElementById('r-type').value = 'pdf'; pendingFileData = null;
-      document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===0));
-      document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===0));
-      openModal('modal-resource'); setTimeout(() => document.getElementById('r-title').focus(), 300);
-    });
-
-    document.getElementById('save-resource-btn').addEventListener('click', async () => {
-      const title = document.getElementById('r-title').value.trim();
-      const desc = document.getElementById('r-desc').value.trim();
-      const type = document.getElementById('r-type').value;
-      const activeTab = document.querySelector('.form-tab.active').dataset.tab;
-      if (!title) { document.getElementById('r-title').focus(); return; }
-      const id = uid(); let src = '';
-      if (activeTab === 'gdrive-panel') {
-        const gdriveUrl = (document.getElementById('r-gdrive') || {}).value || '';
-        const fileId = extractDriveId(gdriveUrl.trim());
-        if (!fileId) { alert('Please paste a valid Google Drive link.'); return; }
-        const mode = (document.querySelector('input[name="gdrive-access"]:checked') || {}).value || 'preview';
-        src = `https://drive.google.com/file/d/${fileId}/${mode}?usp=sharing`;
-      } else if (activeTab === 'url-panel') {
-        src = document.getElementById('r-url').value.trim();
-        if (!src) { document.getElementById('r-url').focus(); return; }
-      } else {
-        if (!pendingFileData) { alert('Please select a file.'); return; }
-      }
-      const item = { id, title, desc, type, src: activeTab === 'upload-panel' ? 'idb:'+id : src, thumb: null };
-      if (activeTab === 'upload-panel' && pendingFileData) {
-        await saveFile(id, pendingFileData);
-        if (type === 'image') item.thumb = pendingFileData;
-      }
-      const sems = loadSemesters();
-      if (!sems[activeSem]) sems[activeSem] = [];
-      sems[activeSem].push(item);
-      saveSemesters(sems); renderSem(activeSem); closeModal('modal-resource');
-    });
-
-    function editResource(id, sem) {
-      const sems = loadSemesters();
-      const item = (sems[sem]||[]).find(i => i.id === id);
-      if (!item) return;
-      document.getElementById('edit-r-id').value = id;
-      document.getElementById('edit-r-sem').value = sem;
-      document.getElementById('edit-r-title').value = item.title;
-      document.getElementById('edit-r-desc').value = item.desc || '';
-      openModal('modal-edit-resource');
-    }
-
-    document.getElementById('update-resource-btn').addEventListener('click', () => {
-      const id = document.getElementById('edit-r-id').value;
-      const sem = document.getElementById('edit-r-sem').value;
-      const title = document.getElementById('edit-r-title').value.trim();
-      const desc = document.getElementById('edit-r-desc').value.trim();
-      if (!title) return;
-      
-      const sems = loadSemesters();
-      const itemIndex = (sems[sem]||[]).findIndex(i => i.id === id);
-      if (itemIndex > -1) {
-        sems[sem][itemIndex].title = title;
-        sems[sem][itemIndex].desc = desc;
-        saveSemesters(sems);
-        renderSem(sem);
-        closeModal('modal-edit-resource');
-      }
-    });
-
-    async function deleteResource(id, sem) {
-      showConfirm('Are you sure you want to delete this resource? This action cannot be undone.', async () => {
-        const sems = loadSemesters();
-        const item = (sems[sem]||[]).find(i => i.id === id);
-        if (item && item.src && item.src.startsWith('idb:')) await deleteFile(item.src.slice(4));
-        sems[sem] = (sems[sem]||[]).filter(i => i.id !== id);
-        saveSemesters(sems); renderSem(sem);
-      });
-    }
-
-    async function openResource(id, sem, type) {
-      const sems = loadSemesters();
-      const item = (sems[sem]||[]).find(i => i.id === id);
+    /* ── Open resource ─────────────────────── */
+    async function openResource(id, sem) {
+      const item = (loadSems()[sem]||[]).find(i=>i.id===id);
       if (!item) return;
       let src = item.src;
       if (src && src.startsWith('idb:')) {
         src = await getFile(src.slice(4));
-        if (!src) { alert('File not found. It may have been cleared.'); return; }
+        if (!src) { toast('File not found. IndexedDB cleared হয়ে গেছে।', 'error'); return; }
       }
-      if (type === 'pdf') {
-        document.getElementById('pdf-modal-title').innerHTML = `<i class="fas fa-file-pdf" style="color:var(--blue);margin-right:8px;"></i>${esc(item.title)}`;
-        document.getElementById('pdf-bar-title').textContent = item.title;
-        document.getElementById('pdf-open-link').href = src;
-        document.getElementById('pdf-frame').src = src;
-        openModal('modal-pdf');
+      if (item.type === 'pdf') {
+        openPdfViewer(src, item.title);
       } else {
         document.getElementById('img-modal-title').innerHTML = `<i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i>${esc(item.title)}`;
         document.getElementById('img-view').src = src;
-        document.getElementById('img-view').alt = item.title;
         document.getElementById('img-desc').textContent = item.desc || '';
         openModal('modal-image');
       }
     }
 
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        ['modal-confirm', 'modal-edit-resource', 'modal-pdf','modal-image','modal-notice','modal-resource','modal-admin'].forEach(id => {
-          if (document.getElementById(id).classList.contains('open')) closeModal(id);
-        });
-      }
+    /* ── Edit resource ─────────────────────── */
+    function openEditModal(id, sem) {
+      const item = (loadSems()[sem]||[]).find(i=>i.id===id);
+      if (!item) return;
+      document.getElementById('edit-id').value    = id;
+      document.getElementById('edit-sem').value   = sem;
+      document.getElementById('edit-title').value = item.title || '';
+      document.getElementById('edit-desc').value  = item.desc  || '';
+      openModal('modal-edit');
+      setTimeout(() => document.getElementById('edit-title').focus(), 300);
+    }
+    document.getElementById('save-edit-btn').addEventListener('click', () => {
+      const id    = document.getElementById('edit-id').value;
+      const sem   = document.getElementById('edit-sem').value;
+      const title = document.getElementById('edit-title').value.trim();
+      if (!title) { toast('Title দাও', 'error'); return; }
+      const sems = loadSems();
+      sems[sem]  = (sems[sem]||[]).map(i => i.id===id ? {...i, title, desc:document.getElementById('edit-desc').value.trim()} : i);
+      saveSems(sems); renderSem(sem); closeModal('modal-edit'); toast('Updated ✓', 'success');
     });
 
+    /* ── Delete resource ───────────────────── */
+    async function deleteResource(id, sem) {
+      const sems = loadSems();
+      const item = (sems[sem]||[]).find(i=>i.id===id);
+      if (item && item.src && item.src.startsWith('idb:')) await delFile(item.src.slice(4));
+      sems[sem] = (sems[sem]||[]).filter(i=>i.id!==id);
+      saveSems(sems); renderSem(sem); toast('Deleted', 'info');
+    }
+
+    /* ── Add resource form ─────────────────── */
+    let pendingFileData = null;
+    let pendingDriveResult = null;
+
+    // Source tabs
+    document.getElementById('src-tabs').addEventListener('click', e => {
+      const tab = e.target.closest('.form-tab'); if(!tab) return;
+      document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t===tab));
+      document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
+    });
+
+    // File drop zone
+    const dropZone = document.getElementById('file-drop');
+    const fileInput = document.getElementById('r-file');
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if(e.dataTransfer.files[0]) fileSelected(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', () => { if(fileInput.files[0]) fileSelected(fileInput.files[0]); });
+
+    let _pendingFile = null;
+    function fileSelected(f) {
+      _pendingFile = f;
+      const mb = (f.size/1024/1024).toFixed(1);
+      setFileStatus(`✓ ${f.name} (${mb} MB)`, 'ok');
+      if (!document.getElementById('r-title').value) document.getElementById('r-title').value = f.name.replace(/\.[^.]+$/, '');
+      if (f.type.startsWith('image/')) document.getElementById('r-type').value = 'image';
+      else if (f.type === 'application/pdf') document.getElementById('r-type').value = 'pdf';
+    }
+    function setFileStatus(msg, cls) {
+      const el = document.getElementById('file-status');
+      el.textContent = msg; el.className = `file-status ${cls}`;
+    }
+
+    document.getElementById('add-resource-btn').addEventListener('click', () => {
+      document.getElementById('r-edit-id').value = '';
+      document.getElementById('r-title').value = '';
+      document.getElementById('r-desc').value  = '';
+      document.getElementById('r-url').value   = '';
+      document.getElementById('r-gdrive').value = '';
+      document.getElementById('gdrive-detected').style.display = 'none';
+      document.getElementById('file-status').textContent = '';
+      document.getElementById('drive-progress').classList.remove('show');
+      document.getElementById('r-type').value = 'pdf';
+      document.getElementById('resource-modal-title').innerHTML = '<i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Resource';
+      document.getElementById('save-resource-label').textContent = 'Add to Semester';
+      _pendingFile = null; pendingFileData = null; pendingDriveResult = null;
+      // reset to url tab
+      document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===1));
+      document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===1));
+      openModal('modal-resource');
+      setTimeout(() => document.getElementById('r-title').focus(), 300);
+    });
+
+    document.getElementById('save-resource-btn').addEventListener('click', async () => {
+      const title     = document.getElementById('r-title').value.trim();
+      const desc      = document.getElementById('r-desc').value.trim();
+      const type      = document.getElementById('r-type').value;
+      const activeTab = document.querySelector('#src-tabs .form-tab.active').dataset.tab;
+      if (!title) { toast('Title দাও', 'error'); return; }
+
+      const id = uid();
+      let src = '';
+
+      if (activeTab === 'gdrive-panel') {
+        const gUrl = document.getElementById('r-gdrive').value.trim();
+        const fid = extractDriveId(gUrl);
+        if (!fid) { toast('Valid Google Drive link paste করো', 'error'); return; }
+        const mode = document.querySelector('input[name="gdrive-access"]:checked').value;
+        src = `https://drive.google.com/file/d/${fid}/${mode}?usp=sharing`;
+
+      } else if (activeTab === 'url-panel') {
+        src = document.getElementById('r-url').value.trim();
+        if (!src) { toast('URL দাও', 'error'); return; }
+
+      } else {
+        // Upload → Drive
+        if (!_pendingFile) { toast('File select করো', 'error'); return; }
+        if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
+          // Fallback: IndexedDB
+          setFileStatus('⏳ Saving locally...', 'loading');
+          const reader = new FileReader();
+          reader.onload = async ev => {
+            const dataUrl = ev.target.result;
+            await saveFile(id, dataUrl);
+            const item = { id, title, desc, type, src:'idb:'+id, thumb: type==='image'?dataUrl:null };
+            const sems = loadSems();
+            if (!sems[activeSem]) sems[activeSem]=[];
+            sems[activeSem].push(item);
+            saveSems(sems); renderSem(activeSem);
+            closeModal('modal-resource'); toast('Saved locally (Drive not configured)', 'info');
+          };
+          reader.readAsDataURL(_pendingFile); return;
+        }
+        // Drive upload
+        try {
+          const mode = document.querySelector('input[name="upload-access"]:checked').value;
+          const result = await uploadFileToDrive(_pendingFile, activeSem, mode);
+          src = result.embedUrl;
+        } catch (err) {
+          console.error(err);
+          toast('Drive upload failed: ' + (err.message || 'Check CLIENT_ID'), 'error');
+          return;
+        }
+      }
+
+      const item = { id, title, desc, type, src, thumb:null };
+      const sems = loadSems();
+      if (!sems[activeSem]) sems[activeSem] = [];
+      sems[activeSem].push(item);
+      saveSems(sems); renderSem(activeSem);
+      closeModal('modal-resource'); toast('Resource added ✓', 'success');
+    });
+
+    /* ── Util ──────────────────────────────── */
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    buildPanels(); renderNotices(); renderAllSems();
+    /* ── Init ──────────────────────────────── */
+    buildPanels();
+    renderNotices();
+    renderAllSems();
   })();
   </script>
 </body>
