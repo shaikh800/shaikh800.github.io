@@ -816,7 +816,8 @@
     fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
 
     function handleFile(f) {
-      if (f.size > 15 * 1024 * 1024) { alert('File is too large (max 15 MB).'); return; }
+      const mb = (f.size / 1024 / 1024).toFixed(1);
+      document.getElementById('file-name').textContent = `⏳ Loading... (${mb} MB)`;
       const reader = new FileReader();
       reader.onload = ev => {
         pendingFileData = ev.target.result;
@@ -828,14 +829,36 @@
       reader.readAsDataURL(f);
     }
 
+    // Google Drive link → extract file ID
+    function extractDriveId(url) {
+      const patterns = [/\/file\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/d\/([a-zA-Z0-9_-]+)/];
+      for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+      return null;
+    }
+    function buildDriveSrc(fileId, mode) {
+      return `https://drive.google.com/file/d/${fileId}/${mode}?usp=sharing`;
+    }
+    const gdriveInput = document.getElementById('r-gdrive');
+    if (gdriveInput) {
+      gdriveInput.addEventListener('input', function() {
+        const id = extractDriveId(this.value.trim());
+        const preview = document.getElementById('gdrive-id-preview');
+        const text    = document.getElementById('gdrive-id-text');
+        if (id && preview && text) { preview.style.display='block'; text.textContent = id; }
+        else if (preview) { preview.style.display='none'; }
+      });
+    }
+
     document.getElementById('add-resource-btn').addEventListener('click', () => {
       document.getElementById('r-title').value = '';
       document.getElementById('r-desc').value  = '';
       document.getElementById('r-url').value   = '';
+      if (document.getElementById('r-gdrive')) document.getElementById('r-gdrive').value = '';
+      if (document.getElementById('gdrive-id-preview')) document.getElementById('gdrive-id-preview').style.display = 'none';
       document.getElementById('file-name').textContent = '';
       document.getElementById('r-type').value  = 'pdf';
       pendingFileData = null;
-      // reset tabs
+      // reset tabs — start on Google Drive tab (index 0)
       document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===0));
       openModal('modal-resource');
@@ -843,20 +866,33 @@
     });
 
     document.getElementById('save-resource-btn').addEventListener('click', async () => {
-      const title = document.getElementById('r-title').value.trim();
-      const desc  = document.getElementById('r-desc').value.trim();
-      const type  = document.getElementById('r-type').value;
-      const useUrl  = document.querySelector('.form-tab.active').dataset.tab === 'url-panel';
-      const urlVal  = document.getElementById('r-url').value.trim();
+      const title     = document.getElementById('r-title').value.trim();
+      const desc      = document.getElementById('r-desc').value.trim();
+      const type      = document.getElementById('r-type').value;
+      const activeTab = document.querySelector('.form-tab.active').dataset.tab;
 
       if (!title) { document.getElementById('r-title').focus(); return; }
-      if (useUrl && !urlVal) { document.getElementById('r-url').focus(); return; }
-      if (!useUrl && !pendingFileData) { alert('Please select a file.'); return; }
 
       const id = uid();
-      const item = { id, title, desc, type, src: useUrl ? urlVal : 'idb:'+id, thumb: null };
+      let src = '';
 
-      if (!useUrl && pendingFileData) {
+      if (activeTab === 'gdrive-panel') {
+        const gdriveUrl = (document.getElementById('r-gdrive') || {}).value || '';
+        const fileId = extractDriveId(gdriveUrl.trim());
+        if (!fileId) { alert('Valid Google Drive link paste করো।'); return; }
+        const mode = (document.querySelector('input[name="gdrive-access"]:checked') || {}).value || 'preview';
+        src = buildDriveSrc(fileId, mode);
+      } else if (activeTab === 'url-panel') {
+        src = document.getElementById('r-url').value.trim();
+        if (!src) { document.getElementById('r-url').focus(); return; }
+      } else {
+        // upload panel
+        if (!pendingFileData) { alert('Please select a file.'); return; }
+      }
+
+      const item = { id, title, desc, type, src: activeTab === 'upload-panel' ? 'idb:'+id : src, thumb: null };
+
+      if (activeTab === 'upload-panel' && pendingFileData) {
         await saveFile(id, pendingFileData);
         if (type === 'image') item.thumb = pendingFileData;
       }
