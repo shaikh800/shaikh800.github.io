@@ -89,8 +89,11 @@
     }
     .work-action-btn.edit-btn { background:rgba(255,255,255,0.9); color:var(--blue); }
     .work-action-btn.del-btn  { background:rgba(255,255,255,0.9); color:#ef4444; }
-    .admin-actions { display:none; }
-    body.admin-mode .admin-actions { display:flex; }
+
+    /* ── ADMIN-ONLY ELEMENTS FIX ── */
+    .admin-actions { display: none !important; }
+    body.admin-mode .admin-actions { display: flex !important; }
+    body.admin-mode button.admin-actions { display: inline-flex !important; }
 
     /* ── SECTION HEAD ROW ────────────────────────────────── */
     .section-head-row {
