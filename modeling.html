@@ -10,6 +10,23 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
+    /* ── CSS VARIABLES FALLBACK ──────────────────────────── */
+    :root {
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --line: #e2e8f0;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    }
+
     /* ── FILTER TABS ─────────────────────────────────────── */
     .filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
     .filter-btn {
@@ -17,7 +34,6 @@
       background:var(--surface); color:var(--muted); font-size:13px; font-weight:700;
       cursor:pointer; transition:all 0.2s ease;
     }
-    .filter-btn:hover { border-color:var(--blue); color:var(--blue); }
     .filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
 
     /* ── WORKS GRID ──────────────────────────────────────── */
@@ -28,12 +44,10 @@
       transition:all 0.25s var(--ease-spring);
       animation:fadeSlideUp 0.4s var(--ease-out) both;
     }
-    .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
     .work-thumb {
       width:100%; aspect-ratio:16/9; object-fit:cover; display:block;
       background:var(--surface-soft); transition:transform 0.4s var(--ease-out);
     }
-    .work-card:hover .work-thumb { transform:scale(1.03); }
     .work-thumb-wrap { overflow:hidden; position:relative; }
     .work-thumb-wrap .play-badge {
       position:absolute; top:10px; right:10px;
@@ -75,7 +89,6 @@
     }
     .work-action-btn.edit-btn { background:rgba(255,255,255,0.9); color:var(--blue); }
     .work-action-btn.del-btn  { background:rgba(255,255,255,0.9); color:#ef4444; }
-    .work-action-btn:hover { transform:scale(1.1); }
     .admin-actions { display:none; }
     body.admin-mode .admin-actions { display:flex; }
 
@@ -110,7 +123,6 @@
       box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:all 0.2s var(--ease-spring);
       display:flex; align-items:center; justify-content:center;
     }
-    .admin-fab:hover { transform:scale(1.1); }
     .admin-fab.active { background:var(--blue); }
 
     /* ── MODALS ──────────────────────────────────────────── */
@@ -194,15 +206,32 @@
     .page-title { padding-bottom:40px; }
     .page-title h1 { font-size:clamp(32px,5vw,54px); margin-bottom:10px; }
 
-    @media (max-width:600px) {
+    /* ── HOVER EFFECTS FOR DESKTOP ONLY ──────────────────── */
+    @media (hover: hover) and (pointer: fine) {
+      .filter-btn:hover { border-color:var(--blue); color:var(--blue); }
+      .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
+      .work-card:hover .work-thumb { transform:scale(1.03); }
+      .work-action-btn:hover { transform:scale(1.1); }
+      .admin-fab:hover { transform:scale(1.1); }
+    }
+
+    /* ── MOBILE OPTIMIZATION ─────────────────────────────── */
+    @media (max-width: 600px) {
       #works-container { grid-template-columns:1fr; }
       .form-row { grid-template-columns:1fr; }
+      
+      /* Make buttons larger for touch screens */
+      .work-action-btn { width:40px; height:40px; font-size:16px; }
+      .admin-actions { top:15px; left:15px; gap:10px; }
+      
+      /* Fix keyboard blocking modal on mobile */
+      .modal-box { max-height: 85dvh; display: flex; flex-direction: column; }
+      .modal-body { overflow-y: auto; overscroll-behavior: contain; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── HEADER ─────────────────────────────────────────── -->
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
@@ -221,10 +250,8 @@
     </div>
   </header>
 
-  <!-- ── MAIN ───────────────────────────────────────────── -->
   <main class="page">
 
-    <!-- Page Title -->
     <section class="page-title reveal">
       <p class="eyebrow">Blender · 3D Modeling · Animation</p>
       <h1>3D Portfolio</h1>
@@ -236,7 +263,6 @@
       </div>
     </section>
 
-    <!-- ── WORKS ─────────────────────────────────────────── -->
     <section class="section" aria-labelledby="works-title">
       <div class="section-head-row reveal">
         <div>
@@ -244,7 +270,6 @@
           <span class="admin-badge"><i class="fas fa-lock-open"></i> Admin Mode</span>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <!-- Filter bar -->
           <div class="filter-bar" id="filter-bar" style="margin-bottom:0;">
             <button class="filter-btn active" data-cat="all">All</button>
           </div>
@@ -257,7 +282,6 @@
       <div id="works-container"></div>
     </section>
 
-    <!-- ── ABOUT / DIRECTION ──────────────────────────────── -->
     <section class="section" aria-labelledby="direction">
       <div class="split-band reveal">
         <div>
@@ -277,7 +301,6 @@
       </div>
     </section>
 
-    <!-- ── CONTACT ────────────────────────────────────────── -->
     <section class="contact-strip reveal" aria-label="Contact">
       <div>
         <h2>Follow the work</h2>
@@ -292,7 +315,6 @@
 
   </main>
 
-  <!-- ── FOOTER ─────────────────────────────────────────── -->
   <footer class="site-footer">
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
@@ -300,12 +322,10 @@
     </div>
   </footer>
 
-  <!-- ── ADMIN FAB ──────────────────────────────────────── -->
   <button class="admin-fab" id="admin-fab" title="Admin mode">
     <i class="fas fa-lock" id="admin-fab-icon"></i>
   </button>
 
-  <!-- ── MODAL: ADD / EDIT WORK ─────────────────────────── -->
   <div class="modal-overlay" id="modal-work">
     <div class="modal-box">
       <div class="modal-head">
@@ -349,7 +369,6 @@
           </div>
         </div>
 
-        <!-- Thumbnail source -->
         <div class="form-group">
           <label>Thumbnail</label>
           <div class="src-tabs" id="thumb-src-tabs">
@@ -376,7 +395,6 @@
     </div>
   </div>
 
-  <!-- ── MODAL: ADMIN LOGIN ─────────────────────────────── -->
   <div class="modal-overlay" id="modal-admin">
     <div class="modal-box" style="max-width:380px;">
       <div class="modal-head">
@@ -397,7 +415,6 @@
     </div>
   </div>
 
-  <!-- ── MODAL: VIEW IMAGE ──────────────────────────────── -->
   <div class="modal-overlay" id="modal-img">
     <div class="modal-box" style="max-width:860px;">
       <div class="modal-head">
@@ -411,13 +428,12 @@
     </div>
   </div>
 
-  <!-- ── SCRIPTS ────────────────────────────────────────── -->
   <script src="assets/site.js"></script>
   <script>
   (() => {
     /* ── CONFIG ── */
-    const ADMIN_PW_KEY = 'civil_admin_pw'; // shared with civil page
-    const DEFAULT_PW   = 'fec2024';
+    const ADMIN_PW_KEY = 'civil_admin_pw'; 
+    const DEFAULT_PW   = atob('ZmVjMjAyNA=='); // Base64 encoded 'fec2024'
     const STORE_KEY    = 'modeling_works';
     const DB_NAME = 'modelingDB'; const DB_VER = 1; const STORE = 'thumbs';
 
@@ -553,7 +569,7 @@
         return;
       }
 
-      // Render cards (thumbnail may be in IndexedDB)
+      // Render cards
       const cards = await Promise.all(filtered.map(async w => {
         let imgHtml;
         if (w.imgSrc === 'idb') {
@@ -593,7 +609,7 @@
 
       container.innerHTML = cards.join('');
 
-      // Click to view image (non-link area)
+      // Click to view image
       container.querySelectorAll('.work-card').forEach(card => {
         card.addEventListener('click', async e => {
           if (e.target.closest('.work-action-btn') || e.target.closest('.work-link')) return;
@@ -624,13 +640,14 @@
       renderWorks();
     }
 
-    /* ── THUMBNAIL SOURCE TABS ── */
-    let pendingThumb = null; // { dataUrl }
+    /* ── THUMBNAIL COMPRESSION & UPLOAD FIX ── */
+    let pendingThumb = null;
     document.getElementById('thumb-src-tabs').addEventListener('click', e => {
       const tab = e.target.closest('.src-tab'); if (!tab) return;
       document.querySelectorAll('.src-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.src-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.panel));
     });
+    
     const thumbDrop = document.getElementById('thumb-drop');
     const thumbFile = document.getElementById('w-img-file');
     thumbDrop.addEventListener('click', () => thumbFile.click());
@@ -643,10 +660,29 @@
       if (!f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
       const reader = new FileReader();
       reader.onload = ev => {
-        pendingThumb = ev.target.result;
-        document.getElementById('thumb-preview-img').src = pendingThumb;
-        document.getElementById('thumb-preview').classList.add('show');
-        document.getElementById('w-img-url').value = '';
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const MAX_WIDTH = 800; // Resize large mobile images
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          pendingThumb = canvas.toDataURL('image/jpeg', 0.7); // Compress quality to 70%
+          document.getElementById('thumb-preview-img').src = pendingThumb;
+          document.getElementById('thumb-preview').classList.add('show');
+          document.getElementById('w-img-url').value = '';
+        };
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(f);
     }
@@ -671,7 +707,6 @@
       document.getElementById('thumb-preview').classList.remove('show');
       document.getElementById('thumb-preview-img').src = '';
       pendingThumb = null;
-      // reset to URL tab
       document.querySelectorAll('.src-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.src-panel').forEach((p,i) => p.classList.toggle('active', i===0));
     }
@@ -729,7 +764,6 @@
         imgSrc = 'url'; img = urlVal;
         if (editId && loadWorks().find(w=>w.id===editId)?.imgSrc === 'idb') await delThumb(editId);
       } else {
-        // keep existing if editing
         if (editId) {
           const existing = loadWorks().find(w=>w.id===editId);
           imgSrc = existing?.imgSrc || ''; img = existing?.img || '';
