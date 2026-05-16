@@ -972,17 +972,24 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
   ? it.folder 
   : `Semester ${n}/General`;
         let itSegs = folderStr.split('/').map(x=>x.trim()).filter(x=>x);
+
+// ❗ remove "Semester X" from UI structure
+if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
+  itSegs.shift();
+}
         
         let match = true;
         for(let i=0; i<targetSegs.length; i++) {
           if(itSegs[i] !== targetSegs[i]) { match = false; break; }
         }
         if(match) {
-          if(itSegs.length === targetSegs.length + 1) {
-            files.push(it);
-          } else {
-            folders.add(itSegs[targetSegs.length]);
-          }
+          if(itSegs.length > targetSegs.length) {
+  if(itSegs.length === targetSegs.length + 1) {
+    files.push(it);
+  } else {
+    folders.add(itSegs[targetSegs.length]);
+  }
+}
         }
       });
 
@@ -1139,6 +1146,7 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
 
   // remove Semester if exists
   val = val.replace(/Semester\s*\d+/gi, '').trim();
+  if (!val) return;
 
   let current = input.value.trim();
 
@@ -1185,7 +1193,7 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
       document.getElementById('r-desc').value  = '';
       document.getElementById('r-url').value   = '';
       document.getElementById('r-gdrive').value = '';
-      document.getElementById('r-drive-path').value = `Semester ${activeSem}`; // Default path
+      document.getElementById('r-drive-path').value = ''; // Default path
       document.getElementById('gdrive-detected').style.display = 'none';
       document.getElementById('file-status').textContent = '';
       document.getElementById('drive-progress').classList.remove('show');
