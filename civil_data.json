@@ -1,0 +1,19 @@
+{
+  "semesters": {
+    "1": [],
+    "5": [
+      {
+        "id": "mp90atblbabv",
+        "title": "Book_Principles of Geotechnical Engineering",
+        "desc": "- B. M. Das",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1mBBgOcJ3kAQI6Wb-Wxm7CnkBlfLRFjFz/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 5/CE 506/Books",
+        "hidden": false
+      }
+    ]
+  },
+  "notices": [],
+  "updated": "2026-05-16T23:58:06.544Z"
+}
