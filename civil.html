@@ -847,9 +847,27 @@
         return;
       }
       grid.innerHTML = items.map(it => {
-        const isPdf = it.type==='pdf';
-        const thumb = (!isPdf && it.thumb) ? `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">` : `<i class="rc-icon fas ${isPdf?'fa-file-pdf':'fa-image'}"></i>`;
+        const isPdf = it.type === 'pdf';
+        let thumbHtml = '';
+        const fid = extractDriveId(it.src);
+
+        // Drive link হলে ড্রাইভের অটো-জেনারেটেড থাম্বনেইল দেখাবে (PDF এবং Image দুটোর জন্যই)
+        if (fid) {
+          thumbHtml = `<img src="https://drive.google.com/thumbnail?id=${fid}&sz=w400" alt="${esc(it.title)}" loading="lazy">`;
+        } 
+        // লোকাল ইমেজ হলে আগের মতোই ইমেজ দেখাবে
+        else if (!isPdf && it.thumb) {
+          thumbHtml = `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">`;
+        } 
+        // অন্যথায় ডিফল্ট আইকন দেখাবে
+        else {
+          thumbHtml = `<i class="rc-icon fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
+        }
+
         return `
+          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
+            <div class="rc-thumb">${thumbHtml}</div>
+            <div class="rc-body">
           <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
             <div class="rc-thumb">${thumb}</div>
             <div class="rc-body">
