@@ -279,6 +279,39 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
     .text-muted { color:var(--muted); font-size:12px; margin-top:6px; line-height:1.5; }
     @media (max-width:900px) { .card-grid.three { grid-template-columns:1fr 1fr; } }
     @media (max-width:560px) { .card-grid.three { grid-template-columns:1fr; } .resource-grid { grid-template-columns:1fr 1fr; } }
+
+    /* ── LOCKED / PRIVATE CARDS ───────────────────────── */
+    .locked-card { cursor: default !important; }
+    .locked-card .rc-thumb { background: repeating-linear-gradient(45deg,var(--surface-soft),var(--surface-soft) 8px,var(--line) 8px,var(--line) 16px) !important; }
+    .locked-card:hover { transform: none !important; box-shadow: var(--shadow) !important; border-color: var(--line) !important; }
+    .private-badge { position:absolute; top:8px; left:8px; background:rgba(239,68,68,0.9); color:#fff; font-size:10px; font-weight:800; padding:2px 8px; border-radius:100px; letter-spacing:0.05em; text-transform:uppercase; pointer-events:none; }
+
+    /* ── GITHUB SYNC STATUS ────────────────────────────── */
+    .gh-loading { text-align:center; padding:40px 20px; color:var(--muted); grid-column:1/-1; }
+    .gh-loading i { font-size:28px; display:block; margin-bottom:10px; animation:spin 1s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .sync-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+    .sync-dot.ok    { background:#10b981; }
+    .sync-dot.fail  { background:#f59e0b; }
+
+    /* ── MOBILE FIXES ──────────────────────────────────── */
+    @media (max-width:600px) {
+      .resource-grid.view-list { grid-template-columns: 1fr 1fr !important; }
+      .resource-grid.view-list .resource-card { flex-direction: column; height: auto; }
+      .resource-grid.view-list .rc-thumb { width: 100%; height: 120px; flex-shrink: unset; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+      .resource-grid.view-list .rc-body { padding: 12px 14px; flex: unset; width: 100%; }
+      .resource-grid.view-list .rc-meta { flex-direction: row; border-left: none; border-top: 1px solid var(--line); width: 100%; height: auto; min-width: unset; padding: 8px 12px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+      .pdf-topbar { flex-wrap: wrap; height: auto; padding: 8px 12px; gap: 6px; }
+      .pdf-topbar-title { width: 100%; font-size: 13px; }
+      .modal-body { padding: 16px; }
+      .modal-head { padding: 14px 16px; }
+      .modal-footer { padding: 12px 16px; }
+      .form-tab { font-size: 11px; padding: 8px 6px; }
+      .fs-header { gap: 8px; }
+      .fs-breadcrumb { font-size: 13px; }
+      .path-suggestions { gap: 5px; }
+      .path-chip { font-size: 10px; padding: 4px 9px; }
+    }
   </style>
 </head>
 <body>
@@ -508,6 +541,7 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
             <div class="access-label">Access Control</div>
             <label class="access-option"><input type="radio" name="gdrive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — Download button থাকবে না</span></label>
             <label class="access-option"><input type="radio" name="gdrive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+            <label class="access-option"><input type="radio" name="gdrive-access" value="private"> <span><i class="fas fa-lock" style="color:#ef4444;"></i> Only Me — অন্যদের কাছে locked দেখাবে</span></label>
           </div>
         </div>
 
@@ -537,6 +571,7 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
             <div class="access-label">Access Control</div>
             <label class="access-option"><input type="radio" name="upload-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only</span></label>
             <label class="access-option"><input type="radio" name="upload-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+            <label class="access-option"><input type="radio" name="upload-access" value="private"> <span><i class="fas fa-lock" style="color:#ef4444;"></i> Only Me — অন্যদের কাছে locked দেখাবে</span></label>
           </div>
         </div>
 
@@ -557,7 +592,12 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
       <div class="modal-body">
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
+          <input type="password" id="admin-pass" placeholder="Admin password" autocomplete="current-password">
+        </div>
+        <div class="form-group" style="margin-top:4px;">
+          <label>GitHub Token <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;font-size:11px;">(cross-device sync এর জন্য)</span></label>
+          <input type="password" id="admin-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+          <p style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6;">GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read & Write</b></p>
         </div>
         <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;">Incorrect password.</p>
       </div>
@@ -615,6 +655,46 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
     const NOTICE_KEY       = 'civil_notices';
     const DB_NAME = 'civilDB2'; const DB_VER = 1; const ISTORE = 'files';
 
+    /* ── GitHub Shared Storage ─────────────────────────── */
+    const GITHUB_OWNER  = 'shaikh800';
+    const GITHUB_REPO   = 'shaikh800.github.io';
+    const GITHUB_FILE   = 'civil_data.json';
+    const GITHUB_BRANCH = 'main';
+
+    async function fetchFromGitHub() {
+      const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (data.semesters) localStorage.setItem(STORE_KEY, JSON.stringify(data.semesters));
+        if (data.notices)   localStorage.setItem(NOTICE_KEY, JSON.stringify(data.notices));
+        return true;
+      } catch { return false; }
+    }
+
+    async function pushToGitHub() {
+      const token = sessionStorage.getItem('civil_gh_token');
+      if (!token) return;
+      const data = { semesters: loadSems(), notices: loadNotices(), updated: new Date().toISOString() };
+      try {
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+        let sha = null;
+        try {
+          const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }});
+          if (g.ok) { const j = await g.json(); sha = j.sha; }
+        } catch {}
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+        const put = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+          body: JSON.stringify({ message: 'Update civil resources', content, ...(sha ? {sha} : {}) })
+        });
+        if (put.ok) toast('Synced to GitHub ✓', 'success', 2000);
+        else toast('GitHub sync failed — locally saved', 'error');
+      } catch { toast('GitHub sync error — locally saved', 'error'); }
+    }
+
     /* ── IndexedDB ─────────────────────────── */
     let _db;
     function openDB() {
@@ -653,9 +733,9 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
 
     /* ── Storage helpers ───────────────────── */
     function loadSems()    { try { return JSON.parse(localStorage.getItem(STORE_KEY)||'{}'); } catch { return {}; } }
-    function saveSems(o)   { localStorage.setItem(STORE_KEY, JSON.stringify(o)); }
+    function saveSems(o)   { localStorage.setItem(STORE_KEY, JSON.stringify(o)); pushToGitHub(); }
     function loadNotices() { try { return JSON.parse(localStorage.getItem(NOTICE_KEY)||'[]'); } catch { return []; } }
-    function saveNotices(a){ localStorage.setItem(NOTICE_KEY, JSON.stringify(a)); }
+    function saveNotices(a){ localStorage.setItem(NOTICE_KEY, JSON.stringify(a)); pushToGitHub(); }
     function uid()         { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
     /* ── Toast ─────────────────────────────── */
@@ -713,7 +793,10 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
       const pw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
       if (document.getElementById('admin-pass').value === pw) {
         adminMode = true; sessionStorage.setItem('civil_admin','1');
-        applyAdmin(); closeModal('modal-admin'); toast('Admin mode on 🔓', 'success');
+        const ghToken = document.getElementById('admin-gh-token').value.trim();
+        if (ghToken) sessionStorage.setItem('civil_gh_token', ghToken);
+        applyAdmin(); closeModal('modal-admin');
+        toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
       } else {
         document.getElementById('admin-error').style.display = 'block';
         document.getElementById('admin-pass').select();
@@ -990,25 +1073,17 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
 }
         
         let match = itSegs.slice(0, targetSegs.length).join('/') === targetSegs.join('/');
-        if(match) {
-          if (itSegs.length > targetSegs.length) {
-  let originalSegs = folderStr.split('/').map(x => x.trim()).filter(x => x);
-
-  // remove semester
-  if (originalSegs.length && /^semester\s*\d+/i.test(originalSegs[0])) {
-    originalSegs.shift();
-  }
-
-  let nextLevel = originalSegs[targetSegs.length];
-
-  if (itSegs.length === targetSegs.length + 1) {
-    // ✅ last level → file
-    files.push(it);
-  } else {
-    // ✅ middle level → folder
-    folders.add(nextLevel);
-  }
-}
+        if (match) {
+          if (itSegs.length === targetSegs.length) {
+            files.push(it);
+          } else if (itSegs.length > targetSegs.length) {
+            let originalSegs = folderStr.split('/').map(x => x.trim()).filter(x => x);
+            if (originalSegs.length && /^semester\s*\d+/i.test(originalSegs[0])) {
+              originalSegs.shift();
+            }
+            let nextLevel = originalSegs[targetSegs.length];
+            folders.add(nextLevel);
+          }
         }
       });
 
@@ -1033,6 +1108,25 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       // Render Files
       files.forEach(it => {
         const isPdf = it.type === 'pdf';
+
+        // ── Private / locked card for non-admin ──
+        if (it.hidden && !adminMode) {
+          finalHtml += `
+            <div class="resource-card locked-card type-${it.type}">
+              <div class="rc-thumb locked-thumb">
+                <i class="rc-icon fas fa-lock" style="color:var(--muted);opacity:0.45;"></i>
+              </div>
+              <div class="rc-body">
+                <div class="rc-title" style="color:var(--muted);">Private</div>
+                <div class="rc-desc">Admin only</div>
+              </div>
+              <div class="rc-meta">
+                <span class="rc-type" style="color:#ef4444;"><i class="fas fa-lock"></i> PRIVATE</span>
+              </div>
+            </div>`;
+          return;
+        }
+
         let thumbHtml = '';
         const fid = extractDriveId(it.src);
 
@@ -1040,8 +1134,11 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
         else if (!isPdf && it.thumb) thumbHtml = `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">`;
         else thumbHtml = `<i class="rc-icon fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
 
+        const privateBadge = (it.hidden && adminMode) ? '<span class="private-badge"><i class="fas fa-lock"></i> Private</span>' : '';
+
         finalHtml += `
-          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}">
+          <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}" style="position:relative;">
+            ${privateBadge}
             <div class="rc-thumb">${thumbHtml}</div>
             <div class="rc-body">
               <div class="rc-title">${esc(it.title)}</div>
@@ -1249,11 +1346,14 @@ if(subCode !== '') {
   folderPath = `Semester ${activeSem}/General`;
 }
 
+      let isHidden = false;
       if (activeTab === 'gdrive-panel') {
         const gUrl = document.getElementById('r-gdrive').value.trim();
         const fid = extractDriveId(gUrl);
         if (!fid) { toast('Valid Google Drive link paste করো', 'error'); return; }
-        const mode = document.querySelector('input[name="gdrive-access"]:checked').value;
+        const rawMode = document.querySelector('input[name="gdrive-access"]:checked').value;
+        isHidden = (rawMode === 'private');
+        const mode = isHidden ? 'preview' : rawMode;
         src = `https://drive.google.com/file/d/${fid}/${mode}?usp=sharing`;
 
       } else if (activeTab === 'url-panel') {
@@ -1282,7 +1382,9 @@ if(subCode !== '') {
         
         // Drive upload Custom Path
         try {
-          const mode = document.querySelector('input[name="upload-access"]:checked').value;
+          const rawMode = document.querySelector('input[name="upload-access"]:checked').value;
+          isHidden = (rawMode === 'private');
+          const mode = isHidden ? 'preview' : rawMode;
           const result = await uploadFileToDrive(_pendingFile, folderPath, mode);
           src = result.embedUrl;
         } catch (err) {
@@ -1292,7 +1394,7 @@ if(subCode !== '') {
         }
       }
 
-      const item = { id, title, desc, type, src, thumb:null, folder: folderPath };
+      const item = { id, title, desc, type, src, thumb:null, folder: folderPath, hidden: isHidden || false };
       const sems = loadSems();
       if (!sems[activeSem]) sems[activeSem] = [];
       sems[activeSem].push(item);
@@ -1301,12 +1403,26 @@ if(subCode !== '') {
     });
 
     /* ── Util ──────────────────────────────── */
-    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&quot;'); }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     /* ── Init ──────────────────────────────── */
     buildPanels();
-    renderNotices();
-    renderAllSems();
+
+    // Show spinner while loading shared data from GitHub
+    document.querySelectorAll('[id^="sem-grid-"]').forEach(g => {
+      g.innerHTML = '<div class="gh-loading"><i class="fas fa-circle-notch"></i>Loading resources...</div>';
+    });
+    document.getElementById('notices-container').innerHTML =
+      '<div class="gh-loading" style="padding:20px;"><i class="fas fa-circle-notch"></i>Loading...</div>';
+
+    fetchFromGitHub().then(ok => {
+      if (!ok) console.warn('GitHub fetch failed — using local cache.');
+      renderNotices();
+      renderAllSems();
+    }).catch(() => {
+      renderNotices();
+      renderAllSems();
+    });
   })();
   </script>
 </body>
