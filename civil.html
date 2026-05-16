@@ -236,7 +236,6 @@
     .mt-0 { margin-top: 0 !important; }
 
     @media (max-width: 560px) {
-      /* Fixed the grid squash issue on mobile */
       .resource-grid { grid-template-columns: 1fr; }
       .modal-box { max-height: 85dvh; display: flex; flex-direction: column; }
       .modal-body { overflow-y: auto; overscroll-behavior: contain; }
@@ -336,8 +335,7 @@
         </div>
       </div>
 
-      <div id="sem-panels">
-        </div>
+      <div id="sem-panels"></div>
     </section>
 
     <section class="section" aria-labelledby="skills-title">
@@ -507,7 +505,6 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // ✅ Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDHzrA90SIuUIoPEuVGrMpc2OlpT8dbFrM",
       authDomain: "shaikh-portfolio.firebaseapp.com",
@@ -530,7 +527,6 @@
     let activeSem = 1;
     const semLabels = ['','1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'];
 
-    // ── ADMIN AUTHENTICATION ──
     function applyAdmin() {
       document.body.classList.toggle('admin-mode', adminMode);
       document.getElementById('admin-fab').classList.toggle('active', adminMode);
@@ -557,24 +553,20 @@
       } catch (err) { console.error(err); }
     });
 
-    // ── MODAL UTILS ──
     function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
     document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
     document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    // ── FETCH DATA FROM FIREBASE ──
     async function fetchAllData() {
       try {
-        // Fetch Notices
         const snapNotices = await getDocs(collection(db, "notices"));
         noticesData = [];
         snapNotices.forEach(d => noticesData.push(d.data()));
         noticesData.sort((a, b) => b.timestamp - a.timestamp);
         renderNotices();
 
-        // Fetch Resources
         const snapResources = await getDocs(collection(db, "resources"));
         semestersData = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[]};
         snapResources.forEach(d => {
@@ -585,7 +577,6 @@
       } catch (err) { console.error("Error fetching data:", err); }
     }
 
-    // ── NOTICES LOGIC ──
     function renderNotices() {
       const c = document.getElementById('notices-container');
       if (!noticesData.length) {
@@ -642,7 +633,6 @@
       fetchAllData();
     });
 
-    // ── SEMESTER RESOURCES LOGIC ──
     function buildPanels() {
       const wrap = document.getElementById('sem-panels');
       wrap.innerHTML = Array.from({length:8},(_,i) => `
@@ -719,7 +709,6 @@
       document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${activeSem}`));
     });
 
-    // ── RESOURCE UPLOAD (PDF CRASH PREVENTION) ──
     let pendingImage = null;
 
     document.getElementById('src-tabs').addEventListener('click', e => {
@@ -766,7 +755,7 @@
       document.getElementById('file-name').textContent = '';
       document.getElementById('r-type').value  = 'pdf';
       pendingImage = null;
-      document.querySelector('[data-tab="url-panel"]').click(); // Reset to URL tab
+      document.querySelector('[data-tab="url-panel"]').click();
       openModal('modal-resource');
     });
 
@@ -802,10 +791,8 @@
       fetchAllData();
     });
 
-    // ── INIT ──
     buildPanels();
     fetchAllData();
-  })();
   </script>
 </body>
 </html>
