@@ -380,6 +380,29 @@
     <i class="fas fa-lock" id="admin-fab-icon"></i>
   </button>
 
+  <div class="modal-overlay" id="modal-admin">
+    <div class="modal-box" style="max-width:380px;">
+      <div class="modal-head">
+        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
+        <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Admin Password</label>
+          <input type="password" id="admin-pass" placeholder="Enter password" autocomplete="current-password">
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:-6px; margin-bottom:12px;">
+          <a href="#" id="forget-pass-btn" style="font-size:12px; color:var(--blue); text-decoration:none; font-weight:700;">Forgot Password?</a>
+        </div>
+        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:4px;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
+        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-notice">
     <div class="modal-box">
       <div class="modal-head">
@@ -502,7 +525,7 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -518,7 +541,6 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
 
     const ADMIN_EMAIL = "md.shaikh.alam.007@gmail.com";
     let adminMode = false;
@@ -544,13 +566,42 @@
         await signOut(auth);
         return;
       }
+      document.getElementById('admin-pass').value = '';
+      document.getElementById('admin-error').style.display = 'none';
+      openModal('modal-admin');
+      setTimeout(() => document.getElementById('admin-pass').focus(), 300);
+    });
+
+    document.getElementById('admin-login-btn').addEventListener('click', async () => {
+      const password = document.getElementById('admin-pass').value;
+      const errorEl = document.getElementById('admin-error');
+      if (!password) return;
+
       try {
-        const result = await signInWithPopup(auth, provider);
-        if (result.user.email !== ADMIN_EMAIL) {
-          await signOut(auth);
-          alert("Access Denied: You are not authorized.");
-        }
-      } catch (err) { console.error(err); }
+        errorEl.style.display = 'none';
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+        closeModal('modal-admin');
+      } catch (err) {
+        errorEl.textContent = "Incorrect password or login failed.";
+        errorEl.style.display = 'block';
+      }
+    });
+
+    document.getElementById('admin-pass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('admin-login-btn').click();
+    });
+
+    document.getElementById('forget-pass-btn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const errorEl = document.getElementById('admin-error');
+      try {
+        await sendPasswordResetEmail(auth, ADMIN_EMAIL);
+        alert(`A password reset link has been sent to your Google Email (${ADMIN_EMAIL}). Please check your inbox or spam folder.`);
+        closeModal('modal-admin');
+      } catch (err) {
+        errorEl.textContent = "Failed to send reset email. Try again.";
+        errorEl.style.display = 'block';
+      }
     });
 
     function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
@@ -789,6 +840,16 @@
       saveBtn.innerHTML = '<i class="fas fa-check"></i> Add to Semester'; saveBtn.disabled = false;
       closeModal('modal-resource');
       fetchAllData();
+    });
+
+    /* ────────── ESC KEY ────────── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        ['modal-pdf','modal-image','modal-notice','modal-resource','modal-admin'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('open')) closeModal(id);
+        });
+      }
     });
 
     buildPanels();
