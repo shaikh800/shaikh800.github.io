@@ -930,6 +930,10 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
       if (countEl) countEl.textContent = items.length ? `${items.length} files` : '';
       
       let targetSegs = currentSemPath.split('/').map(x=>x.trim()).filter(x=>x);
+      // normalize target (remove Semester)
+if (targetSegs.length && /^semester\s*\d+/i.test(targetSegs[0])) {
+  targetSegs.shift();
+}
       
       // Breadcrumb Header
       let breadcrumbHtml = `<span class="crumb ${targetSegs.length===0?'active':''}" onclick="navigateFolder(${n}, '')"><i class="fas fa-home"></i> Root File</span>`;
@@ -978,10 +982,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
   itSegs.shift();
 }
         
-        let match = true;
-        for(let i=0; i<targetSegs.length; i++) {
-          if(itSegs[i] !== targetSegs[i]) { match = false; break; }
-        }
+        let match = itSegs.slice(0, targetSegs.length).join('/') === targetSegs.join('/');
         if(match) {
           if(itSegs.length > targetSegs.length) {
   if(itSegs.length === targetSegs.length + 1) {
