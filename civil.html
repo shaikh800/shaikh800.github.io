@@ -43,7 +43,9 @@
       background: none; border: none; color: var(--muted); cursor: pointer;
       font-size: 13px; opacity: 0; transition: opacity 0.2s; padding: 4px;
     }
-    .notice-card:hover .n-delete { opacity: 1; }
+    @media (hover: hover) and (pointer: fine) {
+      .notice-card:hover .n-delete { opacity: 1; }
+    }
     .notice-card .n-delete:hover { color: #ef4444; }
     .notices-empty {
       text-align: center; padding: 40px 20px; color: var(--muted);
@@ -59,9 +61,7 @@
     }
     .sem-section-head h2 { margin: 0; font-size: clamp(22px,3vw,30px); letter-spacing: -0.02em; }
     .sem-tabs-wrap { overflow-x: auto; padding-bottom: 4px; margin-bottom: 28px; }
-    .sem-tabs {
-      display: flex; gap: 8px; min-width: max-content;
-    }
+    .sem-tabs { display: flex; gap: 8px; min-width: max-content; }
     .sem-tab {
       padding: 8px 18px; border-radius: 100px; border: 1px solid var(--line);
       background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 700;
@@ -86,7 +86,9 @@
       transition: all 0.25s var(--ease-spring);
       animation: fadeSlideUp 0.4s var(--ease-out) both;
     }
-    .resource-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(37,99,235,0.3); }
+    @media (hover: hover) and (pointer: fine) {
+      .resource-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: rgba(37,99,235,0.3); }
+    }
     .resource-card .rc-thumb {
       height: 140px; display: flex; align-items: center; justify-content: center;
       background: var(--surface-soft); overflow: hidden; position: relative;
@@ -128,8 +130,7 @@
     .modal-box {
       background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
       width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
-      transform: translateY(20px) scale(0.97);
-      transition: transform 0.3s var(--ease-out);
+      transform: translateY(20px) scale(0.97); transition: transform 0.3s var(--ease-out);
     }
     .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
     .modal-box.modal-wide { max-width: 900px; max-height: 92vh; }
@@ -154,8 +155,7 @@
     .form-group input, .form-group textarea, .form-group select {
       width: 100%; padding: 10px 14px; border: 1px solid var(--line);
       border-radius: var(--radius); background: var(--surface-soft); color: var(--ink);
-      font-size: 14px; font-family: inherit; transition: border-color 0.2s;
-      -webkit-appearance: none; appearance: none;
+      font-size: 14px; font-family: inherit; transition: border-color 0.2s; -webkit-appearance: none;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       outline: none; border-color: var(--blue); background: var(--surface);
@@ -200,11 +200,11 @@
     .admin-fab:hover { transform: scale(1.1); }
     .admin-fab.active { background: var(--blue); }
 
-    /* ── ADMIN-ONLY ELEMENTS ─────────────────────────────── */
+    /* ── ADMIN-ONLY ELEMENTS (MOBILE FIXED) ──────────────── */
     .admin-only { display: none !important; }
     body.admin-mode .admin-only { display: inline-flex !important; }
-    body.admin-mode .rc-delete { display: inline-flex !important; }
-    body.admin-mode .n-delete  { display: block !important; opacity: 0; }
+    body.admin-mode .rc-delete { display: inline-flex !important; opacity: 1; }
+    body.admin-mode .n-delete  { display: block !important; opacity: 1; }
     .admin-badge {
       display: none; align-items: center; gap: 6px; padding: 4px 12px;
       background: rgba(37,99,235,0.1); color: var(--blue); border-radius: 100px;
@@ -228,25 +228,23 @@
     @media (max-width: 900px) { .card-grid.three { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 560px) { .card-grid.three { grid-template-columns: 1fr; } }
 
-    /* ── PAGE TITLE ──────────────────────────────────────── */
+    /* ── MOBILE UI FIXES ─────────────────────────────────── */
     .page-title { padding-bottom: 40px; }
     .page-title h1 { font-size: clamp(32px,5vw,54px); margin-bottom: 10px; }
-
-    /* ── MISC ────────────────────────────────────────────── */
     .btn.sm { min-height: 34px; padding: 0 14px; font-size: 13px; }
-    .btn.danger { color: #ef4444; border-color: rgba(239,68,68,0.3); }
-    .btn.danger:hover { background: rgba(239,68,68,0.08); }
     .text-muted { color: var(--muted); font-size: 13px; }
     .mt-0 { margin-top: 0 !important; }
 
     @media (max-width: 560px) {
-      .resource-grid { grid-template-columns: 1fr 1fr; }
+      /* Fixed the grid squash issue on mobile */
+      .resource-grid { grid-template-columns: 1fr; }
+      .modal-box { max-height: 85dvh; display: flex; flex-direction: column; }
+      .modal-body { overflow-y: auto; overscroll-behavior: contain; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── HEADER ─────────────────────────────────────────── -->
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
@@ -265,17 +263,14 @@
     </div>
   </header>
 
-  <!-- ── MAIN ───────────────────────────────────────────── -->
   <main class="page">
 
-    <!-- Page Title -->
     <section class="page-title reveal">
       <p class="eyebrow">FEC Civil Engineering · Batch 10</p>
       <h1>Civil Section</h1>
       <p class="lead" style="margin-bottom:0;">Tools, semester resources, and notices — all in one place.</p>
     </section>
 
-    <!-- ── NOTICE BOARD ──────────────────────────────────── -->
     <section class="notice-board reveal" id="notice-section">
       <div class="notice-board-head">
         <h2><i class="fas fa-bell" style="color:var(--blue);font-size:22px;margin-right:8px;"></i>Notice Board</h2>
@@ -286,10 +281,11 @@
           </button>
         </div>
       </div>
-      <div id="notices-container"></div>
+      <div id="notices-container">
+        <div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="color:var(--blue); font-size:24px;"></i></div>
+      </div>
     </section>
 
-    <!-- ── ACADEMIC TOOLS ─────────────────────────────────── -->
     <section class="section" aria-labelledby="academic-tools">
       <div class="section-head reveal">
         <div>
@@ -319,7 +315,6 @@
       </div>
     </section>
 
-    <!-- ── SEMESTER RESOURCES ─────────────────────────────── -->
     <section class="sem-section reveal" id="semester-section">
       <div class="sem-section-head">
         <h2><i class="fas fa-books" style="color:var(--blue);font-size:22px;margin-right:8px;"></i>Semester Resources</h2>
@@ -328,7 +323,6 @@
         </button>
       </div>
 
-      <!-- Semester Tab Buttons -->
       <div class="sem-tabs-wrap">
         <div class="sem-tabs" id="sem-tabs">
           <button class="sem-tab active" data-sem="1">1st Semester</button>
@@ -342,13 +336,10 @@
         </div>
       </div>
 
-      <!-- Semester Panels (1–8) -->
       <div id="sem-panels">
-        <!-- Generated by JS -->
-      </div>
+        </div>
     </section>
 
-    <!-- ── WORKING AREAS ──────────────────────────────────── -->
     <section class="section" aria-labelledby="skills-title">
       <div class="section-head reveal">
         <div>
@@ -366,7 +357,6 @@
       </div>
     </section>
 
-    <!-- Contact Strip -->
     <section class="contact-strip reveal" aria-label="Contact">
       <div>
         <h2>Need one of these tools?</h2>
@@ -381,7 +371,6 @@
 
   </main>
 
-  <!-- ── FOOTER ─────────────────────────────────────────── -->
   <footer class="site-footer">
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
@@ -389,12 +378,10 @@
     </div>
   </footer>
 
-  <!-- ── ADMIN FAB ──────────────────────────────────────── -->
   <button class="admin-fab" id="admin-fab" title="Admin mode">
     <i class="fas fa-lock" id="admin-fab-icon"></i>
   </button>
 
-  <!-- ── MODAL: ADD NOTICE ──────────────────────────────── -->
   <div class="modal-overlay" id="modal-notice">
     <div class="modal-box">
       <div class="modal-head">
@@ -426,7 +413,6 @@
     </div>
   </div>
 
-  <!-- ── MODAL: ADD RESOURCE ────────────────────────────── -->
   <div class="modal-overlay" id="modal-resource">
     <div class="modal-box">
       <div class="modal-head">
@@ -446,32 +432,31 @@
           <label>Type</label>
           <select id="r-type">
             <option value="pdf">PDF Document</option>
-            <option value="image">Image</option>
+            <option value="image">Image / Screenshot</option>
           </select>
         </div>
 
-        <!-- Source tabs: URL or Upload -->
         <div class="form-tabs" id="src-tabs">
           <button class="form-tab active" data-tab="url-panel">🔗 Link (URL)</button>
-          <button class="form-tab" data-tab="upload-panel">📁 Upload File</button>
+          <button class="form-tab" data-tab="upload-panel">📁 Upload Image</button>
         </div>
 
         <div class="form-tab-panel active" id="url-panel">
           <div class="form-group mt-0">
             <label>File URL</label>
             <input type="url" id="r-url" placeholder="https://... (Google Drive / GitHub / direct link)">
-            <p class="text-muted" style="margin:6px 0 0;">For Google Drive: Share → "Anyone with link" → use embed URL.</p>
+            <p class="text-muted" style="margin:6px 0 0;">For PDF/Docs use Google Drive: Share → "Anyone with link".</p>
           </div>
         </div>
 
         <div class="form-tab-panel" id="upload-panel">
           <div class="form-group mt-0">
-            <label>Upload File</label>
+            <label>Upload Image</label>
             <div class="file-drop-zone" id="file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
-              <p>Click to browse or drag & drop here</p>
-              <p style="font-size:11px;margin-top:4px;">(PDF or image, max ~10 MB)</p>
-              <input type="file" id="r-file" accept=".pdf,image/*">
+              <p>Click to browse image</p>
+              <p style="font-size:11px;margin-top:4px;">(Images only. For PDFs, use the Link tab)</p>
+              <input type="file" id="r-file" accept="image/*">
             </div>
             <div class="file-selected" id="file-name"></div>
           </div>
@@ -484,7 +469,6 @@
     </div>
   </div>
 
-  <!-- ── MODAL: VIEW PDF ────────────────────────────────── -->
   <div class="modal-overlay" id="modal-pdf">
     <div class="modal-box modal-wide">
       <div class="modal-head">
@@ -501,7 +485,6 @@
     </div>
   </div>
 
-  <!-- ── MODAL: VIEW IMAGE ──────────────────────────────── -->
   <div class="modal-overlay" id="modal-image">
     <div class="modal-box modal-wide">
       <div class="modal-head">
@@ -517,134 +500,100 @@
     </div>
   </div>
 
-  <!-- ── MODAL: ADMIN LOGIN ─────────────────────────────── -->
-  <div class="modal-overlay" id="modal-admin">
-    <div class="modal-box" style="max-width:380px;">
-      <div class="modal-head">
-        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
-        <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
-        </div>
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:-8px;">Incorrect password.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
-        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── SCRIPTS ────────────────────────────────────────── -->
   <script src="assets/site.js"></script>
-  <script>
-  (() => {
-    /* ────────── CONFIG ────────── */
-    const ADMIN_PW_KEY = 'civil_admin_pw';
-    const DEFAULT_PW   = 'fec2024';
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    /* ────────── STORAGE HELPERS ────────── */
-    const DB_NAME = 'civilDB'; const DB_VER = 1; const STORE = 'files';
-    let db;
+    // ✅ Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDHzrA90SIuUIoPEuVGrMpc2OlpT8dbFrM",
+      authDomain: "shaikh-portfolio.firebaseapp.com",
+      projectId: "shaikh-portfolio",
+      storageBucket: "shaikh-portfolio.firebasestorage.app",
+      messagingSenderId: "132917714279",
+      appId: "1:132917714279:web:d03261e67ec77b21f063c2",
+      measurementId: "G-C6T7CCS4EH"
+    };
 
-    function openDB() {
-      return new Promise((res, rej) => {
-        if (db) { res(db); return; }
-        const req = indexedDB.open(DB_NAME, DB_VER);
-        req.onupgradeneeded = e => e.target.result.createObjectStore(STORE, { keyPath: 'id' });
-        req.onsuccess = e => { db = e.target.result; res(db); };
-        req.onerror   = () => rej('DB error');
-      });
-    }
-    async function saveFile(id, dataUrl) {
-      const d = await openDB();
-      return new Promise((res,rej) => {
-        const tx = d.transaction(STORE, 'readwrite');
-        tx.objectStore(STORE).put({ id, dataUrl });
-        tx.oncomplete = res; tx.onerror = rej;
-      });
-    }
-    async function getFile(id) {
-      const d = await openDB();
-      return new Promise((res,rej) => {
-        const req = d.transaction(STORE,'readonly').objectStore(STORE).get(id);
-        req.onsuccess = () => res(req.result ? req.result.dataUrl : null);
-        req.onerror   = rej;
-      });
-    }
-    async function deleteFile(id) {
-      const d = await openDB();
-      return new Promise((res,rej) => {
-        const tx = d.transaction(STORE,'readwrite');
-        tx.objectStore(STORE).delete(id);
-        tx.oncomplete = res; tx.onerror = rej;
-      });
-    }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    function loadNotices()   { try { return JSON.parse(localStorage.getItem('civil_notices') || '[]'); } catch { return []; } }
-    function saveNotices(a)  { localStorage.setItem('civil_notices', JSON.stringify(a)); }
-    function loadSemesters() { try { return JSON.parse(localStorage.getItem('civil_semesters') || '{}'); } catch { return {}; } }
-    function saveSemesters(o){ localStorage.setItem('civil_semesters', JSON.stringify(o)); }
-    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+    const ADMIN_EMAIL = "md.shaikh.alam.007@gmail.com";
+    let adminMode = false;
+    let noticesData = [];
+    let semestersData = {};
+    let activeSem = 1;
+    const semLabels = ['','1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'];
 
-    /* ────────── ADMIN MODE ────────── */
-    let adminMode = sessionStorage.getItem('civil_admin') === '1';
+    // ── ADMIN AUTHENTICATION ──
     function applyAdmin() {
       document.body.classList.toggle('admin-mode', adminMode);
-      const fab = document.getElementById('admin-fab');
-      const ic  = document.getElementById('admin-fab-icon');
-      fab.classList.toggle('active', adminMode);
-      ic.className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
-      fab.title = adminMode ? 'Exit admin mode' : 'Admin mode';
+      document.getElementById('admin-fab').classList.toggle('active', adminMode);
+      document.getElementById('admin-fab-icon').className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
+      document.getElementById('admin-fab').title = adminMode ? 'Log out' : 'Admin Login';
     }
-    applyAdmin();
 
-    document.getElementById('admin-fab').addEventListener('click', () => {
-      if (adminMode) { adminMode = false; sessionStorage.removeItem('civil_admin'); applyAdmin(); return; }
-      openModal('modal-admin');
-      document.getElementById('admin-pass').value = '';
-      document.getElementById('admin-error').style.display = 'none';
-      setTimeout(() => document.getElementById('admin-pass').focus(), 300);
+    onAuthStateChanged(auth, (user) => {
+      adminMode = (user && user.email === ADMIN_EMAIL);
+      applyAdmin();
     });
 
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
-      const stored = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
-      const val    = document.getElementById('admin-pass').value;
-      if (val === stored) {
-        adminMode = true; sessionStorage.setItem('civil_admin','1');
-        applyAdmin(); closeModal('modal-admin');
-      } else {
-        document.getElementById('admin-error').style.display = 'block';
-        document.getElementById('admin-pass').select();
+    document.getElementById('admin-fab').addEventListener('click', async () => {
+      if (adminMode) {
+        await signOut(auth);
+        return;
       }
-    });
-    document.getElementById('admin-pass').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('admin-login-btn').click();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        if (result.user.email !== ADMIN_EMAIL) {
+          await signOut(auth);
+          alert("Access Denied: You are not authorized.");
+        }
+      } catch (err) { console.error(err); }
     });
 
-    /* ────────── MODAL HELPERS ────────── */
+    // ── MODAL UTILS ──
     function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
-    document.querySelectorAll('[data-close]').forEach(btn => {
-      btn.addEventListener('click', () => closeModal(btn.dataset.close));
-    });
-    document.querySelectorAll('.modal-overlay').forEach(ov => {
-      ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); });
-    });
+    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+    document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    /* ────────── NOTICES ────────── */
+    // ── FETCH DATA FROM FIREBASE ──
+    async function fetchAllData() {
+      try {
+        // Fetch Notices
+        const snapNotices = await getDocs(collection(db, "notices"));
+        noticesData = [];
+        snapNotices.forEach(d => noticesData.push(d.data()));
+        noticesData.sort((a, b) => b.timestamp - a.timestamp);
+        renderNotices();
+
+        // Fetch Resources
+        const snapResources = await getDocs(collection(db, "resources"));
+        semestersData = {1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[]};
+        snapResources.forEach(d => {
+          const item = d.data();
+          if(semestersData[item.sem]) semestersData[item.sem].push(item);
+        });
+        renderAllSems();
+      } catch (err) { console.error("Error fetching data:", err); }
+    }
+
+    // ── NOTICES LOGIC ──
     function renderNotices() {
       const c = document.getElementById('notices-container');
-      const notices = loadNotices();
-      if (!notices.length) {
+      if (!noticesData.length) {
         c.innerHTML = `<div class="notices-empty"><i class="fas fa-bell-slash"></i><p>No notices yet.</p></div>`;
         return;
       }
       const icons = { info:'fa-info-circle', warning:'fa-triangle-exclamation', urgent:'fa-circle-exclamation' };
-      c.innerHTML = `<div class="notices-grid">${notices.map(n => `
+      c.innerHTML = `<div class="notices-grid">${noticesData.map(n => `
         <div class="notice-card ${n.type}">
           <div class="n-icon"><i class="fas ${icons[n.type]||'fa-info-circle'}"></i></div>
           <div class="n-body">
@@ -652,17 +601,17 @@
             <div class="n-text">${esc(n.text)}</div>
             <div class="n-date"><i class="far fa-calendar-alt"></i> ${n.date}</div>
           </div>
-          <button class="n-delete admin-only" data-id="${n.id}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+          <button class="n-delete admin-only" data-id="${n.id}" title="Delete Notice"><i class="fas fa-trash-alt"></i></button>
         </div>`).join('')}</div>`;
+      
       c.querySelectorAll('.n-delete').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); deleteNotice(btn.dataset.id); });
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          if(!confirm('Delete this notice?')) return;
+          await deleteDoc(doc(db, "notices", btn.dataset.id));
+          fetchAllData();
+        });
       });
-    }
-
-    function deleteNotice(id) {
-      if (!confirm('Delete this notice?')) return;
-      const notices = loadNotices().filter(n => n.id !== id);
-      saveNotices(notices); renderNotices();
     }
 
     document.getElementById('add-notice-btn').addEventListener('click', () => {
@@ -670,23 +619,30 @@
       document.getElementById('n-text').value  = '';
       document.getElementById('n-type').value  = 'info';
       openModal('modal-notice');
-      setTimeout(() => document.getElementById('n-title').focus(), 300);
     });
 
-    document.getElementById('save-notice-btn').addEventListener('click', () => {
+    document.getElementById('save-notice-btn').addEventListener('click', async () => {
       const title = document.getElementById('n-title').value.trim();
       const text  = document.getElementById('n-text').value.trim();
-      const type  = document.getElementById('n-type').value;
-      if (!title) { document.getElementById('n-title').focus(); return; }
-      const notices = loadNotices();
-      notices.unshift({ id: uid(), title, text, type, date: new Date().toLocaleDateString('en-BD', { day:'2-digit', month:'short', year:'numeric' }) });
-      saveNotices(notices); renderNotices(); closeModal('modal-notice');
+      if (!title) return;
+
+      const saveBtn = document.getElementById('save-notice-btn');
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; saveBtn.disabled = true;
+
+      const id = Date.now().toString();
+      const notice = {
+        id, title, text, type: document.getElementById('n-type').value,
+        date: new Date().toLocaleDateString('en-BD', { day:'2-digit', month:'short', year:'numeric' }),
+        timestamp: Date.now()
+      };
+      
+      await setDoc(doc(db, "notices", id), notice);
+      saveBtn.innerHTML = '<i class="fas fa-check"></i> Save Notice'; saveBtn.disabled = false;
+      closeModal('modal-notice');
+      fetchAllData();
     });
 
-    /* ────────── SEMESTER PANELS ────────── */
-    const semLabels = ['','1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'];
-    let activeSem = 1;
-
+    // ── SEMESTER RESOURCES LOGIC ──
     function buildPanels() {
       const wrap = document.getElementById('sem-panels');
       wrap.innerHTML = Array.from({length:8},(_,i) => `
@@ -699,18 +655,17 @@
     }
 
     function renderSem(n) {
-      const sems = loadSemesters();
-      const items = sems[n] || [];
+      const items = semestersData[n] || [];
       const grid  = document.getElementById(`sem-grid-${n}`);
       const countEl = document.getElementById(`sem-count-${n}`);
       if (countEl) countEl.textContent = items.length ? `${items.length} file${items.length>1?'s':''}` : '';
       if (!items.length) {
-        grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources yet. Add PDFs or images here.</p></div>`;
+        grid.innerHTML = `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>No resources found for this semester.</p></div>`;
         return;
       }
       grid.innerHTML = items.map(it => {
         const isPdf = it.type === 'pdf';
-        const thumb = (!isPdf && it.thumb) ? `<img src="${it.thumb}" alt="${esc(it.title)}" loading="lazy">` : `<i class="rc-icon fas ${isPdf?'fa-file-pdf':'fa-image'}"></i>`;
+        const thumb = (!isPdf && it.src) ? `<img src="${esc(it.src)}" alt="${esc(it.title)}" loading="lazy">` : `<i class="rc-icon fas ${isPdf?'fa-file-pdf':'fa-image'}"></i>`;
         return `
           <div class="resource-card type-${it.type}" data-id="${it.id}" data-sem="${n}" data-type="${it.type}">
             <div class="rc-thumb">${thumb}</div>
@@ -720,7 +675,7 @@
             </div>
             <div class="rc-meta">
               <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
-              <button class="rc-delete admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
+              <button class="rc-delete admin-only" data-id="${it.id}" title="Delete File"><i class="fas fa-trash-alt"></i></button>
             </div>
           </div>`;
       }).join('');
@@ -728,61 +683,81 @@
       grid.querySelectorAll('.resource-card').forEach(card => {
         card.addEventListener('click', e => {
           if (e.target.closest('.rc-delete')) return;
-          openResource(card.dataset.id, card.dataset.sem, card.dataset.type);
+          const item = semestersData[n].find(i => i.id === card.dataset.id);
+          if(!item) return;
+          if (item.type === 'pdf') {
+            document.getElementById('pdf-modal-title').innerHTML = `<i class="fas fa-file-pdf" style="color:var(--blue);margin-right:8px;"></i>${esc(item.title)}`;
+            document.getElementById('pdf-bar-title').textContent = item.title;
+            document.getElementById('pdf-open-link').href = item.src;
+            document.getElementById('pdf-frame').src = item.src;
+            openModal('modal-pdf');
+          } else {
+            document.getElementById('img-modal-title').innerHTML = `<i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i>${esc(item.title)}`;
+            document.getElementById('img-view').src = item.src;
+            document.getElementById('img-desc').textContent = item.desc || '';
+            openModal('modal-image');
+          }
         });
       });
+
       grid.querySelectorAll('.rc-delete').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); deleteResource(btn.dataset.id, btn.dataset.sem); });
+        btn.addEventListener('click', async e => {
+          e.stopPropagation();
+          if(!confirm('Delete this file permanently?')) return;
+          await deleteDoc(doc(db, "resources", btn.dataset.id));
+          fetchAllData();
+        });
       });
     }
 
     function renderAllSems() { for(let i=1;i<=8;i++) renderSem(i); }
 
-    /* ────────── SEMESTER TABS ────────── */
     document.getElementById('sem-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.sem-tab');
-      if (!tab) return;
-      const n = parseInt(tab.dataset.sem);
+      const tab = e.target.closest('.sem-tab'); if (!tab) return;
+      activeSem = parseInt(tab.dataset.sem);
       document.querySelectorAll('.sem-tab').forEach(t => t.classList.toggle('active', t===tab));
-      document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${n}`));
-      activeSem = n;
+      document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${activeSem}`));
     });
 
-    /* ────────── ADD RESOURCE ────────── */
-    let pendingFileData = null;
+    // ── RESOURCE UPLOAD (PDF CRASH PREVENTION) ──
+    let pendingImage = null;
 
-    // Form source tabs
     document.getElementById('src-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.form-tab');
-      if (!tab) return;
+      const tab = e.target.closest('.form-tab'); if (!tab) return;
+      if (tab.dataset.tab === 'upload-panel' && document.getElementById('r-type').value === 'pdf') {
+        alert("To prevent the website from crashing, PDF uploads are disabled. Please upload your PDF to Google Drive and paste the link in the URL tab.");
+        return;
+      }
       document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
     });
 
-    // File drop zone
-    const dropZone = document.getElementById('file-drop');
-    const fileInput = document.getElementById('r-file');
-    dropZone.addEventListener('click', () => fileInput.click());
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault(); dropZone.classList.remove('dragover');
-      const f = e.dataTransfer.files[0]; if (f) handleFile(f);
+    document.getElementById('r-type').addEventListener('change', e => {
+      if(e.target.value === 'pdf') {
+         document.querySelector('[data-tab="url-panel"]').click();
+      }
     });
-    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
 
-    function handleFile(f) {
-      if (f.size > 15 * 1024 * 1024) { alert('File is too large (max 15 MB).'); return; }
+    const fileInput = document.getElementById('r-file');
+    document.getElementById('file-drop').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files[0];
+      if (!f || !f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
       const reader = new FileReader();
       reader.onload = ev => {
-        pendingFileData = ev.target.result;
-        document.getElementById('file-name').textContent = `✓ ${f.name} (${(f.size/1024).toFixed(0)} KB)`;
-        if (!document.getElementById('r-title').value) document.getElementById('r-title').value = f.name.replace(/\.[^.]+$/,'');
-        if (f.type.startsWith('image/')) document.getElementById('r-type').value = 'image';
-        else if (f.type === 'application/pdf') document.getElementById('r-type').value = 'pdf';
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+          let w = img.width, h = img.height;
+          if (w > 1200) { h = Math.round((h * 1200) / w); w = 1200; }
+          canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+          pendingImage = canvas.toDataURL('image/jpeg', 0.6);
+          document.getElementById('file-name').textContent = `✓ Image selected and compressed`;
+        };
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(f);
-    }
+    });
 
     document.getElementById('add-resource-btn').addEventListener('click', () => {
       document.getElementById('r-title').value = '';
@@ -790,96 +765,46 @@
       document.getElementById('r-url').value   = '';
       document.getElementById('file-name').textContent = '';
       document.getElementById('r-type').value  = 'pdf';
-      pendingFileData = null;
-      // reset tabs
-      document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===0));
-      document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+      pendingImage = null;
+      document.querySelector('[data-tab="url-panel"]').click(); // Reset to URL tab
       openModal('modal-resource');
-      setTimeout(() => document.getElementById('r-title').focus(), 300);
     });
 
     document.getElementById('save-resource-btn').addEventListener('click', async () => {
       const title = document.getElementById('r-title').value.trim();
-      const desc  = document.getElementById('r-desc').value.trim();
-      const type  = document.getElementById('r-type').value;
-      const useUrl  = document.querySelector('.form-tab.active').dataset.tab === 'url-panel';
-      const urlVal  = document.getElementById('r-url').value.trim();
+      const type = document.getElementById('r-type').value;
+      const useUrl = document.querySelector('.form-tab.active').dataset.tab === 'url-panel';
+      
+      if (!title) return alert("Title is required!");
+      let src = '';
 
-      if (!title) { document.getElementById('r-title').focus(); return; }
-      if (useUrl && !urlVal) { document.getElementById('r-url').focus(); return; }
-      if (!useUrl && !pendingFileData) { alert('Please select a file.'); return; }
-
-      const id = uid();
-      const item = { id, title, desc, type, src: useUrl ? urlVal : 'idb:'+id, thumb: null };
-
-      if (!useUrl && pendingFileData) {
-        await saveFile(id, pendingFileData);
-        if (type === 'image') item.thumb = pendingFileData;
-      }
-
-      const sems = loadSemesters();
-      if (!sems[activeSem]) sems[activeSem] = [];
-      sems[activeSem].push(item);
-      saveSemesters(sems);
-      renderSem(activeSem);
-      closeModal('modal-resource');
-    });
-
-    /* ────────── DELETE RESOURCE ────────── */
-    async function deleteResource(id, sem) {
-      if (!confirm('Delete this resource?')) return;
-      const sems = loadSemesters();
-      const item = (sems[sem]||[]).find(i => i.id === id);
-      if (item && item.src && item.src.startsWith('idb:')) await deleteFile(item.src.slice(4));
-      sems[sem] = (sems[sem]||[]).filter(i => i.id !== id);
-      saveSemesters(sems); renderSem(sem);
-    }
-
-    /* ────────── OPEN RESOURCE ────────── */
-    async function openResource(id, sem, type) {
-      const sems  = loadSemesters();
-      const item  = (sems[sem]||[]).find(i => i.id === id);
-      if (!item) return;
-
-      let src = item.src;
-      if (src && src.startsWith('idb:')) {
-        src = await getFile(src.slice(4));
-        if (!src) { alert('File not found. It may have been cleared.'); return; }
-      }
-
-      if (type === 'pdf') {
-        document.getElementById('pdf-modal-title').innerHTML = `<i class="fas fa-file-pdf" style="color:var(--blue);margin-right:8px;"></i>${esc(item.title)}`;
-        document.getElementById('pdf-bar-title').textContent = item.title;
-        document.getElementById('pdf-open-link').href = src;
-        document.getElementById('pdf-frame').src = src;
-        openModal('modal-pdf');
+      if (useUrl) {
+        src = document.getElementById('r-url').value.trim();
+        if(!src) return alert("Please enter the file URL.");
       } else {
-        document.getElementById('img-modal-title').innerHTML = `<i class="fas fa-image" style="color:var(--green);margin-right:8px;"></i>${esc(item.title)}`;
-        document.getElementById('img-view').src = src;
-        document.getElementById('img-view').alt = item.title;
-        document.getElementById('img-desc').textContent = item.desc || '';
-        openModal('modal-image');
+        if(type === 'pdf') return alert("PDF uploads are disabled. Please use a URL link.");
+        if(!pendingImage) return alert("Please select an image to upload.");
+        src = pendingImage;
       }
-    }
 
-    /* ────────── ESC KEY ────────── */
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        ['modal-pdf','modal-image','modal-notice','modal-resource','modal-admin'].forEach(id => {
-          if (document.getElementById(id).classList.contains('open')) closeModal(id);
-        });
-      }
+      const saveBtn = document.getElementById('save-resource-btn');
+      saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; saveBtn.disabled = true;
+
+      const id = Date.now().toString();
+      const item = {
+        id, sem: activeSem, title, desc: document.getElementById('r-desc').value.trim(),
+        type, src, timestamp: Date.now()
+      };
+
+      await setDoc(doc(db, "resources", id), item);
+      saveBtn.innerHTML = '<i class="fas fa-check"></i> Add to Semester'; saveBtn.disabled = false;
+      closeModal('modal-resource');
+      fetchAllData();
     });
 
-    /* ────────── UTIL ────────── */
-    function esc(s) {
-      return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    /* ────────── INIT ────────── */
+    // ── INIT ──
     buildPanels();
-    renderNotices();
-    renderAllSems();
+    fetchAllData();
   })();
   </script>
 </body>
