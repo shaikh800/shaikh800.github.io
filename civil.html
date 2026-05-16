@@ -1195,6 +1195,9 @@ width: 130px; height: 100%; flex-shrink: 0; padding: 12px; border-radius: 0 var(
       let src = '';
       let subCode = document.getElementById('r-drive-path').value.trim();
 
+// 🔥 Remove any "Semester X" if user accidentally includes it
+subCode = subCode.replace(/Semester\s*\d+\s*\/?/gi, '').trim();
+
 let folderPath = '';
 
 if(subCode !== '') {
