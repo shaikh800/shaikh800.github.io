@@ -159,8 +159,25 @@
     .form-tab.active { background:var(--blue); color:#fff; }
     .form-tab-panel { display:none; }
     .form-tab-panel.active { display:block; }
+    
+    /* ── UPLOAD PATH UI ────────────────────────────────── */
+    .path-builder { margin-bottom: 12px; }
+    .path-input-wrap { display: flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); overflow: hidden; padding: 0 8px; transition: border-color 0.2s; }
+    .path-input-wrap:focus-within { border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .path-input-wrap i { color: var(--muted); font-size: 13px; margin: 0 6px; }
+    .path-input-wrap input { border: none; outline: none; background: transparent; padding: 10px 6px; flex: 1; box-shadow: none !important; font-family: monospace; font-size: 13px; }
+    .path-suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .path-chip {
+      padding: 5px 12px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: 100px; font-size: 11px; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .path-chip:hover { border-color: var(--blue); color: var(--blue); background: rgba(37,99,235,0.05); }
+    .path-chip.clear-path { border-color: rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.05); }
+    .path-chip.clear-path:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
     .file-drop-zone {
-      border:2px dashed var(--line); border-radius:var(--radius); padding:28px 16px;
+      border:2px dashed var(--line); border-radius:var(--radius); padding:24px 16px;
       text-align:center; cursor:pointer; transition:all 0.2s; color:var(--muted);
     }
     .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(37,99,235,0.04); color:var(--blue); }
@@ -450,12 +467,38 @@
         </div>
 
         <div class="form-tab-panel" id="upload-panel">
+          
+          <div class="path-builder form-group">
+            <label>Drive Folder Path</label>
+            <div class="path-input-wrap">
+              <i class="fas fa-folder-open"></i>
+              <input type="text" id="r-drive-path" placeholder="e.g. Semester 1 / Books">
+            </div>
+            <div class="path-suggestions" id="path-suggestions">
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 501 (Structural-I)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 502 (Structural Lab)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 503 (Concrete-I)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 504 (Environment-I)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 505 (Soil Mechanics)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 506 (Geotech Lab)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 507 (OCF)</span>
+              <span class="path-chip"><i class="fas fa-folder"></i> CE 508 (OCF Lab)</span>
+              
+              <span class="path-chip"><i class="fas fa-book"></i> Books</span>
+              <span class="path-chip"><i class="fas fa-file-pdf"></i> PDFs</span>
+              <span class="path-chip"><i class="fas fa-clipboard-question"></i> Questions</span>
+              <span class="path-chip"><i class="fas fa-person-chalkboard"></i> Lecture</span>
+              <span class="path-chip"><i class="fas fa-pen-to-square"></i> Notes</span>
+              <span class="path-chip"><i class="fas fa-flask"></i> Lab Reports</span>
+              <span class="path-chip"><i class="fas fa-file-contract"></i> Assignments</span>
+              <span class="path-chip clear-path" title="Reset Path"><i class="fas fa-undo"></i> Reset</span>
+            </div>
+
           <div class="form-group" style="margin-bottom:8px;">
-            <label>Upload from Device → Auto-save to Google Drive</label>
+            <label>Select File</label>
             <div class="file-drop-zone" id="file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
               <p>Click to browse or drag & drop</p>
-              <p style="font-size:11px;margin-top:4px;opacity:0.7;">File টা Google Drive এ upload হবে</p>
               <input type="file" id="r-file" accept=".pdf,image/*">
             </div>
             <div class="file-status" id="file-status"></div>
@@ -464,13 +507,14 @@
               <div class="drive-progress-bar"><div class="drive-progress-fill" id="drive-progress-fill" style="width:0%"></div></div>
             </div>
           </div>
+          
           <div class="access-box" style="margin-top:8px;">
             <div class="access-label">Access Control</div>
             <label class="access-option"><input type="radio" name="upload-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only</span></label>
             <label class="access-option"><input type="radio" name="upload-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
           </div>
-          <p class="text-muted" style="margin-top:8px;"><i class="fas fa-info-circle" style="color:var(--blue);"></i> Drive এ <b>"Civil Engineering → Semester X"</b> folder এ organized ভাবে save হবে।</p>
         </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn secondary sm" data-close="modal-resource">Cancel</button>
@@ -537,13 +581,6 @@
   (() => {
     /* ════════════════════════════════════════
        CONFIG — Google Drive
-       ════════════════════════════════════════
-       Setup steps:
-       1. console.cloud.google.com → New Project
-       2. APIs & Services → Enable "Google Drive API"
-       3. Credentials → OAuth 2.0 Client ID → Web Application
-       4. Authorized JS Origins: https://mdshaikh.me
-       5. Copy Client ID below
     ════════════════════════════════════════ */
     const GDRIVE_CLIENT_ID = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
     const GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.file';
@@ -721,22 +758,35 @@
       return folder.id;
     }
 
-    async function uploadFileToDrive(file, semNumber, accessMode) {
+    async function uploadFileToDrive(file, pathString, accessMode) {
       const token = await getDriveToken();
-      // Show progress
+      
       const prog = document.getElementById('drive-progress');
       const fill = document.getElementById('drive-progress-fill');
       const txt  = document.getElementById('drive-progress-text');
       prog.classList.add('show'); fill.style.width = '10%'; txt.textContent = 'Connecting to Drive...';
 
-      const rootId  = await findOrCreateFolder('Civil Engineering', 'root', token);
-      fill.style.width = '25%'; txt.textContent = `Creating Semester ${semNumber} folder...`;
+      let currentParentId = await findOrCreateFolder('Civil Engineering', 'root', token);
+      
+      // Parse the custom folder path
+      const folders = pathString.split('/').map(f => f.trim()).filter(f => f);
+      if (folders.length === 0) folders.push(`Semester ${activeSem}`); // safety fallback
 
-      const semId = await findOrCreateFolder(`Semester ${semNumber}`, rootId, token);
+      let step = 30 / folders.length;
+      let currentProg = 10;
+
+      for (const folderName of folders) {
+        currentParentId = await findOrCreateFolder(folderName, currentParentId, token);
+        currentProg += step;
+        fill.style.width = currentProg + '%'; 
+        txt.textContent = `Accessing folder: ${folderName}...`;
+      }
+
       fill.style.width = '40%'; txt.textContent = 'Uploading file...';
+      const finalFolderId = currentParentId;
 
       // Multipart upload
-      const meta = JSON.stringify({ name: file.name, parents: [semId] });
+      const meta = JSON.stringify({ name: file.name, parents: [finalFolderId] });
       const boundary = '-------civil_upload_boundary';
       const body = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type}\r\n\r\n`;
       const bodyEnd = `\r\n--${boundary}--`;
@@ -752,10 +802,8 @@
       const uploaded = await uploadRes.json();
       fill.style.width = '85%'; txt.textContent = 'Setting permissions...';
 
-      // Set permission: anyone can view (role: reader)
+      // Set permission
       await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
-
-      // Disable download if view-only
       if (accessMode === 'preview') {
         await driveAPI('PATCH', `/files/${uploaded.id}?fields=copyRequiresWriterPermission`, { copyRequiresWriterPermission: true }, token);
       }
@@ -955,13 +1003,32 @@
 
     /* ── Add resource form ─────────────────── */
     let pendingFileData = null;
-    let pendingDriveResult = null;
 
     // Source tabs
     document.getElementById('src-tabs').addEventListener('click', e => {
       const tab = e.target.closest('.form-tab'); if(!tab) return;
       document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
+    });
+
+    // Path Builder Click Logic
+    document.getElementById('path-suggestions').addEventListener('click', e => {
+      const clearBtn = e.target.closest('.clear-path');
+      const input = document.getElementById('r-drive-path');
+      
+      if (clearBtn) {
+        input.value = `Semester ${activeSem}`;
+        return;
+      }
+      
+      const chip = e.target.closest('.path-chip');
+      if (!chip) return;
+      
+      let currentVal = input.value.trim();
+      if (currentVal && !currentVal.endsWith('/')) {
+        currentVal += ' / ';
+      }
+      input.value = currentVal + chip.textContent.trim();
     });
 
     // File drop zone
@@ -993,13 +1060,14 @@
       document.getElementById('r-desc').value  = '';
       document.getElementById('r-url').value   = '';
       document.getElementById('r-gdrive').value = '';
+      document.getElementById('r-drive-path').value = `Semester ${activeSem}`; // Default path
       document.getElementById('gdrive-detected').style.display = 'none';
       document.getElementById('file-status').textContent = '';
       document.getElementById('drive-progress').classList.remove('show');
       document.getElementById('r-type').value = 'pdf';
       document.getElementById('resource-modal-title').innerHTML = '<i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Resource';
       document.getElementById('save-resource-label').textContent = 'Add to Semester';
-      _pendingFile = null; pendingFileData = null; pendingDriveResult = null;
+      _pendingFile = null; pendingFileData = null;
       // reset to url tab
       document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===1));
       document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===1));
@@ -1047,10 +1115,12 @@
           };
           reader.readAsDataURL(_pendingFile); return;
         }
-        // Drive upload
+        
+        // Drive upload Custom Path
         try {
           const mode = document.querySelector('input[name="upload-access"]:checked').value;
-          const result = await uploadFileToDrive(_pendingFile, activeSem, mode);
+          const folderPath = document.getElementById('r-drive-path').value.trim();
+          const result = await uploadFileToDrive(_pendingFile, folderPath, mode);
           src = result.embedUrl;
         } catch (err) {
           console.error(err);
@@ -1068,7 +1138,7 @@
     });
 
     /* ── Util ──────────────────────────────── */
-    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&quot;'); }
 
     /* ── Init ──────────────────────────────── */
     buildPanels();
