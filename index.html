@@ -29,33 +29,6 @@
       .card-grid-3 { grid-template-columns: 1fr; }
     }
 
-    /* ── mobile bottom tab bar ── */
-    .mobile-tabbar {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 56px;
-      background: var(--ink);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      z-index: 9999;
-      grid-template-columns: repeat(4, 1fr);
-    }
-    .mobile-tab {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 3px; color: #94a3b8; font-size: 11px; font-weight: 700;
-      text-decoration: none; transition: color 0.2s; letter-spacing: 0.3px;
-    }
-    .mobile-tab i { font-size: 18px; line-height: 1; }
-    .mobile-tab.active { color: #38bdf8; }
-
-    @media (max-width: 900px) {
-      body { padding-bottom: 56px; }
-      .mobile-tabbar { display: grid; }
-      /* mobile-da tab bar thakle nav-toggle r site-nav lukano */
-      .nav-toggle { display: none !important; }
-      .site-nav   { display: none !important; }
-    }
-
     /* ── profile card responsive override ──
        site.css hides it at 900px, keep it visible until 700px */
     @media (min-width: 700px) and (max-width: 900px) {
