@@ -27,6 +27,11 @@
       background:var(--surface); box-shadow:var(--shadow); overflow:hidden;
       transition:all 0.25s var(--ease-spring);
       animation:fadeSlideUp 0.4s var(--ease-out) both;
+      /* ── Lag Fix ── */
+      content-visibility: auto;
+      contain-intrinsic-size: 240px;
+      will-change: transform, opacity;
+      transform: translateZ(0);
     }
     .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
     .work-thumb {
@@ -641,14 +646,13 @@
 
     function handleThumbFile(f) {
       if (!f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
-      const reader = new FileReader();
-      reader.onload = ev => {
-        pendingThumb = ev.target.result;
+      // Compress before showing/saving
+      compressImage(f, 600, (compressedDataUrl) => {
+        pendingThumb = compressedDataUrl;
         document.getElementById('thumb-preview-img').src = pendingThumb;
         document.getElementById('thumb-preview').classList.add('show');
         document.getElementById('w-img-url').value = '';
-      };
-      reader.readAsDataURL(f);
+      });
     }
 
     // URL preview
@@ -755,6 +759,24 @@
 
     /* ── UTIL ── */
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function compressImage(file, maxWidth, callback) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let w = img.width; let h = img.height;
+          if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          callback(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
 
     /* ── INIT ── */
     renderWorks();
