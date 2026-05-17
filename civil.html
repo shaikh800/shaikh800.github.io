@@ -383,48 +383,52 @@
       <div id="notices-container"></div>
     </section>
 
-    <section class="section">
-      <div class="section-head reveal">
-        <h2>Academic Utilities</h2>
-        <p>Cover pages, index sheets and question builders — submission-ready in seconds.</p>
-      </div>
-      <div class="card-grid three reveal-grid">
-        <a class="project-card" href="cover-page-maker.html">
-          <span class="card-icon"><i class="fas fa-file-lines"></i></span>
-          <h3>FEC Cover Page Maker</h3>
-          <p>Create a clean Faridpur Engineering College cover page, fill course and student details, then export as PDF.</p>
-          <span class="card-meta">Open cover page maker →</span>
-        </a>
-        <a class="project-card" href="lab-index.html">
-          <span class="card-icon"><i class="fas fa-table-list"></i></span>
-          <h3>Lab Report Index Generator</h3>
-          <p>Generate professional lab report index pages with dynamic rows, experiment titles and A4 PDF export.</p>
-          <span class="card-meta">Open index generator →</span>
-        </a>
-        <a class="project-card" href="print/mcq-builder.html">
-          <span class="card-icon"><i class="fas fa-list-check"></i></span>
-          <h3>Question Builder</h3>
-          <p>Build printable MCQ and question layouts for academic use with export-friendly formatting.</p>
-          <span class="card-meta">Open MCQ builder →</span>
-        </a>
-      </div>
-    </section>
+    <div class="quick-tools-bar reveal-grid">
+      <a class="quick-tool-card" href="cover-page-maker.html">
+        <div class="qt-icon"><i class="fas fa-file-lines"></i></div>
+        <div class="qt-text">
+          <div class="qt-name">Cover Page Maker</div>
+          <div class="qt-desc">FEC cover page → PDF in seconds</div>
+        </div>
+        <div class="qt-arrow"><i class="fas fa-arrow-right"></i> Open</div>
+      </a>
+      <a class="quick-tool-card" href="lab-index.html">
+        <div class="qt-icon"><i class="fas fa-table-list"></i></div>
+        <div class="qt-text">
+          <div class="qt-name">Lab Index Generator</div>
+          <div class="qt-desc">Professional lab report index sheets</div>
+        </div>
+        <div class="qt-arrow"><i class="fas fa-arrow-right"></i> Open</div>
+      </a>
+      <a class="quick-tool-card" href="print/mcq-builder.html">
+        <div class="qt-icon"><i class="fas fa-list-check"></i></div>
+        <div class="qt-text">
+          <div class="qt-name">MCQ Builder</div>
+          <div class="qt-desc">Printable question layouts, fast</div>
+        </div>
+        <div class="qt-arrow"><i class="fas fa-arrow-right"></i> Open</div>
+      </a>
+    </div>
 
     <section class="sem-section reveal" id="semester-section">
       <div class="sem-section-head">
         <h2><i class="fas fa-books" style="color:var(--blue);font-size:20px;margin-right:8px;"></i>Semester Resources</h2>
         <button class="btn primary sm admin-only" id="add-resource-btn"><i class="fas fa-plus"></i> Add Resource</button>
       </div>
-      <div class="sem-tabs-wrap"><div class="sem-tabs" id="sem-tabs">
-        <button class="sem-tab active" data-sem="1">1st Semester</button>
-        <button class="sem-tab" data-sem="2">2nd Semester</button>
-        <button class="sem-tab" data-sem="3">3rd Semester</button>
-        <button class="sem-tab" data-sem="4">4th Semester</button>
-        <button class="sem-tab" data-sem="5">5th Semester</button>
-        <button class="sem-tab" data-sem="6">6th Semester</button>
-        <button class="sem-tab" data-sem="7">7th Semester</button>
-        <button class="sem-tab" data-sem="8">8th Semester</button>
-      </div></div>
+      <div class="sem-tabs-sticky">
+        <div class="sem-tabs-wrap">
+          <div class="sem-tabs" id="sem-tabs">
+            <button class="sem-tab active" data-sem="1">1st Sem</button>
+            <button class="sem-tab" data-sem="2">2nd Sem</button>
+            <button class="sem-tab" data-sem="3">3rd Sem</button>
+            <button class="sem-tab" data-sem="4">4th Sem</button>
+            <button class="sem-tab" data-sem="5">5th Sem</button>
+            <button class="sem-tab" data-sem="6">6th Sem</button>
+            <button class="sem-tab" data-sem="7">7th Sem</button>
+            <button class="sem-tab" data-sem="8">8th Sem</button>
+          </div>
+        </div>
+      </div>
       <div id="sem-panels"></div>
     </section>
 
