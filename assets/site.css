@@ -291,3 +291,34 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   .btn { width: 100%; }
   .footer-shell { flex-direction: column; text-align: center; }
 }
+
+/* ── MOBILE BOTTOM TAB BAR (GLOBAL) ── */
+.mobile-tabbar {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 56px;
+  background: var(--ink);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 9999;
+  grid-template-columns: repeat(4, 1fr);
+}
+.mobile-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; color: #94a3b8; font-size: 11px; font-weight: 700;
+  text-decoration: none; transition: color 0.2s; letter-spacing: 0.3px;
+}
+.mobile-tab i { font-size: 18px; line-height: 1; }
+.mobile-tab.active { color: #38bdf8; }
+
+@media (max-width: 900px) {
+  body { padding-bottom: 56px; } /* ট্যাবারের জন্য নিচে জায়গা রাখা */
+  .mobile-tabbar { display: grid; }
+  
+  /* মোবাইল ভিউতে উপরের মেনু হাইড করা */
+  .nav-toggle { display: none !important; }
+  .site-nav   { display: none !important; }
+  
+  /* অ্যাডমিন বাটনটি ট্যাবারের উপরে তুলে দেওয়া */
+  .admin-fab { bottom: 80px !important; }
+}
