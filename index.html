@@ -10,12 +10,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
-    /* ── scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--surface-soft); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
     /* ── 3-col card grid for featured section ── */
     .card-grid-3 {
       display: grid;
@@ -38,7 +32,6 @@
 </head>
 <body>
 
-  <!-- ── HEADER ─────────────────────────────────────────── -->
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
@@ -57,10 +50,8 @@
     </div>
   </header>
 
-  <!-- ── MAIN ───────────────────────────────────────────── -->
   <main class="page">
 
-    <!-- ── HERO / INTRO ──────────────────────────────────── -->
     <section class="intro" aria-labelledby="intro-title">
       <div class="intro-content">
         <p class="eyebrow">Civil engineering student and maker</p>
@@ -94,7 +85,6 @@
         </div>
       </div>
 
-      <!-- Profile card — site.css positions this absolutely on desktop -->
       <aside class="profile-card" aria-label="Profile summary">
         <img src="assets/images/shaikh.png" alt="Md. Shaikh Alam">
         <div class="pc-name">Md. Shaikh Alam</div>
@@ -107,7 +97,6 @@
       </aside>
     </section>
 
-    <!-- ── FEATURED WORK ──────────────────────────────────── -->
     <section class="section" aria-labelledby="featured-title">
       <div class="section-head reveal">
         <h2 id="featured-title">Featured Work</h2>
@@ -132,7 +121,7 @@
           <h3>CTRL-P Service</h3>
           <p>Direct print-order interface for documents, academic sheets and engineering materials.</p>
           <span class="card-meta">Open print service →</span>
-          <img class="card-thumb" src="print/ctrlp_main.png" alt="CTRL-P">
+          <img class="card-thumb" src="print/ctrlp_main.png" alt="CTRL-P" loading="lazy">
         </a>
         <a class="project-card" href="modeling.html">
           <span class="card-icon"><i class="fas fa-dice-d20"></i></span>
@@ -143,7 +132,6 @@
       </div>
     </section>
 
-    <!-- ── WHAT I AM WORKING ON ───────────────────────────── -->
     <section class="section" aria-labelledby="focus-title">
       <div class="split-band reveal">
         <div>
@@ -157,14 +145,13 @@
           </ul>
         </div>
         <div class="media-note">
-          <img src="assets/images/Faridpur_Engineering_College.jpg" alt="Faridpur Engineering College logo">
+          <img src="assets/images/Faridpur_Engineering_College.jpg" alt="Faridpur Engineering College logo" loading="lazy">
           <h3>Engineering background</h3>
           <p>The academic tools are built around the format and needs of Faridpur Engineering College students — especially civil engineering reports, indexes and printable documents.</p>
         </div>
       </div>
     </section>
 
-    <!-- ── CONTACT ────────────────────────────────────────── -->
     <section class="contact-strip reveal" aria-label="Contact and GitHub">
       <div>
         <h2>Contact</h2>
@@ -180,7 +167,6 @@
 
   </main>
 
-  <!-- ── FOOTER ─────────────────────────────────────────── -->
   <footer class="site-footer">
     <div class="footer-shell">
       <span style="font-weight:700;color:var(--ink);">Md. Shaikh Alam</span>
@@ -188,7 +174,6 @@
     </div>
   </footer>
 
-  <!-- ── MOBILE TAB BAR ────────────────────────────────── -->
   <nav class="mobile-tabbar" aria-label="Mobile navigation">
     <a href="index.html" class="mobile-tab active">
       <i class="fas fa-house"></i>
