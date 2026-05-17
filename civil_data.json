@@ -11,9 +11,19 @@
         "thumb": null,
         "folder": "Semester 5/CE 506/Books",
         "hidden": false
+      },
+      {
+        "id": "mp90kyzi0ezh",
+        "title": "Book_Structural Analysis",
+        "desc": "by Hibbeler",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1Mfh0iuY953eg6G4Zxuj5LWIURfSpHPNB/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 5/CE 501/Books",
+        "hidden": false
       }
     ]
   },
   "notices": [],
-  "updated": "2026-05-16T23:58:06.544Z"
+  "updated": "2026-05-17T00:05:58.963Z"
 }
