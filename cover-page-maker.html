@@ -856,7 +856,7 @@ function downloadPDF() {
     document.body.appendChild(clone);
     
     const isMobile = window.innerWidth <= 768;
-    const renderScale = isMobile ? 1.5 : 3;
+    const renderScale = isMobile ? 1.0 : 2;
 
     waitForImages(clone).then(() => { 
         return html2canvas(clone, { 
