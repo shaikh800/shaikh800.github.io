@@ -99,6 +99,26 @@
     .works-empty i { font-size:48px; display:block; margin-bottom:16px; opacity:0.3; }
     .works-empty p { margin:0; font-size:15px; }
 
+    /* ── GITHUB SYNC STATUS ──────────────────────────────── */
+    .sync-pill {
+      display:none; align-items:center; gap:5px; padding:3px 10px;
+      border-radius:100px; font-size:11px; font-weight:700; cursor:default;
+    }
+    body.admin-mode .sync-pill { display:inline-flex; }
+    .sync-dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+    .sync-dot.ok   { background:#10b981; }
+    .sync-dot.fail { background:#f59e0b; animation:pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── TOAST ───────────────────────────────────────────── */
+    #toast-wrap { position:fixed; bottom:80px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+    .toast { padding:10px 16px; border-radius:var(--radius); font-size:13px; font-weight:700; color:#fff; box-shadow:var(--shadow-lg); animation:toastIn 0.3s var(--ease-out) both; pointer-events:all; }
+    .toast.success { background:#10b981; }
+    .toast.error   { background:#ef4444; }
+    .toast.info    { background:var(--blue); }
+    @keyframes toastIn  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+    @keyframes toastOut { from{opacity:1;transform:none} to{opacity:0;transform:translateY(12px)} }
+
     /* ── ADMIN BADGE ─────────────────────────────────────── */
     .admin-badge {
       display:none; align-items:center; gap:6px; padding:4px 12px;
@@ -253,6 +273,19 @@
           <div class="filter-bar" id="filter-bar" style="margin-bottom:0;">
             <button class="filter-btn active" data-cat="all">All</button>
           </div>
+          <!-- GitHub sync status -->
+          <span class="sync-pill" id="sync-pill" style="background:rgba(16,185,129,0.1);color:#10b981;">
+            <span class="sync-dot ok" id="sync-dot"></span>
+            <span id="sync-label">Synced</span>
+          </span>
+          <!-- Admin actions -->
+          <button class="btn secondary sm admin-actions" id="export-btn" title="Export JSON backup">
+            <i class="fas fa-file-export"></i> Export
+          </button>
+          <label class="btn secondary sm admin-actions" id="import-label" title="Import JSON backup" style="cursor:pointer;margin:0;">
+            <i class="fas fa-file-import"></i> Import
+            <input type="file" id="import-file" accept=".json" style="display:none;">
+          </label>
           <button class="btn primary sm admin-actions" id="add-work-btn">
             <i class="fas fa-plus"></i> Add Project
           </button>
@@ -319,6 +352,8 @@
       <i class="fas fa-print"></i><span>CTRL-P</span>
     </a>
   </nav>
+
+  <div id="toast-wrap"></div>
 
   <button class="admin-fab" id="admin-fab"><i class="fas fa-lock" id="admin-fab-icon"></i></button>
 
@@ -401,11 +436,19 @@
         <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:0;">
           <label>Password</label>
           <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
         </div>
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:-8px;">Incorrect password.</p>
+        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:4px;">Incorrect password.</p>
+
+        <details style="margin-top:16px;">
+          <summary style="cursor:pointer;font-size:11px;color:var(--muted);user-select:none;font-weight:600;">Advanced: GitHub Sync Token (Optional)</summary>
+          <div class="form-group" style="margin-top:10px;margin-bottom:0;">
+            <input type="password" id="admin-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+            <p style="font-size:10px;color:var(--muted);margin-top:5px;line-height:1.4;">GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read &amp; Write</b></p>
+          </div>
+        </details>
       </div>
       <div class="modal-footer">
         <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
@@ -437,6 +480,67 @@
     const DEFAULT_PW   = 'fec2024';
     const STORE_KEY    = 'modeling_works';
     const DB_NAME = 'modelingDB'; const DB_VER = 1; const STORE = 'thumbs';
+
+    /* ── GitHub Shared Storage ── */
+    const GITHUB_OWNER  = 'shaikh800';
+    const GITHUB_REPO   = 'shaikh800.github.io';
+    const GITHUB_FILE   = 'modeling_data.json';
+    const GITHUB_BRANCH = 'main';
+
+    async function fetchFromGitHub() {
+      const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (data.works) localStorage.setItem(STORE_KEY, JSON.stringify(data.works));
+        setSyncStatus(true);
+        return true;
+      } catch { setSyncStatus(false); return false; }
+    }
+
+    async function pushToGitHub() {
+      const token = sessionStorage.getItem('modeling_gh_token');
+      if (!token) return;
+      setSyncStatus(false, true);
+      const data = { works: loadWorks(), updated: new Date().toISOString() };
+      try {
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+        let sha = null;
+        try {
+          const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }});
+          if (g.ok) { const j = await g.json(); sha = j.sha; }
+        } catch {}
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+        const put = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+          body: JSON.stringify({ message: 'Update modeling works', content, ...(sha ? {sha} : {}) })
+        });
+        if (put.ok) { setSyncStatus(true); toast('Synced to GitHub ✓', 'success', 2000); }
+        else { setSyncStatus(false); toast('GitHub sync failed — locally saved', 'error'); }
+      } catch { setSyncStatus(false); toast('GitHub sync error — locally saved', 'error'); }
+    }
+
+    function setSyncStatus(ok, saving=false) {
+      const dot = document.getElementById('sync-dot');
+      const lbl = document.getElementById('sync-label');
+      const pill = document.getElementById('sync-pill');
+      if (!dot) return;
+      if (saving) {
+        dot.className = 'sync-dot fail';
+        lbl.textContent = 'Saving…';
+        pill.style.cssText = 'background:rgba(245,158,11,0.1);color:#f59e0b;';
+      } else if (ok) {
+        dot.className = 'sync-dot ok';
+        lbl.textContent = 'Synced';
+        pill.style.cssText = 'background:rgba(16,185,129,0.1);color:#10b981;';
+      } else {
+        dot.className = 'sync-dot fail';
+        lbl.textContent = 'Local only';
+        pill.style.cssText = 'background:rgba(245,158,11,0.1);color:#f59e0b;';
+      }
+    }
 
     /* ── SEED DATA (shown when localStorage is empty) ── */
     const SEED_WORKS = [
@@ -488,7 +592,7 @@
         return JSON.parse(raw);
       } catch { return [...SEED_WORKS]; }
     }
-    function saveWorks(arr) { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); }
+    function saveWorks(arr) { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); pushToGitHub(); }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
     /* ── ADMIN MODE ── */
@@ -513,7 +617,10 @@
       const pw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
       if (document.getElementById('admin-pass').value === pw) {
         adminMode = true; sessionStorage.setItem('civil_admin','1');
+        const ghToken = document.getElementById('admin-gh-token').value.trim();
+        if (ghToken) sessionStorage.setItem('modeling_gh_token', ghToken);
         applyAdmin(); closeModal('modal-admin');
+        toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
       } else {
         document.getElementById('admin-error').style.display = 'block';
         document.getElementById('admin-pass').select();
@@ -770,6 +877,15 @@
     });
 
     /* ── UTIL ── */
+    function toast(msg, type='info', ms=3000) {
+      const wrap = document.getElementById('toast-wrap');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => { el.style.animation='toastOut 0.3s forwards'; setTimeout(()=>el.remove(), 300); }, ms);
+    }
+
     function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function compressImage(file, maxWidth, callback) {
@@ -790,8 +906,38 @@
       reader.readAsDataURL(file);
     }
 
+    /* ── EXPORT / IMPORT (JSON backup) ── */
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const data = { works: loadWorks(), exported: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `modeling_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      toast('Backup exported ✓', 'success');
+    });
+
+    document.getElementById('import-file').addEventListener('change', function() {
+      const f = this.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const data = JSON.parse(e.target.result);
+          const works = data.works || data; // support both wrapped and raw array
+          if (!Array.isArray(works)) { toast('Invalid backup file', 'error'); return; }
+          if (!confirm(`Import করলে ${works.length}টি project load হবে। Continue?`)) return;
+          localStorage.setItem(STORE_KEY, JSON.stringify(works));
+          renderWorks();
+          toast(`${works.length}টি project imported ✓`, 'success');
+        } catch { toast('JSON parse error', 'error'); }
+      };
+      reader.readAsText(f);
+      this.value = '';
+    });
+
     /* ── INIT ── */
-    renderWorks();
+    fetchFromGitHub().then(() => renderWorks());
+    renderWorks(); // show local data immediately while fetching
   })();
   </script>
 </body>
