@@ -244,7 +244,7 @@
       .hidden { display: none !important; }
 
       .page { font-family: var(--bangla-font); }
-      .page-header, .page-header * { font-family: 'Georgia', 'Times New Roman', serif; }
+      .page-header, .page-header * { font-family: inherit; }
       .page {
         position: relative;
         width: var(--page-width);
@@ -263,7 +263,7 @@
       
       .page-number { position: absolute; top: 8px; right: 12px; font-size: 10px; line-height: 1; color: #334155; }
       .page-header { display: grid; grid-template-columns: 185px 1fr 185px; gap: 12px; align-items: center; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1.5px solid #111; flex: 0 0 auto; }
-      .header-box { border: 1px solid #111; min-height: 44px; padding: var(--header-box-pad); font-size: var(--body-font-size); line-height: var(--body-line-height); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: var(--header-box-weight); }
+      .header-box { border: 1px solid #111; min-height: calc(44px * var(--header-scale)); padding: var(--header-box-pad); font-size: var(--header-info-font, calc(var(--body-font-size) * var(--header-scale))); line-height: var(--body-line-height); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: var(--header-box-weight); }
       .header-box.right { justify-content: space-between; }
       .header-box .label-inline { margin-right: 0; }
       .header-box .value-inline { text-align: right; }
@@ -602,24 +602,16 @@
            </div>
         </details>
 
+        <div class="field" id="globalLangField" style="margin-bottom: 12px; padding: 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff;">
+          <label for="languageModeControl" style="font-size:14px; font-weight:700; color: #0f172a; display:block; margin-bottom:8px;">🌍 Question Language</label>
+          <select id="languageModeControl">
+            <option value="bn">Bangla</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
         <div class="builder-section" id="sheetOptionsSection">
           <h2 class="section-title">Sheet Options</h2>
-          <div class="row">
-            <div class="field">
-              <label for="languageModeControl">Question Language</label>
-              <select id="languageModeControl">
-                <option value="bn">Bangla</option>
-                <option value="en">English</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="mcqPageFillControl">MCQ Page Fill</label>
-              <select id="mcqPageFillControl">
-                <option value="fixed">Fixed 30 per page</option>
-                <option value="auto">Auto fill page</option>
-              </select>
-            </div>
-          </div>
           <div class="toggle-wrapper">
             <label for="mcqRepeatHeaderControl" class="toggle-text">Repeat header on extra MCQ pages</label>
             <label class="switch"><input type="checkbox" id="mcqRepeatHeaderControl"><span class="slider"></span></label>
@@ -805,14 +797,20 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="headerInfoScaleControl"
-              >সময়/পূর্ণমান/প্রাপ্তমান Font Scale</label
-            ><input
-              id="headerInfoScaleControl"
+            <label for="mcqPageFillControl">MCQ Page Fill</label>
+            <select id="mcqPageFillControl">
+              <option value="fixed">Fixed 30 per page</option>
+              <option value="auto">Auto fill page</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom: 0">
+            <label for="headerInfoFontControl">Header Box Font</label>
+            <input
+              id="headerInfoFontControl"
               type="number"
-              min="0.8"
-              max="1.6"
-              step="0.02"
+              min="6"
+              max="24"
+              step="0.2"
             />
           </div>
           <div class="field" style="margin-bottom: 0">
@@ -1064,7 +1062,8 @@
     mcqBold: false,
     optionMarkScale: 1,
     headerScale: 1,
-    headerInfoScale: 1,
+    headerInfoFont: 11,
+    headerInfoFontLinked: true,
     answerKeyBold: false,
     answerNumBold: false,
     answerLetterBold: false,
@@ -1267,8 +1266,8 @@
         "footerAnswerFontControl"
       );
       const headerScaleControl = document.getElementById("headerScaleControl");
-      const headerInfoScaleControl = document.getElementById(
-        "headerInfoScaleControl"
+      const headerInfoFontControl = document.getElementById(
+        "headerInfoFontControl"
       );
       const answerKeyBoldControl = document.getElementById(
         "answerKeyBoldControl"
@@ -1307,6 +1306,9 @@
   applyLayoutControls();
 });
       bodyFontControl.addEventListener("input", () => {
+        if (state.layout.headerInfoFontLinked !== false) {
+          headerInfoFontControl.value = bodyFontControl.value;
+        }
         if (state.layout.mcqFontLinked !== false) {
           mcqFontControl.value = bodyFontControl.value;
         }
@@ -1322,6 +1324,11 @@
         if (state.layout.questionFontLinked !== false) {
           questionFontControl.value = bodyFontControl.value;
         }
+      });
+      headerInfoFontControl.addEventListener("input", () => {
+        state.layout.headerInfoFontLinked =
+          String(headerInfoFontControl.value).trim() ===
+          String(bodyFontControl.value).trim();
       });
       mcqFontControl.addEventListener("input", () => {
         state.layout.mcqFontLinked =
@@ -1383,7 +1390,7 @@
         footerNumberFontControl,
         footerAnswerFontControl,
         headerScaleControl,
-        headerInfoScaleControl,
+        headerInfoFontControl,
         answerKeyBoldControl,
         answerNumBoldControl,
         answerLetterBoldControl,
@@ -1410,7 +1417,7 @@
         el.addEventListener(eventType, () => applyLayoutControls());
       });
       const panel = document.querySelector(".panel");
-      const lead = panel.querySelector(".guide-box") || panel.querySelector("h1");
+      const lead = document.getElementById("globalLangField") || panel.querySelector(".guide-box") || panel.querySelector("h1");
       const panelFinalizeNodes = Array.from(
         panel.querySelectorAll(":scope > .toolbar")
       ).slice(0, 3);
@@ -1443,6 +1450,7 @@
         mcqFontControl.closest(".field"),
         optionBadgeBoldControl.closest(".field"),
         optionMarkScaleControl.closest(".field"),
+        mcqPageFillControl.closest(".field")
       ].filter(Boolean);
       const uniformCqNodes = [
         cqFontControl.closest(".field"),
@@ -1464,11 +1472,11 @@
       ].filter(Boolean);
       const uniformHeaderNodes = [
         headerScaleControl.closest(".field"),
+        headerInfoFontControl.closest(".field"),
         headerBoxesBoldControl.closest(".field"),
       ].filter(Boolean);
-      const uniformHiddenNodes = [
-        headerInfoScaleControl.closest(".field"),
-      ].filter(Boolean);
+      
+      const uniformHiddenNodes = []; // এটি খালি থাকবে কারণ ইনপুট সরিয়ে ফেলেছি
       const uniformMarginNodes = [
         padTopControl.closest(".field"),
         padRightControl.closest(".field"),
@@ -1852,7 +1860,7 @@
   footerNumberFontControl.value = state.layout.footerNumberFont;
   footerAnswerFontControl.value = state.layout.footerAnswerFont;
   headerScaleControl.value = state.layout.headerScale;
-  headerInfoScaleControl.value = state.layout.headerInfoScale ?? 1;
+  headerInfoFontControl.value = state.layout.headerInfoFont ?? state.layout.bodyFont;
   answerKeyBoldControl.checked = !!state.layout.answerKeyBold;
   answerNumBoldControl.checked = !!state.layout.answerNumBold;
   answerLetterBoldControl.checked = !!state.layout.answerLetterBold;
@@ -2538,7 +2546,8 @@
   state.layout.footerNumberFont = numberValueOr(state.layout.bodyFont, footerNumberFontControl.value);
   state.layout.footerAnswerFont = numberValueOr(state.layout.bodyFont, footerAnswerFontControl.value);
   state.layout.headerScale = numberValueOr(1, headerScaleControl.value);
-  state.layout.headerInfoScale = numberValueOr(1, headerInfoScaleControl.value);
+  if (state.layout.headerInfoFontLinked !== false) headerInfoFontControl.value = bodyFontControl.value;
+  state.layout.headerInfoFont = numberValueOr(state.layout.bodyFont, headerInfoFontControl.value);
   state.layout.answerKeyBold = answerKeyBoldControl.checked;
   state.layout.answerNumBold = answerNumBoldControl.checked;
   state.layout.answerLetterBold = answerLetterBoldControl.checked;
@@ -2679,7 +2688,7 @@
   
   root.setProperty("--question-number-weight", state.layout.questionNumberBold ? "700" : "400");
   root.setProperty("--header-scale", String(state.layout.headerScale));
-  root.setProperty("--header-info-scale", String(state.layout.headerInfoScale ?? 1));
+  root.setProperty("--header-info-font", `calc(${state.layout.headerInfoFont}px * var(--header-scale))`);
   root.setProperty("--mcq-image-width", state.layout.mcqImageWidth + "%");
   root.setProperty("--mcq-image-height", state.layout.mcqImageHeight + "px");
   root.setProperty("--cq-font-size", (state.layout.cqFont ?? state.layout.bodyFont) + "px");
@@ -2929,7 +2938,7 @@
               <div class="header-box right"><span class="label-inline">${textByLang("পূর্ণমান", "Full Marks")}</span><span class="value-inline">${esc(
                 displayText(state.fullMarksLine || "")
               )}</span></div>
-              <div class="header-box right" style="margin-top:6px;"><span class="label-inline">${textByLang("প্রাপ্তমান", "Obtain Marks")}</span><span class="value-inline">${esc(
+              <div class="header-box right" style="margin-top: calc(6px * var(--header-scale));"><span class="label-inline">${textByLang("প্রাপ্তমান", "Obtain Marks")}</span><span class="value-inline">${esc(
                 displayText(state.scoreLine || "")
               )}</span></div>
             </div>
@@ -3295,8 +3304,10 @@
                 11 * baseHeaderScale * f
               )}px`;
             boxes.forEach((b) => {
-              b.style.minHeight = `${Math.max(28, 44 * f)}px`;
-              b.style.padding = `${Math.max(4, 8 * baseHeaderScale * f)}px`;
+              b.style.minHeight = `${Math.max(20, 44 * baseHeaderScale * f)}px`;
+              b.style.padding = `${Math.max(2, 8 * baseHeaderScale * f)}px`;
+              b.style.fontSize = `${Math.max(7, (state.layout.headerInfoFont || 11) * baseHeaderScale * f)}px`;
+              if (b.style.marginTop) b.style.marginTop = `${Math.max(2, 6 * baseHeaderScale * f)}px`;
             });
           }
         });
