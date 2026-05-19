@@ -3942,10 +3942,10 @@
         const pageWrap = document.getElementById('pagesWrap');
         const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
         if (wasHidden && pageWrap) {
-          pageWrap.style.visibility = 'hidden';
           pageWrap.style.transform = 'none';
           pageWrap.style.position = 'fixed';
           pageWrap.style.left = '-9999px';
+          pageWrap.style.top = '-9999px';
         }
         try {
           const blob = await generatePdfBlob();
@@ -3961,10 +3961,10 @@
           } catch (e) {}
         } finally {
           if (wasHidden && pageWrap) {
-            pageWrap.style.visibility = '';
             pageWrap.style.transform = '';
             pageWrap.style.position = '';
             pageWrap.style.left = '';
+            pageWrap.style.top = '';
             if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
           }
         }
@@ -3973,10 +3973,10 @@
         const pageWrap = document.getElementById('pagesWrap');
         const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
         if (wasHidden && pageWrap) {
-          pageWrap.style.visibility = 'hidden';
           pageWrap.style.transform = 'none';
           pageWrap.style.position = 'fixed';
           pageWrap.style.left = '-9999px';
+          pageWrap.style.top = '-9999px';
         }
         try {
           const blob = await generatePdfBlob();
@@ -4005,10 +4005,10 @@
           alert("Share PDF তৈরি করা যায়নি।");
         } finally {
           if (wasHidden && pageWrap) {
-            pageWrap.style.visibility = '';
             pageWrap.style.transform = '';
             pageWrap.style.position = '';
             pageWrap.style.left = '';
+            pageWrap.style.top = '';
             if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
           }
         }
