@@ -856,9 +856,11 @@ function downloadPDF() {
     document.body.appendChild(clone);
     
     const isMobile = window.innerWidth <= 768;
-    const renderScale = isMobile ? 1.0 : 2;
+    const renderScale = isMobile ? 1.5 : 2;
 
-    waitForImages(clone).then(() => { 
+    const fontReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+
+    fontReady.catch(() => {}).then(() => waitForImages(clone)).then(() => { 
         return html2canvas(clone, { 
             scale: renderScale, 
             useCORS: true, 
@@ -871,12 +873,22 @@ function downloadPDF() {
             windowWidth: clone.offsetWidth, 
             windowHeight: clone.offsetHeight 
         }); 
-    }).then(canvas => { 
+    }).then(async canvas => { 
         const imgData = canvas.toDataURL('image/jpeg', 1.0); 
         const { jsPDF } = window.jspdf; 
         const pdf = new jsPDF('portrait', 'mm', 'a4'); 
-        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297); 
-        pdf.save(saveName); 
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        const pdfBlob = pdf.output('blob');
+        const file = new File([pdfBlob], saveName, { type: 'application/pdf' });
+        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+            await navigator.share({ title: saveName, files: [file] });
+        } else {
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url; a.download = saveName;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1500);
+        }
     }).catch(error => { 
         console.error('PDF export failed:', error); 
         alert('PDF export failed. Logo image path ba browser console check korun.'); 
