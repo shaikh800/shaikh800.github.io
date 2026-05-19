@@ -352,7 +352,7 @@
       .only-question-item { font-size: var(--question-font-size); }
       .cq-head { display: flex; justify-content: space-between; gap: 8px; font-weight: var(--question-number-weight); margin-bottom: 4px; }
       .cq-meta { font-size: calc(var(--body-font-size) * 0.86); color: #111827; white-space: nowrap; }
-      .cq-stimulus { margin-bottom: 4px; }
+      .cq-stimulus { margin-bottom: 4px; text-align: var(--stimulus-align, left); }
       .cq-stem { margin-bottom: 4px; font-weight: 700; }
       .cq-part { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
       .cq-part-main { display: flex; gap: 6px; min-width: 0; flex: 1; }
@@ -559,7 +559,7 @@
       .stimulus-group-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
 
       /* Print styles for new MCQ types */
-      .stimulus-block { margin-bottom: 5px; padding: 4px 6px; border-left: 2px solid #555; background: #f9f9f9; font-style: italic; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
+      .stimulus-block { margin-bottom: 5px; padding: 4px 6px; border-left: 2px solid #555; background: #f9f9f9; font-style: italic; font-size: var(--mcq-font-size); line-height: var(--body-line-height); text-align: var(--stimulus-align, left); }
       .stimulus-block-label { font-weight: 700; font-style: normal; font-size: calc(var(--mcq-font-size) * 0.9); margin-right: 5px; color: #333; display: inline; }
       .stimulus-image-block { font-style: normal; }
       .stimulus-image-block .stimulus-block-label { display: block; margin: 0 0 4px; }
@@ -730,8 +730,8 @@
 
         <div class="control-grid">
           <div class="field" style="margin-bottom: 0">
-            <label for="bodyFontControl">Uniform Body Font</label
-            ><input
+            <label for="bodyFontControl">Master Font Size</label>
+            <input
               id="bodyFontControl"
               type="number"
               min="9"
@@ -880,6 +880,9 @@
               max="16"
               step="0.2"
             />
+          </div>
+          <div class="field" style="margin-bottom: 0">
+            <div class="toggle-wrapper"><label for="stimulusCenterControl" class="toggle-text">Center Align Stimulus</label><label class="switch"><input type="checkbox" id="stimulusCenterControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
             <label for="cqImageWidthControl">CQ Image Width %</label
@@ -1075,6 +1078,7 @@
     footerAnswerFont: 11,
     mcqImageWidth: 42,
     mcqImageHeight: 95,
+    stimulusCenter: false,
     cqFont: 11,
     cqFontLinked: true,
     cqImageWidth: 52,
@@ -1353,6 +1357,7 @@
       );
       const optionMarkScaleControl = document.getElementById("optionMarkScaleControl");
       const cqFontControl = document.getElementById("cqFontControl");
+      const stimulusCenterControl = document.getElementById("stimulusCenterControl");
       const cqImageWidthControl = document.getElementById(
         "cqImageWidthControl"
       );
@@ -1402,6 +1407,7 @@
         mcqImageWidthControl,
         mcqImageHeightControl,
         cqFontControl,
+        stimulusCenterControl,
         cqImageWidthControl,
         cqImageHeightControl,
         questionFontControl,
@@ -1454,6 +1460,7 @@
       ].filter(Boolean);
       const uniformCqNodes = [
         cqFontControl.closest(".field"),
+        stimulusCenterControl.closest(".field"),
         cqImageWidthControl.closest(".field"),
         cqImageHeightControl.closest(".field"),
       ].filter(Boolean);
@@ -1870,6 +1877,7 @@
   mcqImageWidthControl.value = state.layout.mcqImageWidth;
   mcqImageHeightControl.value = state.layout.mcqImageHeight;
   optionMarkScaleControl.value = state.layout.optionMarkScale ?? 1;
+  stimulusCenterControl.checked = !!state.layout.stimulusCenter;
   cqFontControl.value = state.layout.cqFont ?? state.layout.bodyFont;
   cqImageWidthControl.value = state.layout.cqImageWidth;
   cqImageHeightControl.value = state.layout.cqImageHeight;
@@ -2042,9 +2050,17 @@
               c.totalMarks || "১০"
             )}"></div>
               </div>
-              <div class="field"><label>Stimulus / উদ্দীপক</label><textarea data-type="cqstimulus" data-index="${idx}">${esc(
-              c.stimulus || ""
-            )}</textarea></div>
+              <div class="field">
+                <label style="display:flex; justify-content:space-between; align-items:center;">
+                  <span>Stimulus / উদ্দীপক</span>
+                  <select data-type="cqstimalign" data-index="${idx}" style="width: auto; padding: 2px 6px; font-size: 11px; height: 22px; cursor:pointer;">
+                    <option value="" ${!c.stimAlign ? 'selected' : ''}>Global Align</option>
+                    <option value="left" ${c.stimAlign === 'left' ? 'selected' : ''}>Left</option>
+                    <option value="center" ${c.stimAlign === 'center' ? 'selected' : ''}>Center</option>
+                  </select>
+                </label>
+                <textarea data-type="cqstimulus" data-index="${idx}">${esc(c.stimulus || "")}</textarea>
+              </div>
               ${["ক", "খ", "গ", "ঘ"]
                 .map(
                   (k, partIndex) => `
@@ -2227,6 +2243,7 @@
         }
         else if (type === "cqtime") state.cqs[idx].time = el.value;
         else if (type === "cqmarks") state.cqs[idx].totalMarks = el.value;
+        else if (type === "cqstimalign") state.cqs[idx].stimAlign = el.value;
         else if (type === "cqstimulus") state.cqs[idx].stimulus = el.value;
         else if (type === "cqpart")
           state.cqs[idx].parts[el.dataset.part] = el.value;
@@ -2335,6 +2352,7 @@
           time: "২০ মিনিট",
           totalMarks: "১০",
           stimulus: "",
+          stimAlign: "",
           parts: { ক: "", খ: "", গ: "", ঘ: "" },
           partMarks: { ...cqPartMarksDefault },
           images: [],
@@ -2558,6 +2576,7 @@
   state.layout.mcqImageWidth = numberValueOr(42, mcqImageWidthControl.value);
   state.layout.mcqImageHeight = numberValueOr(95, mcqImageHeightControl.value);
   state.layout.optionMarkScale = numberValueOr(1, optionMarkScaleControl.value);
+  state.layout.stimulusCenter = stimulusCenterControl.checked;
   if (state.layout.cqFontLinked !== false) cqFontControl.value = bodyFontControl.value;
   if (state.layout.questionFontLinked !== false) questionFontControl.value = bodyFontControl.value;
   state.layout.cqFont = numberValueOr(state.layout.bodyFont, cqFontControl.value);
@@ -2685,7 +2704,7 @@
   
   // এখানে 0.6 দিয়ে গুণ করে দেওয়া হয়েছে, ফলে UI তে 1 মানে আসলে 0.6 সাইজ হবে
   root.setProperty("--option-mark-scale", String((state.layout.optionMarkScale ?? 1) * 0.6));
-  
+  root.setProperty("--stimulus-align", state.layout.stimulusCenter ? "center" : "left");
   root.setProperty("--question-number-weight", state.layout.questionNumberBold ? "700" : "400");
   root.setProperty("--header-scale", String(state.layout.headerScale));
   root.setProperty("--header-info-font", `calc(${state.layout.headerInfoFont}px * var(--header-scale))`);
@@ -2786,7 +2805,7 @@
       </div>
       ${
         stimulusLine
-          ? `<div class="cq-stimulus">${formatText(stimulusLine)}</div>`
+          ? `<div class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign};` : ''}">${formatText(stimulusLine)}</div>`
           : ""
       }
       ${["ক", "খ", "গ", "ঘ"]
@@ -3796,7 +3815,7 @@ function splitIntoQuestionBlocks(text) {
         }
 
         let qText = firstLine;
-        if (extraLines.length) qText = [qText, ...extraLines].join(" ").trim();
+        if (extraLines.length) qText = [qText, ...extraLines].join("\n").trim();
 
         const hasStatements = statementLines.length >= 2;
         const qtype = stimulusText ? "stimulus" : hasStatements ? "multistatement" : "normal";
@@ -3834,7 +3853,7 @@ function splitIntoQuestionBlocks(text) {
           }
           contentLines.push(l);
         }
-        return contentLines.join(" ").trim();
+        return contentLines.join("\n").trim();
       }
 
       function parseBulkText(text) {
@@ -4032,7 +4051,7 @@ function splitIntoQuestionBlocks(text) {
           )
             stimulusBits.push(line);
         }
-        stimulus = stimulusBits.join(" ").trim();
+        stimulus = stimulusBits.join("\n").trim();
         return { time, totalMarks, stimulus, parts, partMarks, images: [] };
       }
       function parseCQBulkText(text) {
