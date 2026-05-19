@@ -63,6 +63,7 @@
         --panel: #ffffff;
         --soft: #f8fafc;
         --shadow: rgba(0, 0, 0, 0.5);
+        --mobile-tabbar-height: 56px;
       }
       * {
         box-sizing: border-box;
@@ -262,7 +263,7 @@
       
       .page-number { position: absolute; top: 8px; right: 12px; font-size: 10px; line-height: 1; color: #334155; }
       .page-header { display: grid; grid-template-columns: 185px 1fr 185px; gap: 12px; align-items: center; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1.5px solid #111; flex: 0 0 auto; }
-      .header-box { border: 1px solid #111; min-height: 44px; padding: var(--header-box-pad); font-size: calc(var(--body-font-size) * var(--header-info-scale)); line-height: 1.2; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: var(--header-box-weight); }
+      .header-box { border: 1px solid #111; min-height: 44px; padding: var(--header-box-pad); font-size: var(--body-font-size); line-height: var(--body-line-height); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: var(--header-box-weight); }
       .header-box.right { justify-content: space-between; }
       .header-box .label-inline { margin-right: 0; }
       .header-box .value-inline { text-align: right; }
@@ -345,9 +346,9 @@
       .uniform-card #fitStatus { margin-top: 0; }
       
       .no-header-top { padding-top: calc(var(--pad-top) + 2px); }
-      .cq-section { margin-top: 10px; border-top: 1px dashed #666; padding-top: 7px; display: grid; gap: 8px; align-content: start; }
+      .cq-section { margin-top: 10px; border-top: 1px dashed #666; padding-top: 7px; display: grid; gap: var(--mcq-gap); align-content: start; }
       .cq-title { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
-      .cq-item { border: none; padding: 4px 0; font-size: var(--cq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
+      .cq-item { border: none; padding: 0; font-size: var(--cq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
       .only-question-item { font-size: var(--question-font-size); }
       .cq-head { display: flex; justify-content: space-between; gap: 8px; font-weight: var(--question-number-weight); margin-bottom: 4px; }
       .cq-meta { font-size: calc(var(--body-font-size) * 0.86); color: #111827; white-space: nowrap; }
@@ -414,7 +415,8 @@
         display: none;
         position: fixed;
         bottom: 0; left: 0; right: 0;
-        height: 56px;
+        height: var(--mobile-tabbar-height);
+        box-sizing: border-box;
         background: #1e293b;
         border-top: 1px solid #334155;
         z-index: 9999;
@@ -431,29 +433,40 @@
       .mobile-tab.active .tab-icon { filter: drop-shadow(0 0 4px #38bdf8aa); }
 
       @media (max-width: 768px) {
-        html, body { height: 100dvh; overflow: hidden; }
+        :root { --mobile-tabbar-height: calc(58px + env(safe-area-inset-bottom, 0px)); }
+        html, body { width: 100%; height: 100dvh; overflow: hidden; }
 
         .app { position: relative; overflow: hidden; height: 100dvh; }
 
         .panel {
-  width: 440px;
-  background-color: #ffffff;
-  padding: 24px;
-  box-shadow: 2px 0 15px rgba(0,0,0,0.05);
-  overflow-y: auto;
-  overflow-x: hidden; /* Eta add kora hoyeche */
-  z-index: 100;
-  border-right: 1px solid #e2e8f0;
-  height: 100%;
-  border-radius: 0;
-  flex-shrink: 0;
-}
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: var(--mobile-tabbar-height);
+          width: 100%;
+          max-width: 100%;
+          height: auto;
+          background-color: #ffffff;
+          padding: 14px 12px 18px;
+          box-shadow: none;
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+          z-index: 100;
+          border-right: 0;
+          border-radius: 0;
+          flex-shrink: 0;
+          transform: translateX(0);
+          transition: transform 0.25s ease;
+        }
         .panel.hidden-mobile { transform: translateX(-100%); pointer-events: none; }
 
         .page-wrap {
           position: fixed; top: 0; left: 0;
-          width: 100%; height: calc(100dvh - 56px);
-          padding: 12px 0 4px;
+          width: 100%; height: calc(100dvh - var(--mobile-tabbar-height));
+          padding: 12px 0 16px;
           overflow-y: auto;
           overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
@@ -484,17 +497,22 @@
         .panel-flow-section { padding: 10px 10px; }
 
         .field-grid { grid-template-columns: 1fr; }
+        .row, .three-col { grid-template-columns: 1fr; }
         .control-grid { grid-template-columns: 1fr 1fr; }
         .uniform-grid-three { grid-template-columns: 1fr 1fr; }
 
-        .toolbar { gap: 8px; }
+        .toolbar { gap: 8px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+        .toolbar > div:empty { display: none; }
         .toolbar.three { grid-template-columns: 1fr 1fr; }
         .toolbar.three > :last-child:nth-child(odd) { grid-column: 1 / -1; }
         .answer-buttons { gap: 6px; }
         .answer-buttons label { padding: 10px 6px; font-size: 14px; min-height: 44px; }
         .part-editor-row { grid-template-columns: 1fr 72px; }
+        .img-url-row { grid-template-columns: 1fr; }
+        .img-url-row button { width: 100%; }
         .image-card-body { grid-template-columns: 80px minmax(0, 1fr); }
         .image-preview { min-width: 80px; max-width: 80px; }
+        .cropper-zoom-row { grid-template-columns: repeat(2, 1fr); }
       }
 
       @media print {
@@ -543,6 +561,9 @@
       /* Print styles for new MCQ types */
       .stimulus-block { margin-bottom: 5px; padding: 4px 6px; border-left: 2px solid #555; background: #f9f9f9; font-style: italic; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
       .stimulus-block-label { font-weight: 700; font-style: normal; font-size: calc(var(--mcq-font-size) * 0.9); margin-right: 5px; color: #333; display: inline; }
+      .stimulus-image-block { font-style: normal; }
+      .stimulus-image-block .stimulus-block-label { display: block; margin: 0 0 4px; }
+      .stimulus-image-block .mcq-image { margin: 0; max-width: 100%; }
       .stimulus-group-wrap { margin-bottom: var(--mcq-gap); break-inside: avoid; page-break-inside: avoid; }
       .stimulus-instruction { font-size: calc(var(--mcq-font-size) * 0.88); font-style: italic; color: #333; margin-bottom: 3px; text-align: center; }
       .stmt-list { padding-left: 18px; margin: 2px 0 2px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
@@ -580,6 +601,34 @@
              </ul>
            </div>
         </details>
+
+        <div class="builder-section" id="sheetOptionsSection">
+          <h2 class="section-title">Sheet Options</h2>
+          <div class="row">
+            <div class="field">
+              <label for="languageModeControl">Question Language</label>
+              <select id="languageModeControl">
+                <option value="bn">Bangla</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="mcqPageFillControl">MCQ Page Fill</label>
+              <select id="mcqPageFillControl">
+                <option value="fixed">Fixed 30 per page</option>
+                <option value="auto">Auto fill page</option>
+              </select>
+            </div>
+          </div>
+          <div class="toggle-wrapper">
+            <label for="mcqRepeatHeaderControl" class="toggle-text">Repeat header on extra MCQ pages</label>
+            <label class="switch"><input type="checkbox" id="mcqRepeatHeaderControl"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-wrapper" style="margin-top: 8px">
+            <label for="showHeaderControl" class="toggle-text">Show header on pages</label>
+            <label class="switch"><input type="checkbox" id="showHeaderControl"><span class="slider"></span></label>
+          </div>
+        </div>
 
         <div class="toolbar three">
           <button type="button" onclick="downloadPDFDirect()">
@@ -1001,6 +1050,10 @@
   fullMarksLine: "",
   scoreLine: "",
   creditLine: "Prepared by Md. Shaikh Alam",
+  languageMode: "bn",
+  mcqPageFillMode: "fixed",
+  mcqRepeatHeader: false,
+  showHeader: true,
   layout: {
     bodyFont: 11,
     mcqFont: 11,
@@ -1157,6 +1210,10 @@
       const scoreLine = document.getElementById("scoreLine");
       const creditLine = document.getElementById("creditLine");
       const bulkInput = document.getElementById("bulkInput");
+      const languageModeControl = document.getElementById("languageModeControl");
+      const mcqPageFillControl = document.getElementById("mcqPageFillControl");
+      const mcqRepeatHeaderControl = document.getElementById("mcqRepeatHeaderControl");
+      const showHeaderControl = document.getElementById("showHeaderControl");
 
       function cleanBulkPasteText(text) {
         return String(text || "")
@@ -1318,6 +1375,40 @@
           String(questionFontControl.value).trim() ===
           String(bodyFontControl.value).trim();
       });
+      [
+        bodyFontControl,
+        lineHeightControl,
+        gapControl,
+        columnGapControl,
+        footerNumberFontControl,
+        footerAnswerFontControl,
+        headerScaleControl,
+        headerInfoScaleControl,
+        answerKeyBoldControl,
+        answerNumBoldControl,
+        answerLetterBoldControl,
+        headerBoxesBoldControl,
+        optionBadgeBoldControl,
+        mcqBoldControl,
+        mcqFontControl,
+        optionMarkScaleControl,
+        mcqImageWidthControl,
+        mcqImageHeightControl,
+        cqFontControl,
+        cqImageWidthControl,
+        cqImageHeightControl,
+        questionFontControl,
+        questionNumberBoldControl,
+        questionImageWidthControl,
+        questionImageHeightControl,
+        padTopControl,
+        padRightControl,
+        padBottomControl,
+        padLeftControl,
+      ].filter(Boolean).forEach((el) => {
+        const eventType = el.type === "checkbox" ? "change" : "input";
+        el.addEventListener(eventType, () => applyLayoutControls());
+      });
       const panel = document.querySelector(".panel");
       const lead = panel.querySelector(".guide-box") || panel.querySelector("h1");
       const panelFinalizeNodes = Array.from(
@@ -1332,10 +1423,13 @@
       const basicExamInfoSection = document.getElementById(
         "basicExamInfoSection"
       );
+      const sheetOptionsSection = document.getElementById(
+        "sheetOptionsSection"
+      );
       const bulkMcqImportSection = document.getElementById(
         "bulkMcqImportSection"
       );
-      const panelHeaderNodes = [basicExamInfoSection].filter(Boolean);
+      const panelHeaderNodes = [sheetOptionsSection, basicExamInfoSection].filter(Boolean);
       const panelMcqBulkNode = bulkMcqImportSection;
       const uniformTextNodes = [
         bodyFontControl.closest(".field"),
@@ -1370,8 +1464,10 @@
       ].filter(Boolean);
       const uniformHeaderNodes = [
         headerScaleControl.closest(".field"),
-        headerInfoScaleControl.closest(".field"),
         headerBoxesBoldControl.closest(".field"),
+      ].filter(Boolean);
+      const uniformHiddenNodes = [
+        headerInfoScaleControl.closest(".field"),
       ].filter(Boolean);
       const uniformMarginNodes = [
         padTopControl.closest(".field"),
@@ -1419,6 +1515,7 @@
           ...uniformQuestionNodes,
           ...uniformFooterNodes,
           ...uniformHeaderNodes,
+          ...uniformHiddenNodes,
           ...uniformMarginNodes,
           ...uniformActionNodes,
           ...mcqImageFieldNodes,
@@ -1491,6 +1588,7 @@
           ...uniformQuestionNodes,
           ...uniformFooterNodes,
           ...uniformHeaderNodes,
+          ...uniformHiddenNodes,
           ...uniformMarginNodes,
           ...uniformActionNodes,
           ...mcqImageFieldNodes,
@@ -1560,8 +1658,25 @@
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#039;");
       }
+      function isEnglishMode() {
+        return state.languageMode === "en";
+      }
+      function textByLang(bnText, enText) {
+        return isEnglishMode() ? enText : bnText;
+      }
+      function displayText(v) {
+        const text = String(v ?? "");
+        if (!isEnglishMode()) return text;
+        return toAsciiDigits(text)
+          .replace(/মিনিট/g, "minutes")
+          .replace(/নম্বর/g, "marks")
+          .replace(/মান/g, "marks")
+          .replace(/সময়/g, "Time")
+          .replace(/পূর্ণমান/g, "Full Marks")
+          .replace(/প্রাপ্তমান/g, "Obtain Marks");
+      }
       function formatText(v) {
-        const text = esc(v);
+        const text = esc(displayText(v));
         return text.replace(/\n/g, "<br>");
       }
       function renderImageControls(kind, idx, images, defaultWidth, defaultHeight) {
@@ -1611,11 +1726,22 @@
   </div>`;
       }
       function bn(v) {
+        if (isEnglishMode()) return toAsciiDigits(v);
         const d = "০১২৩৪৫৬৭৮৯";
         return String(v ?? "").replace(/[0-9]/g, (x) => d[Number(x)]);
       }
       function answerToBn(v) {
+        if (isEnglishMode()) return v || "";
         return answerMap[v] || v || "";
+      }
+      function optionLabel(index) {
+        return isEnglishMode() ? ["A", "B", "C", "D"][index] : optionLabels[index];
+      }
+      function partLabel(key, index) {
+        return isEnglishMode() ? ["a", "b", "c", "d"][index] : key;
+      }
+      function questionStop() {
+        return isEnglishMode() ? "." : "।";
       }
       function numberValueOr(fallback, value) {
         return value === "" || value === null || Number.isNaN(Number(value))
@@ -1643,7 +1769,7 @@
         );
       }
       function toAsciiDigits(value) {
-        return String(value || "")
+        return String(value ?? "")
           .replace(/[০-৯]/g, (d) => "০১২৩৪৫৬৭৮৯".indexOf(d))
           .replace(/,/g, ".");
       }
@@ -1665,9 +1791,10 @@
       }
       function formatAutoMinutes(totalMinutes) {
         if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return "";
-        return Number.isInteger(totalMinutes)
-          ? `${totalMinutes} মিনিট`
-          : `${totalMinutes.toFixed(1).replace(/\.0$/, "")} মিনিট`;
+        const value = Number.isInteger(totalMinutes)
+          ? String(totalMinutes)
+          : totalMinutes.toFixed(1).replace(/\.0$/, "");
+        return isEnglishMode() ? `${value} minutes` : `${bn(value)} মিনিট`;
       }
       function getAutoHeaderStats() {
         const mcqCount = state.questions.filter(isMcqMeaningful).length;
@@ -1712,6 +1839,10 @@
   fullMarksLine.value = state.fullMarksLine || "";
   scoreLine.value = state.scoreLine || "";
   creditLine.value = state.creditLine || "";
+  languageModeControl.value = state.languageMode || "bn";
+  mcqPageFillControl.value = state.mcqPageFillMode || "fixed";
+  mcqRepeatHeaderControl.checked = !!state.mcqRepeatHeader;
+  showHeaderControl.checked = state.showHeader !== false;
   bodyFontControl.value = state.layout.bodyFont;
   mcqFontControl.value = state.layout.mcqFont ?? state.layout.bodyFont;
   bodyBoldControl.checked = !!state.layout.bodyBold;
@@ -1852,7 +1983,7 @@
                 ? '<div><label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:#334;">Statements (i, ii, iii...)</label><div id="stmts-' + idx + '">' + stmtRows + '</div><button type="button" class="add-stmt-btn" onclick="addStatement(' + idx + ')">+ Statement যোগ করো</button></div>'
                 : "";
               const radioButtons = ["A","B","C","D"].map(function(letter, i) {
-                return '<label><input type="radio" data-index="' + idx + '" name="ans-' + idx + '" value="' + letter + '" ' + (q.answer === letter ? "checked" : "") + '> ' + optionLabels[i] + '</label>';
+                return '<label><input type="radio" data-index="' + idx + '" name="ans-' + idx + '" value="' + letter + '" ' + (q.answer === letter ? "checked" : "") + '> ' + optionLabel(i) + '</label>';
               }).join("");
               return '<details ' + isOpen + '>'
                 + '<summary><span class="summary-row"><span>MCQ ' + bn(q.no) + ' <small style="font-weight:400;color:#64748b;">[' + typeLabel + ']</small></span><span class="summary-actions"><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveQuestion(' + idx + ',-1)">▲</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveQuestion(' + idx + ',1)">▼</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); deleteQuestion(' + idx + ')">✕</button></span></span></summary>'
@@ -1865,10 +1996,10 @@
                 + '<div class="field"><label>Question</label><textarea data-type="qtext" data-index="' + idx + '">' + esc(q.text || "") + '</textarea></div>'
                 + stmtBox
                 + renderImageControls("mcq", idx, q.images, state.layout.mcqImageWidth, state.layout.mcqImageHeight)
-                + '<div class="field"><label>Option ক</label><input data-type="qopt" data-opt="0" data-index="' + idx + '" value="' + esc(q.options?.[0] || "") + '"></div>'
-                + '<div class="field"><label>Option খ</label><input data-type="qopt" data-opt="1" data-index="' + idx + '" value="' + esc(q.options?.[1] || "") + '"></div>'
-                + '<div class="field"><label>Option গ</label><input data-type="qopt" data-opt="2" data-index="' + idx + '" value="' + esc(q.options?.[2] || "") + '"></div>'
-                + '<div class="field"><label>Option ঘ</label><input data-type="qopt" data-opt="3" data-index="' + idx + '" value="' + esc(q.options?.[3] || "") + '"></div>'
+                + '<div class="field"><label>Option ' + optionLabel(0) + '</label><input data-type="qopt" data-opt="0" data-index="' + idx + '" value="' + esc(q.options?.[0] || "") + '"></div>'
+                + '<div class="field"><label>Option ' + optionLabel(1) + '</label><input data-type="qopt" data-opt="1" data-index="' + idx + '" value="' + esc(q.options?.[1] || "") + '"></div>'
+                + '<div class="field"><label>Option ' + optionLabel(2) + '</label><input data-type="qopt" data-opt="2" data-index="' + idx + '" value="' + esc(q.options?.[2] || "") + '"></div>'
+                + '<div class="field"><label>Option ' + optionLabel(3) + '</label><input data-type="qopt" data-opt="3" data-index="' + idx + '" value="' + esc(q.options?.[3] || "") + '"></div>'
                 + '<div><label>Correct Answer</label><div class="answer-buttons">' + radioButtons + '</div></div>'
                 + '</div></details>';
             }).join("")}
@@ -1908,12 +2039,12 @@
             )}</textarea></div>
               ${["ক", "খ", "গ", "ঘ"]
                 .map(
-                  (k) => `
+                  (k, partIndex) => `
                 <div class="part-editor-row">
-                  <div class="field"><label>${k} part</label><textarea data-type="cqpart" data-part="${k}" data-index="${idx}">${esc(
+                  <div class="field"><label>${partLabel(k, partIndex)} part</label><textarea data-type="cqpart" data-part="${k}" data-index="${idx}">${esc(
                     c.parts?.[k] || ""
                   )}</textarea></div>
-                  <div class="field"><label>${k} mark</label><input data-type="cqpartmark" data-part="${k}" data-index="${idx}" value="${esc(
+                  <div class="field"><label>${partLabel(k, partIndex)} mark</label><input data-type="cqpartmark" data-part="${k}" data-index="${idx}" value="${esc(
                     c.partMarks?.[k] ?? cqPartMarksDefault[k]
                   )}"></div>
                 </div>
@@ -2375,6 +2506,25 @@
         });
       });
 
+      languageModeControl.addEventListener("change", () => {
+        state.languageMode = languageModeControl.value === "en" ? "en" : "bn";
+        syncNumbers();
+        initFields();
+        renderAll();
+      });
+      mcqPageFillControl.addEventListener("change", () => {
+        state.mcqPageFillMode = mcqPageFillControl.value === "auto" ? "auto" : "fixed";
+        renderAll();
+      });
+      mcqRepeatHeaderControl.addEventListener("change", () => {
+        state.mcqRepeatHeader = mcqRepeatHeaderControl.checked;
+        renderAll();
+      });
+      showHeaderControl.addEventListener("change", () => {
+        state.showHeader = showHeaderControl.checked;
+        renderAll();
+      });
+
       function applyLayoutControls() {
   state.layout.bodyFont = numberValueOr(11, bodyFontControl.value);
   state.layout.bodyBold = bodyBoldControl.checked;
@@ -2511,7 +2661,7 @@
   const root = document.documentElement.style;
   root.setProperty("--body-font-size", state.layout.bodyFont + "px");
   root.setProperty("--mcq-font-size", (state.layout.mcqFont ?? state.layout.bodyFont) + "px");
-  root.setProperty("--body-weight", "400");
+  root.setProperty("--body-weight", state.layout.bodyBold ? "700" : "400");
   root.setProperty("--body-line-height", String(state.layout.lineHeight));
   root.setProperty("--mcq-gap", state.layout.gap + "px");
   root.setProperty("--option-col-gap", state.layout.columnGap + "px");
@@ -2553,11 +2703,11 @@
         const imgHtml = images.map((img) => {
           const width = numberValueOr(defaultWidth, img.width);
           const height = numberValueOr(defaultHeight, img.height);
-          return `<img class="mcq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
+          return `<div class="stimulus-block stimulus-image-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span><img class="mcq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain;" src="${img.src}"></div>`;
         }).join("");
 
         const stimulusHtml = (qtype === "stimulus" && stimTxt)
-          ? `<div class="stimulus-block"><span class="stimulus-block-label">উদ্দীপক :</span>${formatText(stimTxt)}</div>`
+          ? `<div class="stimulus-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>${formatText(stimTxt)}</div>`
           : "";
 
         const statementsHtml = (qtype === "multistatement" && stmts.length)
@@ -2571,7 +2721,7 @@
       ${stimulusHtml}
       ${imgHtml}
       <div class="q-head">
-        <div class="q-no">${bn(q.no)}।</div>
+        <div class="q-no">${bn(q.no)}${questionStop()}</div>
         <div class="q-text">${formatText(q.text)}</div>
       </div>
       ${statementsHtml}
@@ -2580,7 +2730,7 @@
           .map(
             (opt, i) => `
           <div class="option-item">
-            <div class="option-mark">${optionLabels[i]}</div>
+            <div class="option-mark">${optionLabel(i)}</div>
             <div class="option-text">${formatText(opt)}</div>
           </div>
         `
@@ -2591,7 +2741,7 @@
       }
       function renderAnswerTable(list) {
         if (!list.length)
-          return '<div class="placeholder-box">এই page-এ MCQ নেই</div>';
+          return `<div class="placeholder-box">${textByLang("এই page-এ MCQ নেই", "No MCQ on this page")}</div>`;
         const cols = list
           .map((q) => `<th><span class="answer-num">${bn(q.no)}</span></th>`)
           .join("");
@@ -2620,10 +2770,10 @@
         })
         .join("")}
       <div class="cq-head">
-        <div>${bn(idx + 1)}।</div>
-        <div class="cq-meta">${formatText(c.time || "২০ মিনিট")} | ${formatText(
+        <div>${bn(idx + 1)}${questionStop()}</div>
+        <div class="cq-meta">${formatText(c.time || textByLang("২০ মিনিট", "20 minutes"))} | ${formatText(
           c.totalMarks || "১০"
-        )} নম্বর</div>
+        )} ${textByLang("নম্বর", "marks")}</div>
       </div>
       ${
         stimulusLine
@@ -2631,10 +2781,10 @@
           : ""
       }
       ${["ক", "খ", "গ", "ঘ"]
-        .map((k) => {
+        .map((k, i) => {
           const text = c.parts?.[k];
           if (!String(text || "").trim()) return "";
-          return `<div class="cq-part"><div class="cq-part-main"><div class="cq-part-label">${k}.</div><div class="cq-part-text">${formatText(
+          return `<div class="cq-part"><div class="cq-part-main"><div class="cq-part-label">${partLabel(k, i)}.</div><div class="cq-part-text">${formatText(
             text
           )}</div></div><div class="cq-part-mark">${bn(
             c.partMarks?.[k] ?? cqPartMarksDefault[k]
@@ -2660,10 +2810,10 @@
       <div class="cq-head">
         <div class="only-question-main"><span class="only-question-no">${bn(
           idx + 1
-        )}।</span><span class="only-question-text">${formatText(
+        )}${questionStop()}</span><span class="only-question-text">${formatText(
           stimulusLine
         )}</span></div>
-        <div class="cq-meta">${bn(q.mark || "1")} নম্বর</div>
+        <div class="cq-meta">${bn(q.mark || "1")} ${textByLang("নম্বর", "marks")}</div>
       </div>
     </div>`;
       }
@@ -2673,6 +2823,7 @@
         }><div class="cq-title">QUESTION SECTION</div></div>`;
       }
       function createOnlyQuestionPageMarkup(includeHeader = false) {
+        includeHeader = includeHeader && allowPageHeader();
         return `
         <section class="page ${includeHeader ? "" : "no-header-top"}">
           ${includeHeader ? renderHeaderBlock() : ""}
@@ -2751,8 +2902,8 @@
               : ""
           }
           <header class="page-header">
-            <div class="header-box"><span class="label-inline">সময়</span><span class="value-inline">${esc(
-              state.durationLine || ""
+            <div class="header-box"><span class="label-inline">${textByLang("সময়", "Time")}</span><span class="value-inline">${esc(
+              displayText(state.durationLine || "")
             )}</span></div>
             <div class="header-center">
               <h2>${esc(state.examTitle || "")}</h2>
@@ -2775,11 +2926,11 @@
               }
             </div>
             <div>
-              <div class="header-box right"><span class="label-inline">পূর্ণমান</span><span class="value-inline">${esc(
-                state.fullMarksLine || ""
+              <div class="header-box right"><span class="label-inline">${textByLang("পূর্ণমান", "Full Marks")}</span><span class="value-inline">${esc(
+                displayText(state.fullMarksLine || "")
               )}</span></div>
-              <div class="header-box right" style="margin-top:6px;"><span class="label-inline">প্রাপ্তমান</span><span class="value-inline">${esc(
-                state.scoreLine || ""
+              <div class="header-box right" style="margin-top:6px;"><span class="label-inline">${textByLang("প্রাপ্তমান", "Obtain Marks")}</span><span class="value-inline">${esc(
+                displayText(state.scoreLine || "")
               )}</span></div>
             </div>
           </header>`;
@@ -2790,6 +2941,7 @@
         }><div class="cq-title">CQ SECTION</div></div>`;
       }
       function createCQPageMarkup(includeHeader = false) {
+        includeHeader = includeHeader && allowPageHeader();
         return `
         <section class="page ${includeHeader ? "" : "no-header-top"}">
           ${includeHeader ? renderHeaderBlock() : ""}
@@ -2802,11 +2954,12 @@
         </section>`;
       }
       function createEmptyPageMarkup() {
+        const includeHeader = allowPageHeader();
         return `
-        <section class="page">
-          ${renderHeaderBlock()}
+        <section class="page ${includeHeader ? "" : "no-header-top"}">
+          ${includeHeader ? renderHeaderBlock() : ""}
           <div class="content-area">
-            <div class="placeholder-box">CQ, MCQ বা Question part add করলে preview এখানে দেখা যাবে।</div>
+            <div class="placeholder-box">${textByLang("CQ, MCQ বা Question part add করলে preview এখানে দেখা যাবে।", "Add CQ, MCQ, or Question part to see the preview here.")}</div>
           </div>
         </section>`;
       }
@@ -2868,6 +3021,136 @@
         }
         return nextIndex;
       }
+      function allowPageHeader() {
+        return state.showHeader !== false;
+      }
+      function mcqPageHasHeader(pageIndex) {
+        return allowPageHeader() && (pageIndex === 0 || !!state.mcqRepeatHeader);
+      }
+      function createMcqPageMarkup(pageIndex) {
+        const includeHeader = mcqPageHasHeader(pageIndex);
+        return `
+      <section class="page mcq-page ${includeHeader ? "" : "no-header-top"}">
+        ${includeHeader ? renderHeaderBlock() : ""}
+        <div class="content-area">
+          <div class="page-section-title">MCQ SECTION</div>
+          <div class="mcq-columns">
+            <div class="mcq-column mcq-column-left"></div>
+            <div class="mcq-column mcq-column-right"></div>
+          </div>
+          <footer class="footer-box mcq-answer-footer"></footer>
+        </div>
+      </section>`;
+      }
+      function resetHeaderFitStyles(pageEl) {
+        const header = pageEl?.querySelector(".page-header");
+        if (!header) return;
+        header.style.gridTemplateColumns = "";
+        header.style.gap = "";
+        header.style.paddingBottom = "";
+        header.style.marginBottom = "";
+        const topCredit = pageEl.querySelector(".top-credit");
+        const title = pageEl.querySelector(".header-center h2");
+        const meta = pageEl.querySelector(".header-center .meta");
+        if (topCredit) {
+          topCredit.style.fontSize = "";
+          topCredit.style.marginBottom = "";
+        }
+        if (title) title.style.fontSize = "";
+        if (meta) meta.style.fontSize = "";
+        pageEl.querySelectorAll(".header-box").forEach((box) => {
+          box.style.minHeight = "";
+          box.style.padding = "";
+          box.style.fontSize = "";
+        });
+      }
+      function setMcqPageContent(pageEl, items) {
+        const list = Array.isArray(items) ? items : [];
+        const split = list.length >= 30 ? 15 : Math.ceil(list.length / 2);
+        const left = list.slice(0, split);
+        const right = list.slice(split);
+        pageEl.querySelector(".mcq-column-left").innerHTML = left
+          .map(renderQuestion)
+          .join("");
+        pageEl.querySelector(".mcq-column-right").innerHTML = right
+          .map(renderQuestion)
+          .join("");
+        const footer = pageEl.querySelector(".mcq-answer-footer");
+        footer.innerHTML = `${renderAnswerTable(list)}<div class="footer-note">${esc(
+          state.creditLine || ""
+        )}</div>`;
+        resetHeaderFitStyles(pageEl);
+      }
+      function pageContentOverflows(pageEl) {
+        const content = pageEl?.querySelector(".content-area");
+        return !!content && content.scrollHeight > content.clientHeight + 1;
+      }
+      function buildFixedMcqPages(allMcq) {
+        let html = "";
+        const chunks = [];
+        for (let i = 0; i < allMcq.length; i += 30) {
+          chunks.push(allMcq.slice(i, i + 30));
+        }
+        chunks.forEach((chunk, pageIndex) => {
+          const split = chunk.length >= 30 ? 15 : Math.ceil(chunk.length / 2);
+          const left = chunk.slice(0, split);
+          const right = chunk.slice(split);
+          const includeHeader = mcqPageHasHeader(pageIndex);
+          html += `
+      <section class="page mcq-page ${includeHeader ? "" : "no-header-top"}">
+        ${includeHeader ? renderHeaderBlock() : ""}
+        <div class="content-area">
+          <div class="page-section-title">MCQ SECTION</div>
+          <div class="mcq-columns">
+            <div class="mcq-column">${
+              left.length ? left.map(renderQuestion).join("") : ""
+            }</div>
+            <div class="mcq-column">${
+              right.length ? right.map(renderQuestion).join("") : ""
+            }</div>
+          </div>
+          <footer class="footer-box">
+            ${renderAnswerTable(chunk)}
+            <div class="footer-note">${esc(state.creditLine || "")}</div>
+          </footer>
+        </div>
+      </section>`;
+        });
+        return html;
+      }
+      function renderAutoMcqPages(allMcq) {
+        let nextIndex = 0;
+        let pageIndex = 0;
+        while (nextIndex < allMcq.length) {
+          pagesWrap.insertAdjacentHTML("beforeend", createMcqPageMarkup(pageIndex));
+          const pageEl = pagesWrap.lastElementChild;
+          const pageItems = [];
+
+          while (nextIndex < allMcq.length) {
+            const candidate = [...pageItems, allMcq[nextIndex]];
+            setMcqPageContent(pageEl, candidate);
+            applyAutoHeaderFit();
+
+            if (pageContentOverflows(pageEl)) {
+              if (!pageItems.length) {
+                pageItems.push(allMcq[nextIndex]);
+                nextIndex += 1;
+                setMcqPageContent(pageEl, pageItems);
+                applyAutoHeaderFit();
+              } else {
+                setMcqPageContent(pageEl, pageItems);
+                applyAutoHeaderFit();
+              }
+              break;
+            }
+
+            pageItems.push(allMcq[nextIndex]);
+            nextIndex += 1;
+          }
+
+          pageIndex += 1;
+        }
+      }
       function renderPages() {
         applyPageVars();
         const allMcq = state.questions.filter(isMcqMeaningful);
@@ -2886,38 +3169,13 @@
         let html = "";
 
         if (allMcq.length) {
-          const chunks = [];
-          for (let i = 0; i < allMcq.length; i += 30) {
-            chunks.push(allMcq.slice(i, i + 30));
-          }
-
-          chunks.forEach((chunk, pageIndex) => {
-            const split = chunk.length >= 30 ? 15 : Math.ceil(chunk.length / 2);
-            const left = chunk.slice(0, split);
-            const right = chunk.slice(split, 30);
-            html += `
-      <section class="page ${pageIndex > 0 ? "no-header-top" : ""}">
-        ${pageIndex === 0 ? renderHeaderBlock() : ""}
-        <div class="content-area">
-          <div class="page-section-title">MCQ SECTION</div>
-          <div class="mcq-columns">
-            <div class="mcq-column">${
-              left.length ? left.map(renderQuestion).join("") : ""
-            }</div>
-            <div class="mcq-column">${
-              right.length ? right.map(renderQuestion).join("") : ""
-            }</div>
-          </div>
-          <footer class="footer-box">
-            ${renderAnswerTable(chunk)}
-            <div class="footer-note">${esc(state.creditLine || "")}</div>
-          </footer>
-        </div>
-      </section>`;
-          });
+          html = state.mcqPageFillMode === "auto" ? "" : buildFixedMcqPages(allMcq);
         }
 
         pagesWrap.innerHTML = html;
+        if (allMcq.length && state.mcqPageFillMode === "auto") {
+          renderAutoMcqPages(allMcq);
+        }
         applyAutoHeaderFit();
 
         if (allCq.length) {
@@ -3002,7 +3260,6 @@
           const meta = page.querySelector(".header-center .meta");
           const boxes = [...page.querySelectorAll(".header-box")];
           const baseHeaderScale = Number(state.layout.headerScale || 1);
-          const baseInfoScale = Number(state.layout.headerInfoScale || 1);
           let factor = 1;
           for (let i = 0; i < 24; i++) {
             const overflow = content.scrollHeight - content.clientHeight;
@@ -3040,10 +3297,6 @@
             boxes.forEach((b) => {
               b.style.minHeight = `${Math.max(28, 44 * f)}px`;
               b.style.padding = `${Math.max(4, 8 * baseHeaderScale * f)}px`;
-              b.style.fontSize = `${Math.max(
-                9.5,
-                11 * baseInfoScale * baseHeaderScale * f
-              )}px`;
             });
           }
         });
@@ -3071,12 +3324,15 @@
         const onlyQuestionCount = state.onlyQuestions.filter(
           isOnlyQuestionMeaningful
         ).length;
-        const mcqPages = mcqCount ? Math.ceil(mcqCount / 30) : 0;
-        fitStatus.innerHTML = `<strong>Status:</strong> MCQ ${bn(
-          mcqCount
-        )}টি | MCQ page ${bn(mcqPages)}টি | CQ ${bn(cqCount)}টি | Question ${bn(
-          onlyQuestionCount
-        )}টি`;
+        const renderedMcqPages = document.querySelectorAll(".page.mcq-page").length;
+        const mcqPages = renderedMcqPages || (mcqCount ? Math.ceil(mcqCount / 30) : 0);
+        fitStatus.innerHTML = isEnglishMode()
+          ? `<strong>Status:</strong> MCQ ${bn(mcqCount)} | MCQ pages ${bn(mcqPages)} | CQ ${bn(cqCount)} | Question ${bn(onlyQuestionCount)}`
+          : `<strong>Status:</strong> MCQ ${bn(
+              mcqCount
+            )}টি | MCQ page ${bn(mcqPages)}টি | CQ ${bn(cqCount)}টি | Question ${bn(
+              onlyQuestionCount
+            )}টি`;
       }
       function renderAll(recordHistory = true) {
         state.examTitle = examTitle.value;
@@ -3119,6 +3375,11 @@
         if (!Array.isArray(nextState.cqs)) nextState.cqs = [];
         if (!Array.isArray(nextState.onlyQuestions))
           nextState.onlyQuestions = [];
+        nextState.languageMode = nextState.languageMode === "en" ? "en" : "bn";
+        nextState.mcqPageFillMode =
+          nextState.mcqPageFillMode === "auto" ? "auto" : "fixed";
+        nextState.mcqRepeatHeader = !!nextState.mcqRepeatHeader;
+        nextState.showHeader = nextState.showHeader !== false;
 
         nextState.questions = nextState.questions.map((q, i) => ({
           no: i + 1,
@@ -3875,6 +4136,48 @@ function splitIntoQuestionBlocks(text) {
         });
         return out;
       }
+      function getPageCaptureSize(pageEl) {
+        const computed = window.getComputedStyle(pageEl);
+        return {
+          width:
+            Math.ceil(parseFloat(computed.width)) ||
+            pageEl.scrollWidth ||
+            pageEl.offsetWidth ||
+            794,
+          height:
+            Math.ceil(parseFloat(computed.height)) ||
+            pageEl.scrollHeight ||
+            pageEl.offsetHeight ||
+            1123,
+        };
+      }
+      function createPageCaptureClone(pageEl) {
+        const size = getPageCaptureSize(pageEl);
+        const stage = document.createElement("div");
+        stage.setAttribute("aria-hidden", "true");
+        stage.style.position = "fixed";
+        stage.style.left = "-10000px";
+        stage.style.top = "0";
+        stage.style.width = size.width + "px";
+        stage.style.height = size.height + "px";
+        stage.style.overflow = "hidden";
+        stage.style.pointerEvents = "none";
+        stage.style.zIndex = "2147483647";
+        stage.style.background = "#ffffff";
+
+        const clone = pageEl.cloneNode(true);
+        clone.style.transform = "none";
+        clone.style.transformOrigin = "top left";
+        clone.style.margin = "0";
+        clone.style.boxShadow = "none";
+        clone.style.width = size.width + "px";
+        clone.style.height = size.height + "px";
+        clone.style.minHeight = size.height + "px";
+
+        stage.appendChild(clone);
+        document.body.appendChild(stage);
+        return { stage, clone, width: size.width, height: size.height };
+      }
       async function svgPageToJpegBytes(pageEl, scale = 2) {
         if (document.fonts && document.fonts.ready) {
           try {
@@ -3883,15 +4186,23 @@ function splitIntoQuestionBlocks(text) {
         }
         await new Promise((r) => setTimeout(r, 150));
 
-        const canvas = await html2canvas(pageEl, {
-          backgroundColor: "#ffffff",
-          scale: scale,
-          useCORS: true,
-          logging: false,
-          removeContainer: true,
-          windowWidth: pageEl.scrollWidth || pageEl.offsetWidth,
-          windowHeight: pageEl.scrollHeight || pageEl.offsetHeight,
-        });
+        const capture = createPageCaptureClone(pageEl);
+        let canvas;
+        try {
+          canvas = await html2canvas(capture.clone, {
+            backgroundColor: "#ffffff",
+            scale: scale,
+            useCORS: true,
+            logging: false,
+            removeContainer: true,
+            width: capture.width,
+            height: capture.height,
+            windowWidth: capture.width,
+            windowHeight: capture.height,
+          });
+        } finally {
+          capture.stage.remove();
+        }
 
         const jpegBlob = await new Promise((resolve, reject) => {
           canvas.toBlob(
@@ -4010,8 +4321,7 @@ function splitIntoQuestionBlocks(text) {
         await new Promise((r) => setTimeout(r, 120));
         const pages = [...document.querySelectorAll(".page")];
         const images = [];
-        const isMobile = window.innerWidth <= 768;
-        const renderScale = isMobile ? 1.5 : 2; 
+        const renderScale = 2;
         for (const page of pages) {
           images.push(await svgPageToJpegBytes(page, renderScale));
         }
@@ -4029,14 +4339,6 @@ function splitIntoQuestionBlocks(text) {
         setTimeout(() => URL.revokeObjectURL(url), 1500);
       }
       async function downloadPDFDirect() {
-        const pageWrap = document.getElementById('pagesWrap');
-        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
-        if (wasHidden && pageWrap) {
-          pageWrap.style.transform = 'none';
-          pageWrap.style.position = 'fixed';
-          pageWrap.style.left = '-9999px';
-          pageWrap.style.top = '-9999px';
-        }
         try {
           const blob = await generatePdfBlob();
           await downloadBlob(
@@ -4049,25 +4351,9 @@ function splitIntoQuestionBlocks(text) {
           try {
             window.print();
           } catch (e) {}
-        } finally {
-          if (wasHidden && pageWrap) {
-            pageWrap.style.transform = '';
-            pageWrap.style.position = '';
-            pageWrap.style.left = '';
-            pageWrap.style.top = '';
-            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
-          }
         }
       }
       async function sharePDFDirect() {
-        const pageWrap = document.getElementById('pagesWrap');
-        const wasHidden = pageWrap && !pageWrap.classList.contains('active-mobile') && window.innerWidth <= 768;
-        if (wasHidden && pageWrap) {
-          pageWrap.style.transform = 'none';
-          pageWrap.style.position = 'fixed';
-          pageWrap.style.left = '-9999px';
-          pageWrap.style.top = '-9999px';
-        }
         try {
           const blob = await generatePdfBlob();
           const filename =
@@ -4093,14 +4379,6 @@ function splitIntoQuestionBlocks(text) {
         } catch (err) {
           console.error(err);
           alert("Share PDF তৈরি করা যায়নি।");
-        } finally {
-          if (wasHidden && pageWrap) {
-            pageWrap.style.transform = '';
-            pageWrap.style.position = '';
-            pageWrap.style.left = '';
-            pageWrap.style.top = '';
-            if (currentMobileTab !== 'preview') pageWrap.classList.remove('active-mobile');
-          }
         }
       }
       async function downloadAsImagesZipLike() {
