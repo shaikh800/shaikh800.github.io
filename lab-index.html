@@ -924,12 +924,11 @@
         const isMobile = window.innerWidth <= 768;
         const wasHidden = isMobile && pageWrap && !pageWrap.classList.contains('active-mobile');
 
-        // ISSUE 3 FIXED: Using fixed positioning instead of just visibility hidden to avoid blank PDF captures on mobile
         if (wasHidden && pageWrap) {
-            pageWrap.style.visibility = 'hidden';
             pageWrap.style.transform = 'none';
             pageWrap.style.position = 'fixed';
             pageWrap.style.left = '-9999px';
+            pageWrap.style.top = '-9999px';
         }
 
         const prevPageTransform = element.style.transform;
@@ -943,21 +942,35 @@
         btn.style.backgroundColor = "#555";
         element.style.boxShadow = 'none';
 
-        // Reduced scale for mobile to prevent memory crashes
-        const renderScale = isMobile ? 1.0 : 2;
+        const renderScale = isMobile ? 1.5 : 2;
+        const filename = 'lab-report-index.pdf';
 
         const opt = {
             margin: 0,
-            filename: 'lab-report-index.pdf',
+            filename: filename,
             image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { scale: renderScale, useCORS: true, scrollY: 0, scrollX: 0 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
-            const totalPages = pdf.internal.getNumberOfPages();
-            for (let i = totalPages; i > 1; i--) pdf.deletePage(i);
-        }).save().then(() => {
+        const fontReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+
+        fontReady.catch(() => {}).then(() => {
+            return html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = totalPages; i > 1; i--) pdf.deletePage(i);
+            }).outputPdf('blob');
+        }).then(async (pdfBlob) => {
+            const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+                await navigator.share({ title: filename, files: [file] });
+            } else {
+                const url = URL.createObjectURL(pdfBlob);
+                const a = document.createElement('a');
+                a.href = url; a.download = filename;
+                document.body.appendChild(a); a.click(); a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1500);
+            }
             btn.innerText = originalText;
             btn.style.backgroundColor = "#111827";
         }).catch(() => {
@@ -971,10 +984,10 @@
                 element.style.marginBottom = prevPageMargin;
             }
             if (wasHidden && pageWrap) {
-                pageWrap.style.visibility = '';
                 pageWrap.style.transform = '';
                 pageWrap.style.position = '';
                 pageWrap.style.left = '';
+                pageWrap.style.top = '';
             }
         });
     }
