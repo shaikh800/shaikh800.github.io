@@ -373,8 +373,8 @@
       .cq-meta { font-size: calc(var(--body-font-size) * 0.86); color: #111827; white-space: nowrap; }
       .cq-stimulus { margin-bottom: 4px; text-align: var(--stimulus-align, left); }
       .cq-stem { margin-bottom: 4px; font-weight: 700; }
-      .cq-part { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-top: 2px; }
-      .cq-part-main { display: flex; gap: 6px; min-width: 0; flex: 1; }
+      .cq-part { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 2px; }
+      .cq-part-main { display: flex; align-items: baseline; gap: 6px; min-width: 0; flex: 1; }
       .cq-part-label { font-weight: 700; min-width: 22px; }
       .cq-part-text { flex: 1; overflow-wrap: anywhere; }
       .cq-part-mark { min-width: 44px; text-align: right; font-weight: 700; white-space: nowrap; }
@@ -2829,17 +2829,19 @@ function copyAiPrompt(type, btn) {
           return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
         })
         .join("")}
-      <div class="cq-head">
-        <div>${bn(idx + 1)}${questionStop()}</div>
+      <div class="cq-head" style="align-items: baseline;">
+        <div style="flex: 1; min-width: 0;">
+          <span style="font-weight: var(--question-number-weight); margin-right: 5px;">${bn(idx + 1)}${questionStop()}</span>
+          ${
+            stimulusLine
+              ? `<span class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign}; display: inline-block;` : ''}">${formatText(stimulusLine)}</span>`
+              : ""
+          }
+        </div>
         <div class="cq-meta">${formatText(c.time || textByLang("২০ মিনিট", "20 minutes"))} | ${formatText(
           c.totalMarks || "১০"
         )} ${textByLang("নম্বর", "marks")}</div>
       </div>
-      ${
-        stimulusLine
-          ? `<div class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign};` : ''}">${formatText(stimulusLine)}</div>`
-          : ""
-      }
       ${["ক", "খ", "গ", "ঘ"]
         .map((k, i) => {
           const text = c.parts?.[k];
