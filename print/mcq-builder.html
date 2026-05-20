@@ -186,6 +186,7 @@
       .image-card-actions button { flex: 1 1 120px; min-width: 0; }
       
       .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.toolbar > div:empty { display: none; }
 .toolbar.three { grid-template-columns: 1fr 1fr 1fr; }
 .toolbar.four { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .toolbar button { 
@@ -197,20 +198,38 @@
 }
       button {
         border: none;
-        border-radius: 6px;
-        padding: 10px 12px;
+        border-radius: 7px;
+        padding: 9px 14px;
         font: inherit;
-        font-weight: bold;
+        font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
-        background: #111827;
+        background: #1e293b;
         color: #fff;
-        transition: all 0.2s;
+        transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
+        letter-spacing: 0.1px;
       }
-      button:hover { opacity: 0.9; }
-      button.secondary { background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; }
-      button.secondary:hover { background: #cbd5e1; }
-      button.ghost { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
-      button.ghost:hover { background: #e2e8f0; }
+      button:hover { background: #0f172a; }
+      button:active { transform: scale(0.975); }
+      button:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+      button.secondary {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+      }
+      button.secondary:hover { background: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+      button.ghost {
+        background: transparent;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+      }
+      button.ghost:hover { background: #f8fafc; color: #374151; border-color: #cbd5e1; }
+      button.danger {
+        background: #fff5f5;
+        color: #b91c1c;
+        border: 1px solid #fca5a5;
+      }
+      button.danger:hover { background: #fee2e2; border-color: #f87171; }
       
       .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
@@ -489,7 +508,8 @@
         .panel h1 { font-size: 18px; margin-bottom: 8px; }
         .field label { font-size: 12px; }
         .field input, .field textarea, .field select { font-size: 14px; padding: 9px 10px; }
-        button { padding: 11px 10px; font-size: 13px; min-height: 44px; }
+        button { padding: 11px 10px; font-size: 13px; min-height: 46px; }
+        button:active { transform: scale(0.97); }
         .icon-btn { padding: 5px 10px; font-size: 14px; min-height: 36px; }
         .toggle-wrapper { padding: 8px 10px; }
         .toggle-text { font-size: 13px; }
@@ -623,16 +643,16 @@
         </div>
 
         <div class="toolbar three">
-          <button type="button" onclick="downloadPDFDirect()">
+          <button type="button" onclick="downloadPDFDirect(this)">
             ↓ Direct PDF
           </button>
-          <button type="button" class="secondary" onclick="sharePDFDirect()">
+          <button type="button" class="secondary" onclick="sharePDFDirect(this)">
             ↗ Share PDF
           </button>
           <button
             type="button"
             class="secondary"
-            onclick="downloadAsImagesZipLike()"
+            onclick="downloadAsImagesZipLike(this)"
           >
             ▣ Page PNG
           </button>
@@ -661,7 +681,7 @@
   <button type="button" class="secondary" onclick="trimEmptyQuestions()">
     Trim Empty MCQ
   </button>
-  <button type="button" class="ghost" onclick="removeMCQPart()">
+  <button type="button" class="danger" onclick="removeMCQPart()">
     Remove MCQ Part
   </button>
 </div>
@@ -1922,7 +1942,7 @@
     <div class="toolbar three">
       <button type="button" class="secondary" onclick="addCQ()">Add CQ</button>
       <button type="button" class="secondary" onclick="trimEmptyCQ()">Trim Empty CQ</button>
-      <button type="button" class="ghost" onclick="removeCQPart()">Remove CQ Part</button>
+      <button type="button" class="danger" onclick="removeCQPart()">Remove CQ Part</button>
     </div>
     <div class="field bulk-box">
       <label for="cqBulkInput">Bulk Import CQs</label>
@@ -1945,7 +1965,7 @@
     <div class="toolbar three">
       <button type="button" class="secondary" onclick="addOnlyQuestion()">Add Question</button>
       <button type="button" class="secondary" onclick="trimEmptyOnlyQuestions()">Trim Empty Question</button>
-      <button type="button" class="ghost" onclick="removeOnlyQuestionPart()">Remove Question Part</button>
+      <button type="button" class="danger" onclick="removeOnlyQuestionPart()">Remove Question Part</button>
     </div>
     <div class="field bulk-box">
       <label for="onlyQuestionBulkInput">Bulk Import Questions</label>
@@ -2022,7 +2042,7 @@
         <div class="toolbar three">
           <button type="button" class="secondary" onclick="addQuestion()">Add MCQ</button>
           <button type="button" class="secondary" onclick="trimEmptyQuestions()">Trim Empty MCQ</button>
-          <button type="button" class="ghost" onclick="removeMCQPart()">Remove MCQ Part</button>
+          <button type="button" class="danger" onclick="removeMCQPart()">Remove MCQ Part</button>
         </div>
       </div>`
           : "";
@@ -3378,7 +3398,7 @@
         if (recordHistory) recordHistorySnapshot();
         scheduleAutosave();
         if (window.MathJax && MathJax.typesetPromise) {
-          MathJax.typesetPromise();
+          MathJax.typesetPromise().catch((e) => console.warn("MathJax:", e));
         }
       }
       function normalizeImportedState(parsed) {
@@ -4351,9 +4371,16 @@ function splitIntoQuestionBlocks(text) {
         await new Promise((r) => setTimeout(r, 120));
         const pages = [...document.querySelectorAll(".page")];
         const images = [];
-        const renderScale = 2;
+        // সব সময় 2x quality — mobile এ memory fail হলে 1.5x এ retry হবে
         for (const page of pages) {
-          images.push(await svgPageToJpegBytes(page, renderScale));
+          let result;
+          try {
+            result = await svgPageToJpegBytes(page, 2);
+          } catch (err) {
+            console.warn("2x render failed, retrying at 1.5x:", err);
+            result = await svgPageToJpegBytes(page, 1.5);
+          }
+          images.push(result);
         }
         return buildPdfFromJpegs(images);
       }
@@ -4368,7 +4395,21 @@ function splitIntoQuestionBlocks(text) {
         a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1500);
       }
-      async function downloadPDFDirect() {
+      function setButtonLoading(btn, loading, loadingText = 'Processing…') {
+        if (!btn) return;
+        if (loading) {
+          btn._origText = btn.innerHTML;
+          btn.innerHTML = loadingText;
+          btn.disabled = true;
+        } else {
+          btn.innerHTML = btn._origText || btn.innerHTML;
+          btn.disabled = false;
+        }
+      }
+
+      async function downloadPDFDirect(btnEl) {
+        const btn = btnEl || document.querySelector('[onclick*="downloadPDFDirect"]');
+        setButtonLoading(btn, true, '⏳ Generating…');
         try {
           const blob = await generatePdfBlob();
           await downloadBlob(
@@ -4381,9 +4422,13 @@ function splitIntoQuestionBlocks(text) {
           try {
             window.print();
           } catch (e) {}
+        } finally {
+          setButtonLoading(btn, false);
         }
       }
-      async function sharePDFDirect() {
+      async function sharePDFDirect(btnEl) {
+        const btn = btnEl || document.querySelector('[onclick*="sharePDFDirect"]');
+        setButtonLoading(btn, true, '⏳ Generating…');
         try {
           const blob = await generatePdfBlob();
           const filename =
@@ -4409,22 +4454,37 @@ function splitIntoQuestionBlocks(text) {
         } catch (err) {
           console.error(err);
           alert("Share PDF তৈরি করা যায়নি।");
+        } finally {
+          setButtonLoading(btn, false);
         }
       }
-      async function downloadAsImagesZipLike() {
+      async function downloadAsImagesZipLike(btnEl) {
+        const btn = btnEl || document.querySelector('[onclick*="downloadAsImagesZipLike"]');
         try {
           renderAll();
           const pages = [...document.querySelectorAll(".page")];
+          setButtonLoading(btn, true, `⏳ 0/${pages.length}`);
           for (let i = 0; i < pages.length; i++) {
-            const data = await svgPageToJpegBytes(pages[i], 2);
+            if (btn) btn.innerHTML = `⏳ ${i + 1}/${pages.length}`;
+            let data;
+            try {
+              data = await svgPageToJpegBytes(pages[i], 2);
+            } catch (err) {
+              console.warn("2x render failed, retrying at 1.5x:", err);
+              data = await svgPageToJpegBytes(pages[i], 1.5);
+            }
             await downloadBlob(
               new Blob([data.bytes], { type: "image/jpeg" }),
               `page-${i + 1}.jpg`
             );
+            // mobile browser এ multiple download এ delay দরকার
+            if (pages.length > 1) await new Promise(r => setTimeout(r, 600));
           }
         } catch (err) {
           console.error(err);
           alert("Page image export করা যায়নি।");
+        } finally {
+          setButtonLoading(btn, false);
         }
       }
       async function blobToBase64(blob) {
