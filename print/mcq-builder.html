@@ -725,7 +725,10 @@
         <div class="builder-section" id="bulkMcqImportSection">
           <h2 class="section-title">Bulk MCQ Import</h2>
           <div class="field bulk-box">
-          <label for="bulkInput">সব MCQ একবারে Paste করো</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <label for="bulkInput" style="margin-bottom: 0;">সব MCQ একবারে Paste করো</label>
+            <button type="button" class="icon-btn" onclick="copyAiPrompt('mcq', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
+          </div>
           <textarea
             id="bulkInput"
             placeholder="১। প্রশ্ন...&#10;ক) ...&#10;খ) ...&#10;গ) ...&#10;ঘ) ...&#10;উত্তর: গ"
@@ -1238,29 +1241,32 @@
       const mcqRepeatHeaderControl = document.getElementById("mcqRepeatHeaderControl");
       const showHeaderControl = document.getElementById("showHeaderControl");
 
+function copyAiPrompt(type, btn) {
+        let promptText = "";
+        if (type === 'mcq') {
+          promptText = `Generate [Number] multiple-choice questions in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. [Question text with LaTeX for math/variables inside $...$]\n(ক) [Option 1]\n(খ) [Option 2]\n(গ) [Option 3]\n(ঘ) [Option 4]\nউত্তর: [ক/খ/গ/ঘ]\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. Option bullets must be exactly: (ক), (খ), (গ), (ঘ).\n3. The answer must be exactly in this format on a new line: "উত্তর: [correct option letter]".\n4. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n5. For any fractions in questions or options, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n6. Do not include any explanations, extra blank lines, or conversational text. Output ONLY the raw questions following the format perfectly.`;
+        } else if (type === 'cq') {
+          promptText = `Generate [Number] Creative Questions (CQ/সৃজনশীল প্রশ্ন) in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. উদ্দীপক: [Stimulus text with LaTeX for math/variables inside $...$]\nক. [Knowledge based question]\nখ. [Comprehension based question]\nগ. [Application based question]\nঘ. [Higher order thinking question]\nসময়: ২০ মিনিট\nমান: ১০\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. The stimulus must start with "উদ্দীপক: " on a new line.\n3. Option bullets must be exactly: ক., খ., গ., ঘ.\n4. Include "সময়: ২০ মিনিট" and "মান: ১০" at the end of each CQ.\n5. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n6. For any fractions, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n7. Do not include explanations, extra blank lines, or conversational text. Output ONLY the raw questions perfectly.`;
+        } else if (type === 'question') {
+          promptText = `Generate [Number] short questions in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. [Question text with LaTeX for math/variables inside $...$]\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n3. For any fractions, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n4. Do not include explanations, answers, extra blank lines, or conversational text. Output ONLY the raw questions perfectly.`;
+        }
+        navigator.clipboard.writeText(promptText).then(() => {
+          const originalText = btn.innerHTML;
+          btn.innerHTML = "✅ Copied!";
+          btn.style.backgroundColor = "#dcfce7";
+          btn.style.color = "#166534";
+          btn.style.borderColor = "#bbf7d0";
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.backgroundColor = "#eff6ff";
+            btn.style.color = "#2563eb";
+            btn.style.borderColor = "#bfdbfe";
+          }, 2000);
+        }).catch(() => alert("Copy failed."));
+      }
+
       function cleanBulkPasteText(text) {
-        return String(text || "")
-          .replace(/\r/g, "")
-          .replace(/\$(.*?)\$/g, "$1")
-          .replace(/\$\s*\}/g, "")
-          .replace(/\}\s*\$/g, "")
-          .replace(/\\ce\{([^}]+)\}/g, "$1")
-          .replace(/\\text\{([^}]+)\}/g, "$1")
-          .replace(/\\mathrm\{([^}]+)\}/g, "$1")
-          .replace(/\\leftarrow/g, "←")
-          .replace(/\\longrightarrow/g, "→")
-          .replace(/\\xrightarrow\{([^}]+)\}/g, "→$1")
-          .replace(/\\rightleftharpoons/g, "⇌")
-          .replace(/\\leftrightarrow/g, "↔")
-          .replace(/\\rightarrow/g, "→")
-          .replace(/\\Delta/g, "Δ")
-          .replace(/\\cdot/g, "·")
-          .replace(/\\times/g, "×")
-          .replace(/\\left/g, "")
-          .replace(/\\right/g, "")
-          .replace(/\\[A-Za-z]+\{([^}]+)\}/g, "$1")
-          .replace(/\\([A-Za-z]+)/g, "$1")
-          .replace(/[{}]/g, "");
+        return String(text || "").replace(/\r/g, "");
       }
 
       if (bulkInput) {
@@ -1945,7 +1951,10 @@
       <button type="button" class="danger" onclick="removeCQPart()">Remove CQ Part</button>
     </div>
     <div class="field bulk-box">
-      <label for="cqBulkInput">Bulk Import CQs</label>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <label for="cqBulkInput" style="margin-bottom: 0;">Bulk Import CQs</label>
+        <button type="button" class="icon-btn" onclick="copyAiPrompt('cq', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
+      </div>
       <textarea id="cqBulkInput" placeholder="1. উদ্দীপক: ...&#10;ক. ...&#10;খ. ...&#10;গ. ...&#10;ঘ. ...&#10;সময়: ২০ মিনিট&#10;মান: ১০"></textarea>
       <div class="toolbar three" style="margin-top:10px;">
         <button type="button" onclick="applyCQBulkPaste()">Paste Apply</button>
@@ -1968,7 +1977,10 @@
       <button type="button" class="danger" onclick="removeOnlyQuestionPart()">Remove Question Part</button>
     </div>
     <div class="field bulk-box">
-      <label for="onlyQuestionBulkInput">Bulk Import Questions</label>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <label for="onlyQuestionBulkInput" style="margin-bottom: 0;">Bulk Import Questions</label>
+        <button type="button" class="icon-btn" onclick="copyAiPrompt('question', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
+      </div>
       <textarea id="onlyQuestionBulkInput" placeholder="1. প্রথম প্রশ্ন...&#10;2. দ্বিতীয় প্রশ্ন..."></textarea>
       <div class="toolbar three" style="margin-top:10px;">
         <button type="button" onclick="applyOnlyQuestionBulkPaste()">Paste Apply</button>
@@ -3398,6 +3410,7 @@
         if (recordHistory) recordHistorySnapshot();
         scheduleAutosave();
         if (window.MathJax && MathJax.typesetPromise) {
+          MathJax.typesetClear();
           MathJax.typesetPromise().catch((e) => console.warn("MathJax:", e));
         }
       }
