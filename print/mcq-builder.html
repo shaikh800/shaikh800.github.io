@@ -1306,11 +1306,114 @@
       function copyAiPrompt(type, btn) {
         let promptText = "";
         if (type === 'mcq') {
-          promptText = `Generate [Number] multiple-choice questions in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. [Question text with LaTeX for math/variables inside $...$]\n(ক) [Option 1]\n(খ) [Option 2]\n(গ) [Option 3]\n(ঘ) [Option 4]\nউত্তর: [ক/খ/গ/ঘ]\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. Option bullets must be exactly: (ক), (খ), (গ), (ঘ).\n3. The answer must be exactly in this format on a new line: "উত্তর: [correct option letter]".\n4. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n5. For any fractions in questions or options, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n6. Do not include any explanations, extra blank lines, or conversational text. Output ONLY the raw questions following the format perfectly.`;
+          promptText = `তুমি একটি MCQ extraction বিশেষজ্ঞ। আমি তোমাকে একটি গাইড বা বইয়ের পৃষ্ঠার ছবি দেব। ছবিতে থাকা সব MCQ হুবহু extract করে নিচের নিয়ম মেনে output দাও।
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ তিন ধরনের MCQ format:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+【TYPE 1 — সাধারণ MCQ】
+১. প্রশ্নের টেক্সট এখানে
+(ক) অপশন এক
+(খ) অপশন দুই
+(গ) অপশন তিন
+(ঘ) অপশন চার
+উত্তর: গ
+
+【TYPE 2 — বহুপদী MCQ (i/ii/iii বিবৃতি আছে)】
+২. প্রশ্নের টেক্সট এখানে—
+(i) প্রথম বিবৃতি
+(ii) দ্বিতীয় বিবৃতি
+(iii) তৃতীয় বিবৃতি
+নিচের কোনটি সঠিক?
+(ক) i ও ii
+(খ) i ও iii
+(গ) ii ও iii
+(ঘ) i, ii ও iii
+উত্তর: খ
+
+【TYPE 3 — উদ্দীপকসহ MCQ (stimulus আছে)】
+উদ্দীপক: উদ্দীপকের সম্পূর্ণ টেক্সট এখানে লেখো
+৩. এই উদ্দীপক সম্পর্কিত প্রশ্ন
+(ক) অপশন এক
+(খ) অপশন দুই
+(গ) অপশন তিন
+(ঘ) অপশন চার
+উত্তর: ক
+
+উদ্দীপক: একই উদ্দীপক থেকে পরের প্রশ্নের আগেও লেখো
+৪. পরবর্তী উদ্দীপক-সম্পর্কিত প্রশ্ন
+(ক) অপশন এক
+(খ) অপশন দুই
+(গ) অপশন তিন
+(ঘ) অপশন চার
+উত্তর: ঘ
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ কঠোর নিয়মাবলি (একটুও বিচ্যুত হবে না):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. প্রশ্ন নম্বর অবশ্যই বাংলা অঙ্কে (১., ২., ৩. ...) — অন্য কোনো চিহ্ন নয়।
+2. অপশন mark হবে ঠিক এভাবে: (ক) (খ) (গ) (ঘ) — প্রতিটি নতুন লাইনে।
+3. উত্তর লাইন হবে ঠিক এই format-এ: উত্তর: ক (অথবা খ/গ/ঘ) — নতুন লাইনে।
+4. বহুপদী statement গুলো হবে: (i) (ii) (iii) — নতুন লাইনে।
+5. উদ্দীপক থাকলে সেই প্রশ্নের ঠিক আগে নতুন লাইনে লেখো: উদ্দীপক: [টেক্সট]
+6. একই উদ্দীপক থেকে একাধিক প্রশ্ন থাকলে, প্রতিটি প্রশ্নের আগে আলাদাভাবে উদ্দীপক: লেখো।
+7. গণিত, পদার্থ, রসায়নের সমীকরণ LaTeX-এ লেখো: $সমীকরণ$
+8. ভগ্নাংশের জন্য সাধারণ slash (/) ব্যবহার না করে লেখো: $\\dfrac{লব}{হর}$
+9. প্রশ্নের মূল টেক্সট হুবহু বইয়ের মতো লেখো — নিজে থেকে কিছু যোগ বা বাদ দেবে না।
+10. Output-এ শুধু formatted MCQ থাকবে — কোনো ব্যাখ্যা, মন্তব্য, বা অতিরিক্ত লেখা নয়।
+11. প্রতিটি MCQ-এর মাঝে একটি ফাঁকা লাইন রাখো।
+12. ছবিতে উত্তর না থাকলে সবচেয়ে সম্ভাব্য সঠিক উত্তর দাও।
+
+এখন ছবি দাও — আমি সব MCQ extract করে দেব।`;
         } else if (type === 'cq') {
-          promptText = `Generate [Number] Creative Questions (CQ/সৃজনশীল প্রশ্ন) in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. উদ্দীপক: [Stimulus text with LaTeX for math/variables inside $...$]\nক. [Knowledge based question]\nখ. [Comprehension based question]\nগ. [Application based question]\nঘ. [Higher order thinking question]\nসময়: ২০ মিনিট\nমান: ১০\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. The stimulus must start with "উদ্দীপক: " on a new line.\n3. Option bullets must be exactly: ক., খ., গ., ঘ.\n4. Include "সময়: ২০ মিনিট" and "মান: ১০" at the end of each CQ.\n5. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n6. For any fractions, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n7. Do not include explanations, extra blank lines, or conversational text. Output ONLY the raw questions perfectly.`;
+          promptText = `তুমি একটি সৃজনশীল প্রশ্ন (CQ) extraction বিশেষজ্ঞ। আমি তোমাকে একটি গাইড বা বইয়ের পৃষ্ঠার ছবি দেব। ছবিতে থাকা সব সৃজনশীল প্রশ্ন হুবহু extract করে নিচের নিয়ম মেনে output দাও।
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ সৃজনশীল প্রশ্নের exact format:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+১. উদ্দীপক: উদ্দীপকের সম্পূর্ণ টেক্সট এখানে
+ক. জ্ঞানমূলক প্রশ্ন এখানে
+খ. অনুধাবনমূলক প্রশ্ন এখানে
+গ. প্রয়োগমূলক প্রশ্ন এখানে
+ঘ. উচ্চতর দক্ষতার প্রশ্ন এখানে
+সময়: ২০ মিনিট
+মান: ১০
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ কঠোর নিয়মাবলি:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. প্রশ্ন নম্বর বাংলায় (১., ২., ৩. ...)।
+2. উদ্দীপক লাইন: উদ্দীপক: দিয়ে শুরু।
+3. প্রশ্নের অংশ: ক. খ. গ. ঘ. (dot সহ)।
+4. গণিত/বিজ্ঞানের সমীকরণ LaTeX-এ: $সমীকরণ$
+5. ভগ্নাংশ: $\\dfrac{লব}{হর}$
+6. হুবহু বইয়ের টেক্সট — কিছু যোগ/বাদ নয়।
+7. শুধু formatted CQ output — কোনো ব্যাখ্যা নয়।
+
+এখন ছবি দাও — আমি সব CQ extract করে দেব।`;
         } else if (type === 'question') {
-          promptText = `Generate [Number] short questions in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. [Question text with LaTeX for math/variables inside $...$]\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n3. For any fractions, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n4. Do not include explanations, answers, extra blank lines, or conversational text. Output ONLY the raw questions perfectly.`;
+          promptText = `তুমি একটি প্রশ্ন extraction বিশেষজ্ঞ। আমি তোমাকে একটি গাইড বা বইয়ের পৃষ্ঠার ছবি দেব। ছবিতে থাকা সব short/অনুধাবনমূলক প্রশ্ন হুবহু extract করে নিচের নিয়ম মেনে output দাও।
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ প্রশ্নের exact format:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+১. প্রথম প্রশ্ন এখানে
+২. দ্বিতীয় প্রশ্ন এখানে
+৩. তৃতীয় প্রশ্ন এখানে
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ নিয়মাবলি:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. প্রশ্ন নম্বর বাংলায় (১., ২., ৩. ...)।
+2. গণিত/বিজ্ঞানের সমীকরণ LaTeX-এ: $সমীকরণ$
+3. ভগ্নাংশ: $\\dfrac{লব}{হর}$
+4. হুবহু বইয়ের টেক্সট — কোনো উত্তর বা ব্যাখ্যা নয়।
+5. শুধু formatted প্রশ্ন output করো।
+
+এখন ছবি দাও — আমি সব প্রশ্ন extract করে দেব।`;
         }
         navigator.clipboard.writeText(promptText).then(() => {
           const originalText = btn.innerHTML;
