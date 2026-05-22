@@ -323,7 +323,7 @@
         align-items: center; 
         justify-content: center; 
         font-weight: var(--option-mark-weight); 
-        font-size: calc(var(--mcq-font-size) * 0.88); 
+        font-size: calc(var(--mcq-font-size) * var(--option-mark-letter-scale, 0.88)); 
         line-height: 1; 
         padding-top: 0.12em; /* অক্ষরটাকে ওপর থেকে নিচের দিকে ঠেলে সেন্টারে আনার জন্য */
         flex-shrink: 0; 
@@ -590,6 +590,39 @@
       .stmt-item { display: flex; gap: 4px; }
       .stmt-label { white-space: nowrap; font-weight: 400; min-width: 28px; }
       .stmt-text { flex: 1; overflow-wrap: anywhere; }
+
+      /* ── Page corner watermarks ── */
+      .page-top-date {
+        position: absolute;
+        top: 3px;
+        right: 5px;
+        font-size: 6.5px;
+        color: #666;
+        line-height: 1;
+        font-family: var(--bangla-font);
+        pointer-events: none;
+        z-index: 5;
+        letter-spacing: 0.2px;
+      }
+      .page-footer-meta {
+        position: absolute;
+        bottom: 3px;
+        left: 5px;
+        right: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 6.5px;
+        color: #666;
+        line-height: 1;
+        font-family: var(--bangla-font);
+        pointer-events: none;
+        z-index: 5;
+        letter-spacing: 0.2px;
+      }
+      @media print {
+        .page-top-date, .page-footer-meta { color: #888; }
+      }
       </style>
       <script>
       MathJax = {
@@ -639,6 +672,14 @@
           <div class="toggle-wrapper" style="margin-top: 8px">
             <label for="showHeaderControl" class="toggle-text">Show header on pages</label>
             <label class="switch"><input type="checkbox" id="showHeaderControl"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-wrapper" style="margin-top: 8px">
+            <label for="showHeaderDateControl" class="toggle-text">Header-এর উপরে তারিখ দেখাও</label>
+            <label class="switch"><input type="checkbox" id="showHeaderDateControl"><span class="slider"></span></label>
+          </div>
+          <div class="toggle-wrapper" style="margin-top: 8px">
+            <label for="showFooterMetaControl" class="toggle-text">Footer-এ বিষয় ও তারিখ দেখাও</label>
+            <label class="switch"><input type="checkbox" id="showFooterMetaControl"><span class="slider"></span></label>
           </div>
         </div>
 
@@ -1078,6 +1119,8 @@
   mcqPageFillMode: "fixed",
   mcqRepeatHeader: false,
   showHeader: true,
+  showHeaderDate: true,
+  showFooterMeta: true,
   layout: {
     bodyFont: 11,
     mcqFont: 11,
@@ -1240,8 +1283,29 @@
       const mcqPageFillControl = document.getElementById("mcqPageFillControl");
       const mcqRepeatHeaderControl = document.getElementById("mcqRepeatHeaderControl");
       const showHeaderControl = document.getElementById("showHeaderControl");
+      const showHeaderDateControl = document.getElementById("showHeaderDateControl");
+      const showFooterMetaControl = document.getElementById("showFooterMetaControl");
 
-function copyAiPrompt(type, btn) {
+      function getTodayDateStr() {
+        const d = new Date();
+        const day   = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year  = d.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+      function renderPageTopDate() {
+        if (state.showHeaderDate === false) return '';
+        return `<div class="page-top-date">${getTodayDateStr()}</div>`;
+      }
+      function renderPageFooterMeta() {
+        if (state.showFooterMeta === false) return '';
+        const parts = [state.subjectLine, state.codeLine].filter(s => String(s || '').trim());
+        const subjText = esc(parts.join(' | '));
+        const dateText = getTodayDateStr();
+        return `<div class="page-footer-meta"><span>${subjText}</span><span>${dateText}</span></div>`;
+      }
+
+      function copyAiPrompt(type, btn) {
         let promptText = "";
         if (type === 'mcq') {
           promptText = `Generate [Number] multiple-choice questions in Bengali about [Topic Name].\n\nYou MUST strictly follow this exact formatting structure without any deviation:\n১. [Question text with LaTeX for math/variables inside $...$]\n(ক) [Option 1]\n(খ) [Option 2]\n(গ) [Option 3]\n(ঘ) [Option 4]\nউত্তর: [ক/খ/গ/ঘ]\n\nCRITICAL RULES:\n1. Always use standard Bengali numerals for question numbers (১., ২., ৩., etc.).\n2. Option bullets must be exactly: (ক), (খ), (গ), (ঘ).\n3. The answer must be exactly in this format on a new line: "উত্তর: [correct option letter]".\n4. Use standard LaTeX for all math, physics, and chemistry equations. Wrap inline math in single dollar signs ($...$).\n5. For any fractions in questions or options, ALWAYS use \\dfrac{}{} instead of simple slashes (/).\n6. Do not include any explanations, extra blank lines, or conversational text. Output ONLY the raw questions following the format perfectly.`;
@@ -1884,6 +1948,8 @@ function copyAiPrompt(type, btn) {
   mcqPageFillControl.value = state.mcqPageFillMode || "fixed";
   mcqRepeatHeaderControl.checked = !!state.mcqRepeatHeader;
   showHeaderControl.checked = state.showHeader !== false;
+  showHeaderDateControl.checked = state.showHeaderDate !== false;
+  showFooterMetaControl.checked = state.showFooterMeta !== false;
   bodyFontControl.value = state.layout.bodyFont;
   mcqFontControl.value = state.layout.mcqFont ?? state.layout.bodyFont;
   bodyBoldControl.checked = !!state.layout.bodyBold;
@@ -2582,6 +2648,14 @@ function copyAiPrompt(type, btn) {
         state.showHeader = showHeaderControl.checked;
         renderAll();
       });
+      showHeaderDateControl.addEventListener("change", () => {
+        state.showHeaderDate = showHeaderDateControl.checked;
+        renderAll();
+      });
+      showFooterMetaControl.addEventListener("change", () => {
+        state.showFooterMeta = showFooterMetaControl.checked;
+        renderAll();
+      });
 
       function applyLayoutControls() {
   state.layout.bodyFont = numberValueOr(11, bodyFontControl.value);
@@ -2736,6 +2810,8 @@ function copyAiPrompt(type, btn) {
   
   // এখানে 0.6 দিয়ে গুণ করে দেওয়া হয়েছে, ফলে UI তে 1 মানে আসলে 0.6 সাইজ হবে
   root.setProperty("--option-mark-scale", String((state.layout.optionMarkScale ?? 1) * 0.6));
+  // English mode-এ Latin capital letters (A,B,C,D) visually বড় দেখায়, তাই একটু ছোট রাখা হয়
+  root.setProperty("--option-mark-letter-scale", isEnglishMode() ? "0.72" : "0.88");
   root.setProperty("--stimulus-align", state.layout.stimulusCenter ? "center" : "left");
   root.setProperty("--question-number-weight", state.layout.questionNumberBold ? "700" : "400");
   root.setProperty("--header-scale", String(state.layout.headerScale));
@@ -2888,6 +2964,7 @@ function copyAiPrompt(type, btn) {
         includeHeader = includeHeader && allowPageHeader();
         return `
         <section class="page ${includeHeader ? "" : "no-header-top"}">
+          ${renderPageTopDate()}
           ${includeHeader ? renderHeaderBlock() : ""}
           <div class="content-area">
             <footer class="footer-box">
@@ -2895,6 +2972,7 @@ function copyAiPrompt(type, btn) {
               <div class="footer-note">${esc(state.creditLine || "")}</div>
             </footer>
           </div>
+          ${renderPageFooterMeta()}
         </section>`;
       }
       function packOnlyQuestionsIntoPage(
@@ -3006,6 +3084,7 @@ function copyAiPrompt(type, btn) {
         includeHeader = includeHeader && allowPageHeader();
         return `
         <section class="page ${includeHeader ? "" : "no-header-top"}">
+          ${renderPageTopDate()}
           ${includeHeader ? renderHeaderBlock() : ""}
           <div class="content-area">
             <footer class="footer-box">
@@ -3013,16 +3092,19 @@ function copyAiPrompt(type, btn) {
               <div class="footer-note">${esc(state.creditLine || "")}</div>
             </footer>
           </div>
+          ${renderPageFooterMeta()}
         </section>`;
       }
       function createEmptyPageMarkup() {
         const includeHeader = allowPageHeader();
         return `
         <section class="page ${includeHeader ? "" : "no-header-top"}">
+          ${renderPageTopDate()}
           ${includeHeader ? renderHeaderBlock() : ""}
           <div class="content-area">
             <div class="placeholder-box">${textByLang("CQ, MCQ বা Question part add করলে preview এখানে দেখা যাবে।", "Add CQ, MCQ, or Question part to see the preview here.")}</div>
           </div>
+          ${renderPageFooterMeta()}
         </section>`;
       }
       function packCQsIntoPage(
@@ -3093,6 +3175,7 @@ function copyAiPrompt(type, btn) {
         const includeHeader = mcqPageHasHeader(pageIndex);
         return `
       <section class="page mcq-page ${includeHeader ? "" : "no-header-top"}">
+        ${renderPageTopDate()}
         ${includeHeader ? renderHeaderBlock() : ""}
         <div class="content-area">
           <div class="page-section-title">MCQ SECTION</div>
@@ -3102,6 +3185,7 @@ function copyAiPrompt(type, btn) {
           </div>
           <footer class="footer-box mcq-answer-footer"></footer>
         </div>
+        ${renderPageFooterMeta()}
       </section>`;
       }
       function resetHeaderFitStyles(pageEl) {
@@ -3160,6 +3244,7 @@ function copyAiPrompt(type, btn) {
           const includeHeader = mcqPageHasHeader(pageIndex);
           html += `
       <section class="page mcq-page ${includeHeader ? "" : "no-header-top"}">
+        ${renderPageTopDate()}
         ${includeHeader ? renderHeaderBlock() : ""}
         <div class="content-area">
           <div class="page-section-title">MCQ SECTION</div>
@@ -3176,6 +3261,7 @@ function copyAiPrompt(type, btn) {
             <div class="footer-note">${esc(state.creditLine || "")}</div>
           </footer>
         </div>
+        ${renderPageFooterMeta()}
       </section>`;
         });
         return html;
@@ -3445,6 +3531,8 @@ function copyAiPrompt(type, btn) {
           nextState.mcqPageFillMode === "auto" ? "auto" : "fixed";
         nextState.mcqRepeatHeader = !!nextState.mcqRepeatHeader;
         nextState.showHeader = nextState.showHeader !== false;
+        nextState.showHeaderDate = nextState.showHeaderDate !== false;
+        nextState.showFooterMeta = nextState.showFooterMeta !== false;
 
         nextState.questions = nextState.questions.map((q, i) => ({
           no: i + 1,
