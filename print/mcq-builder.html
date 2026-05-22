@@ -87,18 +87,18 @@
         width: 100%;
         height: 100%;
         display: flex;
-        align-items: stretch; /* flex-start থেকে stretch করা হলো */
+        align-items: stretch;
       }
       
       .panel {
         width: 440px;
         background-color: #ffffff;
         padding: 24px;
-        padding-bottom: 100px; /* নিচে এক্সট্রা স্পেস দেওয়া হলো যাতে স্ক্রল আটকে না যায় */
+        padding-bottom: 100px;
         box-shadow: 2px 0 15px rgba(0,0,0,0.05);
         overflow-y: auto;
         overflow-x: hidden;
-        overscroll-behavior: contain; /* ব্রাউজারের স্ক্রল গ্লিচ ফিক্স করার জন্য */
+        overscroll-behavior: contain;
         z-index: 100;
         border-right: 1px solid #e2e8f0;
         height: 100%;
@@ -186,16 +186,16 @@
       .image-card-actions button { flex: 1 1 120px; min-width: 0; }
       
       .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.toolbar > div:empty { display: none; }
-.toolbar.three { grid-template-columns: 1fr 1fr 1fr; }
-.toolbar.four { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.toolbar button { 
-  min-width: 0; 
-  white-space: normal; 
-  word-break: break-word; 
-  line-height: 1.25; 
-  padding: 8px 4px; 
-}
+      .toolbar > div:empty { display: none; }
+      .toolbar.three { grid-template-columns: 1fr 1fr 1fr; }
+      .toolbar.four { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .toolbar button { 
+        min-width: 0; 
+        white-space: normal; 
+        word-break: break-word; 
+        line-height: 1.25; 
+        padding: 8px 4px; 
+      }
       button {
         border: none;
         border-radius: 7px;
@@ -280,7 +280,8 @@
       }
       .page:last-child { margin-bottom: 0; page-break-after: auto; }
       
-      .page-number { position: absolute; top: 8px; right: 12px; font-size: 10px; line-height: 1; color: #334155; }
+      .page-number { position: absolute; top: 4px; right: 3px; font-size: 10px; line-height: 1; color: #334155; }
+      
       .page-header { display: grid; grid-template-columns: 185px 1fr 185px; gap: 12px; align-items: center; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1.5px solid #111; flex: 0 0 auto; }
       .header-box { border: 1px solid #111; min-height: calc(44px * var(--header-scale)); padding: var(--header-box-pad); font-size: var(--header-info-font, calc(var(--body-font-size) * var(--header-scale))); line-height: var(--body-line-height); display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: var(--header-box-weight); }
       .header-box.right { justify-content: space-between; }
@@ -325,7 +326,7 @@
         font-weight: var(--option-mark-weight); 
         font-size: calc(var(--mcq-font-size) * var(--option-mark-letter-scale, 0.88)); 
         line-height: 1; 
-        padding-top: 0.12em; /* অক্ষরটাকে ওপর থেকে নিচের দিকে ঠেলে সেন্টারে আনার জন্য */
+        padding-top: 0.12em; 
         flex-shrink: 0; 
       }
       .option-text { overflow-wrap: anywhere; flex: 1; }
@@ -563,7 +564,6 @@
       .tiny-hint { display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; font-size: 11px; color: #475569; line-height: 1.4; background: #f8fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
       .tiny-hint i { font-style: normal; background: #1e293b; color: #fff; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 9px; font-weight: bold; flex-shrink: 0; }
 
-      /* MCQ Type selector */
       .mcq-type-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
       .mcq-type-tab { padding: 7px 4px; font-size: 11px; font-weight: 700; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #f8fafc; color: #475569; cursor: pointer; text-align: center; transition: all 0.15s; }
       .mcq-type-tab.active { background: #111827; color: #fff; border-color: #111827; }
@@ -578,7 +578,6 @@
       .stimulus-group-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
       .stimulus-group-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
 
-      /* Print styles for new MCQ types */
       .stimulus-block { margin-bottom: 5px; padding: 4px 6px; border-left: 2px solid #555; background: #f9f9f9; font-style: italic; font-size: var(--mcq-font-size); line-height: var(--body-line-height); text-align: var(--stimulus-align, left); }
       .stimulus-block-label { font-weight: 700; font-style: normal; font-size: calc(var(--mcq-font-size) * 0.9); margin-right: 5px; color: #333; display: inline; }
       .stimulus-image-block { font-style: normal; }
@@ -591,11 +590,10 @@
       .stmt-label { white-space: nowrap; font-weight: 400; min-width: 28px; }
       .stmt-text { flex: 1; overflow-wrap: anywhere; }
 
-      /* ── Page corner watermarks ── */
       .page-top-date {
         position: absolute;
-        top: 3px;
-        right: 5px;
+        top: 4px;
+        left: 12px;
         font-size: 6.5px;
         color: #666;
         line-height: 1;
@@ -627,7 +625,7 @@
       <script>
       MathJax = {
         tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-        svg: { fontCache: 'global' }
+        svg: { fontCache: 'none' }
       };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -716,16 +714,16 @@
           </button>
         </div>
         <div class="toolbar three">
-  <button type="button" class="secondary" onclick="addQuestion()">
-    Add MCQ
-  </button>
-  <button type="button" class="secondary" onclick="trimEmptyQuestions()">
-    Trim Empty MCQ
-  </button>
-  <button type="button" class="danger" onclick="removeMCQPart()">
-    Remove MCQ Part
-  </button>
-</div>
+          <button type="button" class="secondary" onclick="addQuestion()">
+            Add MCQ
+          </button>
+          <button type="button" class="secondary" onclick="trimEmptyQuestions()">
+            Trim Empty MCQ
+          </button>
+          <button type="button" class="danger" onclick="removeMCQPart()">
+            Remove MCQ Part
+          </button>
+        </div>
 
         <div class="builder-section" id="basicExamInfoSection">
           <h2 class="section-title">Basic Exam Info</h2>
@@ -1401,12 +1399,12 @@
         questionNumberBoldControl,
       ];
       bodyBoldControl.addEventListener("change", () => {
-  const isChecked = bodyBoldControl.checked;
-  masterBoldTargets.forEach((el) => {
-    if (el) el.checked = isChecked;
-  });
-  applyLayoutControls();
-});
+        const isChecked = bodyBoldControl.checked;
+        masterBoldTargets.forEach((el) => {
+          if (el) el.checked = isChecked;
+        });
+        applyLayoutControls();
+      });
       bodyFontControl.addEventListener("input", () => {
         if (state.layout.headerInfoFontLinked !== false) {
           headerInfoFontControl.value = bodyFontControl.value;
@@ -1581,7 +1579,7 @@
         headerBoxesBoldControl.closest(".field"),
       ].filter(Boolean);
       
-      const uniformHiddenNodes = []; // এটি খালি থাকবে কারণ ইনপুট সরিয়ে ফেলেছি
+      const uniformHiddenNodes = []; 
       const uniformMarginNodes = [
         padTopControl.closest(".field"),
         padRightControl.closest(".field"),
@@ -1945,51 +1943,51 @@
         state.prevAutoDuration = autoDurationText;
       }
       function initFields() {
-  examTitle.value = state.examTitle || "";
-  subjectLine.value = state.subjectLine || "";
-  codeLine.value = state.codeLine || "";
-  durationLine.value = state.durationLine || "";
-  fullMarksLine.value = state.fullMarksLine || "";
-  scoreLine.value = state.scoreLine || "";
-  creditLine.value = state.creditLine || "";
-  languageModeControl.value = state.languageMode || "bn";
-  mcqPageFillControl.value = state.mcqPageFillMode || "fixed";
-  mcqRepeatHeaderControl.checked = !!state.mcqRepeatHeader;
-  showHeaderControl.checked = state.showHeader !== false;
-  showHeaderDateControl.checked = state.showHeaderDate !== false;
-  showFooterMetaControl.checked = state.showFooterMeta !== false;
-  bodyFontControl.value = state.layout.bodyFont;
-  mcqFontControl.value = state.layout.mcqFont ?? state.layout.bodyFont;
-  bodyBoldControl.checked = !!state.layout.bodyBold;
-  lineHeightControl.value = state.layout.lineHeight;
-  gapControl.value = state.layout.gap;
-  columnGapControl.value = state.layout.columnGap;
-  footerNumberFontControl.value = state.layout.footerNumberFont;
-  footerAnswerFontControl.value = state.layout.footerAnswerFont;
-  headerScaleControl.value = state.layout.headerScale;
-  headerInfoFontControl.value = state.layout.headerInfoFont ?? state.layout.bodyFont;
-  answerKeyBoldControl.checked = !!state.layout.answerKeyBold;
-  answerNumBoldControl.checked = !!state.layout.answerNumBold;
-  answerLetterBoldControl.checked = !!state.layout.answerLetterBold;
-  headerBoxesBoldControl.checked = !!state.layout.headerBoxesBold;
-  optionBadgeBoldControl.checked = !!state.layout.optionBadgeBold;
-  mcqBoldControl.checked = !!state.layout.mcqBold;
-  mcqImageWidthControl.value = state.layout.mcqImageWidth;
-  mcqImageHeightControl.value = state.layout.mcqImageHeight;
-  optionMarkScaleControl.value = state.layout.optionMarkScale ?? 1;
-  stimulusCenterControl.checked = !!state.layout.stimulusCenter;
-  cqFontControl.value = state.layout.cqFont ?? state.layout.bodyFont;
-  cqImageWidthControl.value = state.layout.cqImageWidth;
-  cqImageHeightControl.value = state.layout.cqImageHeight;
-  questionFontControl.value = state.layout.questionFont ?? state.layout.bodyFont;
-  questionNumberBoldControl.checked = !!state.layout.questionNumberBold;
-  questionImageWidthControl.value = state.layout.questionImageWidth ?? state.layout.cqImageWidth;
-  questionImageHeightControl.value = state.layout.questionImageHeight ?? state.layout.cqImageHeight;
-  padTopControl.value = state.layout.padTop;
-  padRightControl.value = state.layout.padRight;
-  padBottomControl.value = state.layout.padBottom;
-  padLeftControl.value = state.layout.padLeft;
-}
+        examTitle.value = state.examTitle || "";
+        subjectLine.value = state.subjectLine || "";
+        codeLine.value = state.codeLine || "";
+        durationLine.value = state.durationLine || "";
+        fullMarksLine.value = state.fullMarksLine || "";
+        scoreLine.value = state.scoreLine || "";
+        creditLine.value = state.creditLine || "";
+        languageModeControl.value = state.languageMode || "bn";
+        mcqPageFillControl.value = state.mcqPageFillMode || "fixed";
+        mcqRepeatHeaderControl.checked = !!state.mcqRepeatHeader;
+        showHeaderControl.checked = state.showHeader !== false;
+        showHeaderDateControl.checked = state.showHeaderDate !== false;
+        showFooterMetaControl.checked = state.showFooterMeta !== false;
+        bodyFontControl.value = state.layout.bodyFont;
+        mcqFontControl.value = state.layout.mcqFont ?? state.layout.bodyFont;
+        bodyBoldControl.checked = !!state.layout.bodyBold;
+        lineHeightControl.value = state.layout.lineHeight;
+        gapControl.value = state.layout.gap;
+        columnGapControl.value = state.layout.columnGap;
+        footerNumberFontControl.value = state.layout.footerNumberFont;
+        footerAnswerFontControl.value = state.layout.footerAnswerFont;
+        headerScaleControl.value = state.layout.headerScale;
+        headerInfoFontControl.value = state.layout.headerInfoFont ?? state.layout.bodyFont;
+        answerKeyBoldControl.checked = !!state.layout.answerKeyBold;
+        answerNumBoldControl.checked = !!state.layout.answerNumBold;
+        answerLetterBoldControl.checked = !!state.layout.answerLetterBold;
+        headerBoxesBoldControl.checked = !!state.layout.headerBoxesBold;
+        optionBadgeBoldControl.checked = !!state.layout.optionBadgeBold;
+        mcqBoldControl.checked = !!state.layout.mcqBold;
+        mcqImageWidthControl.value = state.layout.mcqImageWidth;
+        mcqImageHeightControl.value = state.layout.mcqImageHeight;
+        optionMarkScaleControl.value = state.layout.optionMarkScale ?? 1;
+        stimulusCenterControl.checked = !!state.layout.stimulusCenter;
+        cqFontControl.value = state.layout.cqFont ?? state.layout.bodyFont;
+        cqImageWidthControl.value = state.layout.cqImageWidth;
+        cqImageHeightControl.value = state.layout.cqImageHeight;
+        questionFontControl.value = state.layout.questionFont ?? state.layout.bodyFont;
+        questionNumberBoldControl.checked = !!state.layout.questionNumberBold;
+        questionImageWidthControl.value = state.layout.questionImageWidth ?? state.layout.cqImageWidth;
+        questionImageHeightControl.value = state.layout.questionImageHeight ?? state.layout.cqImageHeight;
+        padTopControl.value = state.layout.padTop;
+        padRightControl.value = state.layout.padRight;
+        padBottomControl.value = state.layout.padBottom;
+        padLeftControl.value = state.layout.padLeft;
+      }
 
       function renderSectionTitles() {
         const hasMcqSection = state.questions.length > 0;
@@ -2011,7 +2009,6 @@
           </div>`;
       }
       function renderCQSectionMount() {
-        const hasMcqSection = state.questions.length > 0;
         const hasCqSection = state.cqs.length > 0;
 
         if (!hasCqSection) {
@@ -2443,10 +2440,10 @@
           options: ["", "", "", ""],
           answer: "A",
           images: [],
-          type: "normal",       // "normal" | "multistatement" | "stimulus"
-          statements: [],       // for multistatement
-          stimulusText: "",     // for stimulus-grouped (standalone stimulus)
-          stimulusGroup: null,  // group id for shared stimulus
+          type: "normal", 
+          statements: [],  
+          stimulusText: "", 
+          stimulusGroup: null, 
         });
         syncNumbers();
         initEditors();
@@ -2502,9 +2499,6 @@
         state.questions[idx].type = newType;
         if (newType === "multistatement" && !Array.isArray(state.questions[idx].statements)) {
           state.questions[idx].statements = ["", "", ""];
-        }
-        if (newType !== "multistatement") {
-          // keep statements data but hide
         }
         initEditors();
         renderAll();
@@ -2666,46 +2660,46 @@
       });
 
       function applyLayoutControls() {
-  state.layout.bodyFont = numberValueOr(11, bodyFontControl.value);
-  state.layout.bodyBold = bodyBoldControl.checked;
-  state.layout.lineHeight = numberValueOr(1.24, lineHeightControl.value);
-  state.layout.gap = numberValueOr(7, gapControl.value);
-  state.layout.columnGap = numberValueOr(16, columnGapControl.value);
-  if (state.layout.mcqFontLinked !== false) mcqFontControl.value = bodyFontControl.value;
-  if (state.layout.footerNumberFontLinked !== false) footerNumberFontControl.value = bodyFontControl.value;
-  if (state.layout.footerAnswerFontLinked !== false) footerAnswerFontControl.value = bodyFontControl.value;
-  state.layout.mcqFont = numberValueOr(state.layout.bodyFont, mcqFontControl.value);
-  state.layout.footerNumberFont = numberValueOr(state.layout.bodyFont, footerNumberFontControl.value);
-  state.layout.footerAnswerFont = numberValueOr(state.layout.bodyFont, footerAnswerFontControl.value);
-  state.layout.headerScale = numberValueOr(1, headerScaleControl.value);
-  if (state.layout.headerInfoFontLinked !== false) headerInfoFontControl.value = bodyFontControl.value;
-  state.layout.headerInfoFont = numberValueOr(state.layout.bodyFont, headerInfoFontControl.value);
-  state.layout.answerKeyBold = answerKeyBoldControl.checked;
-  state.layout.answerNumBold = answerNumBoldControl.checked;
-  state.layout.answerLetterBold = answerLetterBoldControl.checked;
-  state.layout.headerBoxesBold = headerBoxesBoldControl.checked;
-  state.layout.optionBadgeBold = optionBadgeBoldControl.checked;
-  state.layout.mcqBold = mcqBoldControl.checked;
-  state.layout.questionNumberBold = questionNumberBoldControl.checked;
-  state.layout.mcqImageWidth = numberValueOr(42, mcqImageWidthControl.value);
-  state.layout.mcqImageHeight = numberValueOr(95, mcqImageHeightControl.value);
-  state.layout.optionMarkScale = numberValueOr(1, optionMarkScaleControl.value);
-  state.layout.stimulusCenter = stimulusCenterControl.checked;
-  if (state.layout.cqFontLinked !== false) cqFontControl.value = bodyFontControl.value;
-  if (state.layout.questionFontLinked !== false) questionFontControl.value = bodyFontControl.value;
-  state.layout.cqFont = numberValueOr(state.layout.bodyFont, cqFontControl.value);
-  state.layout.cqImageWidth = numberValueOr(52, cqImageWidthControl.value);
-  state.layout.cqImageHeight = numberValueOr(120, cqImageHeightControl.value);
-  state.layout.questionFont = numberValueOr(state.layout.bodyFont, questionFontControl.value);
-  state.layout.questionImageWidth = numberValueOr(52, questionImageWidthControl.value);
-  state.layout.questionImageHeight = numberValueOr(120, questionImageHeightControl.value);
-  state.layout.padTop = numberValueOr(0.42, padTopControl.value);
-  state.layout.padRight = numberValueOr(0.42, padRightControl.value);
-  state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
-  state.layout.padLeft = numberValueOr(0.42, padLeftControl.value);
-  applyPageVars();
-  renderAll();
-}
+        state.layout.bodyFont = numberValueOr(11, bodyFontControl.value);
+        state.layout.bodyBold = bodyBoldControl.checked;
+        state.layout.lineHeight = numberValueOr(1.24, lineHeightControl.value);
+        state.layout.gap = numberValueOr(7, gapControl.value);
+        state.layout.columnGap = numberValueOr(16, columnGapControl.value);
+        if (state.layout.mcqFontLinked !== false) mcqFontControl.value = bodyFontControl.value;
+        if (state.layout.footerNumberFontLinked !== false) footerNumberFontControl.value = bodyFontControl.value;
+        if (state.layout.footerAnswerFontLinked !== false) footerAnswerFontControl.value = bodyFontControl.value;
+        state.layout.mcqFont = numberValueOr(state.layout.bodyFont, mcqFontControl.value);
+        state.layout.footerNumberFont = numberValueOr(state.layout.bodyFont, footerNumberFontControl.value);
+        state.layout.footerAnswerFont = numberValueOr(state.layout.bodyFont, footerAnswerFontControl.value);
+        state.layout.headerScale = numberValueOr(1, headerScaleControl.value);
+        if (state.layout.headerInfoFontLinked !== false) headerInfoFontControl.value = bodyFontControl.value;
+        state.layout.headerInfoFont = numberValueOr(state.layout.bodyFont, headerInfoFontControl.value);
+        state.layout.answerKeyBold = answerKeyBoldControl.checked;
+        state.layout.answerNumBold = answerNumBoldControl.checked;
+        state.layout.answerLetterBold = answerLetterBoldControl.checked;
+        state.layout.headerBoxesBold = headerBoxesBoldControl.checked;
+        state.layout.optionBadgeBold = optionBadgeBoldControl.checked;
+        state.layout.mcqBold = mcqBoldControl.checked;
+        state.layout.questionNumberBold = questionNumberBoldControl.checked;
+        state.layout.mcqImageWidth = numberValueOr(42, mcqImageWidthControl.value);
+        state.layout.mcqImageHeight = numberValueOr(95, mcqImageHeightControl.value);
+        state.layout.optionMarkScale = numberValueOr(1, optionMarkScaleControl.value);
+        state.layout.stimulusCenter = stimulusCenterControl.checked;
+        if (state.layout.cqFontLinked !== false) cqFontControl.value = bodyFontControl.value;
+        if (state.layout.questionFontLinked !== false) questionFontControl.value = bodyFontControl.value;
+        state.layout.cqFont = numberValueOr(state.layout.bodyFont, cqFontControl.value);
+        state.layout.cqImageWidth = numberValueOr(52, cqImageWidthControl.value);
+        state.layout.cqImageHeight = numberValueOr(120, cqImageHeightControl.value);
+        state.layout.questionFont = numberValueOr(state.layout.bodyFont, questionFontControl.value);
+        state.layout.questionImageWidth = numberValueOr(52, questionImageWidthControl.value);
+        state.layout.questionImageHeight = numberValueOr(120, questionImageHeightControl.value);
+        state.layout.padTop = numberValueOr(0.42, padTopControl.value);
+        state.layout.padRight = numberValueOr(0.42, padRightControl.value);
+        state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
+        state.layout.padLeft = numberValueOr(0.42, padLeftControl.value);
+        applyPageVars();
+        renderAll();
+      }
       function balancedBigger() {
         state.layout.bodyFont = Math.min(
           16,
@@ -2800,41 +2794,39 @@
         renderAll();
       }
       function applyPageVars() {
-  const root = document.documentElement.style;
-  root.setProperty("--body-font-size", state.layout.bodyFont + "px");
-  root.setProperty("--mcq-font-size", (state.layout.mcqFont ?? state.layout.bodyFont) + "px");
-  root.setProperty("--body-weight", state.layout.bodyBold ? "700" : "400");
-  root.setProperty("--body-line-height", String(state.layout.lineHeight));
-  root.setProperty("--mcq-gap", state.layout.gap + "px");
-  root.setProperty("--option-col-gap", state.layout.columnGap + "px");
-  root.setProperty("--mcq-question-weight", state.layout.mcqBold ? "700" : "400");
-  root.setProperty("--footer-number-font", state.layout.footerNumberFont + "px");
-  root.setProperty("--footer-answer-font", state.layout.footerAnswerFont + "px");
-  root.setProperty("--answer-key-weight", state.layout.answerKeyBold ? "700" : "400");
-  root.setProperty("--answer-num-weight", state.layout.answerNumBold ? "700" : "400");
-  root.setProperty("--answer-letter-weight", state.layout.answerLetterBold ? "700" : "400");
-  root.setProperty("--header-box-weight", state.layout.headerBoxesBold ? "700" : "400");
-  root.setProperty("--option-mark-weight", state.layout.optionBadgeBold ? "700" : "400");
-  
-  // এখানে 0.6 দিয়ে গুণ করে দেওয়া হয়েছে, ফলে UI তে 1 মানে আসলে 0.6 সাইজ হবে
-  root.setProperty("--option-mark-scale", String((state.layout.optionMarkScale ?? 1) * 0.6));
-  // English mode-এ Latin capital letters (A,B,C,D) visually বড় দেখায়, তাই একটু ছোট রাখা হয়
-  root.setProperty("--option-mark-letter-scale", isEnglishMode() ? "0.72" : "0.88");
-  root.setProperty("--stimulus-align", state.layout.stimulusCenter ? "center" : "left");
-  root.setProperty("--question-number-weight", state.layout.questionNumberBold ? "700" : "400");
-  root.setProperty("--header-scale", String(state.layout.headerScale));
-  root.setProperty("--header-info-font", `calc(${state.layout.headerInfoFont}px * var(--header-scale))`);
-  root.setProperty("--mcq-image-width", state.layout.mcqImageWidth + "%");
-  root.setProperty("--mcq-image-height", state.layout.mcqImageHeight + "px");
-  root.setProperty("--cq-font-size", (state.layout.cqFont ?? state.layout.bodyFont) + "px");
-  root.setProperty("--question-font-size", (state.layout.questionFont ?? state.layout.bodyFont) + "px");
-  root.setProperty("--cq-image-width", state.layout.cqImageWidth + "%");
-  root.setProperty("--cq-image-height", state.layout.cqImageHeight + "px");
-  root.setProperty("--pad-top", state.layout.padTop + "in");
-  root.setProperty("--pad-right", state.layout.padRight + "in");
-  root.setProperty("--pad-bottom", state.layout.padBottom + "in");
-  root.setProperty("--pad-left", state.layout.padLeft + "in");
-}
+        const root = document.documentElement.style;
+        root.setProperty("--body-font-size", state.layout.bodyFont + "px");
+        root.setProperty("--mcq-font-size", (state.layout.mcqFont ?? state.layout.bodyFont) + "px");
+        root.setProperty("--body-weight", state.layout.bodyBold ? "700" : "400");
+        root.setProperty("--body-line-height", String(state.layout.lineHeight));
+        root.setProperty("--mcq-gap", state.layout.gap + "px");
+        root.setProperty("--option-col-gap", state.layout.columnGap + "px");
+        root.setProperty("--mcq-question-weight", state.layout.mcqBold ? "700" : "400");
+        root.setProperty("--footer-number-font", state.layout.footerNumberFont + "px");
+        root.setProperty("--footer-answer-font", state.layout.footerAnswerFont + "px");
+        root.setProperty("--answer-key-weight", state.layout.answerKeyBold ? "700" : "400");
+        root.setProperty("--answer-num-weight", state.layout.answerNumBold ? "700" : "400");
+        root.setProperty("--answer-letter-weight", state.layout.answerLetterBold ? "700" : "400");
+        root.setProperty("--header-box-weight", state.layout.headerBoxesBold ? "700" : "400");
+        root.setProperty("--option-mark-weight", state.layout.optionBadgeBold ? "700" : "400");
+        
+        root.setProperty("--option-mark-scale", String((state.layout.optionMarkScale ?? 1) * 0.6));
+        root.setProperty("--option-mark-letter-scale", isEnglishMode() ? "0.72" : "0.88");
+        root.setProperty("--stimulus-align", state.layout.stimulusCenter ? "center" : "left");
+        root.setProperty("--question-number-weight", state.layout.questionNumberBold ? "700" : "400");
+        root.setProperty("--header-scale", String(state.layout.headerScale));
+        root.setProperty("--header-info-font", `calc(${state.layout.headerInfoFont}px * var(--header-scale))`);
+        root.setProperty("--mcq-image-width", state.layout.mcqImageWidth + "%");
+        root.setProperty("--mcq-image-height", state.layout.mcqImageHeight + "px");
+        root.setProperty("--cq-font-size", (state.layout.cqFont ?? state.layout.bodyFont) + "px");
+        root.setProperty("--question-font-size", (state.layout.questionFont ?? state.layout.bodyFont) + "px");
+        root.setProperty("--cq-image-width", state.layout.cqImageWidth + "%");
+        root.setProperty("--cq-image-height", state.layout.cqImageHeight + "px");
+        root.setProperty("--pad-top", state.layout.padTop + "in");
+        root.setProperty("--pad-right", state.layout.padRight + "in");
+        root.setProperty("--pad-bottom", state.layout.padBottom + "in");
+        root.setProperty("--pad-left", state.layout.padLeft + "in");
+      }
       const romanNumerals = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii"];
       function renderQuestion(q) {
         const images = Array.isArray(q.images) ? q.images : [];
@@ -3218,95 +3210,140 @@
           box.style.fontSize = "";
         });
       }
-      function setMcqPageContent(pageEl, items) {
-        const list = Array.isArray(items) ? items : [];
-        const split = list.length >= 30 ? 15 : Math.ceil(list.length / 2);
-        const left = list.slice(0, split);
-        const right = list.slice(split);
-        pageEl.querySelector(".mcq-column-left").innerHTML = left
-          .map(renderQuestion)
-          .join("");
-        pageEl.querySelector(".mcq-column-right").innerHTML = right
-          .map(renderQuestion)
-          .join("");
+
+      function balanceColumns(pageEl, items) {
+        const leftCol = pageEl.querySelector(".mcq-column-left");
+        const rightCol = pageEl.querySelector(".mcq-column-right");
+        if (!leftCol || !rightCol) return;
+
+        leftCol.innerHTML = "";
+        rightCol.innerHTML = "";
+
+        const measureCol = leftCol.cloneNode(false);
+        measureCol.style.position = "absolute";
+        measureCol.style.visibility = "hidden";
+        measureCol.style.height = "auto";
+        document.body.appendChild(measureCol);
+
+        const itemData = items.map(q => {
+          const html = renderQuestion(q);
+          measureCol.innerHTML = html;
+          return { html: html, height: measureCol.offsetHeight };
+        });
+        document.body.removeChild(measureCol);
+
+        let totalHeight = itemData.reduce((sum, item) => sum + item.height, 0);
+        let targetHeight = totalHeight / 2;
+        let currentLeftHeight = 0;
+        let splitIndex = 0;
+
+        for (let i = 0; i < itemData.length; i++) {
+          currentLeftHeight += itemData[i].height;
+          splitIndex = i;
+          if (currentLeftHeight >= targetHeight && i < itemData.length - 1) {
+            break;
+          }
+        }
+
+        itemData.forEach((item, index) => {
+          if (index <= splitIndex) {
+            leftCol.insertAdjacentHTML("beforeend", item.html);
+          } else {
+            rightCol.insertAdjacentHTML("beforeend", item.html);
+          }
+        });
+        
         const footer = pageEl.querySelector(".mcq-answer-footer");
-        footer.innerHTML = `${renderAnswerTable(list)}<div class="footer-note">${esc(
-          state.creditLine || ""
-        )}</div>`;
+        if (footer) {
+          footer.innerHTML = `${renderAnswerTable(items)}<div class="footer-note">${esc(state.creditLine || "")}</div>`;
+        }
         resetHeaderFitStyles(pageEl);
       }
+
       function pageContentOverflows(pageEl) {
         const content = pageEl?.querySelector(".content-area");
         return !!content && content.scrollHeight > content.clientHeight + 1;
       }
-      function buildFixedMcqPages(allMcq) {
-        let html = "";
+
+      function renderFixedMcqPages(allMcq) {
         const chunks = [];
         for (let i = 0; i < allMcq.length; i += 30) {
           chunks.push(allMcq.slice(i, i + 30));
         }
         chunks.forEach((chunk, pageIndex) => {
-          const split = chunk.length >= 30 ? 15 : Math.ceil(chunk.length / 2);
-          const left = chunk.slice(0, split);
-          const right = chunk.slice(split);
-          const includeHeader = mcqPageHasHeader(pageIndex);
-          html += `
-      <section class="page mcq-page ${includeHeader ? "" : "no-header-top"}">
-        ${renderPageTopDate()}
-        ${includeHeader ? renderHeaderBlock() : ""}
-        <div class="content-area">
-          <div class="page-section-title">MCQ SECTION</div>
-          <div class="mcq-columns">
-            <div class="mcq-column">${
-              left.length ? left.map(renderQuestion).join("") : ""
-            }</div>
-            <div class="mcq-column">${
-              right.length ? right.map(renderQuestion).join("") : ""
-            }</div>
-          </div>
-          <footer class="footer-box">
-            ${renderAnswerTable(chunk)}
-            <div class="footer-note">${esc(state.creditLine || "")}</div>
-          </footer>
-        </div>
-        ${renderPageFooterMeta()}
-      </section>`;
-        });
-        return html;
-      }
-      function renderAutoMcqPages(allMcq) {
-        let nextIndex = 0;
-        let pageIndex = 0;
-        while (nextIndex < allMcq.length) {
           pagesWrap.insertAdjacentHTML("beforeend", createMcqPageMarkup(pageIndex));
           const pageEl = pagesWrap.lastElementChild;
-          const pageItems = [];
-
-          while (nextIndex < allMcq.length) {
-            const candidate = [...pageItems, allMcq[nextIndex]];
-            setMcqPageContent(pageEl, candidate);
-            applyAutoHeaderFit();
-
-            if (pageContentOverflows(pageEl)) {
-              if (!pageItems.length) {
-                pageItems.push(allMcq[nextIndex]);
-                nextIndex += 1;
-                setMcqPageContent(pageEl, pageItems);
-                applyAutoHeaderFit();
-              } else {
-                setMcqPageContent(pageEl, pageItems);
-                applyAutoHeaderFit();
-              }
-              break;
-            }
-
-            pageItems.push(allMcq[nextIndex]);
-            nextIndex += 1;
-          }
-
-          pageIndex += 1;
-        }
+          balanceColumns(pageEl, chunk);
+        });
       }
+
+      function renderAutoMcqPages(allMcq) {
+  let nextIndex = 0;
+  let pageIndex = 0;
+
+  while (nextIndex < allMcq.length) {
+    pagesWrap.insertAdjacentHTML("beforeend", createMcqPageMarkup(pageIndex));
+    const pageEl = pagesWrap.lastElementChild;
+    const leftCol = pageEl.querySelector(".mcq-column-left");
+    const rightCol = pageEl.querySelector(".mcq-column-right");
+    const footer = pageEl.querySelector(".mcq-answer-footer");
+
+    let pageItems = [];
+    let isLeftFull = false;
+    let isPageFull = false;
+
+    while (nextIndex < allMcq.length) {
+      const q = allMcq[nextIndex];
+      pageItems.push(q);
+      const qHtml = renderQuestion(q);
+
+      if (!isLeftFull) {
+        leftCol.insertAdjacentHTML("beforeend", qHtml);
+      } else {
+        rightCol.insertAdjacentHTML("beforeend", qHtml);
+      }
+
+      footer.innerHTML = `${renderAnswerTable(pageItems)}<div class="footer-note">${esc(state.creditLine || "")}</div>`;
+      
+      // Header compress করার লজিক এখান থেকে সরিয়ে দেওয়া হয়েছে
+
+      if (pageContentOverflows(pageEl)) {
+        if (pageItems.length === 1) {
+          if (!isLeftFull) {
+            isLeftFull = true;
+            nextIndex++;
+          } else {
+            isPageFull = true;
+            nextIndex++;
+            break;
+          }
+        } else {
+          if (!isLeftFull) {
+            leftCol.lastElementChild.remove();
+            isLeftFull = true; 
+            pageItems.pop(); 
+          } else {
+            rightCol.lastElementChild.remove();
+            isPageFull = true; 
+            pageItems.pop();
+            break; 
+          }
+        }
+      } else {
+        nextIndex++; 
+      }
+    }
+
+    if (!isPageFull && pageItems.length > 1) {
+      balanceColumns(pageEl, pageItems);
+    } else if (isPageFull) {
+      footer.innerHTML = `${renderAnswerTable(pageItems)}<div class="footer-note">${esc(state.creditLine || "")}</div>`;
+    }
+
+    pageIndex++;
+  }
+}
+
       function renderPages() {
         applyPageVars();
         const allMcq = state.questions.filter(isMcqMeaningful);
@@ -3322,16 +3359,16 @@
           return;
         }
 
-        let html = "";
+        pagesWrap.innerHTML = "";
 
         if (allMcq.length) {
-          html = state.mcqPageFillMode === "auto" ? "" : buildFixedMcqPages(allMcq);
+          if (state.mcqPageFillMode === "auto") {
+            renderAutoMcqPages(allMcq);
+          } else {
+            renderFixedMcqPages(allMcq);
+          }
         }
 
-        pagesWrap.innerHTML = html;
-        if (allMcq.length && state.mcqPageFillMode === "auto") {
-          renderAutoMcqPages(allMcq);
-        }
         applyAutoHeaderFit();
 
         if (allCq.length) {
@@ -3878,7 +3915,6 @@ function splitIntoQuestionBlocks(text) {
   return clean.split(/\n\s*\n+/).map((b) => b.trim()).filter(Boolean);
 }
       function parseBlock(block) {
-        // Split into lines
         const allLines = String(block)
           .split("\n")
           .map((x) => x.trim())
@@ -3886,41 +3922,33 @@ function splitIntoQuestionBlocks(text) {
 
         if (!allLines.length) return null;
 
-        // First pass: find trailing উদ্দীপক line — it appears AFTER the answer line
-        // Pattern: answer line followed by উদ্দীপক: ...
         let trailingStimulus = "";
         let answerLineIdx = -1;
         for (let i = 0; i < allLines.length; i++) {
           if (looksLikeAnswer(allLines[i])) answerLineIdx = i;
         }
-        // If উদ্দীপক line exists after answer line, extract it
         if (answerLineIdx >= 0 && answerLineIdx < allLines.length - 1) {
           const afterAnswer = allLines.slice(answerLineIdx + 1);
           const stimLine = afterAnswer.find(l => /^(উদ্দীপক|stimulus)\s*[:：-]/i.test(l));
           if (stimLine) {
             trailingStimulus = stimLine.replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim();
-            // Remove everything from answer+1 onwards (the trailing preamble)
             allLines.splice(answerLineIdx + 1);
           }
         }
 
         const lines = allLines;
 
-        // Extract answer from last line
         let answer = "";
         if (looksLikeAnswer(lines[lines.length - 1]))
           answer = parseAnswerLine(lines.pop());
 
-        // Detect leading stimulus (before the question number line)
         let stimulusText = "";
         if (lines.length && /^(উদ্দীপক|stimulus)\s*[:：-]/i.test(lines[0])) {
           stimulusText = lines.shift().replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim();
         }
 
-        // First numbered line = question text
         const firstLine = stripQuestionPrefix(lines.shift() || "");
 
-        // Classify remaining lines
         const optionLines = [];
         const extraLines = [];
         const statementLines = [];
@@ -3973,7 +4001,6 @@ function splitIntoQuestionBlocks(text) {
       function stripRomanPrefix(line) {
         return line.replace(/^\(?\s*(i{1,3}|iv|vi{0,3}|viii|ix|xi{0,2})\s*[).\]]\s+/i, "").trim();
       }
-      // Extracts stimulus content from lines (filters instruction-only lines)
       function extractStimulusFromLines(lines) {
         const contentLines = [];
         for (const l of lines) {
@@ -3990,7 +4017,6 @@ function splitIntoQuestionBlocks(text) {
       function parseBulkText(text) {
         const rawClean = String(text || "").replace(/\r/g, "").trim();
 
-        // Detect a leading preamble stimulus BEFORE the first numbered question
         const firstNumIdx = rawClean.search(/(?:^|\n)\s*[০-৯0-9]{1,3}\s*[.)।:-]+\s/);
         let globalPreambleStimulus = "";
         let mainText = rawClean;
@@ -4008,7 +4034,6 @@ function splitIntoQuestionBlocks(text) {
         const parsed = blocks.map(parseBlock).filter(Boolean);
         const result = [];
 
-        // pendingStim: stimulus to apply to NEXT question (from trailingStimulus of previous block)
         let pendingStim = globalPreambleStimulus || "";
         let pendingApplyToIndex = globalPreambleStimulus ? 0 : -1;
 
@@ -4018,11 +4043,8 @@ function splitIntoQuestionBlocks(text) {
           let finalStim = q.stimulusText || "";
           let finalStatements = Array.isArray(q.statements) ? q.statements : [];
 
-          // If this question has its own leading stimulus, use it
           if (finalStim) {
-            // Already set — keep as is
           } else if (pendingStim && pendingApplyToIndex === i) {
-            // Apply pending stimulus from previous block's trailing stimulus
             finalType = "stimulus";
             finalStim = pendingStim;
             finalStatements = [];
@@ -4030,7 +4052,6 @@ function splitIntoQuestionBlocks(text) {
             pendingApplyToIndex = -1;
           }
 
-          // If this block had a trailing stimulus, queue it for the next question
           if (q.trailingStimulus) {
             pendingStim = q.trailingStimulus;
             pendingApplyToIndex = i + 1;
@@ -4515,7 +4536,6 @@ function splitIntoQuestionBlocks(text) {
           throw new Error("কোনো পৃষ্ঠা পাওয়া যায়নি। PDF তৈরি করা যাচ্ছে না।");
         }
         const images = [];
-        // সব সময় 2x quality — mobile এ memory fail হলে 1.5x এ retry হবে
         for (const page of pages) {
           let result;
           try {
@@ -4673,7 +4693,6 @@ function splitIntoQuestionBlocks(text) {
               new Blob([data.bytes], { type: "image/jpeg" }),
               `page-${i + 1}.jpg`
             );
-            // mobile browser এ multiple download এ delay দরকার
             if (pages.length > 1) await new Promise(r => setTimeout(r, 600));
           }
         } catch (err) {
