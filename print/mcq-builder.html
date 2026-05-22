@@ -1330,7 +1330,15 @@
       }
 
       function cleanBulkPasteText(text) {
-        return String(text || "").replace(/\r/g, "");
+        return String(text || "")
+          .replace(/\r/g, "")
+          .replace(/\u00A0/g, " ")
+          .replace(/[\u2028\u2029]/g, "\n")
+          .replace(/\t/g, " ")
+          .replace(/ +/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .replace(/^[ \t]+|[ \t]+$/gm, "")
+          .trim();
       }
 
       if (bulkInput) {
@@ -3805,10 +3813,10 @@
         );
       }
       function looksLikeAnswer(line) {
-        return /^(ans|answer|উত্তর)\s*[:：-]/i.test(line.trim());
+        return /^(ans|answer|উত্তর)\s*[:：\-ঃ]/i.test(line.trim());
       }
       function parseAnswerLine(line) {
-        const raw = line.replace(/^(ans|answer|উত্তর)\s*[:：-]\s*/i, "").trim();
+        const raw = line.replace(/^(ans|answer|উত্তর)\s*[:：\-ঃ]\s*/i, "").trim();
         const direct = normalizeAnswerToken(raw);
         if (direct) return direct;
         const letterMatch = raw.match(/[ABCDabcdকখগঘ]/u);
@@ -3820,10 +3828,10 @@
     .replace(/([^\n\s])\s*(\(\s*(?:iii|ii|iv|vi|vii|viii|ix|xi|xii|i)\s*\))/gi, "$1\n$2")
     .replace(/([^\n\s])\s+((?:iii|ii|iv|vi|vii|viii|ix|xi|xii|i)\s*[).\]]\s+)/gi, "$1\n$2")
     .replace(/([^\n\s])\s*(\(\s*[ক-ঘA-D]\s*\))/gu, "$1\n$2")
-    .replace(/([^\n\s])\s+([ক-ঘA-D]\s*[)\].:-]\s+)/gu, "$1\n$2")
-    .replace(/([^\n])\s*(উত্তর)\s*[:：-]\s*/giu, "$1\nউত্তর: ")
-    .replace(/([^\n])\s*(answer|ans)\s*[:：-]\s*/giu, "$1\nanswer: ")
-    .replace(/([^\n])\s*(উদ্দীপক|stimulus)\s*[:：-]\s*/giu, "$1\n$2: ");
+    .replace(/([^\n\s])\s+([ক-ঘA-D]\s*[)\].:,-]\s+)/gu, "$1\n$2")
+    .replace(/([^\n])\s*(উত্তর)\s*[:：\-ঃ]\s*/giu, "$1\nউত্তর: ")
+    .replace(/([^\n])\s*(answer|ans)\s*[:：\-ঃ]\s*/giu, "$1\nanswer: ")
+    .replace(/([^\n])\s*(উদ্দীপক|stimulus)\s*[:：\-ঃ]\s*/giu, "$1\n$2: ");
 }
 function splitIntoQuestionBlocks(text) {
   const clean = normalizeBulkQuestionText(text).trim();
@@ -4469,10 +4477,43 @@ function splitIntoQuestionBlocks(text) {
         return new Blob([concatUint8(chunks)], { type: "application/pdf" });
       }
 
+      async function waitForMathJaxReady(maxWait = 2000) {
+        const start = Date.now();
+        while (!window.MathJax && Date.now() - start < maxWait) {
+          await new Promise((r) => setTimeout(r, 50));
+        }
+      }
+
+      async function waitForMathJaxCompletion() {
+        await waitForMathJaxReady();
+        if (!window.MathJax) return;
+        try {
+          if (MathJax.startup && MathJax.startup.promise) {
+            await MathJax.startup.promise;
+          }
+          if (MathJax.typesetClear) MathJax.typesetClear();
+          if (MathJax.typesetPromise) await MathJax.typesetPromise();
+        } catch (err) {
+          console.warn("MathJax wait failed:", err);
+        }
+      }
+
+      async function renderAllAndWait(recordHistory = true) {
+        renderAll(recordHistory);
+        await new Promise((r) => requestAnimationFrame(r));
+        await waitForMathJaxCompletion();
+        await new Promise((r) => setTimeout(r, 400));
+      }
+
       async function generatePdfBlob() {
-        renderAll();
-        await new Promise((r) => setTimeout(r, 120));
+        if (typeof html2canvas !== "function") {
+          throw new Error("html2canvas লোড হয়নি। অনুগ্রহ করে ইন্টারনেট কানেকশন দেখুন বা ব্রাউজারটি রিলোড করুন।");
+        }
+        await renderAllAndWait();
         const pages = [...document.querySelectorAll(".page")];
+        if (!pages.length) {
+          throw new Error("কোনো পৃষ্ঠা পাওয়া যায়নি। PDF তৈরি করা যাচ্ছে না।");
+        }
         const images = [];
         // সব সময় 2x quality — mobile এ memory fail হলে 1.5x এ retry হবে
         for (const page of pages) {
@@ -4485,18 +4526,62 @@ function splitIntoQuestionBlocks(text) {
           }
           images.push(result);
         }
+        if (!images.length) {
+          throw new Error("PDF তৈরির জন্য কোন ইমেজ পাওয়া যায়নি।");
+        }
         return buildPdfFromJpegs(images);
       }
       
       async function downloadBlob(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
+        a.style.display = "none";
         a.href = url;
         a.download = filename;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
         document.body.appendChild(a);
-        a.click();
+        let clicked = false;
+        try {
+          a.click();
+          clicked = true;
+        } catch (err) {
+          console.warn("Download anchor click failed:", err);
+          try {
+            a.dispatchEvent(
+              new MouseEvent("click", {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+              })
+            );
+            clicked = true;
+          } catch (err2) {
+            console.warn("Dispatch click failed:", err2);
+          }
+        }
+        await new Promise((r) => setTimeout(r, 180));
         a.remove();
+
+        if (!clicked) {
+          if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
+            navigator.msSaveOrOpenBlob(blob, filename);
+          } else if (typeof window !== "undefined") {
+            try {
+              window.open(url, "_blank");
+              clicked = true;
+            } catch (err3) {
+              console.warn("Fallback open failed:", err3);
+            }
+          }
+        }
+
         setTimeout(() => URL.revokeObjectURL(url), 1500);
+        if (!clicked) {
+          alert(
+            "ডাউনলোড শুরু করা যায়নি। যদি আপনি ফাইল:// থেকে খুলছেন, তাহলে ব্রাউজারে এই পাতা http:// সার্ভার থেকে চালান বা PDF previews থেকে Save করুন।"
+          );
+        }
       }
       function setButtonLoading(btn, loading, loadingText = 'Processing…') {
         if (!btn) return;
@@ -4522,9 +4607,14 @@ function splitIntoQuestionBlocks(text) {
           );
         } catch (err) {
           console.error(err);
+          alert(
+            "PDF download failed. অনুগ্রহ করে ব্রাউজার কনসোল চেক করুন, অথবা Print থেকে Save as PDF ব্যবহার করুন।"
+          );
           try {
             window.print();
-          } catch (e) {}
+          } catch (e) {
+            console.warn(e);
+          }
         } finally {
           setButtonLoading(btn, false);
         }
@@ -4564,8 +4654,11 @@ function splitIntoQuestionBlocks(text) {
       async function downloadAsImagesZipLike(btnEl) {
         const btn = btnEl || document.querySelector('[onclick*="downloadAsImagesZipLike"]');
         try {
-          renderAll();
+          await renderAllAndWait();
           const pages = [...document.querySelectorAll(".page")];
+          if (!pages.length) {
+            throw new Error("কোনো পৃষ্ঠা পাওয়া যায়নি। Page PNG তৈরি করা যাচ্ছে না।");
+          }
           setButtonLoading(btn, true, `⏳ 0/${pages.length}`);
           for (let i = 0; i < pages.length; i++) {
             if (btn) btn.innerHTML = `⏳ ${i + 1}/${pages.length}`;
