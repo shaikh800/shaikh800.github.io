@@ -304,8 +304,8 @@
       .page-section-title { text-align: center; font-size: 10px; letter-spacing: 0.45px; font-weight: 700; margin: 0 0 6px; }
       .content-area { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
       
-      .mcq-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-content: start; }
-      .mcq-column { display: grid; gap: var(--mcq-gap); align-content: start; min-height: 0; }
+      .mcq-columns { display: flex; align-items: flex-start; gap: 18px; }
+.mcq-column { display: flex; flex-direction: column; gap: var(--mcq-gap); flex: 1; min-width: 0; }
       .q-item { font-size: var(--mcq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
       .q-head { display: flex; align-items: flex-start; gap: 5px; margin-bottom: 2px; }
       .q-no { font-weight: var(--question-number-weight); white-space: nowrap; }
@@ -366,7 +366,7 @@
       .uniform-card #fitStatus { margin-top: 0; }
       
       .no-header-top { padding-top: calc(var(--pad-top) + 2px); }
-      .cq-section { margin-top: 10px; border-top: 1px dashed #666; padding-top: 7px; display: grid; gap: var(--mcq-gap); align-content: start; }
+      .cq-section { margin-top: 10px; border-top: 1px dashed #666; padding-top: 7px; display: flex; flex-direction: column; gap: var(--mcq-gap); }
       .cq-title { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
       .cq-item { border: none; padding: 0; font-size: var(--cq-font-size); line-height: var(--body-line-height); font-weight: var(--body-weight); break-inside: avoid; page-break-inside: avoid; }
       .only-question-item { font-size: var(--question-font-size); }
@@ -538,11 +538,11 @@
 
       @media print {
         @page { size: A4 portrait; margin: 0; }
-        html, body { width: 100%; height: auto; display: block; overflow: visible; background: #fff !important; margin: 0; padding: 0; }
-        .app { display: block; height: auto; }
-        .panel { display: none !important; }
-        .page-wrap { display: block; background: none !important; padding: 0 !important; height: auto; overflow: visible; }
-        .page { width: 210mm; height: 297mm; min-height: 297mm; box-shadow: none; margin: 0; overflow: hidden; page-break-after: always; }
+        html, body { width: 100%; height: auto !important; display: block !important; overflow: visible !important; background: #fff !important; margin: 0 !important; padding: 0 !important; }
+        .app { display: block !important; height: auto !important; position: static !important; overflow: visible !important; transform: none !important; }
+        .panel, .mobile-tabbar, #cropperModal { display: none !important; }
+        .page-wrap { display: block !important; position: static !important; background: none !important; padding: 0 !important; height: auto !important; overflow: visible !important; transform: none !important; opacity: 1 !important; visibility: visible !important; }
+        .page { width: 210mm !important; height: 297mm !important; min-height: 297mm !important; box-shadow: none !important; margin: 0 auto !important; overflow: hidden !important; page-break-after: always !important; transform: none !important; position: relative !important; left: auto !important; top: auto !important; }
       }
       .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0px; background: #fff; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
       .toggle-text { margin: 0; font-size: 12px; font-weight: 600; cursor: pointer; color: #334155; flex-grow: 1; }
@@ -4617,7 +4617,7 @@ function splitIntoQuestionBlocks(text) {
 
       async function downloadPDFDirect(btnEl) {
         const btn = btnEl || document.querySelector('[onclick*="downloadPDFDirect"]');
-        setButtonLoading(btn, true, '⏳ Generating…');
+        setButtonLoading(btn, true, '⏳ Generating PDF…');
         try {
           const blob = await generatePdfBlob();
           await downloadBlob(
@@ -4628,7 +4628,7 @@ function splitIntoQuestionBlocks(text) {
         } catch (err) {
           console.error(err);
           alert(
-            "PDF download failed. অনুগ্রহ করে ব্রাউজার কনসোল চেক করুন, অথবা Print থেকে Save as PDF ব্যবহার করুন।"
+            "PDF download failed. ব্রাউজার কনসোল চেক করুন, অথবা Print থেকে Save as PDF ব্যবহার করুন।"
           );
           try {
             window.print();
@@ -4640,36 +4640,7 @@ function splitIntoQuestionBlocks(text) {
         }
       }
       async function sharePDFDirect(btnEl) {
-        const btn = btnEl || document.querySelector('[onclick*="sharePDFDirect"]');
-        setButtonLoading(btn, true, '⏳ Generating…');
-        try {
-          const blob = await generatePdfBlob();
-          const filename =
-            ((state.examTitle || "sheet")
-              .replace(/[\\/:*?"<>|]+/g, " ")
-              .trim() || "sheet") + ".pdf";
-          const file = new File([blob], filename, { type: "application/pdf" });
-          if (
-            navigator.canShare &&
-            navigator.canShare({ files: [file] }) &&
-            navigator.share
-          ) {
-            await navigator.share({
-              title: state.examTitle || "Sheet PDF",
-              files: [file],
-            });
-          } else {
-            await downloadBlob(blob, filename);
-            alert(
-              "এই browser-এ direct file share support নেই। PDF download করে দেওয়া হয়েছে।"
-            );
-          }
-        } catch (err) {
-          console.error(err);
-          alert("Share PDF তৈরি করা যায়নি।");
-        } finally {
-          setButtonLoading(btn, false);
-        }
+        alert("সঠিক লেআউট এবং সর্বোচ্চ কোয়ালিটি পেতে '↓ Direct PDF' বাটনে ক্লিক করে Save as PDF করুন এবং সেই ফাইলটি শেয়ার করুন।");
       }
       async function downloadAsImagesZipLike(btnEl) {
         const btn = btnEl || document.querySelector('[onclick*="downloadAsImagesZipLike"]');
