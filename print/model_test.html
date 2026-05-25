@@ -726,7 +726,14 @@ async function saveAdminConfig() {
   btn.disabled = true;
 
   // Ensure examData and targetId are properly tracked
-  const targetId = examId; 
+  const targetId = examId;
+
+  // If no exam is loaded, save local settings only and skip GitHub exam update
+  if (!targetId || !examData) {
+    btn.innerText = "💾 Save & Update Server";
+    btn.disabled = false;
+    return showAlert('লোকাল সেটিংস সেভ হয়েছে!\n\n(কোনো Exam লোড না থাকায় GitHub এ Exam আপডেট হয়নি। Exam লিংক দিয়ে খুলুন।)', '✅');
+  }
 
   if (targetId && examData) {
       examData.password = pass;
@@ -752,10 +759,6 @@ async function saveAdminConfig() {
       } else {
           fullGithubData.exams.unshift(examPackage);
       }
-  } else {
-       btn.innerText = "💾 Save & Update Server";
-       btn.disabled = false;
-       return showAlert('Error: Exam Data is missing!', '❌');
   }
 
   fullGithubData.updated = new Date().toISOString();
