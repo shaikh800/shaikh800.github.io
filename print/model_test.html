@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Online Exam</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+body{background:#e2e8f0;font-family:sans-serif;margin:0;padding:20px;display:flex;justify-content:center;color:#0f172a;}
+#app{width:100%;max-width:850px;}
+.login-box,.summary-box{background:#fff;padding:40px;border-radius:10px;text-align:center;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);margin-top:50px;}
+.input-f{padding:12px;width:250px;border:1px solid #cbd5e1;border-radius:6px;margin:10px 0;font-size:16px;}
+.btn{background:#0f172a;color:#fff;border:none;padding:12px 25px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;margin:10px 5px;}
+.btn:hover{background:#334155;}
+.btn-w{background:#eab308;color:#fff;}
+#exam-screen,#summary-screen{display:none;}
+.top-bar{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:15px 25px;border-radius:10px;margin-bottom:20px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);}
+.time-left{font-size:20px;font-weight:bold;color:#dc2626;}
+#pdf-wrap{background:#fff;width:794px;margin:0 auto;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);display:flex;flex-direction:column;}
+.page{width:794px;height:1123px;padding:24px;box-sizing:border-box;background:#fff;overflow:hidden;}
+.exam-header{text-align:center;border-bottom:2px solid #0f172a;padding-bottom:8px;margin-bottom:12px;}
+.exam-header h1{margin:0;font-size:20px;letter-spacing:1px;}
+.exam-header p{margin:4px 0 0;font-size:13px;font-weight:bold;}
+.page-inner{display:flex;gap:30px;height:calc(100% - 60px);}
+.col{flex:1;display:flex;flex-direction:column;gap:10px;}
+.q-block{font-size:12px;line-height:1.4;}
+.stim{font-style:italic;border-left:2px solid #64748b;padding-left:8px;margin-bottom:5px;background:#f8fafc;}
+.stim-tbl{width:100%;border-collapse:collapse;margin-top:4px;}
+.stim-tbl th,.stim-tbl td{border:1px solid #475569;padding:3px;text-align:center;}
+.q-txt{font-weight:bold;margin-bottom:4px;}
+.stmts{margin:3px 0 5px 15px;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.opts label{display:flex;align-items:flex-start;cursor:pointer;padding:4px;border-radius:4px;border:1px solid transparent;transition:0.2s;}
+.opts label:hover{background:#f1f5f9;}
+.opts input{margin-right:6px;margin-top:2px;cursor:pointer;}
+.ans-c{background:#dcfce7!important;border-color:#86efac!important;color:#166534;font-weight:bold;}
+.ans-w{background:#fee2e2!important;border-color:#fca5a5!important;color:#991b1b;text-decoration:line-through;}
+.stat-flex{display:flex;justify-content:center;gap:30px;margin:30px 0;font-size:20px;font-weight:bold;}
+.stat-c{color:#166534;}
+.stat-w{color:#991b1b;}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="login-screen" class="login-box">
+<h2>পরীক্ষায় লগইন করুন</h2>
+<input type="text" id="uid" class="input-f" placeholder="যেকোনো আইডি দিন"><br>
+<input type="password" id="upass" class="input-f" placeholder="যেকোনো পাসওয়ার্ড দিন"><br>
+<button class="btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+</div>
+<div id="exam-screen">
+<div class="top-bar">
+<span class="time-left">সময় বাকি: <span id="timer">30:00</span></span>
+<button class="btn" style="margin:0;padding:8px 15px;" onclick="submitExam()">জমা দিন</button>
+</div>
+<div id="pdf-wrap">
+<div class="page" id="page1">
+<div class="exam-header">
+<h1 id="main-title">পরীক্ষা</h1>
+<p id="main-meta">পূর্ণমান: ৩০ | সময়: ৩০ মিনিট</p>
+</div>
+<div class="page-inner">
+<div class="col" id="col1"></div>
+<div class="col" id="col2"></div>
+</div>
+</div>
+<div class="page" id="page2" style="display:none;">
+<div class="page-inner" style="height:100%;">
+<div class="col" id="col3"></div>
+<div class="col" id="col4"></div>
+</div>
+</div>
+</div>
+</div>
+<div id="summary-screen" class="summary-box">
+<h2>পরীক্ষার ফলাফল</h2>
+<div class="stat-flex">
+<div class="stat-c">সঠিক: <span id="s-c">0</span></div>
+<div class="stat-w">ভুল: <span id="s-w">0</span></div>
+<div>স্কিপড: <span id="s-s">0</span></div>
+</div>
+<h1 style="color:#0f172a;margin-bottom:30px;">মোট প্রাপ্ত নম্বর: <span id="s-score">0</span> / <span id="s-total">30</span></h1>
+<button class="btn btn-w" onclick="showReview()">ভুলগুলো দেখুন</button>
+<button class="btn" onclick="dlPdf()">PDF ডাউনলোড করুন</button>
+</div>
+</div>
+<script>
+const savedPackage=localStorage.getItem("shared_exam_data");
+if(!savedPackage){
+alert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।");
+document.body.innerHTML="<h3 style='text-align:center;margin-top:50px;'>No Exam Data Available</h3>";
+}
+const examData=JSON.parse(savedPackage);
+const qd=examData.questions;
+const totalQ=qd.length;
+const durationStr=examData.duration;
+const durationMatch=durationStr.match(/\d+/);
+const durationMin=durationMatch?parseInt(durationMatch[0]):30;
+document.getElementById("main-title").innerText=examData.title;
+document.title=examData.title;
+document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${durationMin} মিনিট`;
+document.getElementById("s-total").innerText=totalQ;
+document.getElementById("timer").innerText=`${durationMin}:00`;
+const perCol=Math.ceil(totalQ/4);
+const rmap={0:[0,perCol],1:[perCol,perCol*2],2:[perCol*2,perCol*3],3:[perCol*3,totalQ]};
+if(totalQ>perCol*2){document.getElementById("page2").style.display="block";}
+function ren(cId,r){
+let html="";
+for(let i=r[0];i<r[1]&&i<totalQ;i++){
+const q=qd[i];
+let sHtml=q.q;
+let stHtml=q.stmts?`<div class="stmts">i. ${q.stmts[0]||''}<br>ii. ${q.stmts[1]||''}<br>iii. ${q.stmts[2]||''}<br>নিচের কোনটি সঠিক?</div>`:"";
+let oHtml=q.opts.map((o,j)=>`<label id="lbl-${i}-${j}"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("");
+html+=`<div class="q-block" id="qb-${i}"><div class="q-txt">${i+1}. ${sHtml}</div>${stHtml}<div class="opts">${oHtml}</div></div>`;
+}
+document.getElementById(cId).innerHTML=html;
+}
+ren("col1",rmap[0]);ren("col2",rmap[1]);ren("col3",rmap[2]);ren("col4",rmap[3]);
+let tInt;
+function startExam(){
+const uid=document.getElementById("uid").value.trim();
+const upass=document.getElementById("upass").value.trim();
+if(!uid||!upass)return alert("আইডি ও পাসওয়ার্ড দিন!");
+if(localStorage.getItem("ex_"+uid))return alert("আপনি ইতিমধ্যে পরীক্ষা দিয়েছেন! টেস্টিংয়ের জন্য আইডি পরিবর্তন করুন।");
+document.getElementById("login-screen").style.display="none";
+document.getElementById("exam-screen").style.display="block";
+let t=durationMin*60;
+tInt=setInterval(()=>{
+t--;
+let m=Math.floor(t/60),s=t%60;
+document.getElementById("timer").innerText=`${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+if(t<=0){clearInterval(tInt);submitExam();}
+},1000);
+}
+function submitExam(){
+clearInterval(tInt);
+const uid=document.getElementById("uid").value.trim();
+localStorage.setItem("ex_"+uid,"1");
+let c=0,w=0,s=0;
+qd.forEach((q,i)=>{
+const sel=document.querySelector(`input[name="q${i}"]:checked`);
+document.getElementById(`lbl-${i}-${q.ans}`).classList.add("ans-c");
+if(sel){
+const v=parseInt(sel.value);
+if(v===q.ans)c++;
+else{w++;document.getElementById(`lbl-${i}-${v}`).classList.add("ans-w");}
+}else s++;
+document.getElementsByName(`q${i}`).forEach(r=>r.disabled=true);
+});
+document.getElementById("exam-screen").style.display="none";
+document.getElementById("summary-screen").style.display="block";
+document.getElementById("s-c").innerText=c;
+document.getElementById("s-w").innerText=w;
+document.getElementById("s-s").innerText=s;
+document.getElementById("s-score").innerText=c;
+}
+function showReview(){
+document.getElementById("summary-screen").style.display="none";
+document.getElementById("exam-screen").style.display="block";
+document.querySelector(".top-bar").style.display="none";
+window.scrollTo(0,0);
+}
+function dlPdf(){
+const el=document.getElementById("pdf-wrap");
+html2pdf().set({
+margin:0,
+filename:'Online_Exam_Result.pdf',
+image:{type:'jpeg',quality:1},
+html2canvas:{scale:2,useCORS:true,scrollY:0},
+jsPDF:{unit:'px',format:[794,1123],orientation:'portrait'}
+}).from(el).save();
+}
+</script>
+</body>
+</html>
