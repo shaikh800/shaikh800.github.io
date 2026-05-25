@@ -323,6 +323,7 @@ th { background-color: #f8fafc; }
   <div class="btn-row">
     <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
     <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
+    <button class="btn secondary" onclick="generateShareLink()">🔗 Generate Shareable Link</button>
     <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
   </div>
 </div>
@@ -339,7 +340,7 @@ th { background-color: #f8fafc; }
     <input type="text" id="uid" class="input-f" placeholder="স্টুডেন্ট আইডি">
     <input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড">
   </div>
-  <button class="btn" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+  <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
 </div>
 
 <div id="exam-screen">
@@ -451,11 +452,24 @@ function executeConfirm() {
 }
 
 // Load Exam Data
+// ── URL hash থেকে config load (shareable link support) ──
+(function loadFromHash() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#cfg=')) return;
+  try {
+    const encoded = hash.slice(5);
+    const json = decodeURIComponent(escape(atob(encoded)));
+    const config = JSON.parse(json);
+    if (config.e) localStorage.setItem('shared_exam_data', config.e);
+    if (config.g) localStorage.setItem('gas_url', config.g);
+    if (config.t) localStorage.setItem('admin_time', config.t);
+  } catch(err) { console.warn('Invalid hash config:', err); }
+})();
+
 const savedPackage = localStorage.getItem("shared_exam_data");
 if(!savedPackage){
   showAlert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।", "⚠️");
   document.body.innerHTML="<h3 style='text-align:center;margin-top:50px;font-family:sans-serif;'>No Exam Data Available</h3>";
-  throw new Error("No exam data found.");
 }
 
 const examData = JSON.parse(savedPackage);
@@ -479,9 +493,10 @@ function renderSection(containerId, start, end) {
   let html = "";
   for(let i = start; i < end && i < totalQ; i++){
     const q = qd[i];
+    let stimHtml = q.stim ? `<div class="stim">${q.stim}</div>` : "";
     let stHtml = q.stmts ? `<div class="stmts">i. ${q.stmts[0]||''}<br>ii. ${q.stmts[1]||''}<br>iii. ${q.stmts[2]||''}<br>নিচের কোনটি সঠিক?</div>` : "";
     let oHtml = q.opts.map((o,j) => `<label id="lbl-${i}-${j}"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("");
-    html += `<div class="q-block" id="qb-${i}"><div class="q-txt">${i+1}. ${q.q}</div>${stHtml}<div class="opts">${oHtml}</div></div>`;
+    html += `<div class="q-block" id="qb-${i}"><div class="q-txt">${i+1}. ${q.q}</div>${stimHtml}${stHtml}<div class="opts">${oHtml}</div></div>`;
   }
   document.getElementById(containerId).innerHTML = html;
 }
@@ -561,7 +576,7 @@ function unlockAdmin() {
 }
 
 function showAdminScreen() {
-  closeAllOverlays();
+  closeAllOverlays(); // এই লাইনটি শুরুতে অবশ্যই থাকতে হবে
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
@@ -569,8 +584,6 @@ function showAdminScreen() {
 }
 
 function exitAdmin() {
-  adminUnlocked = false;
-  sessionStorage.removeItem('exam_admin');
   document.getElementById('admin-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'block';
   finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
@@ -779,6 +792,27 @@ function reviewWithPdf(){
   document.getElementById("pdf-dummy-space").style.display = "block";
   window.scrollTo(0,0);
   dlPdf();
+}
+
+function generateShareLink() {
+  const gasUrl = document.getElementById('gas-url').value.trim();
+  const time = document.getElementById('admin-time').value.trim();
+  const examPkg = localStorage.getItem('shared_exam_data');
+  if (!examPkg) return showAlert('কোনো পরীক্ষার ডাটা নেই! আগে বিল্ডার থেকে পরীক্ষা তৈরি করুন।', '⚠️');
+  if (!gasUrl) return showAlert('আগে Google Apps Script URL সেট করুন!', '🔗');
+
+  const config = { e: examPkg, g: gasUrl, t: time || String(builderDurationMin) };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(config))));
+  const baseUrl = window.location.href.split('#')[0];
+  const shareUrl = baseUrl + '#cfg=' + encoded;
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => showAlert('লিংক ক্লিপবোর্ডে কপি হয়েছে! যে কাউকে এই লিংক দিলে সে পরীক্ষা দিতে পারবে।', '🔗'))
+      .catch(() => { window.prompt('এই লিংকটি কপি করুন (Ctrl+C):', shareUrl); });
+  } else {
+    window.prompt('এই লিংকটি কপি করুন (Ctrl+C):', shareUrl);
+  }
 }
 
 async function dlPdf(){
