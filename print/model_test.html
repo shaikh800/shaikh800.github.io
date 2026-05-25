@@ -272,7 +272,36 @@ th { background-color: #f8fafc; }
       </table>
     </div>
     
-    <div class="btn-row">
+
+    <div class="admin-card" id="attendance-card">
+      <div class="admin-card-head">
+        <h3><span class="icon">📊</span> উপস্থিতি ও ফলাফল</h3>
+        <button class="btn secondary" style="font-size:12px; min-height:32px; padding:0 14px;" onclick="fetchResults()">🔄 Refresh</button>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.6;">কোন স্টুডেন্ট পরীক্ষা দিয়েছে আর কে দেয়নি তা এখানে দেখা যাবে। Google Sheet-এও এই লিস্ট সিঙ্ক থাকবে।</p>
+      <div id="att-no-url" style="text-align:center; padding:14px; color:var(--muted); font-size:13px; background:var(--surface-soft); border-radius:var(--radius);">
+        ⚠️ ফলাফল দেখতে Google Apps Script URL সেভ করুন।
+      </div>
+      <div id="att-loading" style="display:none; text-align:center; padding:16px; color:var(--muted);">
+        <i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...
+      </div>
+      <div id="att-summary" style="display:none; display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px; font-size:13px; font-weight:700;"></div>
+      <table class="student-table" id="att-table" style="display:none;">
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>নাম</th>
+            <th style="text-align:center; width:90px;">স্কোর</th>
+            <th style="text-align:center; width:120px;">স্ট্যাটাস</th>
+          </tr>
+        </thead>
+        <tbody id="att-list"></tbody>
+      </table>
+      <div id="att-empty" style="display:none; text-align:center; padding:14px; color:var(--muted); font-size:13px; background:var(--surface-soft); border-radius:var(--radius);">
+        এখনো কোনো সাবমিশন পাওয়া যায়নি।
+      </div>
+    </div>
+        <div class="btn-row">
       <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
       <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
       <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
@@ -670,6 +699,9 @@ function showAdminScreen() {
   } else {
     document.getElementById('share-link-card').style.display = 'none';
   }
+
+  // GAS URL থাকলে auto-fetch results
+  setTimeout(() => fetchResults(), 400);
 }
 
 function copyShareLink() {
@@ -814,6 +846,22 @@ async function saveAdminConfig() {
       history.replaceState(null, '', '?examId=' + examId);
       document.getElementById('share-link-card').style.display = 'block';
       document.getElementById('share-url-input').value = `${window.location.origin}${window.location.pathname}?examId=${examId}`;
+
+      // Student list Google Sheet এ sync করো
+      if (url && studentsList.length > 0) {
+        fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'updateStudents',
+            examId: targetId,
+            topic: examData ? examData.title : '',
+            students: studentsList.map(s => s.id)
+          }),
+          headers: { 'Content-Type': 'text/plain' }
+        }).then(() => fetchResults()).catch(e => console.warn('Student sync failed:', e));
+      } else {
+        setTimeout(() => fetchResults(), 800);
+      }
     } else {
       showAlert('GitHub এ সেভ হতে সমস্যা হয়েছে!', '❌');
     }
@@ -823,6 +871,147 @@ async function saveAdminConfig() {
 
   btn.innerText = "💾 Save & Update Server";
   btn.disabled = false;
+}
+
+
+// ── 4b. Results & Attendance ──
+async function fetchResults() {
+  const url = (document.getElementById('gas-url') && document.getElementById('gas-url').value.trim()) || localStorage.getItem('gas_url');
+
+  const noUrl = document.getElementById('att-no-url');
+  const loading = document.getElementById('att-loading');
+  const table = document.getElementById('att-table');
+  const empty = document.getElementById('att-empty');
+  const summary = document.getElementById('att-summary');
+
+  if (!url) {
+    noUrl.style.display = 'block';
+    loading.style.display = 'none';
+    table.style.display = 'none';
+    empty.style.display = 'none';
+    if (summary) summary.style.display = 'none';
+    return;
+  }
+
+  noUrl.style.display = 'none';
+  loading.style.display = 'block';
+  table.style.display = 'none';
+  empty.style.display = 'none';
+  if (summary) summary.style.display = 'none';
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'getResults', examId: examId || '', topic: examData ? examData.title : '' }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    const data = await res.json();
+    loading.style.display = 'none';
+
+    const results = data.results || data.data || [];
+    if (results.length > 0 || studentsList.length > 0) {
+      renderAttendance(results);
+    } else {
+      empty.style.display = 'block';
+    }
+  } catch(e) {
+    loading.style.display = 'none';
+    empty.innerText = '⚠️ ফলাফল লোড করতে সমস্যা হয়েছে! GAS URL ও ইন্টারনেট চেক করুন।';
+    empty.style.display = 'block';
+  }
+}
+
+function renderAttendance(results) {
+  const table = document.getElementById('att-table');
+  const tbody = document.getElementById('att-list');
+  const summary = document.getElementById('att-summary');
+  const empty = document.getElementById('att-empty');
+
+  // results কে id দিয়ে map করো
+  const resultMap = {};
+  results.forEach(r => {
+    const key = String(r.id || r['Student ID'] || r['ID'] || '').trim();
+    if (key) resultMap[key] = r;
+  });
+
+  const totalInList = studentsList.length;
+  let html = '';
+  let presentCount = 0;
+  let absentCount = 0;
+  const totalQ = examData ? examData.questions.length : '?';
+
+  if (totalInList > 0) {
+    // Student list আছে — প্রত্যেকের status দেখাও
+    studentsList.forEach(s => {
+      const id = String(s.id).trim();
+      const r = resultMap[id];
+      if (r) {
+        presentCount++;
+        const score = r.score !== undefined ? r.score : (r['Score'] || '-');
+        const name = r.name || r['Name'] || '-';
+        html += `<tr>
+          <td style="font-weight:600;">${id}</td>
+          <td>${name}</td>
+          <td style="text-align:center; font-weight:700; color:#166534;">${score}/${totalQ}</td>
+          <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ দিয়েছে</span></td>
+        </tr>`;
+      } else {
+        absentCount++;
+        html += `<tr>
+          <td style="font-weight:600;">${id}</td>
+          <td style="color:var(--muted);">—</td>
+          <td style="text-align:center; color:var(--muted);">—</td>
+          <td style="text-align:center;"><span style="background:#fee2e2; color:#991b1b; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">❌ দেয়নি</span></td>
+        </tr>`;
+      }
+    });
+    // Student list এ নেই কিন্তু exam দিয়েছে এমনদেরও দেখাও
+    Object.entries(resultMap).forEach(([id, r]) => {
+      if (!studentsList.some(s => String(s.id).trim() === id)) {
+        presentCount++;
+        const score = r.score !== undefined ? r.score : (r['Score'] || '-');
+        const name = r.name || r['Name'] || '-';
+        html += `<tr style="opacity:0.75;">
+          <td style="font-weight:600;">${id} <span style="font-size:10px; color:var(--muted);">(unlisted)</span></td>
+          <td>${name}</td>
+          <td style="text-align:center; font-weight:700; color:#166534;">${score}/${totalQ}</td>
+          <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ দিয়েছে</span></td>
+        </tr>`;
+      }
+    });
+  } else {
+    // কোনো student list নেই — শুধু submissions দেখাও
+    if (results.length === 0) {
+      document.getElementById('att-empty').style.display = 'block';
+      return;
+    }
+    results.forEach(r => {
+      presentCount++;
+      const id = r.id || r['Student ID'] || '-';
+      const score = r.score !== undefined ? r.score : (r['Score'] || '-');
+      const name = r.name || r['Name'] || '-';
+      html += `<tr>
+        <td style="font-weight:600;">${id}</td>
+        <td>${name}</td>
+        <td style="text-align:center; font-weight:700; color:#166534;">${score}/${totalQ}</td>
+        <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ দিয়েছে</span></td>
+      </tr>`;
+    });
+  }
+
+  tbody.innerHTML = html;
+  table.style.display = 'table';
+
+  // Summary bar
+  if (summary) {
+    const total = totalInList || presentCount;
+    summary.style.display = 'flex';
+    summary.innerHTML = `
+      <span style="background:#f1f5f9; padding:5px 14px; border-radius:20px; color:var(--ink);">মোট: <b>${total}</b></span>
+      <span style="background:#dcfce7; padding:5px 14px; border-radius:20px; color:#166534;">উপস্থিত: <b>${presentCount}</b></span>
+      ${absentCount > 0 ? `<span style="background:#fee2e2; padding:5px 14px; border-radius:20px; color:#991b1b;">অনুপস্থিত: <b>${absentCount}</b></span>` : ''}
+    `;
+  }
 }
 
 function clearDatabase() {
