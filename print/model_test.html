@@ -3,129 +3,435 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Online Exam Portal</title>
+<title>Online Exam</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'none' }
+  };
+</script>
 <style>
+* { box-sizing: border-box; }
+
 :root {
   --blue:#2563eb; --blue-dark:#1d4ed8;
   --ink:#0f172a; --muted:#64748b;
   --surface:#ffffff; --surface-soft:#f8fafc;
-  --line:#e2e8f0; --radius:10px; --radius-lg:20px;
-  --shadow:0 10px 30px rgba(15,23,42,0.06);
+  --line:#e2e8f0;
+  --radius:10px; --radius-lg:20px;
+  --shadow:0 4px 16px rgba(15,23,42,0.07);
+  --shadow-lg:0 24px 60px rgba(15,23,42,0.12);
+  --ease-out:cubic-bezier(0.22,1,0.36,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
 }
-* { box-sizing: border-box; }
-body {
-  background: #f1f5f9; font-family: 'Noto Serif Bengali', sans-serif;
-  margin: 0; padding: 12px; color: var(--ink);
-}
-.container { max-width: 650px; margin: 0 auto; }
-.card {
-  background: var(--surface); border-radius: var(--radius-lg);
-  padding: 24px; box-shadow: var(--shadow); margin-bottom: 16px;
-}
-.btn {
-  width: 100%; padding: 14px; background: var(--blue); color: white;
-  border: none; border-radius: var(--radius); font-size: 16px;
-  font-weight: 700; cursor: pointer; font-family: inherit;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.btn:hover { background: var(--blue-dark); }
-.input-f {
-  width: 100%; padding: 12px; border: 1px solid var(--line);
-  border-radius: var(--radius); margin-top: 6px; margin-bottom: 16px;
-  font-size: 15px; font-family: inherit;
-}
-.top-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 16px; background: var(--ink); color: white;
-  padding: 12px 16px; border-radius: var(--radius);
-}
-.q-card { margin-bottom: 14px; padding: 18px; }
-.q-title { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
-.opt-label {
-  display: flex; align-items: center; gap: 10px; padding: 12px;
-  border: 1px solid var(--line); border-radius: var(--radius);
-  margin-bottom: 8px; cursor: pointer; transition: 0.2s;
-}
-.opt-label:hover { background: var(--surface-soft); }
-input[type="radio"] { width: 18px; height: 18px; margin: 0; }
-#timer { font-weight: 700; font-size: 18px; color: #f59e0b; }
-.alert-box {
-  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
-  padding: 12px; border-radius: var(--radius); margin-bottom: 16px; display: none;
-}
+
+body { background:#f1f5f9; font-family:'Noto Serif Bengali', sans-serif; margin:0; padding:20px; color:var(--ink); }
+#app { width:100%; max-width:980px; margin:0 auto; padding-bottom:60px; }
+
+.site-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; margin-bottom:28px; }
+.site-brand { display:flex; align-items:center; gap:14px; }
+.site-brand-icon { width:50px; height:50px; border-radius:18px; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; box-shadow:0 8px 20px rgba(15,23,42,0.18); }
+.site-brand-text h1 { margin:0; font-size:clamp(22px,3vw,30px); letter-spacing:-0.03em; }
+.site-brand-text p { margin:4px 0 0; color:var(--muted); font-size:14px; }
+
+.panel { background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:28px; margin-bottom:24px; border:1px solid var(--line); }
+.panel h2 { margin:0 0 6px; font-size:clamp(20px,2.4vw,26px); letter-spacing:-0.02em; }
+.panel p { margin:0; color:var(--muted); font-size:14px; line-height:1.6; }
+.panel-row { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
+
+.input-f { width:100%; padding:11px 14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); color:var(--ink); font-size:14px; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; -webkit-appearance:none; }
+.input-f:focus { border-color:var(--blue); outline:none; background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+.input-f::placeholder { color:#94a3b8; }
+.form-group { margin-bottom:14px; }
+.form-group label { display:block; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); margin-bottom:6px; }
+.form-group .input-f { margin:0; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-row.single { grid-template-columns:1fr; }
+
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 20px; border-radius:var(--radius); font-weight:700; font-size:14px; font-family:inherit; transition:all 0.2s var(--ease-spring); border:1px solid transparent; cursor:pointer; text-decoration:none; }
+.btn:hover { transform:translateY(-1px); }
+.btn:active { transform:translateY(0); }
+.btn.primary { background:var(--blue); color:#fff; box-shadow:0 6px 14px rgba(37,99,235,0.22); }
+.btn.primary:hover { background:var(--blue-dark); }
+.btn.secondary { background:var(--surface); color:var(--ink); border-color:var(--line); }
+.btn.secondary:hover { border-color:var(--blue); color:var(--blue); }
+.btn.danger { background:#ef4444; color:#fff; }
+.btn.danger:hover { background:#dc2626; }
+.btn.muted { background:var(--surface-soft); color:var(--muted); border-color:var(--line); }
+.btn.muted:hover { color:var(--ink); }
+.btn-w { background:#eab308; color:#fff; border-color:#eab308; }
+.btn-w:hover { background:#ca8a04; }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+
+.admin-fab { position:fixed; right:24px; bottom:24px; width:48px; height:48px; border-radius:50%; border:none; background:var(--ink); color:#fff; font-size:20px; cursor:pointer; box-shadow:0 8px 24px rgba(15,23,42,0.22); display:flex; align-items:center; justify-content:center; z-index:1000; transition:all 0.2s var(--ease-spring); }
+.admin-fab:hover { transform:scale(1.08); }
+.admin-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; background:rgba(37,99,235,0.1); color:var(--blue); }
+
+.admin-card { background:var(--surface-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:22px; margin-bottom:18px; }
+.admin-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+.admin-card-head h3 { margin:0; font-size:15px; font-weight:800; letter-spacing:-0.01em; display:flex; align-items:center; gap:8px; color:var(--ink); }
+.admin-card-head h3 .icon { width:28px; height:28px; border-radius:8px; background:rgba(37,99,235,0.1); color:var(--blue); display:flex; align-items:center; justify-content:center; font-size:13px; }
+
+.student-table { width:100%; border-collapse:collapse; margin-top:4px; }
+.student-table th { background:var(--surface); color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:10px 12px; border:1px solid var(--line); text-align:left; }
+.student-table td { border:1px solid var(--line); padding:10px 12px; font-size:14px; }
+.student-table tr:hover td { background:var(--surface); }
+.student-table .del-btn { background:none; border:none; cursor:pointer; color:#ef4444; font-size:14px; padding:4px 8px; border-radius:6px; transition:background 0.15s; font-weight:bold; }
+.student-table .del-btn:hover { background:#fee2e2; }
+
+.section-eyebrow { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--blue); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.section-eyebrow::after { content:''; flex:1; height:1px; background:var(--line); }
+
+@media(max-width:720px){ .form-row{grid-template-columns:1fr;} .panel{padding:20px;} .btn-row{flex-direction:column;} .btn-row .btn{width:100%;} } 
+
+#exam-screen, #summary-screen, #admin-screen, #login-screen { display:none; }
+.top-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; padding:15px 20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
+.time-left { font-size:18px; font-weight:bold; color:#dc2626; }
+
+#progress-wrap { background:#fff; border-radius:10px; padding:10px 15px; margin-bottom:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
+#progress-track { background:#e2e8f0; border-radius:99px; height:8px; overflow:hidden; margin-bottom:6px; }
+#progress-fill { height:100%; width:0%; border-radius:99px; background:#dc2626; transition:width 0.4s ease, background 0.4s; }
+#progress-text { font-size:13px; font-weight:bold; color:#475569; display:flex; justify-content:space-between; }
+#progress-text span { color:#0f172a; font-size:14px; }
+
+.pdf-container { width:100%; }
+#pdf-wrap { background:transparent; width:100%; box-shadow:none; font-family:'Noto Serif Bengali', sans-serif; }
+.pdf-section { width:100%; padding:0; background:transparent; }
+.exam-header { display:none; }
+.pdf-section-break { display:none; }
+.page-questions { display:flex; flex-direction:column; gap:10px; }
+
+.q-block { background:#fff; border-radius:12px; padding:13px 15px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.07); font-size:15px; line-height:1.55; break-inside:avoid; page-break-inside:avoid; }
+.q-txt { font-weight:bold; margin-bottom:6px; color:#1e293b; }
+.stim { font-style:italic; border-left:3px solid #64748b; padding-left:8px; margin-bottom:6px; background:#f8fafc; color:#334155; font-size:14px; }
+.stmts { margin:4px 0 6px 12px; font-size:14px; }
+.opts { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:4px; }
+.opts label { display:flex; align-items:flex-start; cursor:pointer; padding:8px 10px; border-radius:8px; border:1.5px solid #e2e8f0; transition:0.2s; font-size:14px; background:#fafafa; }
+.opts label:hover { background:#f1f5f9; border-color:#94a3b8; }
+.opts input { margin-right:8px; margin-top:3px; cursor:pointer; flex-shrink:0; }
+@media (max-width:500px) { .opts { grid-template-columns:1fr; } }
+
+#pdf-wrap.pdf-mode { width:794px; background:#fff; box-shadow:none; }
+#pdf-wrap.pdf-mode .pdf-section { width:794px; padding:15px 22px 8px; box-sizing:border-box; background:#fff; }
+#pdf-wrap.pdf-mode .exam-header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:5px; margin-bottom:8px; }
+#pdf-wrap.pdf-mode .exam-header-center { flex:1; text-align:center; }
+#pdf-wrap.pdf-mode .exam-header h1 { margin:0; font-size:17px; letter-spacing:1px; }
+#pdf-wrap.pdf-mode .exam-header p { margin:2px 0 0; font-size:12px; font-weight:bold; }
+#pdf-wrap.pdf-mode .pdf-section-break { display:block; height:0; page-break-before:always; break-before:page; }
+#pdf-wrap.pdf-mode .page-questions { column-count:2; column-gap:18px; display:block; }
+#pdf-wrap.pdf-mode .q-block { font-size:12px; line-height:1.38; margin-bottom:5px; padding:4px 5px; background:transparent; box-shadow:none; border-radius:0; }
+#pdf-wrap.pdf-mode .q-txt { margin-bottom:2px; font-size:12px; }
+#pdf-wrap.pdf-mode .stmts { margin:2px 0 3px 10px; font-size:11.5px; }
+#pdf-wrap.pdf-mode .stim { font-size:11.5px; padding-left:6px; margin-bottom:3px; }
+#pdf-wrap.pdf-mode .opts { grid-template-columns:1fr 1fr; gap:2px; margin-top:2px; }
+#pdf-wrap.pdf-mode .opts label { padding:2px 4px; border:1px solid transparent; border-radius:5px; font-size:11.5px; background:transparent; }
+
+.student-badge { color:#dc2626; font-size:12px; margin-top:3px; font-weight:bold; background:#fee2e2; padding:2px 10px; border-radius:20px; display:inline-block; }
+.ans-c { background:#dcfce7!important; border-color:#86efac!important; color:#166534; font-weight:bold; }
+.ans-w { background:#fee2e2!important; border-color:#fca5a5!important; color:#991b1b; text-decoration:line-through; }
+.stat-flex { display:flex; justify-content:center; gap:30px; margin:20px 0; font-size:18px; font-weight:bold; }
+.stat-c { color:#166534; }
+.stat-w { color:#991b1b; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { border: 1px solid #cbd5e1; padding: 10px; font-size: 14px; }
+th { background-color: #f8fafc; }
+
+.score-circle-wrap { display: flex; justify-content: center; align-items: center; margin: 25px 0; }
+.score-circle { width: 130px; height: 130px; border: 5px solid #dc2626; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #dc2626; transform: rotate(-8deg); box-shadow: 2px 5px 15px rgba(220, 38, 38, 0.15); background: transparent; }
+.score-val { font-size: 40px; font-weight: 900; line-height: 1; font-family: 'Comic Sans MS', cursive, sans-serif; }
+.score-divider { width: 60px; height: 4px; background: #dc2626; margin: 4px 0; border-radius: 3px; }
+
+.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); padding: 15px; }
+.alert-box { background: #fff; padding: 30px 20px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.alert-box.show { transform: scale(1); opacity: 1; }
+.alert-icon { font-size: 45px; margin-bottom: 15px; line-height: 1; }
+.alert-msg { font-size: 16px; color: #334155; margin-bottom: 25px; line-height: 1.5; font-weight: 600; }
+.alert-btn { background: #0f172a; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
+.alert-btn:hover { background: #334155; }
+.flex-btns { display: flex; gap: 10px; }
 </style>
 </head>
 <body>
-
-<div class="container">
-  <div id="loading-state" class="card" style="text-align:center; padding:40px;">
-    <i class="fas fa-circle-notch fa-spin" style="font-size:32px; color:var(--blue);"></i>
-    <p style="margin-top:16px; color:var(--muted);">পরীক্ষার ডেটা লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...</p>
-  </div>
-
-  <div id="no-id-state" class="card" style="display:none; text-align:center;"></div>
-
-  <div id="login-screen" class="card" style="display:none;">
-    <h2 id="portal-title" style="margin-top:0; margin-bottom:6px; text-align:center;">অনলাইন পরীক্ষা</h2>
-    <p id="portal-duration" style="text-align:center; color:var(--muted); margin-bottom:24px; font-weight:700;"></p>
-    
-    <div id="login-alert" class="alert-box"></div>
-
-    <label>আপনার নাম লিখুন <span>*</span></label>
-    <input type="text" id="uname" class="input-f" placeholder="e.g. Md. Shaikh Alam">
-
-    <label>স্টুডেন্ট আইডি <span>*</span></label>
-    <input type="text" id="uid" class="input-f" placeholder="e.g. 101">
-
-    <label>পরীক্ষার অ্যাক্সেস পাসওয়ার্ড <span>*</span></label>
-    <input type="password" id="upass" class="input-f" placeholder="🔑 Enter Exam Password">
-
-    <button class="btn" onclick="verifyAndStart()"><i class="fas fa-play"></i> পরীক্ষা শুরু করুন</button>
-  </div>
-
-  <div id="exam-screen" style="display:none;">
-    <div class="top-bar">
-      <span id="live-student-info" style="font-weight:700;"></span>
-      <div id="timer">00:00</div>
+<div id="app">
+  <div class="site-header">
+    <div class="site-brand">
+      <div class="site-brand-icon">E</div>
+      <div class="site-brand-text">
+        <h1>Online Exam</h1>
+        <p>Login, admin settings and result review in a cleaner interface.</p>
+      </div>
     </div>
-    <div id="questions-area"></div>
-    <button class="btn" onclick="submitExam()" style="background:#10b981;"><i class="fas fa-check-circle"></i> উত্তরপত্র জমা দিন</button>
+    <button class="admin-fab" id="admin-fab" onclick="openAdmin()" title="Admin panel">⚙️</button>
   </div>
 
-  <div id="summary-screen" class="card" style="display:none; text-align:center;">
-    <h2 style="color:#10b981; margin-top:0;"><i class="fas fa-trophy"></i> পরীক্ষা সম্পন্ন হয়েছে!</h2>
-    <div style="font-size:48px; font-weight:800; margin:20px 0;" id="score-display">0 / 0</div>
-    <p id="status-text" style="color:var(--muted); font-size:16px; margin-bottom:24px;"></p>
-    <button class="btn" onclick="location.reload()" style="background:var(--ink);"><i class="fas fa-redo"></i> রিফ্রেশ করুন</button>
+  <div class="overlay" id="custom-alert">
+    <div class="alert-box" id="alert-inner">
+      <div class="alert-icon" id="alert-icon">🔔</div>
+      <div class="alert-msg" id="alert-msg">Message</div>
+      <button class="alert-btn" onclick="closeAlert()">OK</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="custom-confirm">
+    <div class="alert-box" id="confirm-inner">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-msg" id="confirm-msg">আপনি কি নিশ্চিত?</div>
+      <div class="flex-btns">
+        <button class="alert-btn" style="background:#dc2626;" onclick="executeConfirm()">হ্যাঁ, মুছুন</button>
+        <button class="alert-btn" style="background:#64748b;" onclick="closeConfirm()">না</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="admin-login-modal">
+    <div class="alert-box" id="admin-login-box" style="max-width:420px;">
+      <div class="alert-icon">🔐</div>
+      <div class="alert-msg">এডমিন পাসওয়ার্ড দিন</div>
+      <input type="password" id="admin-password" class="input-f" placeholder="Password">
+      <button class="alert-btn" onclick="unlockAdmin()">Unlock Admin</button>
+      <button class="alert-btn" style="background:#64748b; margin-top:10px;" onclick="closeAdminModal()">Cancel</button>
+    </div>
+  </div>
+
+  <div id="admin-screen" class="panel">
+    <div class="panel-row" style="margin-bottom:26px;">
+      <div>
+        <div class="section-eyebrow">⚙️ Control Panel</div>
+        <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
+        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
+      </div>
+      <span class="admin-badge">🔓 Admin Mode</span>
+    </div>
+
+    <div class="admin-card" id="share-link-card" style="display:none; border-color:var(--blue);">
+      <div class="admin-card-head">
+        <h3><span class="icon" style="background:var(--blue); color:#fff;">📤</span> শেয়ার লিংক</h3>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">স্টুডেন্টদের পরীক্ষা দেওয়ার জন্য নিচের লিংকটি কপি করে শেয়ার করুন।</p>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="share-url-input" class="input-f" readonly style="background:#fff; cursor:text;">
+        <button class="btn secondary" onclick="copyShareLink()">📋 Copy</button>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head">
+        <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
+      </div>
+      <div class="form-group">
+        <label>Google Apps Script URL (ঐচ্ছিক - রেজাল্ট সেভ করার জন্য)</label>
+        <input type="text" id="gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0; opacity:0.5;">
+          <label>পরীক্ষার পাসওয়ার্ড (Admin প্যানেল থেকে সেট করুন)</label>
+          <input type="text" id="exam-pass" class="input-f" placeholder="Controller থেকে নিয়ন্ত্রিত" disabled>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>পরীক্ষার সময় (মিনিট)</label>
+          <input type="number" id="admin-time" class="input-f" placeholder="যেমন: 30">
+        </div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-head">
+        <h3><span class="icon">🌍</span> পাবলিক এক্সেস মোড</h3>
+      </div>
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0;">
+        <input type="checkbox" id="public-mode-toggle" style="width:18px; height:18px; cursor:pointer;" onchange="togglePublicMode()">
+        <span style="font-weight:600; color:var(--ink);">যে কেউ এই লিংক দিয়ে পরীক্ষা দিতে পারবে</span>
+      </label>
+      <p style="font-size:12px; color:var(--muted); margin:8px 0 0; line-height:1.5;">এটি সিলেক্ট থাকলে স্টুডেন্ট আইডি দরকার হবে না।</p>
+    </div>
+
+    <div class="admin-card" id="student-section" style="display:none; opacity:0.5;">
+      <div class="admin-card-head">
+        <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন (Controller থেকে নিয়ন্ত্রিত)</h3>
+      </div>
+      <p style="font-size:12px;">স্টুডেন্ট আইডি এখন exam_controller.html থেকে সরাসরি অ্যাড করা যায়।</p>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save Local Config</button>
+      <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
+    </div>
+  </div>
+
+  <div id="loading-screen" class="panel" style="text-align: center; padding: 50px 20px;">
+    <div id="loading-state">
+      <h2 style="color: var(--blue);"><i class="fas fa-spinner fa-spin"></i> Loading Exam Data...</h2>
+      <p>অনুগ্রহ করে অপেক্ষা করুন।</p>
+    </div>
+    <div id="no-id-state" style="display:none;">
+      <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> কোনো Exam ID পাওয়া যায়নি!</h3>
+      <p style="margin-bottom:20px; color:var(--muted);">পরীক্ষা দিতে আপনার Exam ID টি নিচে প্রবেশ করান অথবা সঠিক লিংকে ক্লিক করুন।</p>
+      <div style="max-width:320px; margin:0 auto; display:flex; gap:10px;">
+         <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam ID (ex: ex_...)">
+         <button class="btn primary" onclick="manualLoadExam()">Load</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="login-screen" class="panel">
+    <div class="panel-row" style="align-items:flex-start;">
+      <div>
+        <h2 id="portal-title">পরীক্ষায় লগইন করুন</h2>
+        <p id="login-desc">নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম, আইডি ও পাসওয়ার্ড দিন।</p>
+      </div>
+    </div>
+    <div class="form-row single">
+      <input type="text" id="uname" class="input-f" placeholder="আপনার নাম">
+      <input type="text" id="uid" class="input-f" placeholder="স্টুডেন্ট আইডি" id="uid-field">
+      <input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড">
+    </div>
+    <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+  </div>
+
+  <div id="exam-screen">
+    <div class="top-bar">
+      <span class="time-left">সময় বাকি: <span id="timer">00:00</span></span>
+      <button class="btn" id="submit-btn" style="margin:0; padding:10px 20px; width:auto;" onclick="submitExam()">জমা দিন</button>
+    </div>
+    <div id="progress-wrap">
+      <div id="progress-track"><div id="progress-fill"></div></div>
+      <div id="progress-text">
+        <span>উত্তর দেওয়া হয়েছে: <span id="prog-done">০</span></span>
+        <span>বাকি আছে: <span id="prog-left">০</span></span>
+      </div>
+    </div>
+    <div class="pdf-container">
+      <div id="pdf-wrap">
+        <div class="pdf-section" id="page1">
+          <div class="exam-header">
+            <div id="pdf-dummy-space" style="display:none; width:80px;"></div>
+            <div class="exam-header-center">
+              <h1 id="main-title">পরীক্ষা</h1>
+              <p id="main-meta"></p>
+              <div id="student-name-display" class="student-badge"></div>
+            </div>
+            <div id="pdf-score-wrap" class="score-circle-wrap" style="display:none; margin:0; width:80px; justify-content:flex-end;">
+              <div class="score-circle" style="width:75px; height:75px; border-width:3px; box-shadow:none;">
+                <div class="score-val" id="pdf-s-score-disp" style="font-size:22px;">0</div>
+                <div class="score-divider" style="width:30px; height:2px; margin:2px 0;"></div>
+                <div class="score-val" id="pdf-s-total-disp" style="font-size:22px;">0</div>
+              </div>
+            </div>
+          </div>
+          <div class="page-questions" id="sec1-q"></div>
+        </div>
+        <div class="pdf-section-break" id="page-break"></div>
+        <div class="pdf-section" id="page2" style="display:none;">
+          <div class="page-questions" id="sec2-q"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="summary-screen" class="summary-box">
+    <div class="panel" style="text-align:center;">
+      <h2 style="color:#10b981; margin-bottom: 20px;"><i class="fas fa-trophy"></i> পরীক্ষার ফলাফল</h2>
+      <div class="stat-flex">
+        <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
+        <div class="stat-w">ভুল: <span id="s-w">0</span></div>
+        <div>স্কিপড: <span id="s-s">0</span></div>
+      </div>
+      <div class="score-circle-wrap">
+        <div class="score-circle">
+          <div class="score-val" id="s-score-disp">0</div>
+          <div class="score-divider"></div>
+          <div class="score-val" id="s-total-disp">0</div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:20px;">
+        <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
+        <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-let examData = null;
-let qd = [];
-let userAnswers = {};
-let tInt = null;
-const urlParams = new URLSearchParams(window.location.search);
-const examId = urlParams.get('examId');
+// ── 1. Utilities and Alerts ──
+let confirmCallback = null;
+function closeAllOverlays() {
+  document.getElementById('custom-alert').style.display = 'none';
+  document.getElementById('custom-confirm').style.display = 'none';
+  document.getElementById('admin-login-modal').style.display = 'none';
+}
+function showAlert(msg, icon='🔔') {
+  document.getElementById('alert-msg').innerText = msg;
+  document.getElementById('alert-icon').innerText = icon;
+  const overlay = document.getElementById('custom-alert');
+  const box = document.getElementById('alert-inner');
+  overlay.style.display = 'flex';
+  setTimeout(() => box.classList.add('show'), 10);
+}
+function closeAlert() {
+  const box = document.getElementById('alert-inner');
+  box.classList.remove('show');
+  setTimeout(() => document.getElementById('custom-alert').style.display = 'none', 300);
+}
+function showConfirm(msg, callback) {
+  document.getElementById('confirm-msg').innerText = msg;
+  confirmCallback = callback;
+  const overlay = document.getElementById('custom-confirm');
+  const box = document.getElementById('confirm-inner');
+  overlay.style.display = 'flex';
+  setTimeout(() => box.classList.add('show'), 10);
+}
+function closeConfirm() {
+  const box = document.getElementById('confirm-inner');
+  box.classList.remove('show');
+  setTimeout(() => document.getElementById('custom-confirm').style.display = 'none', 300);
+  confirmCallback = null;
+}
+function executeConfirm() {
+  if(confirmCallback) confirmCallback();
+  closeConfirm();
+}
 
-window.onload = async () => {
-  if(!examId) {
+// ── 2. Global State ──
+let examData, qd, totalQ, builderDurationMin, finalDuration;
+let tInt;
+let activeStudentId = "";
+let isPublicMode = false;
+const ADMIN_PW_KEY = 'civil_admin_pw';
+const DEFAULT_PW = 'fec2024';
+let adminUnlocked = sessionStorage.getItem('civil_admin') === '1';
+
+// ── 3. Initialization & GitHub Fallback Fetch ──
+window.onload = async function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const examId = urlParams.get('examId');
+  const localExamData = localStorage.getItem("shared_exam_data");
+
+  // Local Preview Logic (If testing before syncing)
+  if (!examId) {
+    if (localExamData) {
+      try {
+        const parsedLocal = JSON.parse(localExamData);
+        examData = parsedLocal;
+        setupExamEnvironment();
+        localStorage.removeItem("shared_exam_data");
+        return;
+      } catch (e) { console.error("Local data parse error", e); }
+    }
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('no-id-state').innerHTML = `<h3>Invalid URL</h3><p>কোনো পরীক্ষার আইডি পাওয়া যায়নি।</p>`;
     document.getElementById('no-id-state').style.display = 'block';
     return;
   }
 
+  // --- GitHub Fetch Logic with API Fallback (Fixes "Exam Not Found" delay) ---
   try {
-    // 1st Fetch: Try GitHub Raw JSON
+    // 1st Attempt: Fetch from Raw CDN
     let res = await fetch(`https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json?_=${Date.now()}`);
     let data = res.ok ? await res.json() : null;
     let foundExam = data ? (data.exams || []).find(e => e.id === examId) : null;
 
-    // 2nd Fetch: Fallback directly to GitHub API if raw CDN is delayed
+    // 2nd Attempt: If not found in CDN, fallback to immediate GitHub API
     if (!foundExam) {
       const apiRes = await fetch(`https://api.github.com/repos/shaikh800/shaikh800.github.io/contents/civil_data.json?_=${Date.now()}`);
       if (apiRes.ok) {
@@ -138,112 +444,353 @@ window.onload = async () => {
 
     if (!foundExam) {
       document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('no-id-state').innerHTML = `<h3 style='color:#ef4444;'>Exam Not Found</h3><p>এই আইডি দিয়ে কোনো পরীক্ষা তৈরি হয়নি অথবা আপডেটের কাজ চলছে।</p>`;
+      document.getElementById('no-id-state').innerHTML = `
+        <h3 style='color:#ef4444; margin-bottom:10px;'>Exam Not Found</h3>
+        <p style='color:var(--muted); margin-bottom:20px;'>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি। আইডিটি সঠিক কি না চেক করুন অথবা কিছুক্ষণ পর চেষ্টা করুন।</p>
+        <button class='btn secondary' onclick='window.location.href="model_test.html"'>Back</button>
+      `;
       document.getElementById('no-id-state').style.display = 'block';
       return;
     }
 
     examData = foundExam.examData;
-    qd = examData.questions || [];
+    setupExamEnvironment();
 
-    // Initialize Login UI
-    document.getElementById('portal-title').innerText = examData.title;
-    document.getElementById('portal-duration').innerText = `সময়সীমা: ${examData.duration}`;
+  } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'block';
-
-  } catch(e) {
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('no-id-state').innerHTML = `<h3>Connection Error</h3><p>সার্ভার থেকে ডেটা আনতে সমস্যা হচ্ছে।</p>`;
+    document.getElementById('no-id-state').innerHTML = `
+        <h3 style='color:#ef4444; margin-bottom:10px;'>Network Error</h3>
+        <p style='color:var(--muted); margin-bottom:20px;'>সার্ভার থেকে ডেটা লোড করা যাচ্ছে না। আপনার ইন্টারনেট কানেকশন চেক করুন।</p>
+        <button class='btn secondary' onclick='window.location.reload()'>Reload</button>
+      `;
     document.getElementById('no-id-state').style.display = 'block';
   }
 };
 
-function verifyAndStart() {
+function setupExamEnvironment() {
+  qd = examData.questions;
+  totalQ = qd.length;
+
+  const durationStr = examData.duration || "30";
+  const durationMatch = String(durationStr).match(/\d+/);
+  builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
+  
+  finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+
+  // Title Update
+  document.getElementById("portal-title").innerText = examData.title;
+  
+  // Public mode Check from JSON Data (Override local storage if JSON has allowedIds)
+  isPublicMode = localStorage.getItem('public_mode') === '1' || (examData.allowedIds && examData.allowedIds.length === 0);
+  updateLoginScreen();
+
+  initializeExamUI();
+
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'block';
+}
+
+function manualLoadExam() {
+  const val = document.getElementById('manual-exam-id').value.trim();
+  if(!val) return showAlert("দয়া করে একটি Exam ID দিন!", "⚠️");
+  window.location.href = "?examId=" + val;
+}
+
+function initializeExamUI() {
+  document.getElementById("main-title").innerText = examData.title;
+  document.title = examData.title;
+  document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+  document.getElementById("s-total-disp").innerText = totalQ;
+  document.getElementById("pdf-s-total-disp").innerText = totalQ;
+  document.getElementById("timer").innerText = `${finalDuration}:00`;
+
+  const half = Math.ceil(totalQ / 2);
+  renderSection('sec1-q', 0, half);
+  renderSection('sec2-q', half, totalQ);
+  if(totalQ > half) { document.getElementById("page2").style.display = "block"; }
+
+  document.getElementById('prog-left').textContent = totalQ;
+  document.getElementById('prog-done').textContent = '০';
+  document.getElementById('progress-fill').style.width = '0%';
+
+  document.querySelectorAll('#sec1-q input[type="radio"], #sec2-q input[type="radio"]').forEach(r => {
+    r.addEventListener('change', updateProgress);
+  });
+
+  setTimeout(() => {
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise().catch((e) => console.warn("MathJax:", e));
+    }
+  }, 500);
+}
+
+function renderSection(containerId, start, end) {
+  let html = "";
+  for(let i = start; i < end && i < totalQ; i++){
+    const q = qd[i];
+    let stimHtml = q.stim ? `<div class="stim">${q.stim}</div>` : "";
+    let stHtml = q.stmts ? `<div class="stmts">i. ${q.stmts[0]||''}<br>ii. ${q.stmts[1]||''}<br>iii. ${q.stmts[2]||''}<br>নিচের কোনটি সঠিক?</div>` : "";
+    let oHtml = q.opts.map((o,j) => `<label id="lbl-${i}-${j}"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("");
+    html += `<div class="q-block" id="qb-${i}"><div class="q-txt">${i+1}. ${q.q}</div>${stimHtml}${stHtml}<div class="opts">${oHtml}</div></div>`;
+  }
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function updateProgress() {
+  let done = 0;
+  for(let i = 0; i < totalQ; i++){
+    if(document.querySelector(`input[name="q${i}"]:checked`)) done++;
+  }
+  const left = totalQ - done;
+  const pct = (done / totalQ) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-fill').style.background = pct === 100 ? '#16a34a' : pct >= 50 ? '#eab308' : '#dc2626';
+  document.getElementById('prog-done').textContent = done;
+  document.getElementById('prog-left').textContent = left;
+}
+
+// ── 4. Admin Functions ──
+function openAdmin() {
+  closeAllOverlays();
+  if (adminUnlocked) return showAdminScreen(); 
+  const modal = document.getElementById('admin-login-modal');
+  const box = document.getElementById('admin-login-box');
+  modal.style.display = 'flex';
+  setTimeout(() => box.classList.add('show'), 10);
+}
+function closeAdminModal() {
+  const box = document.getElementById('admin-login-box');
+  box.classList.remove('show');
+  setTimeout(() => document.getElementById('admin-login-modal').style.display = 'none', 300);
+}
+function unlockAdmin() {
+  const entered = document.getElementById('admin-password').value.trim();
+  const saved = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+  if (entered === saved) {
+    adminUnlocked = true;
+    sessionStorage.setItem('civil_admin', '1');
+    closeAdminModal();
+    showAdminScreen();
+  } else {
+    showAlert('ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', '❌');
+  }
+}
+function showAdminScreen() {
+  closeAllOverlays();
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'none'; 
+  
+  document.getElementById('admin-screen').style.display = 'block';
+  document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
+  
+  document.getElementById('public-mode-toggle').checked = isPublicMode;
+  
+  let defaultTime = typeof builderDurationMin !== 'undefined' ? builderDurationMin : 30;
+  document.getElementById('admin-time').value = localStorage.getItem('admin_time') || defaultTime;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentExamId = urlParams.get('examId');
+  if (currentExamId) {
+    document.getElementById('share-link-card').style.display = 'block';
+    const shareUrl = window.location.origin + window.location.pathname + "?examId=" + currentExamId;
+    document.getElementById('share-url-input').value = shareUrl;
+  } else {
+    document.getElementById('share-link-card').style.display = 'none';
+  }
+}
+
+function copyShareLink() {
+  const input = document.getElementById('share-url-input');
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(() => {
+    showAlert('পরীক্ষার লিংক কপি করা হয়েছে!', '✅');
+  }).catch(err => {
+    showAlert('লিংক কপি করা যায়নি!', '❌');
+  });
+}
+
+function exitAdmin() {
+  document.getElementById('admin-screen').style.display = 'none';
+  
+  if (examData) {
+    document.getElementById('login-screen').style.display = 'block';
+    updateLoginScreen();
+    finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+    document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+    document.getElementById("timer").innerText = `${finalDuration}:00`;
+  } else {
+    document.getElementById('loading-screen').style.display = 'block';
+  }
+}
+
+function togglePublicMode() {
+  isPublicMode = document.getElementById('public-mode-toggle').checked;
+  localStorage.setItem('public_mode', isPublicMode ? '1' : '0');
+  showAlert(isPublicMode ? '✅ পাবলিক মোড চালু হয়েছে।' : '✅ প্রাইভেট মোড চালু হয়েছে।', '⚙️');
+}
+
+function updateLoginScreen() {
+  const idField = document.getElementById('uid');
+  const descField = document.getElementById('login-desc');
+  
+  if(isPublicMode || (examData.allowedIds && examData.allowedIds.length === 0)) {
+    idField.style.display = 'none';
+    descField.innerText = 'পাসওয়ার্ড দিয়ে পরীক্ষায় প্রবেশ করুন।';
+    idField.value = '';
+  } else {
+    idField.style.display = 'block';
+    descField.innerText = 'নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম, আইডি ও পাসওয়ার্ড দিন।';
+  }
+}
+
+async function saveAdminConfig() {
+  const url = document.getElementById('gas-url').value.trim();
+  const time = document.getElementById('admin-time').value.trim();
+  
+  if(url) localStorage.setItem('gas_url', url);
+  if(time) localStorage.setItem('admin_time', time);
+
+  showAlert('লোকাল কনফিগারেশন সেভ হয়েছে।', '✅');
+}
+
+// ── 5. Student Exam Flow (JSON Auth Logic) ──
+async function startExam(){
   const uname = document.getElementById("uname").value.trim();
   const uid = document.getElementById("uid").value.trim();
   const upass = document.getElementById("upass").value.trim();
-  const alertBox = document.getElementById("login-alert");
 
-  alertBox.style.display = "none";
-
-  if(!uname) { alertBox.innerText = "আপনার নাম লিখুন!"; alertBox.style.display = "block"; return; }
-  if(!uid) { alertBox.innerText = "আপনার স্টুডেন্ট আইডি দিন!"; alertBox.style.display = "block"; return; }
-
-  // Admin Security Validations
-  const targetPassword = examData.password || "";
+  if(!uname) return showAlert("আপনার নামটি লিখুন!", "👤");
+  
   const allowedIds = examData.allowedIds || [];
+  const targetPassword = examData.password || "";
+  const needsId = allowedIds.length > 0;
 
+  if(needsId && !uid) return showAlert("স্টুডেন্ট আইডি দিন!", "🔑");
+  if(targetPassword && !upass) return showAlert("পরীক্ষার পাসওয়ার্ড দিন!", "🔑");
+
+  const btn = document.getElementById('login-btn');
+  btn.innerText = "Checking Details...";
+  btn.disabled = true;
+
+  // Validate Password locally via JSON Data
   if(targetPassword && upass !== targetPassword) {
-    alertBox.innerText = "পরীক্ষার পাসওয়ার্ড ভুল হয়েছে!";
-    alertBox.style.display = "block";
-    return;
+    btn.innerText = "পরীক্ষা শুরু করুন";
+    btn.disabled = false;
+    return showAlert("পাসওয়ার্ড ভুল হয়েছে!", "❌");
   }
 
-  if(allowedIds.length > 0 && !allowedIds.includes(uid)) {
-    alertBox.innerText = "দুঃখিত, আপনার স্টুডেন্ট আইডিটি এই পরীক্ষার তালিকায় অনুমোদিত নয়!";
-    alertBox.style.display = "block";
-    return;
+  // Validate Student ID locally via JSON Data
+  if(needsId && !allowedIds.includes(uid)) {
+    btn.innerText = "পরীক্ষা শুরু করুন";
+    btn.disabled = false;
+    return showAlert("দুঃখিত, আপনার স্টুডেন্ট আইডিটি এই পরীক্ষার জন্য অনুমোদিত নয়!", "❌");
   }
 
-  // Pass validations, start the exam
-  document.getElementById("live-student-info").innerText = `পরীক্ষার্থী: ${uname} (ID: ${uid})`;
+  // Login Success
+  activeStudentId = uid || "Guest";
+  let stuName = uname; 
+  
+  document.getElementById("student-name-display").innerText = `নাম: ${stuName}` + (needsId ? ` | আইডি: ${uid}` : '');
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("exam-screen").style.display = "block";
-
-  renderQuestions();
-  startTimer(parseInt(examData.duration) || 30);
-}
-
-function renderQuestions() {
-  const container = document.getElementById("questions-area");
-  let html = '';
-  qd.forEach((q, qIndex) => {
-    html += `
-      <div class="card q-card">
-        <div class="q-title">${qIndex + 1}. ${q.q}</div>
-        <div>
-          ${q.opts.map((opt, oIndex) => `
-            <label class="opt-label">
-              <input type="radio" name="q_${qIndex}" value="${oIndex}" onclick="userAnswers[${qIndex}]=${oIndex}">
-              <span>${opt}</span>
-            </label>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  });
-  container.innerHTML = html;
-}
-
-function startTimer(minutes) {
-  let timeRemaining = minutes * 60;
+  
+  let t = finalDuration * 60;
   tInt = setInterval(() => {
-    timeRemaining--;
-    let m = Math.floor(timeRemaining / 60);
-    let s = timeRemaining % 60;
-    document.getElementById("timer").innerText = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-    if(timeRemaining <= 0) {
-      clearInterval(tInt);
-      submitExam();
-    }
+    t--;
+    let m = Math.floor(t/60), s = t%60;
+    document.getElementById("timer").innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+    if(t <= 0) { clearInterval(tInt); submitExam(); }
   }, 1000);
 }
 
-function submitExam() {
+async function submitExam(){
   clearInterval(tInt);
-  let score = 0;
-  qd.forEach((q, index) => {
-    if(userAnswers[index] !== undefined && userAnswers[index] === q.ans) {
-      score++;
-    }
-  });
+  const btn = document.getElementById('submit-btn');
+  btn.innerText = "Submitting...";
+  btn.disabled = true;
 
-  document.getElementById("score-display").innerText = `${score} / ${qd.length}`;
-  document.getElementById("status-text").innerText = `মোট প্রশ্ন সংখ্যা ${qd.length} টির মধ্যে আপনার ${score} টি সঠিক হয়েছে।`;
+  let c=0, w=0, s=0;
+  let wrongDetails = [];
+
+  qd.forEach((q,i)=>{
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    const correctLbl = document.getElementById(`lbl-${i}-${q.ans}`);
+    if(correctLbl) correctLbl.classList.add("ans-c");
+    
+    if(sel){
+      const v = parseInt(sel.value);
+      if(v === q.ans) c++;
+      else {
+        w++;
+        const wrongLbl = document.getElementById(`lbl-${i}-${v}`);
+        if(wrongLbl) wrongLbl.classList.add("ans-w");
+        wrongDetails.push(`Q${i+1} (দেওয়া: ${q.opts[v] || 'N/A'} | সঠিক: ${q.opts[q.ans] || 'N/A'})`);
+      }
+    } else {
+      s++;
+      wrongDetails.push(`Q${i+1} (এড়িয়ে গেছেন)`);
+    }
+    document.getElementsByName(`q${i}`).forEach(r => r.disabled = true);
+  });
 
   document.getElementById("exam-screen").style.display = "none";
   document.getElementById("summary-screen").style.display = "block";
+  document.getElementById("s-c").innerText = c;
+  document.getElementById("s-w").innerText = w;
+  document.getElementById("s-s").innerText = s;
+  
+  document.getElementById("s-score-disp").innerText = c;
+  document.getElementById("pdf-s-score-disp").innerText = c; 
+
+  // Google Sheets integration (Optional: Only works if gas_url is set by admin)
+  const url = localStorage.getItem('gas_url');
+  if(url && activeStudentId) {
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ 
+        action: 'submit', 
+        id: activeStudentId, 
+        name: document.getElementById("uname").value.trim(),
+        score: c, 
+        topic: examData.title,
+        details: wrongDetails.join(', ') || 'Perfect Score'
+      }),
+      headers: { 'Content-Type': 'text/plain' }
+    }).catch(e => console.error("Result sync failed:", e));
+  }
+}
+
+function reviewWithPdf(){
+  document.getElementById("summary-screen").style.display = "none";
+  document.getElementById("exam-screen").style.display = "block";
+  document.querySelector(".top-bar").style.display = "none";
+  document.getElementById("progress-wrap").style.display = "none";
+  document.getElementById("pdf-score-wrap").style.display = "flex";
+  document.getElementById("pdf-dummy-space").style.display = "block";
+  window.scrollTo(0,0);
+  dlPdf();
+}
+
+async function dlPdf(){
+  const wrap = document.getElementById("pdf-wrap");
+  wrap.classList.add('pdf-mode');
+  await new Promise(r => setTimeout(r, 350));
+
+  await html2pdf().set({
+    margin: 6.35, 
+    filename: `${examData.title}_Review.pdf`,
+    image: { type:'jpeg', quality:1 },
+    html2canvas: { scale:2, useCORS:true, scrollY:0, scrollX:0 },
+    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+    pagebreak: { mode:['css'], before:['#page-break'] }
+  }).from(wrap).save();
+
+  wrap.classList.remove('pdf-mode');
+  document.getElementById("progress-wrap").style.display = "block";
+  document.querySelector(".top-bar").style.display = "flex";
 }
 </script>
 </body>
