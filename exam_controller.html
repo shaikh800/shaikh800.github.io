@@ -4,280 +4,274 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Exam Controller</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">\n<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{--blue:#2563eb;--blue-dark:#1d4ed8;--ink:#0f172a;--muted:#64748b;--surface:#ffffff;--surface-soft:#f8fafc;--line:#e2e8f0;--radius:10px;--radius-lg:16px;--shadow:0 4px 16px rgba(15,23,42,0.07);}
 *{box-sizing:border-box;}
-body{background:#f1f5f9;font-family:'Noto Serif Bengali',sans-serif;margin:0;padding:20px;color:var(--ink);}\n.container{max-width:900px;margin:0 auto;}
+body{background:#f1f5f9;font-family:'Noto Serif Bengali',sans-serif;margin:0;padding:20px;color:var(--ink);}
+.container{max-width:900px;margin:0 auto;}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--line);}
-.header h1{margin:0;font-size:24px;}
-.card{background:var(--surface);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);margin-bottom:20px;}
-.btn{padding:10px 20px;border:none;border-radius:var(--radius);cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:8px;font-family:inherit;}
+.header h1{margin:0;font-size:24px;color:var(--ink);}
+.panel{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:20px;border:1px solid var(--line);}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);font-weight:bold;cursor:pointer;border:none;font-size:14px;transition:0.2s;}
 .btn-primary{background:var(--blue);color:#fff;}
 .btn-primary:hover{background:var(--blue-dark);}
+.btn-danger{background:#ef4444;color:#fff;}
 .btn-secondary{background:var(--surface-soft);color:var(--ink);border:1px solid var(--line);}
-.input-f{width:100%;padding:10px;border:1px solid var(--line);border-radius:var(--radius);margin-top:6px;margin-bottom:14px;font-family:inherit;font-size:14px;}
-.input-f:focus{outline:2px solid var(--blue);border-color:transparent;}
-label{font-weight:700;font-size:14px;color:var(--ink);}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.q-block{background:var(--surface-soft);padding:16px;border-radius:var(--radius);border:1px solid var(--line);margin-bottom:16px;position:relative;}
-.remove-q{position:absolute;top:16px;right:16px;color:#ef4444;cursor:pointer;}
-.exam-item{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid var(--line);}
-.exam-item:last-child{border-bottom:none;}
-#toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:#fff;padding:12px 24px;border-radius:var(--radius);display:none;z-index:1000;}
+.input-f{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);margin-bottom:12px;font-family:inherit;}
+.input-f:focus{border-color:var(--blue);outline:none;background:var(--surface);}
+label{font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-bottom:4px;display:block;}
+.exam-card{display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--surface-soft);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;transition:0.2s;}
+.exam-card:hover{border-color:var(--blue);}
+.exam-info h3{margin:0 0 4px;font-size:16px;}
+.exam-info p{margin:0;font-size:13px;color:var(--muted);}
+.exam-actions{display:flex;gap:8px;}
+#builder-section{display:none;}
+.q-block{background:var(--surface-soft);padding:16px;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;position:relative;}
+.q-block h4{margin:0 0 12px;font-size:14px;color:var(--blue);}
+.remove-q-btn{position:absolute;top:16px;right:16px;color:#ef4444;cursor:pointer;background:none;border:none;font-size:14px;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:50px;font-size:14px;display:none;z-index:1000;box-shadow:var(--shadow);}
+#loader{text-align:center;padding:40px;color:var(--muted);}
 </style>
 </head>
 <body>
-
 <div class="container">
   <div class="header">
-    <h1>Exam Controller Panel</h1>
-    <div id="auth-status"></div>
+    <h1><i class="fas fa-file-signature"></i> Exam Controller</h1>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <input type="password" id="gh-token" class="input-f" style="margin:0;width:200px;padding:8px 12px;" placeholder="GitHub Token" autocomplete="off">
+      <button class="btn btn-secondary" onclick="loadExamsFromGitHub()"><i class="fas fa-sync"></i> Sync</button>
+    </div>
   </div>
-
-  <div id="dashboard-section" class="card">
-    <div style="margin-bottom:16px;display:flex;gap:10px;">
-      <input type="password" id="gh-token" class="input-f" style="margin:0;" placeholder="Enter GitHub Personal Access Token...">
-      <button class="btn btn-primary" onclick="saveToken()">Connect</button>
+  <div id="loader"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Loading data...</p></div>
+  <div id="dashboard-section" style="display:none;">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="margin:0;font-size:18px;">Manage Exams</h2>
+        <button class="btn btn-primary" onclick="openBuilder()"><i class="fas fa-plus"></i> Create New</button>
+      </div>
+      <div id="exam-list"></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;margin-bottom:10px;">
-      <h2>All Exams</h2>
-      <button class="btn btn-primary" onclick="openBuilder()"><i class="fas fa-plus"></i> Create New Exam</button>
-    </div>
-    <div id="exam-list">Loading exams...</div>
   </div>
-
-  <div id="builder-section" class="card" style="display:none;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <h2>Create MCQ Exam</h2>
-      <button class="btn btn-secondary" onclick="closeBuilder()">Back to Dashboard</button>
-    </div>
-
-    <div class="grid-2">
-      <div><label>Exam Title</label><input type="text" id="exam-title" class="input-f" placeholder="e.g. Structural Analysis Quiz"></div>
-      <div><label>Duration (Minutes)</label><input type="number" id="exam-duration" class="input-f" value="30"></div>
-    </div>
-
-    <div class="grid-2">
-      <div><label>Exam Password</label><input type="text" id="exam-pass" class="input-f" placeholder="e.g. fec123 (Faka rakhle password lagbe na)"></div>
-      <div><label>Allowed Student IDs (Comma separated)</label><input type="text" id="exam-ids" class="input-f" placeholder="e.g. 101, 102, 105 (Faka rakhle jekeu dite parbe)"></div>
-    </div>
-
-    <div id="questions-container" style="margin-top:10px;"></div>
-
-    <div style="display:flex;justify-content:space-between;margin-top:20px;">
-      <button class="btn btn-secondary" onclick="addQuestionBlock()"><i class="fas fa-plus"></i> Add Question</button>
-      <button class="btn btn-primary" onclick="saveExam()"><i class="fas fa-save"></i> Save & Sync to GitHub</button>
+  <div id="builder-section">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="margin:0;font-size:18px;">Exam Builder</h2>
+        <button class="btn btn-secondary" onclick="closeBuilder()"><i class="fas fa-arrow-left"></i> Back</button>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+        <div><label>Exam Title</label><input type="text" id="exam-title" class="input-f" placeholder="Model Test 1"></div>
+        <div><label>Duration (Minutes)</label><input type="number" id="exam-duration" class="input-f" placeholder="30"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-top:16px;">
+        <div><label>Exam Password</label><input type="text" id="exam-pass" class="input-f" placeholder="e.g. fec123 (Optional)"></div>
+        <div><label>Allowed IDs (Comma separated)</label><input type="text" id="exam-ids" class="input-f" placeholder="e.g. 101, 102 (Optional)"></div>
+      </div>
+      
+      <div id="questions-container" style="margin-top:20px;"></div>
+      <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:20px;border-style:dashed;" onclick="addQuestionBlock()"><i class="fas fa-plus"></i> Add Question</button>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="saveExam()"><i class="fas fa-cloud-upload-alt"></i> Save & Publish</button>
+      </div>
     </div>
   </div>
 </div>
-
-<div id="toast"></div>
-
+<div class="toast" id="toast">Message</div>
 <script>
-const GITHUB_OWNER = 'shaikh800';
-const GITHUB_REPO = 'shaikh800.github.io';
-const GITHUB_FILE = 'civil_data.json';
-
-let fullGithubData = { semesters: {}, notices: [], exams: [] };
-let questionCount = 0;
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.innerText = msg; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 3000);
+const GITHUB_OWNER='shaikh800';
+const GITHUB_REPO='shaikh800.github.io';
+const GITHUB_FILE='civil_data.json';
+const GITHUB_BRANCH='main';
+let fullGithubData={semesters:{},notices:[],exams:[],updated:""};
+let questionCount=0;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.innerText=msg;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
 }
-
-function saveToken() {
-  const token = document.getElementById('gh-token').value.trim();
-  if(!token) return showToast("Token cannot be empty!");
-  sessionStorage.setItem('civil_gh_token', token);
-  showToast("Token Saved!");
-  loadExams();
+function generateId(){
+  return Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 }
-
-async function loadExams() {
-  const token = sessionStorage.getItem('civil_gh_token') || document.getElementById('gh-token').value.trim();
-  try {
-    const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${GITHUB_FILE}?_=${Date.now()}`);
-    if(res.ok) {
-      const data = await res.json();
-      fullGithubData = data;
-      if(!fullGithubData.exams) fullGithubData.exams = [];
+async function loadExamsFromGitHub(){
+  document.getElementById('loader').style.display='block';
+  document.getElementById('dashboard-section').style.display='none';
+  document.getElementById('builder-section').style.display='none';
+  const token=document.getElementById('gh-token').value.trim();
+  if(token) sessionStorage.setItem('civil_gh_token',token);
+  const url=`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`;
+  try{
+    const res=await fetch(url);
+    if(res.ok){
+      const data=await res.json();
+      fullGithubData={semesters:data.semesters||{},notices:data.notices||[],exams:data.exams||[],updated:data.updated||""};
+      renderExamList();
+      showToast("Data loaded!");
+    }else{
+      showToast("Failed to fetch.");
     }
-    renderExamList();
-  } catch(e) {
-    document.getElementById('exam-list').innerText = "Failed to load data file.";
+  }catch(e){
+    showToast("Network error.");
   }
+  document.getElementById('loader').style.display='none';
+  document.getElementById('dashboard-section').style.display='block';
 }
-
-function renderExamList() {
-  const container = document.getElementById('exam-list');
-  if(!fullGithubData.exams || fullGithubData.exams.length === 0) {
-    container.innerHTML = "<p style='color:var(--muted);'>No exams found. Click 'Create New Exam' to add one.</p>";
+function renderExamList(){
+  const list=document.getElementById('exam-list');
+  if(fullGithubData.exams.length===0){
+    list.innerHTML=`<p style="text-align:center;color:#64748b;">No exams found.</p>`;
     return;
   }
-  let html = '';
-  fullGithubData.exams.forEach((ex) => {
-    const liveLink = `https://mdshaikh.me/print/model_test.html?examId=${ex.id}`;
-    html += `
-      <div class="exam-item">
-        <div>
-          <strong>${ex.examData.title}</strong> <span style="color:var(--muted);font-size:12px;">(${ex.examData.duration})</span><br>
-          <small style="color:var(--blue);word-break:break-all;">${liveLink}</small>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${liveLink}');showToast('Link Copied!')"><i class="fas fa-copy"></i></button>
-          <button class="btn btn-secondary" style="color:#ef4444;" onclick="deleteExam('${ex.id}')"><i class="fas fa-trash"></i></button>
-        </div>
+  list.innerHTML=fullGithubData.exams.map(ex=>`
+    <div class="exam-card">
+      <div class="exam-info">
+        <h3>${ex.examData.title}</h3>
+        <p><i class="far fa-clock"></i> ${ex.examData.duration} | <i class="fas fa-list-ol"></i> ${ex.examData.questions.length} Qs | ID: ${ex.id}</p>
       </div>
-    `;
-  });
-  container.innerHTML = html;
+      <div class="exam-actions">
+        <button class="btn btn-secondary" onclick="copyLink('${ex.id}')"><i class="fas fa-link"></i> Copy</button>
+        <button class="btn btn-danger" onclick="deleteExam('${ex.id}')"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
 }
-
-function openBuilder() {
-  document.getElementById('dashboard-section').style.display = 'none';
-  document.getElementById('builder-section').style.display = 'block';
-  document.getElementById('exam-title').value = '';
-  document.getElementById('exam-duration').value = '30';
-  document.getElementById('exam-pass').value = '';
-  document.getElementById('exam-ids').value = '';
-  document.getElementById('questions-container').innerHTML = '';
-  questionCount = 0;
+function copyLink(id){
+  const link=`https://mdshaikh.me/print/model_test.html?examId=${id}`;
+  navigator.clipboard.writeText(link);
+  showToast("Link copied!");
+}
+function openBuilder(){
+  document.getElementById('dashboard-section').style.display='none';
+  document.getElementById('builder-section').style.display='block';
+  document.getElementById('exam-title').value='';
+  document.getElementById('exam-duration').value='30';
+  document.getElementById('exam-pass').value=''; 
+  document.getElementById('exam-ids').value=''; 
+  document.getElementById('questions-container').innerHTML='';
+  questionCount=0;
   addQuestionBlock();
 }
-
-function closeBuilder() {
-  document.getElementById('dashboard-section').style.display = 'block';
-  document.getElementById('builder-section').style.display = 'none';
+function closeBuilder(){
+  document.getElementById('builder-section').style.display='none';
+  document.getElementById('dashboard-section').style.display='block';
 }
-
-function addQuestionBlock() {
+function addQuestionBlock(){
   questionCount++;
-  const container = document.getElementById('questions-container');
-  const div = document.createElement('div');
-  div.className = 'q-block';
-  div.id = `q-block-${questionCount}`;
-  div.innerHTML = `
-    <i class="fas fa-trash remove-q" onclick="this.parentElement.remove()"></i>
-    <label>Question ${questionCount}</label>
-    <input type="text" class="input-f q-title" placeholder="Enter question description">
-    <div class="grid-2">
-      <div><label>Option 1</label><input type="text" class="input-f opt-0" placeholder="Option 1"></div>
-      <div><label>Option 2</label><input type="text" class="input-f opt-1" placeholder="Option 2"></div>
-      <div><label>Option 3</label><input type="text" class="input-f opt-2" placeholder="Option 3"></div>
-      <div><label>Option 4</label><input type="text" class="input-f opt-3" placeholder="Option 4"></div>
+  const container=document.getElementById('questions-container');
+  const div=document.createElement('div');
+  div.className='q-block';
+  div.id=`q-block-${questionCount}`;
+  div.innerHTML=`
+    <h4>Question ${questionCount}</h4>
+    <button class="remove-q-btn" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    <label>Question Text</label>
+    <input type="text" class="input-f q-title" placeholder="Type question...">
+    <label>Options</label>
+    <div class="options-grid">
+      <input type="text" class="input-f opt-0" placeholder="Option A (0)">
+      <input type="text" class="input-f opt-1" placeholder="Option B (1)">
+      <input type="text" class="input-f opt-2" placeholder="Option C (2)">
+      <input type="text" class="input-f opt-3" placeholder="Option D (3)">
     </div>
     <label>Correct Answer Index</label>
     <select class="input-f correct-ans">
-      <option value="0">Option 1</option>
-      <option value="1">Option 2</option>
-      <option value="2">Option 3</option>
-      <option value="3">Option 4</option>
+      <option value="0">Option A (0)</option>
+      <option value="1">Option B (1)</option>
+      <option value="2">Option C (2)</option>
+      <option value="3">Option D (3)</option>
     </select>
   `;
   container.appendChild(div);
 }
-
-async function saveExam() {
-  const token = sessionStorage.getItem('civil_gh_token') || document.getElementById('gh-token').value.trim();
-  if(!token) return showToast("Please enter and connect your GitHub token first!");
-
-  const title = document.getElementById('exam-title').value.trim();
-  const duration = document.getElementById('exam-duration').value.trim();
-  const examPass = document.getElementById('exam-pass').value.trim();
-  const allowedIdsStr = document.getElementById('exam-ids').value.trim();
-
+async function saveExam(){
+  const token=document.getElementById('gh-token').value.trim()||sessionStorage.getItem('civil_gh_token');
+  if(!token) return showToast("Token required!");
+  const title=document.getElementById('exam-title').value.trim();
+  const duration=document.getElementById('exam-duration').value.trim();
+  const examPass=document.getElementById('exam-pass').value.trim();
+  const allowedIdsStr=document.getElementById('exam-ids').value.trim();
+  
   const allowedIds = allowedIdsStr ? allowedIdsStr.split(',').map(id => id.trim()) : [];
-
-  if(!title) return showToast("Exam Title is required!");
-
-  const qBlocks = document.querySelectorAll('.q-block');
-  const questions = [];
-  let valid = true;
-
-  qBlocks.forEach(block => {
-    const qText = block.querySelector('.q-title').value.trim();
-    const o0 = block.querySelector('.opt-0').value.trim();
-    const o1 = block.querySelector('.opt-1').value.trim();
-    const o2 = block.querySelector('.opt-2').value.trim();
-    const o3 = block.querySelector('.opt-3').value.trim();
-    const ans = parseInt(block.querySelector('.correct-ans').value);
-
-    if(!qText || !o0 || !o1 || !o2 || !o3) valid = false;
-    questions.push({ q: qText, opts: [o0, o1, o2, o3], ans: ans });
+  
+  if(!title) return showToast("Title required!");
+  const qBlocks=document.querySelectorAll('.q-block');
+  const questions=[];
+  let valid=true;
+  qBlocks.forEach(block=>{
+    const qText=block.querySelector('.q-title').value.trim();
+    const o0=block.querySelector('.opt-0').value.trim();
+    const o1=block.querySelector('.opt-1').value.trim();
+    const o2=block.querySelector('.opt-2').value.trim();
+    const o3=block.querySelector('.opt-3').value.trim();
+    const ans=parseInt(block.querySelector('.correct-ans').value);
+    if(!qText||!o0||!o1||!o2||!o3) valid=false;
+    questions.push({q:qText,opts:[o0,o1,o2,o3],ans:ans});
   });
-
-  if(!valid) return showToast("Please fill all questions and option fields!");
-
-  const newExam = {
-    id: 'ex_' + Math.random().toString(36).substr(2, 9),
-    date: new Date().toISOString(),
-    examData: {
-      title: title,
-      duration: duration + " minutes",
+  if(!valid) return showToast("Fill all options!");
+  const newExam={
+    id:generateId(),
+    date:new Date().toISOString(),
+    examData:{
+      title:title,
+      duration:duration+" minutes",
       password: examPass,
       allowedIds: allowedIds,
-      questions: questions
+      questions:questions
     }
   };
-
   fullGithubData.exams.unshift(newExam);
   await pushToGitHub(token);
   closeBuilder();
 }
-
-async function deleteExam(id) {
-  if(!confirm("Are you sure you want to delete this exam?")) return;
-  const token = sessionStorage.getItem('civil_gh_token');
-  if(!token) return showToast("Token required to delete!");
-
-  fullGithubData.exams = fullGithubData.exams.filter(e => e.id !== id);
+async function deleteExam(id){
+  if(!confirm("Delete?")) return;
+  const token=document.getElementById('gh-token').value.trim()||sessionStorage.getItem('civil_gh_token');
+  if(!token) return showToast("Token required!");
+  fullGithubData.exams=fullGithubData.exams.filter(ex=>ex.id!==id);
   await pushToGitHub(token);
 }
-
-async function pushToGitHub(token) {
-  const btn = document.querySelector('.btn-primary');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Syncing...`;
-  btn.disabled = true;
-
-  fullGithubData.updated = new Date().toISOString();
-
-  try {
-    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-    let sha = null;
-    const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } });
-    if(g.ok) {
-      const j = await g.json();
-      sha = j.sha;
+async function pushToGitHub(token){
+  const btn=document.querySelector('.btn-primary');
+  const originalText=btn.innerHTML;
+  btn.innerHTML=`<i class="fas fa-spinner fa-spin"></i> Saving...`;
+  btn.disabled=true;
+  fullGithubData.updated=new Date().toISOString();
+  try{
+    const apiUrl=`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+    let sha=null;
+    const g=await fetch(apiUrl,{headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
+    if(g.ok){
+      const j=await g.json();
+      sha=j.sha;
     }
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(fullGithubData, null, 2))));
-    const put = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-      body: JSON.stringify({ message: 'Update exams via Controller', content, ...(sha ? { sha } : {}) })
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(fullGithubData,null,2))));
+    const put=await fetch(apiUrl,{
+      method:'PUT',
+      headers:{'Authorization':`token ${token}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body:JSON.stringify({message:'Update exams via Controller',content,...(sha?{sha}:{})})
     });
-
-    if(put.ok) {
-      showToast("Successfully Saved & Synced!");
+    if(put.ok){
+      showToast("Synced!");
       renderExamList();
-    } else {
-      showToast("GitHub push failed.");
+    }else{
+      showToast("Push failed.");
     }
-  } catch(e) {
-    showToast("Network profile error.");
+  }catch(e){
+    showToast("Network error.");
   }
-  btn.innerHTML = originalText;
-  btn.disabled = false;
+  btn.innerHTML=originalText;
+  btn.disabled=false;
 }
-
-window.onload = () => {
-  const savedToken = sessionStorage.getItem('civil_gh_token');
-  if(savedToken) {
-    document.getElementById('gh-token').value = savedToken;
-    loadExams();
+window.onload=()=>{
+  const savedToken=sessionStorage.getItem('civil_gh_token');
+  if(savedToken){
+    document.getElementById('gh-token').value=savedToken;
+    loadExamsFromGitHub();
+  }else{
+    document.getElementById('dashboard-section').style.display='block';
+    document.getElementById('loader').style.display='none';
   }
 };
 </script>
