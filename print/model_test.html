@@ -152,6 +152,16 @@ th { background-color: #f8fafc; }
   </div>
 </div>
 
+<div class="overlay" id="admin-login-modal">
+  <div class="alert-box" id="admin-login-box" style="max-width:420px;">
+    <div class="alert-icon">🔐</div>
+    <div class="alert-msg">এডমিন পাসওয়ার্ড দিন</div>
+    <input type="password" id="admin-password" class="input-f" placeholder="Password">
+    <button class="alert-btn" onclick="unlockAdmin()">Unlock Admin</button>
+    <button class="alert-btn" style="background:#64748b; margin-top:10px;" onclick="closeAdminModal()">Cancel</button>
+  </div>
+</div>
+
 <div id="admin-screen" class="panel" style="display:none;">
   <div class="panel-row">
     <div>
@@ -377,11 +387,38 @@ setTimeout(() => {
   }
 }, 500);
 
+const ADMIN_PW_KEY = 'civil_admin_pw';
+const DEFAULT_PW = 'fec2024';
+let adminUnlocked = sessionStorage.getItem('exam_admin') === '1';
 let tInt;
 let activeStudentId = "";
 let studentsList = [];
 
 function openAdmin() {
+  if (adminUnlocked) { return showAdminScreen(); }
+  document.getElementById('admin-login-modal').style.display = 'flex';
+  document.getElementById('admin-password').value = '';
+  setTimeout(() => document.getElementById('admin-password').focus(), 100);
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-login-modal').style.display = 'none';
+}
+
+function unlockAdmin() {
+  const entered = document.getElementById('admin-password').value.trim();
+  const saved = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+  if (entered === saved) {
+    adminUnlocked = true;
+    sessionStorage.setItem('exam_admin', '1');
+    closeAdminModal();
+    showAdminScreen();
+  } else {
+    showAlert('ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', '❌');
+  }
+}
+
+function showAdminScreen() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
