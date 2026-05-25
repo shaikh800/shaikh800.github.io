@@ -223,13 +223,17 @@ th { background-color: #f8fafc; }
         <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
       </div>
       <div class="form-group">
-        <label>Google Apps Script URL (ঐচ্ছিক - রেজাল্ট সেভ করার জন্য)</label>
+        <label>GitHub Token (স্টুডেন্ট লিস্ট সিঙ্ক করার জন্য)</label>
+        <input type="password" id="gh-token" class="input-f" placeholder="ghp_...">
+      </div>
+      <div class="form-group">
+        <label>Google Apps Script URL (ঐচ্ছিক - রেজাল্ট সংরক্ষণের জন্য)</label>
         <input type="text" id="gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
       </div>
       <div class="form-row">
-        <div class="form-group" style="margin-bottom:0; opacity:0.5;">
-          <label>পরীক্ষার পাসওয়ার্ড (Admin প্যানেল থেকে সেট করুন)</label>
-          <input type="text" id="exam-pass" class="input-f" placeholder="Controller থেকে নিয়ন্ত্রিত" disabled>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>পরীক্ষার পাসওয়ার্ড (সবার জন্য)</label>
+          <input type="text" id="exam-pass" class="input-f" placeholder="যেমন: exam2024">
         </div>
         <div class="form-group" style="margin-bottom:0;">
           <label>পরীক্ষার সময় (মিনিট)</label>
@@ -237,6 +241,7 @@ th { background-color: #f8fafc; }
         </div>
       </div>
     </div>
+    
     <div class="admin-card">
       <div class="admin-card-head">
         <h3><span class="icon">🌍</span> পাবলিক এক্সেস মোড</h3>
@@ -245,17 +250,31 @@ th { background-color: #f8fafc; }
         <input type="checkbox" id="public-mode-toggle" style="width:18px; height:18px; cursor:pointer;" onchange="togglePublicMode()">
         <span style="font-weight:600; color:var(--ink);">যে কেউ এই লিংক দিয়ে পরীক্ষা দিতে পারবে</span>
       </label>
-      <p style="font-size:12px; color:var(--muted); margin:8px 0 0; line-height:1.5;">এটি সিলেক্ট থাকলে স্টুডেন্ট আইডি দরকার হবে না।</p>
+      <p style="font-size:12px; color:var(--muted); margin:8px 0 0; line-height:1.5;">অন্যদের জন্য স্টুডেন্ট লিস্ট অক্ষম হবে। শুধু পাসওয়ার্ড দরকার হবে।</p>
     </div>
 
-    <div class="admin-card" id="student-section" style="display:none; opacity:0.5;">
+    <div class="admin-card" id="student-section" style="display:block;">
       <div class="admin-card-head">
-        <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন (Controller থেকে নিয়ন্ত্রিত)</h3>
+        <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন</h3>
       </div>
-      <p style="font-size:12px;">স্টুডেন্ট আইডি এখন exam_controller.html থেকে সরাসরি অ্যাড করা যায়।</p>
+      <div class="form-row" style="margin-bottom:14px; align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>নতুন স্টুডেন্ট আইডি</label>
+          <input type="text" id="new-sid" class="input-f" placeholder="যেমন: 101">
+        </div>
+        <button class="btn btn-w" onclick="addStudentRow()" style="min-height:42px;">+ Add Student</button>
+      </div>
+      <table class="student-table">
+        <thead>
+          <tr><th>Student ID</th><th style="width:80px; text-align:center;">Action</th></tr>
+        </thead>
+        <tbody id="student-list"></tbody>
+      </table>
     </div>
+    
     <div class="btn-row">
-      <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save Local Config</button>
+      <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
+      <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
       <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
     </div>
   </div>
@@ -269,7 +288,7 @@ th { background-color: #f8fafc; }
       <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> কোনো Exam ID পাওয়া যায়নি!</h3>
       <p style="margin-bottom:20px; color:var(--muted);">পরীক্ষা দিতে আপনার Exam ID টি নিচে প্রবেশ করান অথবা সঠিক লিংকে ক্লিক করুন।</p>
       <div style="max-width:320px; margin:0 auto; display:flex; gap:10px;">
-         <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam ID (ex: ex_...)">
+         <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam ID (ex: kx2a9m)">
          <button class="btn primary" onclick="manualLoadExam()">Load</button>
       </div>
     </div>
@@ -278,7 +297,7 @@ th { background-color: #f8fafc; }
   <div id="login-screen" class="panel">
     <div class="panel-row" style="align-items:flex-start;">
       <div>
-        <h2 id="portal-title">পরীক্ষায় লগইন করুন</h2>
+        <h2>পরীক্ষায় লগইন করুন</h2>
         <p id="login-desc">নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম, আইডি ও পাসওয়ার্ড দিন।</p>
       </div>
     </div>
@@ -331,25 +350,21 @@ th { background-color: #f8fafc; }
   </div>
 
   <div id="summary-screen" class="summary-box">
-    <div class="panel" style="text-align:center;">
-      <h2 style="color:#10b981; margin-bottom: 20px;"><i class="fas fa-trophy"></i> পরীক্ষার ফলাফল</h2>
-      <div class="stat-flex">
-        <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
-        <div class="stat-w">ভুল: <span id="s-w">0</span></div>
-        <div>স্কিপড: <span id="s-s">0</span></div>
-      </div>
-      <div class="score-circle-wrap">
-        <div class="score-circle">
-          <div class="score-val" id="s-score-disp">0</div>
-          <div class="score-divider"></div>
-          <div class="score-val" id="s-total-disp">0</div>
-        </div>
-      </div>
-      <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:20px;">
-        <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
-        <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
+    <h2>পরীক্ষার ফলাফল</h2>
+    <div class="stat-flex">
+      <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
+      <div class="stat-w">ভুল: <span id="s-w">0</span></div>
+      <div>স্কিপড: <span id="s-s">0</span></div>
+    </div>
+    <div class="score-circle-wrap">
+      <div class="score-circle">
+        <div class="score-val" id="s-score-disp">0</div>
+        <div class="score-divider"></div>
+        <div class="score-val" id="s-total-disp">0</div>
       </div>
     </div>
+    <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
+    <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
   </div>
 </div>
 
@@ -397,48 +412,65 @@ function executeConfirm() {
 let examData, qd, totalQ, builderDurationMin, finalDuration;
 let tInt;
 let activeStudentId = "";
+let studentsList = [];
 let isPublicMode = false;
 const ADMIN_PW_KEY = 'civil_admin_pw';
 const DEFAULT_PW = 'fec2024';
 let adminUnlocked = sessionStorage.getItem('civil_admin') === '1';
+let fullGithubData = { semesters: {}, notices: [], exams: [] };
 
-// ── 3. Initialization & GitHub Fallback Fetch ──
+// ── 3. Initialization & GitHub Fallback API ──
 window.onload = async function() {
   const urlParams = new URLSearchParams(window.location.search);
   const examId = urlParams.get('examId');
+
   const localExamData = localStorage.getItem("shared_exam_data");
 
-  // Local Preview Logic (If testing before syncing)
   if (!examId) {
     if (localExamData) {
       try {
         const parsedLocal = JSON.parse(localExamData);
         examData = parsedLocal;
-        setupExamEnvironment();
+        qd = examData.questions;
+        totalQ = qd.length;
+
+        const durationStr = examData.duration || "30";
+        const durationMatch = String(durationStr).match(/\d+/);
+        builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
+        
+        finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+
+        initializeExamUI();
+
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'block';
+
         localStorage.removeItem("shared_exam_data");
         return;
-      } catch (e) { console.error("Local data parse error", e); }
+      } catch (e) {
+        console.error("Local data parse error", e);
+      }
     }
+
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('no-id-state').style.display = 'block';
     return;
   }
 
-  // --- GitHub Fetch Logic with API Fallback (Fixes "Exam Not Found" delay) ---
   try {
-    // 1st Attempt: Fetch from Raw CDN
     let res = await fetch(`https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json?_=${Date.now()}`);
     let data = res.ok ? await res.json() : null;
-    let foundExam = data ? (data.exams || []).find(e => e.id === examId) : null;
-
-    // 2nd Attempt: If not found in CDN, fallback to immediate GitHub API
+    if (data) fullGithubData = data;
+    
+    let foundExam = (fullGithubData.exams || []).find(e => e.id === examId);
+    
     if (!foundExam) {
       const apiRes = await fetch(`https://api.github.com/repos/shaikh800/shaikh800.github.io/contents/civil_data.json?_=${Date.now()}`);
       if (apiRes.ok) {
         const apiData = await apiRes.json();
         const decodedContent = decodeURIComponent(escape(atob(apiData.content)));
-        const freshData = JSON.parse(decodedContent);
-        foundExam = (freshData.exams || []).find(e => e.id === examId);
+        fullGithubData = JSON.parse(decodedContent);
+        foundExam = (fullGithubData.exams || []).find(e => e.id === examId);
       }
     }
 
@@ -446,7 +478,7 @@ window.onload = async function() {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('no-id-state').innerHTML = `
         <h3 style='color:#ef4444; margin-bottom:10px;'>Exam Not Found</h3>
-        <p style='color:var(--muted); margin-bottom:20px;'>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি। আইডিটি সঠিক কি না চেক করুন অথবা কিছুক্ষণ পর চেষ্টা করুন।</p>
+        <p style='color:var(--muted); margin-bottom:20px;'>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি। আইডিটি সঠিক কি না চেক করুন।</p>
         <button class='btn secondary' onclick='window.location.href="model_test.html"'>Back</button>
       `;
       document.getElementById('no-id-state').style.display = 'block';
@@ -454,7 +486,19 @@ window.onload = async function() {
     }
 
     examData = foundExam.examData;
-    setupExamEnvironment();
+    qd = examData.questions;
+    totalQ = qd.length;
+
+    const durationStr = examData.duration || "30";
+    const durationMatch = String(durationStr).match(/\d+/);
+    builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
+    
+    finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+
+    initializeExamUI();
+
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'block';
 
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
@@ -466,29 +510,6 @@ window.onload = async function() {
     document.getElementById('no-id-state').style.display = 'block';
   }
 };
-
-function setupExamEnvironment() {
-  qd = examData.questions;
-  totalQ = qd.length;
-
-  const durationStr = examData.duration || "30";
-  const durationMatch = String(durationStr).match(/\d+/);
-  builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
-  
-  finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
-
-  // Title Update
-  document.getElementById("portal-title").innerText = examData.title;
-  
-  // Public mode Check from JSON Data (Override local storage if JSON has allowedIds)
-  isPublicMode = localStorage.getItem('public_mode') === '1' || (examData.allowedIds && examData.allowedIds.length === 0);
-  updateLoginScreen();
-
-  initializeExamUI();
-
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'block';
-}
 
 function manualLoadExam() {
   const val = document.getElementById('manual-exam-id').value.trim();
@@ -583,12 +604,26 @@ function showAdminScreen() {
   document.getElementById('loading-screen').style.display = 'none'; 
   
   document.getElementById('admin-screen').style.display = 'block';
+  document.getElementById('gh-token').value = sessionStorage.getItem('civil_gh_token') || '';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
   
+  // Load public mode setting
+  isPublicMode = localStorage.getItem('public_mode') === '1';
   document.getElementById('public-mode-toggle').checked = isPublicMode;
+  const studentSection = document.getElementById('student-section');
+  studentSection.style.display = isPublicMode ? 'none' : 'block';
   
   let defaultTime = typeof builderDurationMin !== 'undefined' ? builderDurationMin : 30;
   document.getElementById('admin-time').value = localStorage.getItem('admin_time') || defaultTime;
+
+  // Load Exam Data into UI
+  if(examData) {
+     document.getElementById('exam-pass').value = examData.password || '';
+     if (examData.allowedIds) {
+         studentsList = examData.allowedIds.map(id => ({id: id}));
+         renderStudents();
+     }
+  }
 
   const urlParams = new URLSearchParams(window.location.search);
   const currentExamId = urlParams.get('examId');
@@ -604,7 +639,7 @@ function showAdminScreen() {
 function copyShareLink() {
   const input = document.getElementById('share-url-input');
   input.select();
-  input.setSelectionRange(0, 99999);
+  input.setSelectionRange(0, 99999); 
   navigator.clipboard.writeText(input.value).then(() => {
     showAlert('পরীক্ষার লিংক কপি করা হয়েছে!', '✅');
   }).catch(err => {
@@ -629,14 +664,20 @@ function exitAdmin() {
 function togglePublicMode() {
   isPublicMode = document.getElementById('public-mode-toggle').checked;
   localStorage.setItem('public_mode', isPublicMode ? '1' : '0');
-  showAlert(isPublicMode ? '✅ পাবলিক মোড চালু হয়েছে।' : '✅ প্রাইভেট মোড চালু হয়েছে।', '⚙️');
+  
+  const studentSection = document.getElementById('student-section');
+  studentSection.style.display = isPublicMode ? 'none' : 'block';
+  
+  showAlert(isPublicMode ? '✅ পাবলিক মোড চালু হয়েছে। যে কেউ পাসওয়ার্ড দিয়ে পরীক্ষা দিতে পারবে।' : '✅ প্রাইভেট মোড চালু হয়েছে। শুধু লিস্টে থাকা স্টুডেন্টরা পরীক্ষা দিতে পারবে।', '⚙️');
 }
 
 function updateLoginScreen() {
+  const nameField = document.getElementById('uname');
   const idField = document.getElementById('uid');
+  const passField = document.getElementById('upass');
   const descField = document.getElementById('login-desc');
   
-  if(isPublicMode || (examData.allowedIds && examData.allowedIds.length === 0)) {
+  if(isPublicMode) {
     idField.style.display = 'none';
     descField.innerText = 'পাসওয়ার্ড দিয়ে পরীক্ষায় প্রবেশ করুন।';
     idField.value = '';
@@ -646,14 +687,108 @@ function updateLoginScreen() {
   }
 }
 
+function addStudentRow() {
+  const id = document.getElementById('new-sid').value.trim();
+  if(!id) return showAlert('স্টুডেন্ট আইডি দিন!', '⚠️');
+  if(studentsList.some(s => s.id === id)) return showAlert('এই আইডিটি ইতিমধ্যে লিস্টে আছে!', '⚠️');
+  studentsList.push({id}); 
+  renderStudents();
+  document.getElementById('new-sid').value = '';
+}
+
+function removeStudent(idx) {
+  studentsList.splice(idx, 1);
+  renderStudents();
+}
+
+function renderStudents() {
+  const tbody = document.getElementById('student-list');
+  tbody.innerHTML = studentsList.map((s, i) => `<tr><td>${s.id}</td><td style="text-align:center;"><button class="del-btn" onclick="removeStudent(${i})">✕</button></td></tr>`).join('');
+}
+
 async function saveAdminConfig() {
   const url = document.getElementById('gas-url').value.trim();
+  const pass = document.getElementById('exam-pass').value.trim();
   const time = document.getElementById('admin-time').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+
+  if(!token) return showAlert('স্টুডেন্ট লিস্ট সিঙ্ক করার জন্য GitHub Token দিতে হবে!', '🔑');
   
+  sessionStorage.setItem('civil_gh_token', token);
   if(url) localStorage.setItem('gas_url', url);
   if(time) localStorage.setItem('admin_time', time);
 
-  showAlert('লোকাল কনফিগারেশন সেভ হয়েছে।', '✅');
+  const btn = document.getElementById('save-admin-btn');
+  btn.innerText = "Updating GitHub...";
+  btn.disabled = true;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetId = urlParams.get('examId') || (examData && examData.id) || null;
+
+  if (targetId && examData) {
+      examData.password = pass;
+      examData.duration = time + " minutes";
+      examData.allowedIds = studentsList.map(s => s.id);
+
+      const exIndex = fullGithubData.exams.findIndex(e => e.id === targetId);
+      if(exIndex > -1) {
+          fullGithubData.exams[exIndex].examData = examData;
+      }
+  }
+
+  fullGithubData.updated = new Date().toISOString();
+
+  try {
+    const apiUrl = `https://api.github.com/repos/shaikh800/shaikh800.github.io/contents/civil_data.json`;
+    let sha = null;
+    const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}` } });
+    if(g.ok) { const j = await g.json(); sha = j.sha; }
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(fullGithubData, null, 2))));
+    const put = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Update Admin Settings via Panel', content, ...(sha ? { sha } : {}) })
+    });
+
+    if(put.ok) {
+      showAlert('সেটিংস এবং স্টুডেন্ট লিস্ট সফলভাবে সেভ হয়েছে!', '✅');
+    } else {
+      showAlert('GitHub এ সেভ হতে সমস্যা হয়েছে!', '❌');
+    }
+  } catch(e) {
+    showAlert('Network Error! ইন্টারনেট চেক করুন।', '⚠️');
+  }
+
+  btn.innerText = "💾 Save & Update Server";
+  btn.disabled = false;
+}
+
+function clearDatabase() {
+  const url = document.getElementById('gas-url').value.trim();
+  if(!url) return showAlert('আগে Google Apps Script URL দিন!', '🔗');
+  showConfirm('Google Sheet এর সব ডেটা এবং রেজাল্ট মুছে যাবে। আপনি কি নিশ্চিত?', async () => {
+    const btn = document.getElementById('clear-db-btn');
+    btn.innerText = "Clearing...";
+    btn.disabled = true;
+    try {
+      let res = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'clearData' }),
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      let out = await res.json();
+      if(out.status === 'success') {
+        showAlert('সার্ভারের সব ডেটা মুছে ফেলা হয়েছে!', '🗑️');
+      } else {
+        showAlert(out.message, '❌');
+      }
+    } catch(e) {
+      showAlert('Server Connection Failed!', '⚠️');
+    }
+    btn.innerText = "🗑️ Clear All Server Data";
+    btn.disabled = false;
+  });
 }
 
 // ── 5. Student Exam Flow (JSON Auth Logic) ──
@@ -663,37 +798,30 @@ async function startExam(){
   const upass = document.getElementById("upass").value.trim();
 
   if(!uname) return showAlert("আপনার নামটি লিখুন!", "👤");
-  
-  const allowedIds = examData.allowedIds || [];
-  const targetPassword = examData.password || "";
-  const needsId = allowedIds.length > 0;
-
-  if(needsId && !uid) return showAlert("স্টুডেন্ট আইডি দিন!", "🔑");
-  if(targetPassword && !upass) return showAlert("পরীক্ষার পাসওয়ার্ড দিন!", "🔑");
+  if(!isPublicMode && !uid) return showAlert("স্টুডেন্ট আইডি দিন!", "🔑");
+  if(!upass) return showAlert("পরীক্ষার পাসওয়ার্ড দিন!", "🔑");
 
   const btn = document.getElementById('login-btn');
   btn.innerText = "Checking Details...";
   btn.disabled = true;
 
-  // Validate Password locally via JSON Data
-  if(targetPassword && upass !== targetPassword) {
-    btn.innerText = "পরীক্ষা শুরু করুন";
-    btn.disabled = false;
-    return showAlert("পাসওয়ার্ড ভুল হয়েছে!", "❌");
+  const targetPass = examData.password || "";
+  const allowedIds = examData.allowedIds || [];
+
+  if(targetPass && upass !== targetPass) {
+      btn.innerText = "পরীক্ষা শুরু করুন";
+      btn.disabled = false;
+      return showAlert("পরীক্ষার পাসওয়ার্ড ভুল হয়েছে!", "❌");
   }
 
-  // Validate Student ID locally via JSON Data
-  if(needsId && !allowedIds.includes(uid)) {
-    btn.innerText = "পরীক্ষা শুরু করুন";
-    btn.disabled = false;
-    return showAlert("দুঃখিত, আপনার স্টুডেন্ট আইডিটি এই পরীক্ষার জন্য অনুমোদিত নয়!", "❌");
+  if(!isPublicMode && allowedIds.length > 0 && !allowedIds.includes(uid)) {
+      btn.innerText = "পরীক্ষা শুরু করুন";
+      btn.disabled = false;
+      return showAlert("দুঃখিত, এই আইডিটি লিস্টে অনুমোদিত নয়!", "❌");
   }
 
-  // Login Success
   activeStudentId = uid || "Guest";
-  let stuName = uname; 
-  
-  document.getElementById("student-name-display").innerText = `নাম: ${stuName}` + (needsId ? ` | আইডি: ${uid}` : '');
+  document.getElementById("student-name-display").innerText = `নাম: ${uname}` + (uid ? ` | আইডি: ${uid}` : '');
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("exam-screen").style.display = "block";
   
@@ -745,7 +873,6 @@ async function submitExam(){
   document.getElementById("s-score-disp").innerText = c;
   document.getElementById("pdf-s-score-disp").innerText = c; 
 
-  // Google Sheets integration (Optional: Only works if gas_url is set by admin)
   const url = localStorage.getItem('gas_url');
   if(url && activeStudentId) {
     fetch(url, {
@@ -753,7 +880,6 @@ async function submitExam(){
       body: JSON.stringify({ 
         action: 'submit', 
         id: activeStudentId, 
-        name: document.getElementById("uname").value.trim(),
         score: c, 
         topic: examData.title,
         details: wrongDetails.join(', ') || 'Perfect Score'
@@ -790,7 +916,6 @@ async function dlPdf(){
 
   wrap.classList.remove('pdf-mode');
   document.getElementById("progress-wrap").style.display = "block";
-  document.querySelector(".top-bar").style.display = "flex";
 }
 </script>
 </body>
