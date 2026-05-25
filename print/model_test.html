@@ -5,23 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Online Exam</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
   MathJax = {
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
     svg: { fontCache: 'none' }
   };
-  function closeAllOverlays() {
-    document.getElementById('custom-alert').style.display = 'none';
-    document.getElementById('custom-confirm').style.display = 'none';
-    document.getElementById('admin-login-modal').style.display = 'none';
-  }
 </script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 * { box-sizing: border-box; }
 
-/* ── DESIGN TOKENS ── */
 :root {
   --blue:#2563eb; --blue-dark:#1d4ed8;
   --ink:#0f172a; --muted:#64748b;
@@ -34,53 +28,30 @@
   --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
 }
 
-body{background:#f1f5f9;font-family:'Noto Serif Bengali', sans-serif;margin:0;padding:20px;color:var(--ink);}
-#app{width:100%;max-width:980px;margin:0 auto;padding-bottom:60px;}
+body { background:#f1f5f9; font-family:'Noto Serif Bengali', sans-serif; margin:0; padding:20px; color:var(--ink); }
+#app { width:100%; max-width:980px; margin:0 auto; padding-bottom:60px; }
 
-/* ── SITE HEADER ── */
-.site-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;margin-bottom:28px;}
-.site-brand{display:flex;align-items:center;gap:14px;}
-.site-brand-icon{width:50px;height:50px;border-radius:18px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;box-shadow:0 8px 20px rgba(15,23,42,0.18);}
-.site-brand-text h1{margin:0;font-size:clamp(22px,3vw,30px);letter-spacing:-0.03em;}
-.site-brand-text p{margin:4px 0 0;color:var(--muted);font-size:14px;}
+.site-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; margin-bottom:28px; }
+.site-brand { display:flex; align-items:center; gap:14px; }
+.site-brand-icon { width:50px; height:50px; border-radius:18px; background:var(--ink); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; box-shadow:0 8px 20px rgba(15,23,42,0.18); }
+.site-brand-text h1 { margin:0; font-size:clamp(22px,3vw,30px); letter-spacing:-0.03em; }
+.site-brand-text p { margin:4px 0 0; color:var(--muted); font-size:14px; }
 
-/* ── PANEL (login / admin / exam) ── */
-.panel{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:28px;margin-bottom:24px;border:1px solid var(--line);}
-.panel h2{margin:0 0 6px;font-size:clamp(20px,2.4vw,26px);letter-spacing:-0.02em;}
-.panel p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;}
-.panel-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+.panel { background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:28px; margin-bottom:24px; border:1px solid var(--line); }
+.panel h2 { margin:0 0 6px; font-size:clamp(20px,2.4vw,26px); letter-spacing:-0.02em; }
+.panel p { margin:0; color:var(--muted); font-size:14px; line-height:1.6; }
+.panel-row { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
 
-/* ── INPUT FIELDS ── */
-.input-f {
-  width:100%; padding:11px 14px;
-  border:1px solid var(--line); border-radius:var(--radius);
-  background:var(--surface-soft); color:var(--ink);
-  font-size:14px; font-family:inherit;
-  transition:border-color 0.2s, box-shadow 0.2s;
-  -webkit-appearance:none;
-}
+.input-f { width:100%; padding:11px 14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); color:var(--ink); font-size:14px; font-family:inherit; transition:border-color 0.2s, box-shadow 0.2s; -webkit-appearance:none; }
 .input-f:focus { border-color:var(--blue); outline:none; background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
 .input-f::placeholder { color:#94a3b8; }
-
-/* ── FORM GROUP ── */
 .form-group { margin-bottom:14px; }
-.form-group label {
-  display:block; font-size:11px; font-weight:800;
-  text-transform:uppercase; letter-spacing:0.07em;
-  color:var(--muted); margin-bottom:6px;
-}
+.form-group label { display:block; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:var(--muted); margin-bottom:6px; }
 .form-group .input-f { margin:0; }
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.form-row.single{grid-template-columns:1fr;}
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-row.single { grid-template-columns:1fr; }
 
-/* ── BUTTONS ── */
-.btn {
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  min-height:40px; padding:0 20px; border-radius:var(--radius);
-  font-weight:700; font-size:14px; font-family:inherit;
-  transition:all 0.2s var(--ease-spring); border:1px solid transparent;
-  cursor:pointer; text-decoration:none;
-}
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 20px; border-radius:var(--radius); font-weight:700; font-size:14px; font-family:inherit; transition:all 0.2s var(--ease-spring); border:1px solid transparent; cursor:pointer; text-decoration:none; }
 .btn:hover { transform:translateY(-1px); }
 .btn:active { transform:translateY(0); }
 .btn.primary { background:var(--blue); color:#fff; box-shadow:0 6px 14px rgba(37,99,235,0.22); }
@@ -95,40 +66,44 @@ body{background:#f1f5f9;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 .btn-w:hover { background:#ca8a04; }
 .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
 
-/* ── ADMIN FAB ── */
-.admin-fab{position:fixed;right:24px;bottom:24px;width:48px;height:48px;border-radius:50%;border:none;background:var(--ink);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 8px 24px rgba(15,23,42,0.22);display:flex;align-items:center;justify-content:center;z-index:1000;transition:all 0.2s var(--ease-spring);}
-.admin-fab:hover{transform:scale(1.08);}
-.admin-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;background:rgba(37,99,235,0.1);color:var(--blue);}
+.admin-fab { position:fixed; right:24px; bottom:24px; width:48px; height:48px; border-radius:50%; border:none; background:var(--ink); color:#fff; font-size:20px; cursor:pointer; box-shadow:0 8px 24px rgba(15,23,42,0.22); display:flex; align-items:center; justify-content:center; z-index:1000; transition:all 0.2s var(--ease-spring); }
+.admin-fab:hover { transform:scale(1.08); }
+.admin-badge { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; background:rgba(37,99,235,0.1); color:var(--blue); }
 
-/* ── ADMIN SCREEN CARDS ── */
 .admin-card { background:var(--surface-soft); border:1px solid var(--line); border-radius:var(--radius-lg); padding:22px; margin-bottom:18px; }
 .admin-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
 .admin-card-head h3 { margin:0; font-size:15px; font-weight:800; letter-spacing:-0.01em; display:flex; align-items:center; gap:8px; color:var(--ink); }
 .admin-card-head h3 .icon { width:28px; height:28px; border-radius:8px; background:rgba(37,99,235,0.1); color:var(--blue); display:flex; align-items:center; justify-content:center; font-size:13px; }
+
 .student-table { width:100%; border-collapse:collapse; margin-top:4px; }
 .student-table th { background:var(--surface); color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; padding:10px 12px; border:1px solid var(--line); text-align:left; }
 .student-table td { border:1px solid var(--line); padding:10px 12px; font-size:14px; }
 .student-table tr:hover td { background:var(--surface); }
 .student-table .del-btn { background:none; border:none; cursor:pointer; color:#ef4444; font-size:14px; padding:4px 8px; border-radius:6px; transition:background 0.15s; font-weight:bold; }
 .student-table .del-btn:hover { background:#fee2e2; }
+
 .section-eyebrow { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:var(--blue); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
 .section-eyebrow::after { content:''; flex:1; height:1px; background:var(--line); }
-@media(max-width:720px){.form-row{grid-template-columns:1fr;}.panel{padding:20px;}.btn-row{flex-direction:column;}.btn-row .btn{width:100%;}} 
+
+@media(max-width:720px){ .form-row{grid-template-columns:1fr;} .panel{padding:20px;} .btn-row{flex-direction:column;} .btn-row .btn{width:100%;} } 
 
 #exam-screen, #summary-screen, #admin-screen, #login-screen { display:none; }
 .top-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; padding:15px 20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
 .time-left { font-size:18px; font-weight:bold; color:#dc2626; }
+
 #progress-wrap { background:#fff; border-radius:10px; padding:10px 15px; margin-bottom:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
 #progress-track { background:#e2e8f0; border-radius:99px; height:8px; overflow:hidden; margin-bottom:6px; }
 #progress-fill { height:100%; width:0%; border-radius:99px; background:#dc2626; transition:width 0.4s ease, background 0.4s; }
 #progress-text { font-size:13px; font-weight:bold; color:#475569; display:flex; justify-content:space-between; }
 #progress-text span { color:#0f172a; font-size:14px; }
+
 .pdf-container { width:100%; }
 #pdf-wrap { background:transparent; width:100%; box-shadow:none; font-family:'Noto Serif Bengali', sans-serif; }
 .pdf-section { width:100%; padding:0; background:transparent; }
 .exam-header { display:none; }
 .pdf-section-break { display:none; }
 .page-questions { display:flex; flex-direction:column; gap:10px; }
+
 .q-block { background:#fff; border-radius:12px; padding:13px 15px 10px; box-shadow:0 2px 8px rgba(0,0,0,0.07); font-size:15px; line-height:1.55; break-inside:avoid; page-break-inside:avoid; }
 .q-txt { font-weight:bold; margin-bottom:6px; color:#1e293b; }
 .stim { font-style:italic; border-left:3px solid #64748b; padding-left:8px; margin-bottom:6px; background:#f8fafc; color:#334155; font-size:14px; }
@@ -139,7 +114,6 @@ body{background:#f1f5f9;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 .opts input { margin-right:8px; margin-top:3px; cursor:pointer; flex-shrink:0; }
 @media (max-width:500px) { .opts { grid-template-columns:1fr; } }
 
-/* ── PDF Mode ── */
 #pdf-wrap.pdf-mode { width:794px; background:#fff; box-shadow:none; }
 #pdf-wrap.pdf-mode .pdf-section { width:794px; padding:15px 22px 8px; box-sizing:border-box; background:#fff; }
 #pdf-wrap.pdf-mode .exam-header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:5px; margin-bottom:8px; }
@@ -154,8 +128,8 @@ body{background:#f1f5f9;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 #pdf-wrap.pdf-mode .stim { font-size:11.5px; padding-left:6px; margin-bottom:3px; }
 #pdf-wrap.pdf-mode .opts { grid-template-columns:1fr 1fr; gap:2px; margin-top:2px; }
 #pdf-wrap.pdf-mode .opts label { padding:2px 4px; border:1px solid transparent; border-radius:5px; font-size:11.5px; background:transparent; }
+
 .student-badge { color:#dc2626; font-size:12px; margin-top:3px; font-weight:bold; background:#fee2e2; padding:2px 10px; border-radius:20px; display:inline-block; }
-.exam-header-center { flex:1; text-align:center; }
 .ans-c { background:#dcfce7!important; border-color:#86efac!important; color:#166534; font-weight:bold; }
 .ans-w { background:#fee2e2!important; border-color:#fca5a5!important; color:#991b1b; text-decoration:line-through; }
 .stat-flex { display:flex; justify-content:center; gap:30px; margin:20px 0; font-size:18px; font-weight:bold; }
@@ -164,10 +138,12 @@ body{background:#f1f5f9;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 table { width:100%; border-collapse:collapse; margin-top:10px; }
 th, td { border: 1px solid #cbd5e1; padding: 10px; font-size: 14px; }
 th { background-color: #f8fafc; }
+
 .score-circle-wrap { display: flex; justify-content: center; align-items: center; margin: 25px 0; }
 .score-circle { width: 130px; height: 130px; border: 5px solid #dc2626; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #dc2626; transform: rotate(-8deg); box-shadow: 2px 5px 15px rgba(220, 38, 38, 0.15); background: transparent; }
 .score-val { font-size: 40px; font-weight: 900; line-height: 1; font-family: 'Comic Sans MS', cursive, sans-serif; }
 .score-divider { width: 60px; height: 4px; background: #dc2626; margin: 4px 0; border-radius: 3px; }
+
 .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); display: none; justify-content: center; align-items: center; z-index: 9999; backdrop-filter: blur(3px); padding: 15px; }
 .alert-box { background: #fff; padding: 30px 20px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); transform: scale(0.9); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .alert-box.show { transform: scale(1); opacity: 1; }
@@ -191,170 +167,176 @@ th { background-color: #f8fafc; }
     <button class="admin-fab" id="admin-fab" onclick="openAdmin()" title="Admin panel">⚙️</button>
   </div>
 
-<div class="overlay" id="custom-alert">
-  <div class="alert-box" id="alert-inner">
-    <div class="alert-icon" id="alert-icon">🔔</div>
-    <div class="alert-msg" id="alert-msg">Message</div>
-    <button class="alert-btn" onclick="closeAlert()">OK</button>
+  <div class="overlay" id="custom-alert">
+    <div class="alert-box" id="alert-inner">
+      <div class="alert-icon" id="alert-icon">🔔</div>
+      <div class="alert-msg" id="alert-msg">Message</div>
+      <button class="alert-btn" onclick="closeAlert()">OK</button>
+    </div>
   </div>
-</div>
 
-<div class="overlay" id="custom-confirm">
-  <div class="alert-box" id="confirm-inner">
-    <div class="alert-icon">⚠️</div>
-    <div class="alert-msg" id="confirm-msg">আপনি কি নিশ্চিত?</div>
-    <div class="flex-btns">
-      <button class="alert-btn" style="background:#dc2626;" onclick="executeConfirm()">হ্যাঁ, মুছুন</button>
-      <button class="alert-btn" style="background:#64748b;" onclick="closeConfirm()">না</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="admin-login-modal">
-  <div class="alert-box" id="admin-login-box" style="max-width:420px;">
-    <div class="alert-icon">🔐</div>
-    <div class="alert-msg">এডমিন পাসওয়ার্ড দিন</div>
-    <input type="password" id="admin-password" class="input-f" placeholder="Password">
-    <button class="alert-btn" onclick="unlockAdmin()">Unlock Admin</button>
-    <button class="alert-btn" style="background:#64748b; margin-top:10px;" onclick="closeAdminModal()">Cancel</button>
-  </div>
-</div>
-
-<div id="admin-screen" class="panel">
-  <div class="panel-row" style="margin-bottom:26px;">
-    <div>
-      <div class="section-eyebrow">⚙️ Control Panel</div>
-      <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
-      <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
-    </div>
-    <span class="admin-badge">🔓 Admin Mode</span>
-  </div>
-  <div class="admin-card">
-    <div class="admin-card-head">
-      <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
-    </div>
-    <div class="form-group">
-      <label>Google Apps Script URL</label>
-      <input type="text" id="gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
-    </div>
-    <div class="form-row">
-      <div class="form-group" style="margin-bottom:0;">
-        <label>পরীক্ষার পাসওয়ার্ড (সবার জন্য)</label>
-        <input type="text" id="exam-pass" class="input-f" placeholder="যেমন: exam2024">
-      </div>
-      <div class="form-group" style="margin-bottom:0;">
-        <label>পরীক্ষার সময় (মিনিট)</label>
-        <input type="number" id="admin-time" class="input-f" placeholder="যেমন: 30">
+  <div class="overlay" id="custom-confirm">
+    <div class="alert-box" id="confirm-inner">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-msg" id="confirm-msg">আপনি কি নিশ্চিত?</div>
+      <div class="flex-btns">
+        <button class="alert-btn" style="background:#dc2626;" onclick="executeConfirm()">হ্যাঁ, মুছুন</button>
+        <button class="alert-btn" style="background:#64748b;" onclick="closeConfirm()">না</button>
       </div>
     </div>
   </div>
-  <div class="admin-card">
-    <div class="admin-card-head">
-      <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন</h3>
+
+  <div class="overlay" id="admin-login-modal">
+    <div class="alert-box" id="admin-login-box" style="max-width:420px;">
+      <div class="alert-icon">🔐</div>
+      <div class="alert-msg">এডমিন পাসওয়ার্ড দিন</div>
+      <input type="password" id="admin-password" class="input-f" placeholder="Password">
+      <button class="alert-btn" onclick="unlockAdmin()">Unlock Admin</button>
+      <button class="alert-btn" style="background:#64748b; margin-top:10px;" onclick="closeAdminModal()">Cancel</button>
     </div>
-    <div class="form-row" style="margin-bottom:14px; align-items:flex-end;">
-      <div class="form-group" style="margin-bottom:0;">
-        <label>নতুন স্টুডেন্ট আইডি</label>
-        <input type="text" id="new-sid" class="input-f" placeholder="যেমন: 101">
+  </div>
+
+  <div id="admin-screen" class="panel">
+    <div class="panel-row" style="margin-bottom:26px;">
+      <div>
+        <div class="section-eyebrow">⚙️ Control Panel</div>
+        <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
+        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
       </div>
-      <button class="btn btn-w" onclick="addStudentRow()" style="min-height:42px;">+ Add Student</button>
+      <span class="admin-badge">🔓 Admin Mode</span>
     </div>
-    <table class="student-table">
-      <thead>
-        <tr><th>Student ID</th><th style="width:80px; text-align:center;">Action</th></tr>
-      </thead>
-      <tbody id="student-list"></tbody>
-    </table>
-  </div>
-  <div class="btn-row">
-    <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
-    <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
-    <button class="btn secondary" onclick="generateShareLink()">🔗 Copy Shareable Link</button>
-    <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
-  </div>
-</div>
-
-<div id="loading-screen" class="panel" style="text-align: center; padding: 50px 20px;">
-  <h2 style="color: var(--blue);">Loading Exam Data...</h2>
-  <p>Anugroho kore opekha korun.</p>
-</div>
-
-<div id="login-screen" class="panel">
-  <div class="panel-row" style="align-items:flex-start;">
-    <div>
-      <h2>পরীক্ষায় লগইন করুন</h2>
-      <p>নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম, আইডি ও পাসওয়ার্ড দিন।</p>
+    <div class="admin-card">
+      <div class="admin-card-head">
+        <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
+      </div>
+      <div class="form-group">
+        <label>Google Apps Script URL</label>
+        <input type="text" id="gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>পরীক্ষার পাসওয়ার্ড (সবার জন্য)</label>
+          <input type="text" id="exam-pass" class="input-f" placeholder="যেমন: exam2024">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label>পরীক্ষার সময় (মিনিট)</label>
+          <input type="number" id="admin-time" class="input-f" placeholder="যেমন: 30">
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="form-row single">
-    <input type="text" id="uname" class="input-f" placeholder="আপনার নাম">
-    <input type="text" id="uid" class="input-f" placeholder="স্টুডেন্ট আইডি">
-    <input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড">
-  </div>
-  <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
-</div>
-
-<div id="exam-screen">
-  <div class="top-bar">
-    <span class="time-left">সময় বাকি: <span id="timer">00:00</span></span>
-    <button class="btn" id="submit-btn" style="margin:0; padding:10px 20px; width:auto;" onclick="submitExam()">জমা দিন</button>
-  </div>
-  <div id="progress-wrap">
-    <div id="progress-track"><div id="progress-fill"></div></div>
-    <div id="progress-text">
-      <span>উত্তর দেওয়া হয়েছে: <span id="prog-done">০</span></span>
-      <span>বাকি আছে: <span id="prog-left">০</span></span>
+    <div class="admin-card">
+      <div class="admin-card-head">
+        <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন</h3>
+      </div>
+      <div class="form-row" style="margin-bottom:14px; align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>নতুন স্টুডেন্ট আইডি</label>
+          <input type="text" id="new-sid" class="input-f" placeholder="যেমন: 101">
+        </div>
+        <button class="btn btn-w" onclick="addStudentRow()" style="min-height:42px;">+ Add Student</button>
+      </div>
+      <table class="student-table">
+        <thead>
+          <tr><th>Student ID</th><th style="width:80px; text-align:center;">Action</th></tr>
+        </thead>
+        <tbody id="student-list"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
+      <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
+      <button class="btn secondary" onclick="generateShareLink()">🔗 Copy Shareable Link</button>
+      <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
     </div>
   </div>
-  <div class="pdf-container">
-    <div id="pdf-wrap">
-      <div class="pdf-section" id="page1">
-        <div class="exam-header">
-          <div id="pdf-dummy-space" style="display:none; width:80px;"></div>
-          <div class="exam-header-center">
-            <h1 id="main-title">পরীক্ষা</h1>
-            <p id="main-meta"></p>
-            <div id="student-name-display" class="student-badge"></div>
-          </div>
-          <div id="pdf-score-wrap" class="score-circle-wrap" style="display:none; margin:0; width:80px; justify-content:flex-end;">
-            <div class="score-circle" style="width:75px; height:75px; border-width:3px; box-shadow:none;">
-              <div class="score-val" id="pdf-s-score-disp" style="font-size:22px;">0</div>
-              <div class="score-divider" style="width:30px; height:2px; margin:2px 0;"></div>
-              <div class="score-val" id="pdf-s-total-disp" style="font-size:22px;">0</div>
+
+  <div id="loading-screen" class="panel" style="text-align: center; padding: 50px 20px;">
+    <h2 style="color: var(--blue);">Loading Exam Data...</h2>
+    <p>অনুগ্রহ করে অপেক্ষা করুন।</p>
+  </div>
+
+  <div id="login-screen" class="panel">
+    <div class="panel-row" style="align-items:flex-start;">
+      <div>
+        <h2>পরীক্ষায় লগইন করুন</h2>
+        <p>নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম, আইডি ও পাসওয়ার্ড দিন।</p>
+      </div>
+    </div>
+    <div class="form-row single">
+      <input type="text" id="uname" class="input-f" placeholder="আপনার নাম">
+      <input type="text" id="uid" class="input-f" placeholder="স্টুডেন্ট আইডি">
+      <input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড">
+    </div>
+    <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+  </div>
+
+  <div id="exam-screen">
+    <div class="top-bar">
+      <span class="time-left">সময় বাকি: <span id="timer">00:00</span></span>
+      <button class="btn" id="submit-btn" style="margin:0; padding:10px 20px; width:auto;" onclick="submitExam()">জমা দিন</button>
+    </div>
+    <div id="progress-wrap">
+      <div id="progress-track"><div id="progress-fill"></div></div>
+      <div id="progress-text">
+        <span>উত্তর দেওয়া হয়েছে: <span id="prog-done">০</span></span>
+        <span>বাকি আছে: <span id="prog-left">০</span></span>
+      </div>
+    </div>
+    <div class="pdf-container">
+      <div id="pdf-wrap">
+        <div class="pdf-section" id="page1">
+          <div class="exam-header">
+            <div id="pdf-dummy-space" style="display:none; width:80px;"></div>
+            <div class="exam-header-center">
+              <h1 id="main-title">পরীক্ষা</h1>
+              <p id="main-meta"></p>
+              <div id="student-name-display" class="student-badge"></div>
+            </div>
+            <div id="pdf-score-wrap" class="score-circle-wrap" style="display:none; margin:0; width:80px; justify-content:flex-end;">
+              <div class="score-circle" style="width:75px; height:75px; border-width:3px; box-shadow:none;">
+                <div class="score-val" id="pdf-s-score-disp" style="font-size:22px;">0</div>
+                <div class="score-divider" style="width:30px; height:2px; margin:2px 0;"></div>
+                <div class="score-val" id="pdf-s-total-disp" style="font-size:22px;">0</div>
+              </div>
             </div>
           </div>
+          <div class="page-questions" id="sec1-q"></div>
         </div>
-        <div class="page-questions" id="sec1-q"></div>
-      </div>
-      <div class="pdf-section-break" id="page-break"></div>
-      <div class="pdf-section" id="page2" style="display:none;">
-        <div class="page-questions" id="sec2-q"></div>
+        <div class="pdf-section-break" id="page-break"></div>
+        <div class="pdf-section" id="page2" style="display:none;">
+          <div class="page-questions" id="sec2-q"></div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div id="summary-screen" class="summary-box">
-  <h2>পরীক্ষার ফলাফল</h2>
-  <div class="stat-flex">
-    <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
-    <div class="stat-w">ভুল: <span id="s-w">0</span></div>
-    <div>স্কিপড: <span id="s-s">0</span></div>
-  </div>
-  <div class="score-circle-wrap">
-    <div class="score-circle">
-      <div class="score-val" id="s-score-disp">0</div>
-      <div class="score-divider"></div>
-      <div class="score-val" id="s-total-disp">0</div>
+  <div id="summary-screen" class="summary-box">
+    <h2>পরীক্ষার ফলাফল</h2>
+    <div class="stat-flex">
+      <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
+      <div class="stat-w">ভুল: <span id="s-w">0</span></div>
+      <div>স্কিপড: <span id="s-s">0</span></div>
     </div>
+    <div class="score-circle-wrap">
+      <div class="score-circle">
+        <div class="score-val" id="s-score-disp">0</div>
+        <div class="score-divider"></div>
+        <div class="score-val" id="s-total-disp">0</div>
+      </div>
+    </div>
+    <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
+    <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
   </div>
-  <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
-  <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
-</div>
 </div>
 
 <script>
+// ── 1. Utilities and Alerts ──
 let confirmCallback = null;
+function closeAllOverlays() {
+  document.getElementById('custom-alert').style.display = 'none';
+  document.getElementById('custom-confirm').style.display = 'none';
+  document.getElementById('admin-login-modal').style.display = 'none';
+}
 function showAlert(msg, icon='🔔') {
   document.getElementById('alert-msg').innerText = msg;
   document.getElementById('alert-icon').innerText = icon;
@@ -387,19 +369,23 @@ function executeConfirm() {
   closeConfirm();
 }
 
-// ── Global Variables for Exam ──
+// ── 2. Global State ──
 let examData, qd, totalQ, builderDurationMin, finalDuration;
+let tInt;
+let activeStudentId = "";
+let studentsList = [];
+const ADMIN_PW_KEY = 'civil_admin_pw';
+const DEFAULT_PW = 'fec2024';
+let adminUnlocked = sessionStorage.getItem('exam_admin') === '1';
 
-// ── URL theke Data Fetch ──
-const urlParams = new URLSearchParams(window.location.search);
-const examId = urlParams.get('examId');
-
-async function loadExamSystem() {
-  document.getElementById('loading-screen').style.display = 'block';
+// ── 3. Initialization ──
+window.onload = async function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const examId = urlParams.get('examId');
 
   if (!examId) {
-    showAlert("Kono Exam ID paowa jayni! Link ti thik ache kina check korun.", "⚠️");
-    document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>No Exam ID Provided</h3><p>Link er sathe ?examId=... thakte hobe.</p>";
+    document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444; margin-bottom:10px;'>No Exam ID Provided</h3><p>অনুগ্রহ করে সঠিক লিংকে প্রবেশ করুন।<br>লিংকের শেষে <b>?examId=...</b> থাকতে হবে।</p>";
+    showAlert("কোনো Exam ID পাওয়া যায়নি! লিংকটি সঠিক কি না চেক করুন।", "⚠️");
     return;
   }
 
@@ -409,10 +395,9 @@ async function loadExamSystem() {
     const data = await res.json();
     
     const foundExam = (data.exams || []).find(e => e.id === examId);
-    
     if (!foundExam) {
-      showAlert("Ei ID diye kono exam paowa jayni!", "❌");
-      document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>Exam Not Found</h3>";
+      document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>Exam Not Found</h3><p>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি।</p>";
+      showAlert("এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি!", "❌");
       return;
     }
 
@@ -420,9 +405,11 @@ async function loadExamSystem() {
     qd = examData.questions;
     totalQ = qd.length;
 
-    const durationStr = examData.duration;
-    const durationMatch = durationStr.match(/\d+/);
+    const durationStr = examData.duration || "30";
+    const durationMatch = String(durationStr).match(/\d+/);
     builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
+    
+    // Check if admin updated the time locally
     finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
 
     initializeExamUI();
@@ -431,10 +418,10 @@ async function loadExamSystem() {
     document.getElementById('login-screen').style.display = 'block';
 
   } catch (e) {
-    showAlert("Server theke data load korte somossa hocche. Internet connection check korun.", "🌐");
-    document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>Network Error</h3>";
+    document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>Network Error</h3><p>সার্ভার থেকে ডেটা লোড করা যাচ্ছে না।</p>";
+    showAlert("ডেটা লোড করতে সমস্যা হচ্ছে। ইন্টারনেট কানেকশন চেক করুন।", "🌐");
   }
-}
+};
 
 function initializeExamUI() {
   document.getElementById("main-title").innerText = examData.title;
@@ -450,6 +437,8 @@ function initializeExamUI() {
   if(totalQ > half) { document.getElementById("page2").style.display = "block"; }
 
   document.getElementById('prog-left').textContent = totalQ;
+  document.getElementById('prog-done').textContent = '০';
+  document.getElementById('progress-fill').style.width = '0%';
 
   document.querySelectorAll('#sec1-q input[type="radio"], #sec2-q input[type="radio"]').forEach(r => {
     r.addEventListener('change', updateProgress);
@@ -461,8 +450,6 @@ function initializeExamUI() {
     }
   }, 500);
 }
-
-window.onload = loadExamSystem;
 
 function renderSection(containerId, start, end) {
   let html = "";
@@ -489,13 +476,7 @@ function updateProgress() {
   document.getElementById('prog-left').textContent = left;
 }
 
-const ADMIN_PW_KEY = 'civil_admin_pw';
-const DEFAULT_PW = 'fec2024';
-let adminUnlocked = sessionStorage.getItem('exam_admin') === '1';
-let tInt;
-let activeStudentId = "";
-let studentsList = [];
-
+// ── 4. Admin Functions ──
 function openAdmin() {
   closeAllOverlays();
   if (adminUnlocked) return showAdminScreen(); 
@@ -504,13 +485,11 @@ function openAdmin() {
   modal.style.display = 'flex';
   setTimeout(() => box.classList.add('show'), 10);
 }
-
 function closeAdminModal() {
   const box = document.getElementById('admin-login-box');
   box.classList.remove('show');
   setTimeout(() => document.getElementById('admin-login-modal').style.display = 'none', 300);
 }
-
 function unlockAdmin() {
   const entered = document.getElementById('admin-password').value.trim();
   const saved = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
@@ -523,7 +502,6 @@ function unlockAdmin() {
     showAlert('ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', '❌');
   }
 }
-
 function showAdminScreen() {
   closeAllOverlays();
   document.getElementById('login-screen').style.display = 'none';
@@ -531,7 +509,6 @@ function showAdminScreen() {
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
   document.getElementById('admin-time').value = localStorage.getItem('admin_time') || builderDurationMin;
 }
-
 function exitAdmin() {
   document.getElementById('admin-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'block';
@@ -539,7 +516,6 @@ function exitAdmin() {
   document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
   document.getElementById("timer").innerText = `${finalDuration}:00`;
 }
-
 function addStudentRow() {
   const id = document.getElementById('new-sid').value.trim();
   if(!id) return showAlert('স্টুডেন্ট আইডি দিন!', '⚠️');
@@ -548,22 +524,18 @@ function addStudentRow() {
   renderStudents();
   document.getElementById('new-sid').value = '';
 }
-
 function removeStudent(idx) {
   studentsList.splice(idx, 1);
   renderStudents();
 }
-
 function renderStudents() {
   const tbody = document.getElementById('student-list');
   tbody.innerHTML = studentsList.map((s, i) => `<tr><td>${s.id}</td><td style="text-align:center;"><button class="del-btn" onclick="removeStudent(${i})">✕</button></td></tr>`).join('');
 }
-
 async function saveAdminConfig() {
   const url = document.getElementById('gas-url').value.trim();
   const pass = document.getElementById('exam-pass').value.trim();
   const time = document.getElementById('admin-time').value.trim();
-  
   if(!url) return showAlert('Google Apps Script URL দিতে হবে!', '🔗');
   if(!pass) return showAlert('সবার জন্য একটি পাসওয়ার্ড সেট করুন!', '🔑');
   
@@ -574,7 +546,6 @@ async function saveAdminConfig() {
     showAlert('সময় এবং URL সেভ হয়েছে।', '✅');
     return;
   }
-
   const btn = document.getElementById('save-admin-btn');
   btn.innerText = "Updating...";
   btn.disabled = true;
@@ -599,16 +570,13 @@ async function saveAdminConfig() {
   btn.innerText = "Save & Update Server";
   btn.disabled = false;
 }
-
 function clearDatabase() {
   const url = document.getElementById('gas-url').value.trim();
   if(!url) return showAlert('আগে Google Apps Script URL দিন!', '🔗');
-  
   showConfirm('সার্ভারের সব ডেটা এবং রেজাল্ট মুছে যাবে। আপনি কি নিশ্চিত?', async () => {
     const btn = document.getElementById('clear-db-btn');
     btn.innerText = "Clearing...";
     btn.disabled = true;
-
     try {
       let res = await fetch(url, {
         method: 'POST',
@@ -628,7 +596,18 @@ function clearDatabase() {
     btn.disabled = false;
   });
 }
+function generateShareLink() {
+  const shareUrl = window.location.href;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => showAlert('লিংক ক্লিপবোর্ডে কপি হয়েছে! যে কাউকে এই লিংক দিলে সে পরীক্ষা দিতে পারবে।', '🔗'))
+      .catch(() => { window.prompt('এই লিংকটি কপি করুন (Ctrl+C):', shareUrl); });
+  } else {
+    window.prompt('এই লিংকটি কপি করুন (Ctrl+C):', shareUrl);
+  }
+}
 
+// ── 5. Student Exam Flow ──
 async function startExam(){
   const uname = document.getElementById("uname").value.trim();
   const uid = document.getElementById("uid").value.trim();
@@ -666,7 +645,6 @@ async function startExam(){
         document.getElementById("timer").innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
         if(t <= 0) { clearInterval(tInt); submitExam(); }
       }, 1000);
-      
     } else {
       showAlert(out.message, '❌');
     }
@@ -741,24 +719,13 @@ function reviewWithPdf(){
   dlPdf();
 }
 
-function generateShareLink() {
-  const shareUrl = window.location.href;
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => showAlert('Link clipboard e copy hoyeche! Je kauke ei link dile se exam dite parbe.', '🔗'))
-      .catch(() => { window.prompt('Ei link ti copy korun (Ctrl+C):', shareUrl); });
-  } else {
-    window.prompt('Ei link ti copy korun (Ctrl+C):', shareUrl);
-  }
-}
-
 async function dlPdf(){
   const wrap = document.getElementById("pdf-wrap");
   wrap.classList.add('pdf-mode');
   await new Promise(r => setTimeout(r, 350));
 
   await html2pdf().set({
-    margin: 6.35, // .25 margin add kora hoyeche
+    margin: 6.35, 
     filename: `${examData.title}_Review.pdf`,
     image: { type:'jpeg', quality:1 },
     html2canvas: { scale:2, useCORS:true, scrollY:0, scrollX:0 },
