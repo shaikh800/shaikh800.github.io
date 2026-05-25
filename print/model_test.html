@@ -10,6 +10,11 @@
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
     svg: { fontCache: 'none' }
   };
+  function closeAllOverlays() {
+  document.getElementById('custom-alert').style.display = 'none';
+  document.getElementById('custom-confirm').style.display = 'none';
+  document.getElementById('admin-login-modal').style.display = 'none';
+}
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -522,10 +527,13 @@ let activeStudentId = "";
 let studentsList = [];
 
 function openAdmin() {
-  if (adminUnlocked) { return showAdminScreen(); }
+  closeAllOverlays(); // 🔥 ADD THIS LINE
+
+  if (adminUnlocked) { 
+    return showAdminScreen(); 
+  }
+
   document.getElementById('admin-login-modal').style.display = 'flex';
-  document.getElementById('admin-password').value = '';
-  setTimeout(() => document.getElementById('admin-password').focus(), 100);
 }
 
 function closeAdminModal() {
@@ -546,6 +554,11 @@ function unlockAdmin() {
 }
 
 function showAdminScreen() {
+
+  closeAllOverlays(); // 🔥 ADD THIS LINE
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
