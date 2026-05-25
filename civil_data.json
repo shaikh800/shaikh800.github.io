@@ -3,8 +3,8 @@
   "notices": [],
   "exams": [
     {
-      "id": "ex_9g8idvwgq",
-      "date": "2026-05-25T18:53:09.363Z",
+      "id": "ex_e20s1850r",
+      "date": "2026-05-25T19:23:20.653Z",
       "examData": {
         "title": "Model Test",
         "duration": "25 minutes",
@@ -360,13 +360,16 @@
             ]
           }
         ],
-        "id": "ex_9g8idvwgq",
-        "password": "kkk",
+        "id": "ex_e20s1850r",
+        "password": "PHY211",
         "allowedIds": [
-          "123"
+          "111",
+          "222",
+          "333",
+          "201"
         ]
       }
     }
   ],
-  "updated": "2026-05-25T18:53:09.363Z"
+  "updated": "2026-05-25T19:23:20.653Z"
 }
