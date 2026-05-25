@@ -3,8 +3,8 @@
   "notices": [],
   "exams": [
     {
-      "id": "ex_vkbwomoo0",
-      "date": "2026-05-25T18:21:41.052Z",
+      "id": "ex_nbu9qng7l",
+      "date": "2026-05-25T18:43:01.723Z",
       "examData": {
         "title": "Model Test",
         "duration": "25 minutes",
@@ -360,15 +360,16 @@
             ]
           }
         ],
-        "id": "ex_vkbwomoo0",
+        "id": "ex_nbu9qng7l",
         "password": "phy",
         "allowedIds": [
-          "11",
-          "12",
-          "13"
+          "123",
+          "111",
+          "222",
+          "333"
         ]
       }
     }
   ],
-  "updated": "2026-05-25T18:21:41.052Z"
+  "updated": "2026-05-25T18:43:01.723Z"
 }
