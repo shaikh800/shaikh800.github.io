@@ -339,7 +339,7 @@ th { background-color: #f8fafc; }
     <input type="text" id="uid" class="input-f" placeholder="স্টুডেন্ট আইডি">
     <input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড">
   </div>
-  <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+  <button class="btn" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
 </div>
 
 <div id="exam-screen">
@@ -569,6 +569,8 @@ function showAdminScreen() {
 }
 
 function exitAdmin() {
+  adminUnlocked = false;
+  sessionStorage.removeItem('exam_admin');
   document.getElementById('admin-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'block';
   finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
