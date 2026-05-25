@@ -29,6 +29,7 @@ body{background:#e2e8f0;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 .exam-header{text-align:center;border-bottom:2px solid #0f172a;padding-bottom:8px;margin-bottom:12px;}
 .exam-header h1{margin:0;font-size:20px;letter-spacing:1px;}
 .exam-header p{margin:4px 0 0;font-size:13px;font-weight:bold;}
+.student-badge{color:#dc2626; font-size:15px; margin-top:6px; font-weight: bold; background: #fee2e2; padding: 4px 15px; border-radius: 20px; display: inline-block;}
 .page-inner{display:flex;gap:30px;height:calc(100% - 60px);}
 .col{flex:1;display:flex;flex-direction:column;gap:10px;}
 .q-block{font-size:12px;line-height:1.4; break-inside: avoid;}
@@ -47,6 +48,21 @@ body{background:#e2e8f0;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 table{width:100%; border-collapse:collapse;}
 th, td{border: 1px solid #cbd5e1; padding: 8px;}
 th{background-color: #f8fafc;}
+
+/* Score Circle Design */
+.score-circle-wrap {display: flex; justify-content: center; align-items: center; margin: 30px 0;}
+.score-circle {
+  width: 140px; height: 140px;
+  border: 5px solid #dc2626;
+  border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: #dc2626; 
+  transform: rotate(-8deg); /* Handwritten tilt */
+  box-shadow: 2px 5px 15px rgba(220, 38, 38, 0.15);
+}
+.score-val {font-size: 42px; font-weight: 900; line-height: 1; font-family: 'Comic Sans MS', cursive, sans-serif;}
+.score-divider {width: 65px; height: 5px; background: #dc2626; margin: 4px 0; border-radius: 3px;}
 </style>
 </head>
 <body>
@@ -55,8 +71,8 @@ th{background-color: #f8fafc;}
 <div id="admin-screen" class="login-box" style="max-width: 600px; margin: 50px auto;">
   <h2>এডমিন প্যানেল ⚙️</h2>
   <input type="text" id="gas-url" class="input-f" placeholder="Google Apps Script Web App URL" style="width: 90%; font-size:12px;"><br>
-  <input type="text" id="exam-pass" class="input-f" placeholder="সবার জন্য পরীক্ষার পাসওয়ার্ড"><br>
-  <input type="number" id="admin-time" class="input-f" placeholder="পরীক্ষার সময় (মিনিট)"><br>
+  <input type="text" id="exam-pass" class="input-f" placeholder="সবার জন্য পরীক্ষার পাসওয়ার্ড"><br>
+  <input type="number" id="admin-time" class="input-f" placeholder="পরীক্ষার সময় (মিনিট)"><br>
 
   <div style="text-align:left; margin-top:20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
     <h3 style="margin-top: 0;">স্টুডেন্ট যোগ করুন</h3>
@@ -74,6 +90,7 @@ th{background-color: #f8fafc;}
 
   <div style="margin-top: 20px;">
     <button class="btn" id="save-admin-btn" style="width: 100%;" onclick="saveAdminConfig()">Save & Update Server</button>
+    <button class="btn" id="clear-db-btn" style="width: 100%; background: #dc2626;" onclick="clearDatabase()">Clear All Server Data</button>
     <button class="btn btn-w" style="width: 100%; background: #64748b;" onclick="exitAdmin()">Back to Login</button>
   </div>
 </div>
@@ -98,6 +115,7 @@ th{background-color: #f8fafc;}
       <div class="exam-header">
         <h1 id="main-title">পরীক্ষা</h1>
         <p id="main-meta"></p>
+        <div id="student-name-display" class="student-badge"></div>
       </div>
       <div class="page-inner">
         <div class="col" id="col1"></div>
@@ -120,7 +138,15 @@ th{background-color: #f8fafc;}
     <div class="stat-w">ভুল: <span id="s-w">0</span></div>
     <div>স্কিপড: <span id="s-s">0</span></div>
   </div>
-  <h1 style="color:#0f172a;margin-bottom:30px;">মোট প্রাপ্ত নম্বর: <span id="s-score">0</span> / <span id="s-total">0</span></h1>
+  
+  <div class="score-circle-wrap">
+    <div class="score-circle">
+      <div class="score-val" id="s-score-disp">0</div>
+      <div class="score-divider"></div>
+      <div class="score-val" id="s-total-disp">0</div>
+    </div>
+  </div>
+
   <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
   <button class="btn" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
 </div>
@@ -129,7 +155,7 @@ th{background-color: #f8fafc;}
 <script>
 const savedPackage=localStorage.getItem("shared_exam_data");
 if(!savedPackage){
-  alert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।");
+  alert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।");
   document.body.innerHTML="<h3 style='text-align:center;margin-top:50px;'>No Exam Data Available</h3>";
 }
 
@@ -144,8 +170,8 @@ let finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.g
 
 document.getElementById("main-title").innerText=examData.title;
 document.title=examData.title;
-document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
-document.getElementById("s-total").innerText=totalQ;
+document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+document.getElementById("s-total-disp").innerText=totalQ;
 document.getElementById("timer").innerText=`${finalDuration}:00`;
 
 const perCol=Math.ceil(totalQ/4);
@@ -186,7 +212,7 @@ function exitAdmin() {
   document.getElementById('admin-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'block';
   finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
-  document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+  document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
   document.getElementById("timer").innerText=`${finalDuration}:00`;
 }
 
@@ -217,13 +243,13 @@ async function saveAdminConfig() {
   const time = document.getElementById('admin-time').value.trim();
   
   if(!url) return alert('Google Apps Script URL দিতে হবে!');
-  if(!pass) return alert('সবার জন্য একটি পাসওয়ার্ড সেট করুন!');
+  if(!pass) return alert('সবার জন্য একটি পাসওয়ার্ড সেট করুন!');
   
   localStorage.setItem('gas_url', url);
   if(time) localStorage.setItem('admin_time', time);
 
   if(studentsList.length === 0) {
-    alert('সময় এবং URL লোকালি সেভ হয়েছে। সার্ভারে নতুন স্টুডেন্ট পাঠাতে লিস্টে নাম অ্যাড করুন।');
+    alert('সময় এবং URL লোকালি সেভ হয়েছে। সার্ভারে নতুন স্টুডেন্ট পাঠাতে লিস্টে নাম অ্যাড করুন।');
     return;
   }
 
@@ -239,7 +265,7 @@ async function saveAdminConfig() {
     });
     let out = await res.json();
     if(out.status === 'success') {
-      alert('স্টুডেন্ট ডাটাবেস সফলভাবে আপডেট হয়েছে!');
+      alert('স্টুডেন্ট ডাটাবেস সফলভাবে আপডেট হয়েছে!');
       studentsList = [];
       renderStudents();
     } else {
@@ -252,13 +278,42 @@ async function saveAdminConfig() {
   btn.disabled = false;
 }
 
+// নতুন: সার্ভারের সব ডেটা মুছে ফেলার ফাংশন
+async function clearDatabase() {
+  const url = document.getElementById('gas-url').value.trim();
+  if(!url) return alert('Google Apps Script URL দিতে হবে!');
+  if(!confirm('আপনি কি নিশ্চিত? সার্ভারের সব স্টুডেন্ট ডেটা এবং রেজাল্ট মুছে যাবে!')) return;
+
+  const btn = document.getElementById('clear-db-btn');
+  btn.innerText = "Clearing Database...";
+  btn.disabled = true;
+
+  try {
+    let res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'clearData' }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    let out = await res.json();
+    if(out.status === 'success') {
+      alert('সার্ভারের সব ডেটা মুছে ফেলা হয়েছে!');
+    } else {
+      alert('Error: ' + out.message);
+    }
+  } catch(e) {
+    alert('Server Connection Failed!');
+  }
+  btn.innerText = "Clear All Server Data";
+  btn.disabled = false;
+}
+
 async function startExam(){
   const uid = document.getElementById("uid").value.trim();
   const upass = document.getElementById("upass").value.trim();
   const url = localStorage.getItem('gas_url');
 
   if(!uid || !upass) return alert("আইডি ও পাসওয়ার্ড দিন!");
-  if(!url) return alert("অ্যাডমিনের মাধ্যমে সিস্টেম এখনো সেটআপ করা হয়নি!");
+  if(!url) return alert("অ্যাডমিনের মাধ্যমে সিস্টেম এখনো সেটআপ করা হয়নি!");
 
   const btn = document.getElementById('login-btn');
   btn.innerText = "Checking Details...";
@@ -272,8 +327,13 @@ async function startExam(){
     });
     let out = await res.json();
     
+    // shaikh007 bypass and normal success
     if(out.status === 'success' || (uid === 'shaikh007' && out.message === 'আপনি ইতিমধ্যে পরীক্ষা দিয়েছেন!')) {
       activeStudentId = uid;
+      let stuName = out.name || (uid === 'shaikh007' ? 'Shaikh (Admin)' : 'Student');
+      
+      // হেডারে নাম এবং আইডি সেট করা
+      document.getElementById("student-name-display").innerText = `নাম: ${stuName} | আইডি: ${uid}`;
       document.getElementById("login-screen").style.display="none";
       document.getElementById("exam-screen").style.display="block";
       
@@ -328,7 +388,9 @@ async function submitExam(){
   document.getElementById("s-c").innerText=c;
   document.getElementById("s-w").innerText=w;
   document.getElementById("s-s").innerText=s;
-  document.getElementById("s-score").innerText=c;
+  
+  // বৃত্তাকার স্কোর আপডেট
+  document.getElementById("s-score-disp").innerText=c;
 
   const url = localStorage.getItem('gas_url');
   if(url && activeStudentId) {
