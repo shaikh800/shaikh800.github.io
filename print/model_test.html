@@ -202,10 +202,22 @@ th { background-color: #f8fafc; }
       <div>
         <div class="section-eyebrow">⚙️ Control Panel</div>
         <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
-        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন.</p>
+        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
       </div>
       <span class="admin-badge">🔓 Admin Mode</span>
     </div>
+
+    <div class="admin-card" id="share-link-card" style="display:none; border-color:var(--blue);">
+      <div class="admin-card-head">
+        <h3><span class="icon" style="background:var(--blue); color:#fff;">📤</span> শেয়ার লিংক</h3>
+      </div>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">স্টুডেন্টদের পরীক্ষা দেওয়ার জন্য নিচের লিংকটি কপি করে শেয়ার করুন।</p>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="share-url-input" class="input-f" readonly style="background:#fff; cursor:text;">
+        <button class="btn secondary" onclick="copyShareLink()">📋 Copy</button>
+      </div>
+    </div>
+
     <div class="admin-card">
       <div class="admin-card-head">
         <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
@@ -462,7 +474,7 @@ window.onload = async function() {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('no-id-state').innerHTML = `
         <h3 style='color:#ef4444; margin-bottom:10px;'>Network Error</h3>
-        <p style='color:var(--muted); margin-bottom:20px;'>সার্ভার থেকে ডেটা লোড করা যাচ্ছে না। আপনার ইন্টারনেট কানেকশন চেক করুন।</p>
+        <p style='color:var(--muted); margin-bottom:20px;'>সার্ভার থেকে ডেটা লোড করা যাচ্ছে কলকাতা। আপনার ইন্টারনেট কানেকশন চেক করুন।</p>
         <button class='btn secondary' onclick='window.location.reload()'>Reload</button>
       `;
     document.getElementById('no-id-state').style.display = 'block';
@@ -566,7 +578,31 @@ function showAdminScreen() {
   
   let defaultTime = typeof builderDurationMin !== 'undefined' ? builderDurationMin : 30;
   document.getElementById('admin-time').value = localStorage.getItem('admin_time') || defaultTime;
+
+  // শেয়ার লিংক তৈরি করার লজিক
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentExamId = urlParams.get('examId');
+  if (currentExamId) {
+    document.getElementById('share-link-card').style.display = 'block';
+    const shareUrl = window.location.origin + window.location.pathname + "?examId=" + currentExamId;
+    document.getElementById('share-url-input').value = shareUrl;
+  } else {
+    // যদি লাইভ প্রিভিউ মোডে থাকে (কোনো ID ছাড়া), তাহলে শেয়ার কার্ড হাইড থাকবে
+    document.getElementById('share-link-card').style.display = 'none';
+  }
 }
+
+function copyShareLink() {
+  const input = document.getElementById('share-url-input');
+  input.select();
+  input.setSelectionRange(0, 99999); // মোবাইলের জন্য
+  navigator.clipboard.writeText(input.value).then(() => {
+    showAlert('পরীক্ষার লিংক কপি করা হয়েছে!', '✅');
+  }).catch(err => {
+    showAlert('লিংক কপি করা যায়নি!', '❌');
+  });
+}
+
 function exitAdmin() {
   document.getElementById('admin-screen').style.display = 'none';
   
