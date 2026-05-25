@@ -4,7 +4,7 @@
   "exams": [
     {
       "id": "ex_e20s1850r",
-      "date": "2026-05-25T19:31:28.247Z",
+      "date": "2026-05-25T19:32:49.165Z",
       "examData": {
         "title": "Model Test",
         "duration": "25 minutes",
@@ -362,9 +362,12 @@
         ],
         "id": "ex_e20s1850r",
         "password": "PHY211",
-        "allowedIds": []
+        "allowedIds": [
+          "777",
+          "201"
+        ]
       }
     }
   ],
-  "updated": "2026-05-25T19:31:28.247Z"
+  "updated": "2026-05-25T19:32:49.165Z"
 }
