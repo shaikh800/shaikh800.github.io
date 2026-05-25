@@ -322,7 +322,7 @@ th { background-color: #f8fafc; }
   <!-- Action Buttons -->
   <div class="btn-row">
     <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
-    <button class="btn danger" id="clear-db-btn">🗑️ Clear All Server Data</button>
+    <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
     <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
   </div>
 </div>
@@ -339,7 +339,7 @@ th { background-color: #f8fafc; }
     <input type="text" id="uid" class="input-f" placeholder="স্টুডেন্ট আইডি">
     <input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড">
   </div>
-  <button class="btn" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+  <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
 </div>
 
 <div id="exam-screen">
@@ -455,6 +455,7 @@ const savedPackage = localStorage.getItem("shared_exam_data");
 if(!savedPackage){
   showAlert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।", "⚠️");
   document.body.innerHTML="<h3 style='text-align:center;margin-top:50px;font-family:sans-serif;'>No Exam Data Available</h3>";
+  throw new Error("No exam data found.");
 }
 
 const examData = JSON.parse(savedPackage);
@@ -560,9 +561,7 @@ function unlockAdmin() {
 }
 
 function showAdminScreen() {
-  closeAllOverlays(); // এই লাইনটি শুরুতে অবশ্যই থাকতে হবে
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('admin-screen').style.display = 'block';
+  closeAllOverlays();
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
