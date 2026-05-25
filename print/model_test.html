@@ -350,21 +350,26 @@ th { background-color: #f8fafc; }
   </div>
 
   <div id="summary-screen" class="summary-box">
-    <h2>পরীক্ষার ফলাফল</h2>
-    <div class="stat-flex">
-      <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
-      <div class="stat-w">ভুল: <span id="s-w">0</span></div>
-      <div>স্কিপড: <span id="s-s">0</span></div>
-    </div>
-    <div class="score-circle-wrap">
-      <div class="score-circle">
-        <div class="score-val" id="s-score-disp">0</div>
-        <div class="score-divider"></div>
-        <div class="score-val" id="s-total-disp">0</div>
+    <div class="panel" style="text-align:center;">
+      <h2 style="color:#10b981; margin-bottom: 20px;"><i class="fas fa-trophy"></i> পরীক্ষার ফলাফল</h2>
+      <div class="stat-flex">
+        <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
+        <div class="stat-w">ভুল: <span id="s-w">0</span></div>
+        <div>স্কিপড: <span id="s-s">0</span></div>
+      </div>
+      <div class="score-circle-wrap">
+        <div class="score-circle">
+          <div class="score-val" id="s-score-disp">0</div>
+          <div class="score-divider"></div>
+          <div class="score-val" id="s-total-disp">0</div>
+        </div>
+      </div>
+      <p id="status-text" style="color:var(--muted); font-size:16px; margin-bottom:24px;"></p>
+      <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:20px;">
+        <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
+        <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
       </div>
     </div>
-    <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
-    <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
   </div>
 </div>
 
@@ -413,6 +418,7 @@ let examData, qd, totalQ, builderDurationMin, finalDuration;
 let tInt;
 let activeStudentId = "";
 let studentsList = [];
+let userAnswers = {};
 let isPublicMode = false;
 const ADMIN_PW_KEY = 'civil_admin_pw';
 const DEFAULT_PW = 'fec2024';
@@ -551,10 +557,14 @@ function renderSection(containerId, start, end) {
     const q = qd[i];
     let stimHtml = q.stim ? `<div class="stim">${q.stim}</div>` : "";
     let stHtml = q.stmts ? `<div class="stmts">i. ${q.stmts[0]||''}<br>ii. ${q.stmts[1]||''}<br>iii. ${q.stmts[2]||''}<br>নিচের কোনটি সঠিক?</div>` : "";
-    let oHtml = q.opts.map((o,j) => `<label id="lbl-${i}-${j}"><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("");
+    let oHtml = q.opts.map((o,j) => `<label id="lbl-${i}-${j}"><input type="radio" name="q${i}" value="${j}" onchange="selectAnswer(${i}, ${j})"> ${o}</label>`).join("");
     html += `<div class="q-block" id="qb-${i}"><div class="q-txt">${i+1}. ${q.q}</div>${stimHtml}${stHtml}<div class="opts">${oHtml}</div></div>`;
   }
   document.getElementById(containerId).innerHTML = html;
+}
+
+function selectAnswer(qIdx, optIdx) {
+  userAnswers[qIdx] = optIdx;
 }
 
 function updateProgress() {
@@ -672,9 +682,7 @@ function togglePublicMode() {
 }
 
 function updateLoginScreen() {
-  const nameField = document.getElementById('uname');
   const idField = document.getElementById('uid');
-  const passField = document.getElementById('upass');
   const descField = document.getElementById('login-desc');
   
   if(isPublicMode) {
@@ -842,6 +850,7 @@ async function submitExam(){
 
   let c=0, w=0, s=0;
   let wrongDetails = [];
+  let total = examData.questions.length;
 
   qd.forEach((q,i)=>{
     const sel = document.querySelector(`input[name="q${i}"]:checked`);
@@ -866,20 +875,25 @@ async function submitExam(){
 
   document.getElementById("exam-screen").style.display = "none";
   document.getElementById("summary-screen").style.display = "block";
+  
   document.getElementById("s-c").innerText = c;
   document.getElementById("s-w").innerText = w;
   document.getElementById("s-s").innerText = s;
   
   document.getElementById("s-score-disp").innerText = c;
   document.getElementById("pdf-s-score-disp").innerText = c; 
+  document.getElementById("status-text").innerText = `মোট ${total}টি প্রশ্নের মধ্যে আপনার সঠিক উত্তর হয়েছে ${c}টি।`;
 
   const url = localStorage.getItem('gas_url');
+  const uname = document.getElementById("uname").value.trim();
+  
   if(url && activeStudentId) {
     fetch(url, {
       method: 'POST',
       body: JSON.stringify({ 
         action: 'submit', 
-        id: activeStudentId, 
+        id: activeStudentId,
+        name: uname, 
         score: c, 
         topic: examData.title,
         details: wrongDetails.join(', ') || 'Perfect Score'
@@ -916,6 +930,7 @@ async function dlPdf(){
 
   wrap.classList.remove('pdf-mode');
   document.getElementById("progress-wrap").style.display = "block";
+  document.querySelector(".top-bar").style.display = "flex";
 }
 </script>
 </body>
