@@ -202,7 +202,7 @@ th { background-color: #f8fafc; }
       <div>
         <div class="section-eyebrow">⚙️ Control Panel</div>
         <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
-        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
+        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন.</p>
       </div>
       <span class="admin-badge">🔓 Admin Mode</span>
     </div>
@@ -393,8 +393,34 @@ window.onload = async function() {
   const urlParams = new URLSearchParams(window.location.search);
   const examId = urlParams.get('examId');
 
-  // If no Exam ID in URL, show manual entry form instead of annoying alert
+  const localExamData = localStorage.getItem("shared_exam_data");
+
   if (!examId) {
+    if (localExamData) {
+      try {
+        const parsedLocal = JSON.parse(localExamData);
+        examData = parsedLocal;
+        qd = examData.questions;
+        totalQ = qd.length;
+
+        const durationStr = examData.duration || "30";
+        const durationMatch = String(durationStr).match(/\d+/);
+        builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
+        
+        finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+
+        initializeExamUI();
+
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'block';
+
+        localStorage.removeItem("shared_exam_data");
+        return;
+      } catch (e) {
+        console.error("Local data parse error", e);
+      }
+    }
+
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('no-id-state').style.display = 'block';
     return;
@@ -533,19 +559,17 @@ function showAdminScreen() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('exam-screen').style.display = 'none';
   document.getElementById('summary-screen').style.display = 'none';
-  document.getElementById('loading-screen').style.display = 'none'; // Overlap fix
+  document.getElementById('loading-screen').style.display = 'none'; 
   
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
   
-  // Handle undefined builderDurationMin if Exam Data wasn't loaded yet
   let defaultTime = typeof builderDurationMin !== 'undefined' ? builderDurationMin : 30;
   document.getElementById('admin-time').value = localStorage.getItem('admin_time') || defaultTime;
 }
 function exitAdmin() {
   document.getElementById('admin-screen').style.display = 'none';
   
-  // Return to relevant screen based on state
   if (examData) {
     document.getElementById('login-screen').style.display = 'block';
     finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
