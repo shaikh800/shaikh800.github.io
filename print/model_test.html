@@ -115,8 +115,8 @@ body { background:#f1f5f9; font-family:'Noto Serif Bengali', sans-serif; margin:
 .opts input { margin-right:8px; margin-top:3px; cursor:pointer; flex-shrink:0; }
 @media (max-width:500px) { .opts { grid-template-columns:1fr; } }
 
-#pdf-wrap.pdf-mode { width:750px; background:#fff; box-shadow:none; }
-#pdf-wrap.pdf-mode .pdf-section { width:750px; padding:15px 18px 8px; box-sizing:border-box; background:#fff; }
+#pdf-wrap.pdf-mode { width:748px; background:#fff; box-shadow:none; }
+#pdf-wrap.pdf-mode .pdf-section { width:748px; padding:15px 18px 8px; box-sizing:border-box; background:#fff; }
 #pdf-wrap.pdf-mode .exam-header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:5px; margin-bottom:8px; }
 #pdf-wrap.pdf-mode .exam-header-center { flex:1; text-align:center; }
 #pdf-wrap.pdf-mode .exam-header h1 { margin:0; font-size:17px; letter-spacing:1px; }
@@ -153,6 +153,26 @@ th { background-color: #f8fafc; }
 .alert-btn { background: #0f172a; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 15px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
 .alert-btn:hover { background: #334155; }
 .flex-btns { display: flex; gap: 10px; }
+
+/* ── Mobile Print / @media print ── */
+@media print {
+  body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+  #app { max-width: 100% !important; padding: 0 !important; }
+  .site-header, .top-bar, #progress-wrap, .admin-fab,
+  #login-screen, #summary-screen, #admin-screen,
+  .btn-row, #submit-btn, #pdf-dummy-space { display: none !important; }
+  #exam-screen { display: block !important; }
+  #pdf-wrap { width: 100% !important; background: #fff !important; }
+  #pdf-wrap .pdf-section { width: 100% !important; padding: 10px 14px !important; }
+  #pdf-wrap .exam-header { display: flex !important; }
+  #pdf-wrap .pdf-section-break { display: block !important; page-break-before: always !important; }
+  #pdf-wrap .page-questions { column-count: 2 !important; column-gap: 14px !important; display: block !important; }
+  #pdf-wrap .q-block { font-size: 11px !important; line-height: 1.35 !important; padding: 3px 4px !important; box-shadow: none !important; background: transparent !important; break-inside: avoid !important; }
+  #pdf-wrap .opts label { border: 1px solid transparent !important; background: transparent !important; font-size: 11px !important; padding: 2px 3px !important; }
+  #pdf-wrap .opts label.ans-c { background: #dcfce7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #pdf-wrap .opts label.ans-w { background: #fee2e2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #pdf-score-wrap { display: flex !important; }
+}
 </style>
 </head>
 <body>
@@ -1051,6 +1071,13 @@ async function startExam(){
   if(!isPublicMode && !uid) return showAlert("স্টুডেন্ট আইডি দিন!", "🔑");
   if(!upass) return showAlert("পরীক্ষার পাসওয়ার্ড দিন!", "🔑");
 
+  // ── একটি ID থেকে একবারই পরীক্ষা ──
+  if(!isPublicMode && uid) {
+    if(localStorage.getItem(`exam_done_${examId}_${uid}`)) {
+      return showAlert("এই আইডি থেকে ইতোমধ্যে পরীক্ষা দেওয়া হয়েছে!\nএকটি আইডি দিয়ে একবারই পরীক্ষা দেওয়া যাবে।", "🚫");
+    }
+  }
+
   const btn = document.getElementById('login-btn');
   btn.innerText = "Checking Details...";
   btn.disabled = true;
@@ -1128,6 +1155,11 @@ async function submitExam(){
 
   const url = localStorage.getItem('gas_url');
   const uname = document.getElementById("uname").value.trim();
+
+  // ── ID mark as done (একবারই পরীক্ষা) ──
+  if(!isPublicMode && activeStudentId && activeStudentId !== "Guest") {
+    localStorage.setItem(`exam_done_${examId}_${activeStudentId}`, "1");
+  }
   
   if(url && activeStudentId) {
     fetch(url, {
@@ -1158,21 +1190,38 @@ function reviewWithPdf(){
 
 async function dlPdf(){
   const wrap = document.getElementById("pdf-wrap");
+  const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent);
+
   wrap.classList.add('pdf-mode');
-  await new Promise(r => setTimeout(r, 350));
+  await new Promise(r => setTimeout(r, 400));
 
-  await html2pdf().set({
-    margin: [8, 8, 8, 8], 
-    filename: `${examData.title}_Review.pdf`,
-    image: { type:'jpeg', quality:1 },
-    html2canvas: { scale:2, useCORS:true, scrollY:0, scrollX:0 },
-    jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-    pagebreak: { mode:['css'], before:['#page-break'] }
-  }).from(wrap).save();
-
-  wrap.classList.remove('pdf-mode');
-  document.getElementById("progress-wrap").style.display = "block";
-  document.querySelector(".top-bar").style.display = "flex";
+  if(isMobile) {
+    // Mobile: window.print() — works on Opera, Chrome, Safari mobile
+    window.print();
+    // cleanup after print dialog closes
+    setTimeout(() => {
+      wrap.classList.remove('pdf-mode');
+      document.getElementById("progress-wrap").style.display = "block";
+      document.querySelector(".top-bar").style.display = "flex";
+    }, 1000);
+  } else {
+    try {
+      await html2pdf().set({
+        margin: [8, 10, 8, 10],
+        filename: `${examData.title}_Review.pdf`,
+        image: { type:'jpeg', quality:1 },
+        html2canvas: { scale:2, useCORS:true, scrollY:0, scrollX:0 },
+        jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
+        pagebreak: { mode:['css'], before:['#page-break'] }
+      }).from(wrap).save();
+    } catch(e) {
+      // Fallback to print if html2pdf fails
+      window.print();
+    }
+    wrap.classList.remove('pdf-mode');
+    document.getElementById("progress-wrap").style.display = "block";
+    document.querySelector(".top-bar").style.display = "flex";
+  }
 }
 </script>
 </body>
