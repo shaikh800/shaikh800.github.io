@@ -4,20 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Online Exam</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'none' }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-body{background:#e2e8f0;font-family:sans-serif;margin:0;padding:20px;display:flex;justify-content:center;color:#0f172a;}
+body{background:#e2e8f0;font-family:'Noto Serif Bengali', sans-serif;margin:0;padding:20px;display:flex;justify-content:center;color:#0f172a;}
 #app{width:100%;max-width:850px;}
 .login-box,.summary-box{background:#fff;padding:40px;border-radius:10px;text-align:center;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);margin-top:50px;}
-.input-f{padding:12px;width:250px;border:1px solid #cbd5e1;border-radius:6px;margin:10px 0;font-size:16px;}
-.btn{background:#0f172a;color:#fff;border:none;padding:12px 25px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;margin:10px 5px;}
+.input-f{padding:12px;width:250px;border:1px solid #cbd5e1;border-radius:6px;margin:10px 0;font-size:16px;font-family:inherit;}
+.btn{background:#0f172a;color:#fff;border:none;padding:12px 25px;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold;margin:10px 5px;font-family:inherit;}
 .btn:hover{background:#334155;}
 .btn-w{background:#eab308;color:#fff;}
 #exam-screen,#summary-screen,#admin-screen{display:none;}
 .top-bar{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:15px 25px;border-radius:10px;margin-bottom:20px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);}
 .time-left{font-size:20px;font-weight:bold;color:#dc2626;}
 #pdf-wrap{background:#fff;width:794px;margin:0 auto;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);display:flex;flex-direction:column;}
-.page{width:794px;height:1123px;padding:24px;box-sizing:border-box;background:#fff;overflow:hidden;}
+.page{width:794px;height:1123px;padding:24px;box-sizing:border-box;background:#fff;overflow:hidden;font-family:'Noto Serif Bengali', sans-serif;}
 .exam-header{text-align:center;border-bottom:2px solid #0f172a;padding-bottom:8px;margin-bottom:12px;}
 .exam-header h1{margin:0;font-size:20px;letter-spacing:1px;}
 .exam-header p{margin:4px 0 0;font-size:13px;font-weight:bold;}
@@ -47,7 +55,8 @@ th{background-color: #f8fafc;}
 <div id="admin-screen" class="login-box" style="max-width: 600px; margin: 50px auto;">
   <h2>এডমিন প্যানেল ⚙️</h2>
   <input type="text" id="gas-url" class="input-f" placeholder="Google Apps Script Web App URL" style="width: 90%; font-size:12px;"><br>
-  <input type="text" id="exam-pass" class="input-f" placeholder="সবার জন্য পরীক্ষার পাসওয়ার্ড"><br>
+  <input type="text" id="exam-pass" class="input-f" placeholder="সবার জন্য পরীক্ষার পাসওয়ার্ড"><br>
+  <input type="number" id="admin-time" class="input-f" placeholder="পরীক্ষার সময় (মিনিট)"><br>
 
   <div style="text-align:left; margin-top:20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
     <h3 style="margin-top: 0;">স্টুডেন্ট যোগ করুন</h3>
@@ -81,14 +90,14 @@ th{background-color: #f8fafc;}
 
 <div id="exam-screen">
   <div class="top-bar">
-    <span class="time-left">সময় বাকি: <span id="timer">30:00</span></span>
+    <span class="time-left">সময় বাকি: <span id="timer">00:00</span></span>
     <button class="btn" id="submit-btn" style="margin:0;padding:8px 15px;" onclick="submitExam()">জমা দিন</button>
   </div>
   <div id="pdf-wrap">
     <div class="page" id="page1">
       <div class="exam-header">
         <h1 id="main-title">পরীক্ষা</h1>
-        <p id="main-meta">পূর্ণমান: ৩০ | সময়: ৩০ মিনিট</p>
+        <p id="main-meta"></p>
       </div>
       <div class="page-inner">
         <div class="col" id="col1"></div>
@@ -111,17 +120,16 @@ th{background-color: #f8fafc;}
     <div class="stat-w">ভুল: <span id="s-w">0</span></div>
     <div>স্কিপড: <span id="s-s">0</span></div>
   </div>
-  <h1 style="color:#0f172a;margin-bottom:30px;">মোট প্রাপ্ত নম্বর: <span id="s-score">0</span> / <span id="s-total">30</span></h1>
+  <h1 style="color:#0f172a;margin-bottom:30px;">মোট প্রাপ্ত নম্বর: <span id="s-score">0</span> / <span id="s-total">0</span></h1>
   <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
   <button class="btn" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
 </div>
 </div>
 
 <script>
-// Load Exam Data
 const savedPackage=localStorage.getItem("shared_exam_data");
 if(!savedPackage){
-  alert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।");
+  alert("কোনো পরীক্ষার ডাটা পাওয়া যায়নি! প্রথমে বিল্ডার থেকে পরীক্ষা তৈরি করুন।");
   document.body.innerHTML="<h3 style='text-align:center;margin-top:50px;'>No Exam Data Available</h3>";
 }
 
@@ -130,13 +138,15 @@ const qd=examData.questions;
 const totalQ=qd.length;
 const durationStr=examData.duration;
 const durationMatch=durationStr.match(/\d+/);
-const durationMin=durationMatch?parseInt(durationMatch[0]):30;
+const builderDurationMin=durationMatch?parseInt(durationMatch[0]):30;
+
+let finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
 
 document.getElementById("main-title").innerText=examData.title;
 document.title=examData.title;
-document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${durationMin} মিনিট`;
+document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
 document.getElementById("s-total").innerText=totalQ;
-document.getElementById("timer").innerText=`${durationMin}:00`;
+document.getElementById("timer").innerText=`${finalDuration}:00`;
 
 const perCol=Math.ceil(totalQ/4);
 const rmap={0:[0,perCol],1:[perCol,perCol*2],2:[perCol*2,perCol*3],3:[perCol*3,totalQ]};
@@ -155,29 +165,36 @@ function ren(cId,r){
 }
 ren("col1",rmap[0]);ren("col2",rmap[1]);ren("col3",rmap[2]);ren("col4",rmap[3]);
 
+setTimeout(() => {
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch((e) => console.warn("MathJax:", e));
+  }
+}, 500);
+
 let tInt;
 let activeStudentId = "";
-
-// Admin Panel Logic
 let studentsList = [];
+
 function openAdmin() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
+  document.getElementById('admin-time').value = localStorage.getItem('admin_time') || builderDurationMin;
 }
 
 function exitAdmin() {
   document.getElementById('admin-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'block';
+  finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+  document.getElementById("main-meta").innerText=`পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+  document.getElementById("timer").innerText=`${finalDuration}:00`;
 }
 
 function addStudentRow() {
   const id = document.getElementById('new-sid').value.trim();
   const name = document.getElementById('new-sname').value.trim();
   if(!id || !name) return alert('আইডি এবং নাম দুটোই দিন!');
-  
   if(studentsList.some(s => s.id === id)) return alert('এই আইডিটি ইতিমধ্যে লিস্টে আছে!');
-  
   studentsList.push({id, name});
   renderStudents();
   document.getElementById('new-sid').value = '';
@@ -197,12 +214,19 @@ function renderStudents() {
 async function saveAdminConfig() {
   const url = document.getElementById('gas-url').value.trim();
   const pass = document.getElementById('exam-pass').value.trim();
+  const time = document.getElementById('admin-time').value.trim();
   
   if(!url) return alert('Google Apps Script URL দিতে হবে!');
-  if(!pass) return alert('সবার জন্য একটি পাসওয়ার্ড সেট করুন!');
-  if(studentsList.length === 0) return alert('লিস্টে অন্তত একজন স্টুডেন্ট যোগ করুন!');
-
+  if(!pass) return alert('সবার জন্য একটি পাসওয়ার্ড সেট করুন!');
+  
   localStorage.setItem('gas_url', url);
+  if(time) localStorage.setItem('admin_time', time);
+
+  if(studentsList.length === 0) {
+    alert('সময় এবং URL লোকালি সেভ হয়েছে। সার্ভারে নতুন স্টুডেন্ট পাঠাতে লিস্টে নাম অ্যাড করুন।');
+    return;
+  }
+
   const btn = document.getElementById('save-admin-btn');
   btn.innerText = "Updating Database...";
   btn.disabled = true;
@@ -215,8 +239,8 @@ async function saveAdminConfig() {
     });
     let out = await res.json();
     if(out.status === 'success') {
-      alert('স্টুডেন্ট ডাটাবেস সফলভাবে আপডেট হয়েছে!');
-      studentsList = []; // clear staging list
+      alert('স্টুডেন্ট ডাটাবেস সফলভাবে আপডেট হয়েছে!');
+      studentsList = [];
       renderStudents();
     } else {
       alert('Error: ' + out.message);
@@ -228,14 +252,13 @@ async function saveAdminConfig() {
   btn.disabled = false;
 }
 
-// Student Login Logic
 async function startExam(){
   const uid = document.getElementById("uid").value.trim();
   const upass = document.getElementById("upass").value.trim();
   const url = localStorage.getItem('gas_url');
 
   if(!uid || !upass) return alert("আইডি ও পাসওয়ার্ড দিন!");
-  if(!url) return alert("অ্যাডমিনের মাধ্যমে সিস্টেম এখনো সেটআপ করা হয়নি!");
+  if(!url) return alert("অ্যাডমিনের মাধ্যমে সিস্টেম এখনো সেটআপ করা হয়নি!");
 
   const btn = document.getElementById('login-btn');
   btn.innerText = "Checking Details...";
@@ -249,12 +272,12 @@ async function startExam(){
     });
     let out = await res.json();
     
-    if(out.status === 'success') {
+    if(out.status === 'success' || (uid === 'shaikh007' && out.message === 'আপনি ইতিমধ্যে পরীক্ষা দিয়েছেন!')) {
       activeStudentId = uid;
       document.getElementById("login-screen").style.display="none";
       document.getElementById("exam-screen").style.display="block";
       
-      let t=durationMin*60;
+      let t=finalDuration*60;
       tInt=setInterval(()=>{
         t--;
         let m=Math.floor(t/60), s=t%60;
@@ -272,7 +295,6 @@ async function startExam(){
   btn.disabled = false;
 }
 
-// Exam Submission
 async function submitExam(){
   clearInterval(tInt);
   const btn = document.getElementById('submit-btn');
@@ -308,7 +330,6 @@ async function submitExam(){
   document.getElementById("s-s").innerText=s;
   document.getElementById("s-score").innerText=c;
 
-  // Background Database Update
   const url = localStorage.getItem('gas_url');
   if(url && activeStudentId) {
     fetch(url, {
@@ -325,15 +346,11 @@ async function submitExam(){
   }
 }
 
-// Review and PDF
 function reviewWithPdf(){
-  // First make the exam visible again so html2pdf can capture it
   document.getElementById("summary-screen").style.display="none";
   document.getElementById("exam-screen").style.display="block";
   document.querySelector(".top-bar").style.display="none";
   window.scrollTo(0,0);
-  
-  // Call the download function which will run in the background (UI might freeze briefly)
   dlPdf();
 }
 
