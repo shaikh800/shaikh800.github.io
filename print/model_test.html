@@ -15,37 +15,133 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 * { box-sizing: border-box; }
-.input-f { padding:12px 15px; width:100%; border:1px solid #cbd5e1; border-radius:8px; margin:10px 0; font-size:15px; font-family:inherit; transition: 0.3s; background: #f8fafc; }
-.input-f:focus { border-color: #0f172a; outline: none; background: #fff; }
-.btn { background:#0f172a; color:#fff; border:none; padding:13px 20px; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; margin:10px 0; font-family:inherit; width: 100%; transition:0.2s; }
-.btn:hover { background:#334155; transform: translateY(-1px); }
-.btn:active { transform: translateY(1px); }
-.btn-w { background:#eab308; color:#fff; }
-.btn-w:hover { background:#ca8a04; }
 
-body{background:#f8fafc;font-family:'Noto Serif Bengali', sans-serif;margin:0;padding:20px;color:#0f172a;}
-#app{width:100%;max-width:980px;margin:0 auto;padding-bottom:40px;}
-.site-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;margin-bottom:20px;}
+/* ── DESIGN TOKENS ── */
+:root {
+  --blue:#2563eb; --blue-dark:#1d4ed8;
+  --ink:#0f172a; --muted:#64748b;
+  --surface:#ffffff; --surface-soft:#f8fafc;
+  --line:#e2e8f0;
+  --radius:10px; --radius-lg:20px;
+  --shadow:0 4px 16px rgba(15,23,42,0.07);
+  --shadow-lg:0 24px 60px rgba(15,23,42,0.12);
+  --ease-out:cubic-bezier(0.22,1,0.36,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+
+body{background:#f1f5f9;font-family:'Noto Serif Bengali', sans-serif;margin:0;padding:20px;color:var(--ink);}
+#app{width:100%;max-width:980px;margin:0 auto;padding-bottom:60px;}
+
+/* ── SITE HEADER ── */
+.site-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;margin-bottom:28px;}
 .site-brand{display:flex;align-items:center;gap:14px;}
-.site-brand-icon{width:50px;height:50px;border-radius:18px;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;}
-.site-brand-text h1{margin:0;font-size:clamp(24px,3vw,34px);letter-spacing:-0.03em;}
-.site-brand-text p{margin:4px 0 0;color:#475569;font-size:15px;}
-.panel{background:#fff;border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,0.08);padding:28px;margin-bottom:26px;}
-.panel h2{margin:0 0 14px;font-size:clamp(22px,2.4vw,28px);}
-.panel p{margin:0;color:#64748b;}
-.panel-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
-.panel-row .admin-badge{margin-top:8px;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.site-brand-icon{width:50px;height:50px;border-radius:18px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;box-shadow:0 8px 20px rgba(15,23,42,0.18);}
+.site-brand-text h1{margin:0;font-size:clamp(22px,3vw,30px);letter-spacing:-0.03em;}
+.site-brand-text p{margin:4px 0 0;color:var(--muted);font-size:14px;}
+
+/* ── PANEL (login / admin / exam) ── */
+.panel{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:28px;margin-bottom:24px;border:1px solid var(--line);}
+.panel h2{margin:0 0 6px;font-size:clamp(20px,2.4vw,26px);letter-spacing:-0.02em;}
+.panel p{margin:0;color:var(--muted);font-size:14px;line-height:1.6;}
+.panel-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+
+/* ── INPUT FIELDS ── */
+.input-f {
+  width:100%; padding:11px 14px;
+  border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--surface-soft); color:var(--ink);
+  font-size:14px; font-family:inherit;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance:none;
+}
+.input-f:focus { border-color:var(--blue); outline:none; background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+.input-f::placeholder { color:#94a3b8; }
+
+/* ── FORM GROUP ── */
+.form-group { margin-bottom:14px; }
+.form-group label {
+  display:block; font-size:11px; font-weight:800;
+  text-transform:uppercase; letter-spacing:0.07em;
+  color:var(--muted); margin-bottom:6px;
+}
+.form-group .input-f { margin:0; }
+
+/* ── FORM ROW ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .form-row.single{grid-template-columns:1fr;}
-.panel .input-f{border-radius:14px;}
-.panel table{width:100%;border-collapse:collapse;margin-top:16px;}
-.panel table th, .panel table td{border:1px solid #e2e8f0;padding:12px 14px;font-size:14px;}
-.panel table th{background:#f8fafc;color:#334155;}
-.panel .btn{width:auto;}
-.admin-fab{position:fixed;right:24px;bottom:24px;width:48px;height:48px;border-radius:50%;border:none;background:#0f172a;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 18px 40px rgba(15,23,42,0.18);display:flex;align-items:center;justify-content:center;z-index:1000;transition:transform 0.2s ease;}
-.admin-fab:hover{transform:scale(1.05);}
-.admin-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;background:rgba(37,99,235,0.1);color:#2563eb;}
-@media(max-width:720px){.form-row{grid-template-columns:1fr;}.panel{padding:20px;}} 
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:40px; padding:0 20px; border-radius:var(--radius);
+  font-weight:700; font-size:14px; font-family:inherit;
+  transition:all 0.2s var(--ease-spring); border:1px solid transparent;
+  cursor:pointer; text-decoration:none;
+}
+.btn:hover { transform:translateY(-1px); }
+.btn:active { transform:translateY(0); }
+.btn.primary { background:var(--blue); color:#fff; box-shadow:0 6px 14px rgba(37,99,235,0.22); }
+.btn.primary:hover { background:var(--blue-dark); }
+.btn.secondary { background:var(--surface); color:var(--ink); border-color:var(--line); }
+.btn.secondary:hover { border-color:var(--blue); color:var(--blue); }
+.btn.danger { background:#ef4444; color:#fff; }
+.btn.danger:hover { background:#dc2626; }
+.btn.muted { background:var(--surface-soft); color:var(--muted); border-color:var(--line); }
+.btn.muted:hover { color:var(--ink); }
+.btn-w { background:#eab308; color:#fff; border-color:#eab308; }
+.btn-w:hover { background:#ca8a04; }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+
+/* ── ADMIN FAB ── */
+.admin-fab{position:fixed;right:24px;bottom:24px;width:48px;height:48px;border-radius:50%;border:none;background:var(--ink);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 8px 24px rgba(15,23,42,0.22);display:flex;align-items:center;justify-content:center;z-index:1000;transition:all 0.2s var(--ease-spring);}
+.admin-fab:hover{transform:scale(1.08);}
+
+/* ── ADMIN BADGE ── */
+.admin-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;background:rgba(37,99,235,0.1);color:var(--blue);}
+
+/* ── ADMIN SCREEN CARDS ── */
+.admin-card {
+  background:var(--surface-soft); border:1px solid var(--line);
+  border-radius:var(--radius-lg); padding:22px; margin-bottom:18px;
+}
+.admin-card-head {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px; flex-wrap:wrap; gap:10px;
+}
+.admin-card-head h3 {
+  margin:0; font-size:15px; font-weight:800; letter-spacing:-0.01em;
+  display:flex; align-items:center; gap:8px; color:var(--ink);
+}
+.admin-card-head h3 .icon {
+  width:28px; height:28px; border-radius:8px; background:rgba(37,99,235,0.1);
+  color:var(--blue); display:flex; align-items:center; justify-content:center;
+  font-size:13px;
+}
+
+/* ── STUDENT TABLE ── */
+.student-table { width:100%; border-collapse:collapse; margin-top:4px; }
+.student-table th {
+  background:var(--surface); color:var(--muted); font-size:11px; font-weight:800;
+  text-transform:uppercase; letter-spacing:0.06em; padding:10px 12px;
+  border:1px solid var(--line); text-align:left;
+}
+.student-table td { border:1px solid var(--line); padding:10px 12px; font-size:14px; }
+.student-table tr:hover td { background:var(--surface); }
+.student-table .del-btn {
+  background:none; border:none; cursor:pointer; color:#ef4444;
+  font-size:14px; padding:4px 8px; border-radius:6px; transition:background 0.15s;
+  font-weight:bold;
+}
+.student-table .del-btn:hover { background:#fee2e2; }
+
+/* ── SECTION DIVIDER ── */
+.section-eyebrow {
+  font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em;
+  color:var(--blue); margin-bottom:6px; display:flex; align-items:center; gap:6px;
+}
+.section-eyebrow::after { content:''; flex:1; height:1px; background:var(--line); }
+
+@media(max-width:720px){.form-row{grid-template-columns:1fr;}.panel{padding:20px;}.btn-row{flex-direction:column;}.btn-row .btn{width:100%;}} 
 
 #exam-screen, #summary-screen, #admin-screen { display:none; }
 .top-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; padding:15px 20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
@@ -163,35 +259,66 @@ th { background-color: #f8fafc; }
 </div>
 
 <div id="admin-screen" class="panel" style="display:none;">
-  <div class="panel-row">
+
+  <!-- Header -->
+  <div class="panel-row" style="margin-bottom:26px;">
     <div>
-      <h2>এডমিন প্যানেল ⚙️</h2>
-      <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
+      <div class="section-eyebrow">⚙️ Control Panel</div>
+      <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
+      <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
     </div>
-    <span class="admin-badge">Admin Mode</span>
-  </div>
-  <div class="form-row single">
-    <input type="text" id="gas-url" class="input-f" placeholder="Google Apps Script URL">
-    <input type="text" id="exam-pass" class="input-f" placeholder="সবার জন্য পরীক্ষার পাসওয়ার্ড">
-    <input type="number" id="admin-time" class="input-f" placeholder="পরীক্ষার সময় (মিনিট)">
+    <span class="admin-badge">🔓 Admin Mode</span>
   </div>
 
-  <div class="panel" style="background:#f8fafc;border-radius:18px;padding:20px;margin:20px 0 0;border:1px solid #e2e8f0;box-shadow:none;">
-    <h3 style="margin:0 0 12px;font-size:16px;">স্টুডেন্ট সেকশন</h3>
-    <div class="form-row" style="margin-bottom:16px;">
-      <input type="text" id="new-sid" class="input-f" placeholder="স্টুডেন্ট আইডি (যেমন: 101)">
-      <button class="btn btn-w btn-sm" onclick="addStudentRow()" style="width:auto;">+ Add</button>
+  <!-- Server Settings Card -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
     </div>
-    <table>
-      <thead><tr><th>ID</th><th style="width: 80px;">Action</th></tr></thead>
+    <div class="form-group">
+      <label>Google Apps Script URL</label>
+      <input type="text" id="gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>পরীক্ষার পাসওয়ার্ড (সবার জন্য)</label>
+        <input type="text" id="exam-pass" class="input-f" placeholder="যেমন: exam2024">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label>পরীক্ষার সময় (মিনিট)</label>
+        <input type="number" id="admin-time" class="input-f" placeholder="যেমন: 30">
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Section Card -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন</h3>
+    </div>
+    <div class="form-row" style="margin-bottom:14px; align-items:flex-end;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>নতুন স্টুডেন্ট আইডি</label>
+        <input type="text" id="new-sid" class="input-f" placeholder="যেমন: 101">
+      </div>
+      <button class="btn btn-w" onclick="addStudentRow()" style="min-height:42px;">+ Add Student</button>
+    </div>
+    <table class="student-table">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th style="width:80px; text-align:center;">Action</th>
+        </tr>
+      </thead>
       <tbody id="student-list"></tbody>
     </table>
   </div>
 
-  <div class="panel-row" style="justify-content:flex-start;gap:12px;flex-wrap:wrap;margin-top:12px;">
-    <button class="btn" id="save-admin-btn" onclick="saveAdminConfig()">Save & Update Server</button>
-    <button class="btn" id="clear-db-btn" style="background: #dc2626;">Clear All Server Data</button>
-    <button class="btn btn-w" style="background: #64748b;" onclick="exitAdmin()">Back to Login</button>
+  <!-- Action Buttons -->
+  <div class="btn-row">
+    <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
+    <button class="btn danger" id="clear-db-btn">🗑️ Clear All Server Data</button>
+    <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
   </div>
 </div>
 
@@ -450,7 +577,7 @@ function removeStudent(idx) {
 
 function renderStudents() {
   const tbody = document.getElementById('student-list');
-  tbody.innerHTML = studentsList.map((s, i) => `<tr><td>${s.id}</td><td style="text-align:center;"><button onclick="removeStudent(${i})" style="color:#dc2626; font-weight:bold; border:none; background:none; cursor:pointer; font-size:16px;">✕</button></td></tr>`).join('');
+  tbody.innerHTML = studentsList.map((s, i) => `<tr><td>${s.id}</td><td style="text-align:center;"><button class="del-btn" onclick="removeStudent(${i})">✕</button></td></tr>`).join('');
 }
 
 async function saveAdminConfig() {
