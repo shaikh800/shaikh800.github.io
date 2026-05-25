@@ -431,12 +431,13 @@ window.onload = async function() {
   const localExamData = localStorage.getItem("shared_exam_data");
 
   if (!examId) {
+    // ── MCQ Builder থেকে নতুন exam এসেছে ──
     if (localExamData) {
       try {
         const parsedLocal = JSON.parse(localExamData);
         examData = parsedLocal;
-        examId = 'ex_' + Math.random().toString(36).substr(2, 9); // Global Memory Id Generate
-        examData.id = examId; 
+        examId = 'ex_' + Math.random().toString(36).substr(2, 9);
+        examData.id = examId;
         qd = examData.questions;
         totalQ = qd.length;
 
@@ -445,15 +446,45 @@ window.onload = async function() {
         builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
         finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
 
-        initializeExamUI();
+        // Refresh এর পরেও exam থাকার জন্য sessionStorage + URL আপডেট
+        sessionStorage.setItem('mt_exam_id', examId);
+        sessionStorage.setItem('mt_exam_data', JSON.stringify(examData));
+        history.replaceState(null, '', '?examId=' + examId);
 
+        initializeExamUI();
         document.getElementById('loading-screen').style.display = 'none';
         document.getElementById('login-screen').style.display = 'block';
-
         localStorage.removeItem("shared_exam_data");
         return;
       } catch (e) {
         console.error("Local data parse error", e);
+      }
+    }
+
+    // ── Refresh হলে sessionStorage থেকে exam ফিরিয়ে আনো ──
+    const sessId = sessionStorage.getItem('mt_exam_id');
+    const sessData = sessionStorage.getItem('mt_exam_data');
+    if (sessId && sessData) {
+      try {
+        examId = sessId;
+        examData = JSON.parse(sessData);
+        qd = examData.questions;
+        totalQ = qd.length;
+
+        const durationStr = examData.duration || "30";
+        const durationMatch = String(durationStr).match(/\d+/);
+        builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
+        finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+
+        history.replaceState(null, '', '?examId=' + examId);
+        initializeExamUI();
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'block';
+        return;
+      } catch (e) {
+        console.error("Session restore error", e);
+        sessionStorage.removeItem('mt_exam_id');
+        sessionStorage.removeItem('mt_exam_data');
       }
     }
 
@@ -726,13 +757,13 @@ async function saveAdminConfig() {
   btn.disabled = true;
 
   // Ensure examData and targetId are properly tracked
-  const targetId = examId;
+  const targetId = examId; 
 
-  // If no exam is loaded, save local settings only and skip GitHub exam update
+  // Exam না থাকলে শুধু local settings সেভ করো
   if (!targetId || !examData) {
     btn.innerText = "💾 Save & Update Server";
     btn.disabled = false;
-    return showAlert('লোকাল সেটিংস সেভ হয়েছে!\n\n(কোনো Exam লোড না থাকায় GitHub এ Exam আপডেট হয়নি। Exam লিংক দিয়ে খুলুন।)', '✅');
+    return showAlert('লোকাল সেটিংস সেভ হয়েছে!\n\n(কোনো Exam লোড না থাকায় GitHub আপডেট হয়নি। MCQ Builder থেকে Exam লোড করুন।)', '✅');
   }
 
   if (targetId && examData) {
@@ -778,6 +809,9 @@ async function saveAdminConfig() {
 
     if(put.ok) {
       showAlert('সেটিংস এবং স্টুডেন্ট লিস্ট সফলভাবে সেভ হয়েছে!', '✅');
+      sessionStorage.setItem('mt_exam_id', examId);
+      sessionStorage.setItem('mt_exam_data', JSON.stringify(examData));
+      history.replaceState(null, '', '?examId=' + examId);
       document.getElementById('share-link-card').style.display = 'block';
       document.getElementById('share-url-input').value = `${window.location.origin}${window.location.pathname}?examId=${examId}`;
     } else {
