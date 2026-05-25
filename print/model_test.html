@@ -420,6 +420,7 @@ let activeStudentId = "";
 let studentsList = [];
 let userAnswers = {};
 let isPublicMode = false;
+let examId = new URLSearchParams(window.location.search).get('examId');
 const ADMIN_PW_KEY = 'civil_admin_pw';
 const DEFAULT_PW = 'fec2024';
 let adminUnlocked = sessionStorage.getItem('civil_admin') === '1';
@@ -427,9 +428,6 @@ let fullGithubData = { semesters: {}, notices: [], exams: [] };
 
 // ── 3. Initialization & GitHub Fallback API ──
 window.onload = async function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const examId = urlParams.get('examId');
-
   const localExamData = localStorage.getItem("shared_exam_data");
 
   if (!examId) {
@@ -437,13 +435,14 @@ window.onload = async function() {
       try {
         const parsedLocal = JSON.parse(localExamData);
         examData = parsedLocal;
+        examId = 'ex_' + Math.random().toString(36).substr(2, 9); // Global Memory Id Generate
+        examData.id = examId; 
         qd = examData.questions;
         totalQ = qd.length;
 
         const durationStr = examData.duration || "30";
         const durationMatch = String(durationStr).match(/\d+/);
         builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
-        
         finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
 
         initializeExamUI();
@@ -617,7 +616,6 @@ function showAdminScreen() {
   document.getElementById('gh-token').value = sessionStorage.getItem('civil_gh_token') || '';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
   
-  // Load public mode setting
   isPublicMode = localStorage.getItem('public_mode') === '1';
   document.getElementById('public-mode-toggle').checked = isPublicMode;
   const studentSection = document.getElementById('student-section');
@@ -626,7 +624,6 @@ function showAdminScreen() {
   let defaultTime = typeof builderDurationMin !== 'undefined' ? builderDurationMin : 30;
   document.getElementById('admin-time').value = localStorage.getItem('admin_time') || defaultTime;
 
-  // Load Exam Data into UI
   if(examData) {
      document.getElementById('exam-pass').value = examData.password || '';
      if (examData.allowedIds) {
@@ -635,11 +632,9 @@ function showAdminScreen() {
      }
   }
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentExamId = urlParams.get('examId');
-  if (currentExamId) {
+  if (examId) {
     document.getElementById('share-link-card').style.display = 'block';
-    const shareUrl = window.location.origin + window.location.pathname + "?examId=" + currentExamId;
+    const shareUrl = window.location.origin + window.location.pathname + "?examId=" + examId;
     document.getElementById('share-url-input').value = shareUrl;
   } else {
     document.getElementById('share-link-card').style.display = 'none';
@@ -730,17 +725,26 @@ async function saveAdminConfig() {
   btn.innerText = "Updating GitHub...";
   btn.disabled = true;
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const targetId = urlParams.get('examId') || (examData && examData.id) || null;
+  const targetId = examId; // Use global tracked Id
 
   if (targetId && examData) {
       examData.password = pass;
       examData.duration = time + " minutes";
-      examData.allowedIds = studentsList.map(s => s.id);
+      examData.allowedIds = isPublicMode ? [] : studentsList.map(s => s.id);
 
+      if(!fullGithubData.exams) fullGithubData.exams = [];
+      
       const exIndex = fullGithubData.exams.findIndex(e => e.id === targetId);
+      
+      // FIX: Array push deployment fallback block handler
       if(exIndex > -1) {
           fullGithubData.exams[exIndex].examData = examData;
+      } else {
+          fullGithubData.exams.unshift({
+              id: targetId,
+              date: new Date().toISOString(),
+              examData: examData
+          });
       }
   }
 
@@ -761,6 +765,8 @@ async function saveAdminConfig() {
 
     if(put.ok) {
       showAlert('সেটিংস এবং স্টুডেন্ট লিস্ট সফলভাবে সেভ হয়েছে!', '✅');
+      document.getElementById('share-link-card').style.display = 'block';
+      document.getElementById('share-url-input').value = `${window.location.origin}${window.location.pathname}?examId=${examId}`;
     } else {
       showAlert('GitHub এ সেভ হতে সমস্যা হয়েছে!', '❌');
     }
