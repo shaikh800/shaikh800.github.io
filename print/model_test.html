@@ -115,8 +115,8 @@ body { background:#f1f5f9; font-family:'Noto Serif Bengali', sans-serif; margin:
 .opts input { margin-right:8px; margin-top:3px; cursor:pointer; flex-shrink:0; }
 @media (max-width:500px) { .opts { grid-template-columns:1fr; } }
 
-#pdf-wrap.pdf-mode { width:794px; background:#fff; box-shadow:none; }
-#pdf-wrap.pdf-mode .pdf-section { width:794px; padding:15px 22px 8px; box-sizing:border-box; background:#fff; }
+#pdf-wrap.pdf-mode { width:750px; background:#fff; box-shadow:none; }
+#pdf-wrap.pdf-mode .pdf-section { width:750px; padding:15px 18px 8px; box-sizing:border-box; background:#fff; }
 #pdf-wrap.pdf-mode .exam-header { display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:5px; margin-bottom:8px; }
 #pdf-wrap.pdf-mode .exam-header-center { flex:1; text-align:center; }
 #pdf-wrap.pdf-mode .exam-header h1 { margin:0; font-size:17px; letter-spacing:1px; }
@@ -1162,7 +1162,7 @@ async function dlPdf(){
   await new Promise(r => setTimeout(r, 350));
 
   await html2pdf().set({
-    margin: 6.35, 
+    margin: [8, 8, 8, 8], 
     filename: `${examData.title}_Review.pdf`,
     image: { type:'jpeg', quality:1 },
     html2canvas: { scale:2, useCORS:true, scrollY:0, scrollX:0 },
