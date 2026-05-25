@@ -527,17 +527,23 @@ let activeStudentId = "";
 let studentsList = [];
 
 function openAdmin() {
-  closeAllOverlays(); // 🔥 ADD THIS LINE
-
+  closeAllOverlays(); // আগের লাইন থাকবে
   if (adminUnlocked) { 
     return showAdminScreen(); 
   }
-
-  document.getElementById('admin-login-modal').style.display = 'flex';
+  // নিচের তিন লাইন যোগ করুন
+  const modal = document.getElementById('admin-login-modal');
+  const box = document.getElementById('admin-login-box');
+  modal.style.display = 'flex';
+  setTimeout(() => box.classList.add('show'), 10);
 }
 
 function closeAdminModal() {
-  document.getElementById('admin-login-modal').style.display = 'none';
+  const box = document.getElementById('admin-login-box');
+  box.classList.remove('show');
+  setTimeout(() => {
+    document.getElementById('admin-login-modal').style.display = 'none';
+  }, 300);
 }
 
 function unlockAdmin() {
@@ -554,9 +560,7 @@ function unlockAdmin() {
 }
 
 function showAdminScreen() {
-
-  closeAllOverlays(); // 🔥 ADD THIS LINE
-
+  closeAllOverlays(); // এই লাইনটি শুরুতে অবশ্যই থাকতে হবে
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('login-screen').style.display = 'none';
