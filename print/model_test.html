@@ -36,10 +36,13 @@ body{background:#e2e8f0;font-family:'Noto Serif Bengali', sans-serif;margin:0;pa
 .pdf-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; border-radius: 10px; }
 #pdf-wrap { background:#fff; width:794px; min-width: 794px; margin:0 auto; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); display:flex; flex-direction:column; }
 .page { width:794px; height:1123px; padding:24px; box-sizing:border-box; background:#fff; overflow:hidden; font-family:'Noto Serif Bengali', sans-serif; }
-.exam-header { text-align:center; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:15px; }
-.exam-header h1 { margin:0; font-size:22px; letter-spacing:1px; }
-.exam-header p { margin:5px 0 0; font-size:14px; font-weight:bold; }
-.student-badge { color:#dc2626; font-size:15px; margin-top:8px; font-weight:bold; background:#fee2e2; padding:4px 15px; border-radius:20px; display:inline-block; }
+
+/* Updated Header for PDF (Side-by-side Score) */
+.exam-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; }
+.exam-header-center { flex: 1; text-align: center; }
+.exam-header h1 { margin:0; font-size:20px; letter-spacing:1px; }
+.exam-header p { margin:4px 0 0; font-size:13px; font-weight:bold; }
+.student-badge { color:#dc2626; font-size:14px; margin-top:6px; font-weight:bold; background:#fee2e2; padding:3px 12px; border-radius:20px; display:inline-block; }
 
 .page-inner { display:flex; gap:30px; height:calc(100% - 60px); }
 .col { flex:1; display:flex; flex-direction:column; gap:12px; }
@@ -145,16 +148,21 @@ th { background-color: #f8fafc; }
   <div class="pdf-container">
     <div id="pdf-wrap">
       <div class="page" id="page1">
+        
         <div class="exam-header">
-          <h1 id="main-title">পরীক্ষা</h1>
-          <p id="main-meta"></p>
-          <div id="student-name-display" class="student-badge"></div>
+          <div id="pdf-dummy-space" style="display:none; width: 80px;"></div>
           
-          <div id="pdf-score-wrap" class="score-circle-wrap" style="display:none; margin: 15px 0;">
-            <div class="score-circle" style="width:110px; height:110px; border-width:4px;">
-              <div class="score-val" id="pdf-s-score-disp" style="font-size:32px;">0</div>
-              <div class="score-divider" style="width:45px; height:3px;"></div>
-              <div class="score-val" id="pdf-s-total-disp" style="font-size:32px;">0</div>
+          <div class="exam-header-center">
+            <h1 id="main-title">পরীক্ষা</h1>
+            <p id="main-meta"></p>
+            <div id="student-name-display" class="student-badge"></div>
+          </div>
+          
+          <div id="pdf-score-wrap" class="score-circle-wrap" style="display:none; margin:0; width:80px; justify-content:flex-end;">
+            <div class="score-circle" style="width:75px; height:75px; border-width:3px; box-shadow:none;">
+              <div class="score-val" id="pdf-s-score-disp" style="font-size:22px;">0</div>
+              <div class="score-divider" style="width:30px; height:2px; margin:2px 0;"></div>
+              <div class="score-val" id="pdf-s-total-disp" style="font-size:22px;">0</div>
             </div>
           </div>
         </div>
@@ -498,8 +506,9 @@ function reviewWithPdf(){
   document.getElementById("exam-screen").style.display = "block";
   document.querySelector(".top-bar").style.display = "none";
   
-  // Show the score circle in PDF wrap
+  // Show the score circle on right and dummy space on left to keep title centered
   document.getElementById("pdf-score-wrap").style.display = "flex";
+  document.getElementById("pdf-dummy-space").style.display = "block";
   
   // Reset scroll for safe capture
   const scrollContainer = document.querySelector('.pdf-container');
