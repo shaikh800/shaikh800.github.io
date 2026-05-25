@@ -725,27 +725,37 @@ async function saveAdminConfig() {
   btn.innerText = "Updating GitHub...";
   btn.disabled = true;
 
-  const targetId = examId; // Use global tracked Id
+  // Ensure examData and targetId are properly tracked
+  const targetId = examId; 
 
   if (targetId && examData) {
       examData.password = pass;
       examData.duration = time + " minutes";
       examData.allowedIds = isPublicMode ? [] : studentsList.map(s => s.id);
 
-      if(!fullGithubData.exams) fullGithubData.exams = [];
+      // Verify the exams array exists in our global data
+      if (!fullGithubData.exams) {
+          fullGithubData.exams = [];
+      }
       
       const exIndex = fullGithubData.exams.findIndex(e => e.id === targetId);
       
-      // FIX: Array push deployment fallback block handler
+      const examPackage = {
+          id: targetId,
+          date: new Date().toISOString(),
+          examData: examData
+      };
+
+      // Correctly Update or Push to the Global Array
       if(exIndex > -1) {
-          fullGithubData.exams[exIndex].examData = examData;
+          fullGithubData.exams[exIndex] = examPackage;
       } else {
-          fullGithubData.exams.unshift({
-              id: targetId,
-              date: new Date().toISOString(),
-              examData: examData
-          });
+          fullGithubData.exams.unshift(examPackage);
       }
+  } else {
+       btn.innerText = "💾 Save & Update Server";
+       btn.disabled = false;
+       return showAlert('Error: Exam Data is missing!', '❌');
   }
 
   fullGithubData.updated = new Date().toISOString();
@@ -760,7 +770,7 @@ async function saveAdminConfig() {
     const put = await fetch(apiUrl, {
       method: 'PUT',
       headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Update Admin Settings via Panel', content, ...(sha ? { sha } : {}) })
+      body: JSON.stringify({ message: 'Update Exam & Settings via Admin Panel', content, ...(sha ? { sha } : {}) })
     });
 
     if(put.ok) {
