@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Online Exam</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
@@ -245,14 +246,23 @@ th { background-color: #f8fafc; }
     <div class="btn-row">
       <button class="btn primary" id="save-admin-btn" onclick="saveAdminConfig()">💾 Save &amp; Update Server</button>
       <button class="btn danger" id="clear-db-btn" onclick="clearDatabase()">🗑️ Clear All Server Data</button>
-      <button class="btn secondary" onclick="generateShareLink()">🔗 Copy Shareable Link</button>
       <button class="btn muted" onclick="exitAdmin()">← Back to Login</button>
     </div>
   </div>
 
   <div id="loading-screen" class="panel" style="text-align: center; padding: 50px 20px;">
-    <h2 style="color: var(--blue);">Loading Exam Data...</h2>
-    <p>অনুগ্রহ করে অপেক্ষা করুন।</p>
+    <div id="loading-state">
+      <h2 style="color: var(--blue);"><i class="fas fa-spinner fa-spin"></i> Loading Exam Data...</h2>
+      <p>অনুগ্রহ করে অপেক্ষা করুন।</p>
+    </div>
+    <div id="no-id-state" style="display:none;">
+      <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> কোনো Exam ID পাওয়া যায়নি!</h3>
+      <p style="margin-bottom:20px; color:var(--muted);">পরীক্ষা দিতে আপনার Exam ID টি নিচে প্রবেশ করান অথবা সঠিক লিংকে ক্লিক করুন।</p>
+      <div style="max-width:320px; margin:0 auto; display:flex; gap:10px;">
+         <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam ID (ex: kx2a9m)">
+         <button class="btn primary" onclick="manualLoadExam()">Load</button>
+      </div>
+    </div>
   </div>
 
   <div id="login-screen" class="panel">
@@ -383,9 +393,10 @@ window.onload = async function() {
   const urlParams = new URLSearchParams(window.location.search);
   const examId = urlParams.get('examId');
 
+  // If no Exam ID in URL, show manual entry form instead of annoying alert
   if (!examId) {
-    document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444; margin-bottom:10px;'>No Exam ID Provided</h3><p>অনুগ্রহ করে সঠিক লিংকে প্রবেশ করুন।<br>লিংকের শেষে <b>?examId=...</b> থাকতে হবে।</p>";
-    showAlert("কোনো Exam ID পাওয়া যায়নি! লিংকটি সঠিক কি না চেক করুন।", "⚠️");
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('no-id-state').style.display = 'block';
     return;
   }
 
@@ -396,8 +407,13 @@ window.onload = async function() {
     
     const foundExam = (data.exams || []).find(e => e.id === examId);
     if (!foundExam) {
-      document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>Exam Not Found</h3><p>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি।</p>";
-      showAlert("এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি!", "❌");
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('no-id-state').innerHTML = `
+        <h3 style='color:#ef4444; margin-bottom:10px;'>Exam Not Found</h3>
+        <p style='color:var(--muted); margin-bottom:20px;'>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি। আইডিটি সঠিক কি না চেক করুন।</p>
+        <button class='btn secondary' onclick='window.location.href="model_test.html"'>Back</button>
+      `;
+      document.getElementById('no-id-state').style.display = 'block';
       return;
     }
 
@@ -409,7 +425,6 @@ window.onload = async function() {
     const durationMatch = String(durationStr).match(/\d+/);
     builderDurationMin = durationMatch ? parseInt(durationMatch[0]) : 30;
     
-    // Check if admin updated the time locally
     finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
 
     initializeExamUI();
@@ -418,10 +433,21 @@ window.onload = async function() {
     document.getElementById('login-screen').style.display = 'block';
 
   } catch (e) {
-    document.getElementById('loading-screen').innerHTML = "<h3 style='color:#ef4444;'>Network Error</h3><p>সার্ভার থেকে ডেটা লোড করা যাচ্ছে না।</p>";
-    showAlert("ডেটা লোড করতে সমস্যা হচ্ছে। ইন্টারনেট কানেকশন চেক করুন।", "🌐");
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('no-id-state').innerHTML = `
+        <h3 style='color:#ef4444; margin-bottom:10px;'>Network Error</h3>
+        <p style='color:var(--muted); margin-bottom:20px;'>সার্ভার থেকে ডেটা লোড করা যাচ্ছে না। আপনার ইন্টারনেট কানেকশন চেক করুন।</p>
+        <button class='btn secondary' onclick='window.location.reload()'>Reload</button>
+      `;
+    document.getElementById('no-id-state').style.display = 'block';
   }
 };
+
+function manualLoadExam() {
+  const val = document.getElementById('manual-exam-id').value.trim();
+  if(!val) return showAlert("দয়া করে একটি Exam ID দিন!", "⚠️");
+  window.location.href = "?examId=" + val;
+}
 
 function initializeExamUI() {
   document.getElementById("main-title").innerText = examData.title;
@@ -505,16 +531,29 @@ function unlockAdmin() {
 function showAdminScreen() {
   closeAllOverlays();
   document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'none'; // Overlap fix
+  
   document.getElementById('admin-screen').style.display = 'block';
   document.getElementById('gas-url').value = localStorage.getItem('gas_url') || '';
-  document.getElementById('admin-time').value = localStorage.getItem('admin_time') || builderDurationMin;
+  
+  // Handle undefined builderDurationMin if Exam Data wasn't loaded yet
+  let defaultTime = typeof builderDurationMin !== 'undefined' ? builderDurationMin : 30;
+  document.getElementById('admin-time').value = localStorage.getItem('admin_time') || defaultTime;
 }
 function exitAdmin() {
   document.getElementById('admin-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'block';
-  finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
-  document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
-  document.getElementById("timer").innerText = `${finalDuration}:00`;
+  
+  // Return to relevant screen based on state
+  if (examData) {
+    document.getElementById('login-screen').style.display = 'block';
+    finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
+    document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+    document.getElementById("timer").innerText = `${finalDuration}:00`;
+  } else {
+    document.getElementById('loading-screen').style.display = 'block';
+  }
 }
 function addStudentRow() {
   const id = document.getElementById('new-sid').value.trim();
@@ -595,16 +634,6 @@ function clearDatabase() {
     btn.innerText = "Clear All Server Data";
     btn.disabled = false;
   });
-}
-function generateShareLink() {
-  const shareUrl = window.location.href;
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => showAlert('লিংক ক্লিপবোর্ডে কপি হয়েছে! যে কাউকে এই লিংক দিলে সে পরীক্ষা দিতে পারবে।', '🔗'))
-      .catch(() => { window.prompt('এই লিংকটি কপি করুন (Ctrl+C):', shareUrl); });
-  } else {
-    window.prompt('এই লিংকটি কপি করুন (Ctrl+C):', shareUrl);
-  }
 }
 
 // ── 5. Student Exam Flow ──
