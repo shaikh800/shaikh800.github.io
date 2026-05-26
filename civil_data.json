@@ -3,8 +3,8 @@
   "notices": [],
   "exams": [
     {
-      "id": "ex_hooexw4qy",
-      "date": "2026-05-26T15:41:44.618Z",
+      "id": "ex_3u1miam17",
+      "date": "2026-05-26T16:16:13.955Z",
       "examData": {
         "title": "Model Test",
         "duration": "25 minutes",
@@ -360,16 +360,13 @@
             ]
           }
         ],
-        "id": "ex_hooexw4qy",
+        "id": "ex_3u1miam17",
         "password": "PHY211",
         "allowedIds": [
-          "111",
-          "222",
-          "333",
           "201"
         ]
       }
     }
   ],
-  "updated": "2026-05-26T15:41:44.618Z"
+  "updated": "2026-05-26T16:16:13.955Z"
 }
