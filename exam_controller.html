@@ -445,19 +445,27 @@ async function saveExam(){
   const idsStr=document.getElementById('exam-ids').value.trim();
   const allowedIds=idsStr?idsStr.split(',').map(s=>s.trim()).filter(Boolean):[];
   if(!title) return toast('Title দিন!');
-  const qBlocks=document.querySelectorAll('.q-block');
-  const questions=[]; let valid=true;
-  qBlocks.forEach(b=>{
-    const q=b.querySelector('.q-txt').value.trim();
-    const opts=[0,1,2,3].map(i=>b.querySelector(`.opt-${i}`).value.trim());
-    const ans=parseInt(b.querySelector('.correct-ans').value);
-    if(!q||opts.some(o=>!o)) valid=false;
-    questions.push({q,opts,ans,stmts:null});
-  });
-  if(!valid) return toast('সব option পূরণ করুন!');
+
+  let questions = [];
+  if (window.draftQuestions && window.draftQuestions.length > 0) {
+     questions = window.draftQuestions;
+  } else {
+     const qBlocks=document.querySelectorAll('.q-block');
+     let valid=true;
+     qBlocks.forEach(b=>{
+       const q=b.querySelector('.q-txt').value.trim();
+       const opts=[0,1,2,3].map(i=>b.querySelector(`.opt-${i}`).value.trim());
+       const ans=parseInt(b.querySelector('.correct-ans').value);
+       if(!q||opts.some(o=>!o)) valid=false;
+       questions.push({q,opts,ans,stmts:null});
+     });
+     if(!valid) return toast('সব option পূরণ করুন!');
+  }
+
   const newExam={id:genId(),date:new Date().toISOString(),examData:{title,duration:dur+' minutes',password:pass,allowedIds,questions}};
   fullData.exams.unshift(newExam);
-  await pushGitHub(tok,'New exam added');
+  await pushGitHub(tok,'New exam added from builder');
+  window.draftQuestions = null; 
   closeBuilder();
   toast('Exam publish হয়েছে! ✅');
 }
@@ -531,6 +539,21 @@ window.onload=()=>{
   if(savedGas) document.getElementById('gas-url-hdr').value=savedGas;
   if(savedToken) syncAll();
   else{ document.getElementById('exam-list').innerHTML=`<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token দিয়ে Sync করুন।</p>`; }
+
+  const draftExamStr = localStorage.getItem('draft_exam_data');
+  if (draftExamStr) {
+     const draftExam = JSON.parse(draftExamStr);
+     openBuilder();
+     document.getElementById('exam-title').value = draftExam.title;
+     document.getElementById('exam-duration').value = draftExam.duration;
+     window.draftQuestions = draftExam.questions;
+     document.getElementById('questions-container').innerHTML = `
+        <div style="margin:15px 0; padding:15px; background:#dcfce7; color:#166534; border-radius:8px; font-weight:bold; border: 1px solid #bbf7d0;">
+          ✅ MCQ Builder থেকে ${draftExam.questions.length} টি প্রশ্ন ইম্পোর্ট করা হয়েছে! <br><br>
+          এখন শুধু Exam Password এবং Allowed IDs (যদি থাকে) সেট করে নিচের "Save & Publish" বাটনে ক্লিক করুন।
+        </div>`;
+     localStorage.removeItem('draft_exam_data'); 
+  }
 };
 </script>
 </body>
