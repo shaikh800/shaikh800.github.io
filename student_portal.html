@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal | Civil Engineering</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/site.css">
+  <style>
+    body { font-family: 'Noto Serif Bengali', 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
+    .portal-container { max-width: 800px; margin: 40px auto; padding: 0 20px; min-height: 70vh; }
+    
+    /* Panel Styles */
+    .portal-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 30px; box-shadow: var(--shadow); margin-bottom: 24px; animation: fadeSlideUp 0.4s ease-out both; }
+    .portal-panel h2 { margin-top: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; color: var(--ink); }
+    .portal-panel h2 i { color: var(--blue); }
+    
+    /* Inputs */
+    .input-f { width: 100%; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); font-size: 15px; font-family: inherit; margin-bottom: 16px; transition: 0.2s; }
+    .input-f:focus { outline: none; border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    
+    /* Tabs */
+    .tabs { display: flex; gap: 6px; border-bottom: 2px solid var(--line); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { background: none; border: none; padding: 10px 16px; font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .tab-btn:hover { color: var(--blue); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+    
+    /* Exam Cards */
+    .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .exam-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; background: var(--surface-soft); transition: 0.2s; position: relative; overflow: hidden; }
+    .exam-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-3px); }
+    .exam-card h3 { margin: 0 0 8px; font-size: 18px; color: var(--ink); }
+    .exam-meta { font-size: 13px; color: var(--muted); margin-bottom: 16px; display: flex; flex-direction: column; gap: 4px; }
+    .exam-meta i { width: 16px; color: var(--blue); }
+    .status-badge { position: absolute; top: 16px; right: 16px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; }
+    .status-new { background: #dbeafe; color: #1e40af; }
+    .status-done { background: #dcfce7; color: #166534; }
+    
+    /* History Table */
+    .history-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .history-table th { text-align: left; padding: 12px; background: var(--surface-soft); border-bottom: 2px solid var(--line); color: var(--muted); }
+    .history-table td { padding: 12px; border-bottom: 1px solid var(--line); }
+    .score-high { color: #166534; font-weight: bold; }
+    .score-low { color: #dc2626; font-weight: bold; }
+    
+    /* Utilities */
+    .loader { text-align: center; padding: 40px; color: var(--muted); }
+    .loader i { font-size: 30px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); border: 2px dashed var(--line); border-radius: var(--radius); }
+    
+    /* User Profile Banner */
+    .user-banner { display: flex; justify-content: space-between; align-items: center; background: var(--ink); color: #fff; padding: 16px 24px; border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow); flex-wrap: wrap; gap: 12px; }
+    .user-info h3 { margin: 0 0 4px; font-size: 20px; color: #fff; }
+    .user-info p { margin: 0; color: #94a3b8; font-size: 14px; }
+    .user-id-badge { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 18px; font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); }
+
+    @media (max-width: 600px) {
+      .portal-container { margin: 16px auto; padding: 0 12px; }
+      .portal-panel { padding: 20px 16px; }
+      .exam-grid { grid-template-columns: 1fr; }
+      .history-table { font-size: 13px; }
+      .history-table th, .history-table td { padding: 9px 8px; }
+      .user-banner { padding: 14px 16px; }
+      .user-info h3 { font-size: 17px; }
+      /* Larger touch targets */
+      .input-f { font-size: 16px; min-height: 50px; padding: 13px 16px; }
+      .btn { min-height: 50px; font-size: 16px; }
+      .tab-btn { padding: 10px 12px; font-size: 13px; }
+      .exam-card { padding: 16px; }
+      .exam-card h3 { font-size: 16px; }
+      .user-id-badge { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header (Matches your site) -->
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="index.html">
+        <img src="favicon.svg" alt="Logo" style="width:38px;height:38px;border-radius:10px;">
+        <span>Md. Shaikh<small>Student Portal</small></span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html"><i class="fas fa-house"></i> Home</a>
+        <a href="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+        <a class="nav-cta" href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="portal-container">
+
+    <!-- 1. LOGIN SECTION -->
+    <div id="auth-section" class="portal-panel">
+      <h2><i class="fas fa-user-graduate"></i> পোর্টালে প্রবেশ করুন</h2>
+      <p style="margin-bottom: 20px; color: var(--muted);">আপনার নাম এবং মোবাইল নম্বর দিয়ে পোর্টালে লগইন করুন। সিস্টেম আপনাকে অটোমেটিক একটি ৩-ডিজিটের স্টুডেন্ট আইডি প্রদান করবে।</p>
+      
+      <input type="text" id="auth-name" class="input-f" placeholder="আপনার পুরো নাম">
+      <input type="tel" id="auth-mobile" class="input-f" placeholder="মোবাইল নম্বর (১১ ডিজিট)">
+      
+      <button class="btn primary" id="auth-btn" style="width: 100%;" onclick="handleLogin()">
+        লগইন / রেজিস্টার করুন <i class="fas fa-arrow-right"></i>
+      </button>
+      <div id="auth-error" style="color: #dc2626; margin-top: 10px; font-size: 14px; display: none;"></div>
+    </div>
+
+    <!-- 2. DASHBOARD SECTION (Hidden initially) -->
+    <div id="dashboard-section" class="hidden">
+      
+      <!-- Profile Banner -->
+      <div class="user-banner">
+        <div class="user-info">
+          <h3 id="dash-name">Student Name</h3>
+          <p><i class="fas fa-phone"></i> <span id="dash-mobile">01xxxxxxxxx</span></p>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Student ID</div>
+          <div class="user-id-badge" id="dash-id">---</div>
+        </div>
+      </div>
+
+      <div class="portal-panel" style="padding: 20px 30px 30px;">
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('exams')"><i class="fas fa-list-check"></i> Available Exams</button>
+          <button class="tab-btn" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i> My History</button>
+          <button class="tab-btn" style="margin-left: auto; color: #ef4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+
+        <!-- Tab 1: Available Exams -->
+        <div id="tab-exams" class="tab-content active">
+          <div id="exams-loader" class="loader"><i class="fas fa-circle-notch"></i><br>পরীক্ষার তালিকা খোঁজা হচ্ছে...</div>
+          <div id="exams-grid" class="exam-grid hidden"></div>
+          <div id="exams-empty" class="empty-state hidden">
+            <i class="fas fa-folder-open" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
+            <p>এই মুহূর্তে আপনার জন্য কোনো পরীক্ষা অ্যাসাইন করা নেই।</p>
+          </div>
+        </div>
+
+        <!-- Tab 2: History -->
+        <div id="tab-history" class="tab-content">
+          <div id="history-loader" class="loader"><i class="fas fa-circle-notch"></i><br>ফলাফল লোড হচ্ছে...</div>
+          <div id="history-content" class="hidden">
+            <table class="history-table">
+              <thead><tr><th>পরীক্ষার নাম</th><th>তারিখ</th><th>প্রাপ্ত নম্বর</th></tr></thead>
+              <tbody id="history-list"></tbody>
+            </table>
+          </div>
+          <div id="history-empty" class="empty-state hidden">
+            <i class="fas fa-history" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
+            <p>আপনি এখনো কোনো পরীক্ষায় অংশ নেননি।</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const SCRIPT_GAS_URL = "https://script.google.com/macros/s/AKfycbwcb9QoNKZy_W2YtSPQRms3QYuLam4EkbT7oe26dUm6RzmWzdJ86NtISxymtUr2IfxB/exec";
+    const GITHUB_JSON_URL = "https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json";
+
+    let currentUser = { id: '', name: '', mobile: '' };
+    let allExams = [];
+    let myHistory = [];
+
+    // On Load: Check if already logged in
+    window.onload = () => {
+      const savedUser = localStorage.getItem('portal_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        showDashboard();
+      }
+    };
+
+    // Handle Login / Registration
+    async function handleLogin() {
+      const name = document.getElementById('auth-name').value.trim();
+      const mobile = document.getElementById('auth-mobile').value.trim();
+      const errEl = document.getElementById('auth-error');
+      const btn = document.getElementById('auth-btn');
+
+      if (!name || !mobile) {
+        errEl.innerText = "নাম এবং মোবাইল নম্বর দুটিই দিতে হবে!";
+        errEl.style.display = "block"; return;
+      }
+
+      errEl.style.display = "none";
+      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...`;
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(SCRIPT_GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'register', name: name, mobile: mobile }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+          currentUser = { id: String(data.id), name: name, mobile: mobile };
+          localStorage.setItem('portal_user', JSON.stringify(currentUser));
+          showDashboard();
+        } else {
+          errEl.innerText = "সার্ভার এরর: " + data.message;
+          errEl.style.display = "block";
+        }
+      } catch (e) {
+        errEl.innerText = "ইন্টারনেট কানেকশন চেক করুন!";
+        errEl.style.display = "block";
+      }
+
+      btn.innerHTML = `লগইন / রেজিস্টার করুন <i class="fas fa-arrow-right"></i>`;
+      btn.disabled = false;
+    }
+
+    // Show Dashboard UI
+    function showDashboard() {
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('dashboard-section').classList.remove('hidden');
+      
+      document.getElementById('dash-name').innerText = currentUser.name;
+      document.getElementById('dash-mobile').innerText = currentUser.mobile;
+      document.getElementById('dash-id').innerText = currentUser.id;
+
+      fetchDashboardData();
+    }
+
+    // Fetch Exams and History
+    async function fetchDashboardData() {
+      try {
+        // 1. Fetch GitHub Exams
+        const resGit = await fetch(`${GITHUB_JSON_URL}?_=${Date.now()}`);
+        const gitData = await resGit.json();
+        allExams = gitData.exams || [];
+
+        // 2. Fetch History from GAS — শুধু এই student-এর results (token লাগবে না)
+        const resGas = await fetch(SCRIPT_GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getStudentResults', studentId: currentUser.id }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const gasData = await resGas.json();
+        myHistory = gasData.results || gasData.data || [];
+
+        renderExams();
+        renderHistory();
+
+      } catch (e) {
+        console.error(e);
+        alert("ডেটা লোড করতে সমস্যা হচ্ছে। পেজটি রিলোড করুন।");
+      }
+    }
+
+    // Render Available Exams Tab
+    function renderExams() {
+      document.getElementById('exams-loader').classList.add('hidden');
+      const grid = document.getElementById('exams-grid');
+      const empty = document.getElementById('exams-empty');
+      grid.innerHTML = '';
+
+      let availableCount = 0;
+
+      allExams.forEach(ex => {
+        const allowed = ex.examData.allowedIds || [];
+        // Check if user is allowed (or if list is empty meaning public)
+        if (allowed.length === 0 || allowed.includes(currentUser.id)) {
+          
+          // Check if already taken
+          const isDone = myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
+          
+          availableCount++;
+          
+          const qCount = ex.examData.questions ? ex.examData.questions.length : 0;
+          const duration = ex.examData.duration || '30 minutes';
+          
+          let actionBtn = '';
+          let badge = '';
+
+          if (isDone) {
+            badge = `<div class="status-badge status-done"><i class="fas fa-check-circle"></i> Completed</div>`;
+            actionBtn = `<a href="print/model_test.html?examId=${ex.id}&practice=1" class="btn secondary" style="width:100%;"><i class="fas fa-redo"></i> Practice Mode</a>`;
+          } else {
+            badge = `<div class="status-badge status-new">New</div>`;
+            actionBtn = `<a href="print/model_test.html?examId=${ex.id}" class="btn primary" style="width:100%;"><i class="fas fa-play"></i> Start Exam</a>`;
+          }
+
+          grid.innerHTML += `
+            <div class="exam-card">
+              ${badge}
+              <h3>${ex.examData.title}</h3>
+              <div class="exam-meta">
+                <span><i class="far fa-clock"></i> সময়: ${duration}</span>
+                <span><i class="fas fa-list-ol"></i> প্রশ্ন: ${qCount} টি</span>
+                <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${ex.examData.password ? 'প্রয়োজন' : 'নেই'}</span>
+              </div>
+              ${actionBtn}
+            </div>
+          `;
+        }
+      });
+
+      if (availableCount > 0) {
+        grid.classList.remove('hidden');
+      } else {
+        empty.classList.remove('hidden');
+      }
+    }
+
+    // Render History Tab
+    function renderHistory() {
+      document.getElementById('history-loader').classList.add('hidden');
+      const content = document.getElementById('history-content');
+      const empty = document.getElementById('history-empty');
+      const tbody = document.getElementById('history-list');
+      tbody.innerHTML = '';
+
+      if (myHistory.length > 0) {
+        myHistory.forEach(h => {
+          const score = h.score !== undefined ? h.score : (h.Score || 0);
+          const topic = h.topic || h.Topic || 'Unknown Exam';
+          const dateStr = h.time || h.Time || '-';
+          
+          // Let's assume > 40% is pass (just for coloring)
+          const scoreClass = score > 0 ? 'score-high' : 'score-low';
+
+          tbody.innerHTML += `
+            <tr>
+              <td style="font-weight: 600;">${topic}</td>
+              <td style="color: var(--muted);">${dateStr}</td>
+              <td class="${scoreClass}">${score}</td>
+            </tr>
+          `;
+        });
+        content.classList.remove('hidden');
+      } else {
+        empty.classList.remove('hidden');
+      }
+    }
+
+    // Switch Tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.currentTarget.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    // Logout
+    function logout() {
+      localStorage.removeItem('portal_user');
+      location.reload();
+    }
+  </script>
+
+  <!-- Mobile Bottom Tab Bar -->
+  <nav class="mobile-tabbar" aria-label="Mobile navigation">
+    <a href="index.html" class="mobile-tab">
+      <i class="fas fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="civil.html" class="mobile-tab">
+      <i class="fas fa-helmet-safety"></i>
+      <span>Civil</span>
+    </a>
+    <a href="student_portal.html" class="mobile-tab active">
+      <i class="fas fa-user-graduate"></i>
+      <span>Portal</span>
+    </a>
+    <a href="print/index.html" class="mobile-tab">
+      <i class="fas fa-print"></i>
+      <span>CTRL-P</span>
+    </a>
+  </nav>
+
+  <script src="assets/site.js"></script>
+</body>
+</html>
