@@ -3,11 +3,11 @@
   "notices": [],
   "exams": [
     {
-      "id": "ex_mpn6db9spcy",
-      "date": "2026-05-26T21:56:29.392Z",
+      "id": "ex_mpn6frkdwqm",
+      "date": "2026-05-26T21:58:23.821Z",
       "examData": {
         "title": "Model Test",
-        "duration": "20 minutes",
+        "duration": "30 minutes",
         "password": "PHY211",
         "allowedIds": [
           "108",
@@ -372,5 +372,5 @@
       }
     }
   ],
-  "updated": "2026-05-26T21:56:30.241Z"
+  "updated": "2026-05-26T21:58:24.950Z"
 }
