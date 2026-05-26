@@ -4,7 +4,7 @@
   "exams": [
     {
       "id": "ex_3u1miam17",
-      "date": "2026-05-26T16:16:13.955Z",
+      "date": "2026-05-26T16:18:24.403Z",
       "examData": {
         "title": "Model Test",
         "duration": "25 minutes",
@@ -363,10 +363,11 @@
         "id": "ex_3u1miam17",
         "password": "PHY211",
         "allowedIds": [
-          "201"
+          "201",
+          "777"
         ]
       }
     }
   ],
-  "updated": "2026-05-26T16:16:13.955Z"
+  "updated": "2026-05-26T16:18:24.403Z"
 }
