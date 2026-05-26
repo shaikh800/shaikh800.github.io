@@ -4991,44 +4991,47 @@ function splitIntoQuestionBlocks(text) {
       // ==========================================
       
 function generateOnlineExamHTML() {
-        const mcqs = state.questions.filter(isMcqMeaningful);
-        if (mcqs.length === 0) {
-            alert("কোনো MCQ নেই! আগে MCQ যোগ করুন।");
-            return;
-        }
-        const quizData = mcqs.map((q, index) => {
-            let qText = q.text || "";
-            if (q.stimulusText) {
-                qText = `<div class='stim'>${q.stimulusText}</div>` + qText;
-            }
-            if (q.images && q.images.length > 0) {
-                q.images.forEach(img => {
-                    qText += `<br><img src="${img.src}" style="max-width:80%; height:auto; margin-top:5px; object-fit:contain;">`;
-                });
-            }
-            let stmtsArr = (q.statements && q.statements.length > 0) ? q.statements : null;
-            let ansIndex = 0;
-            if (q.answer === 'B') ansIndex = 1;
-            else if (q.answer === 'C') ansIndex = 2;
-            else if (q.answer === 'D') ansIndex = 3;
-            return {
-                q: qText,
-                opts: q.options.map((opt, i) => {
-                    const prefix = isEnglishMode() ? ["(A) ", "(B) ", "(C) ", "(D) "][i] : ["(ক) ", "(খ) ", "(গ) ", "(ঘ) "][i];
-                    return prefix + opt;
-                }),
-                ans: ansIndex,
-                stmts: stmtsArr
-            };
-        });
-        const examPackage = {
-            title: state.examTitle || "Online Exam",
-            duration: state.durationLine || "30 মিনিট",
-            questions: quizData
-        };
-        localStorage.setItem("shared_exam_data", JSON.stringify(examPackage));
-        window.location.href = "model_test.html";
+  const mcqs = state.questions.filter(isMcqMeaningful);
+  if (mcqs.length === 0) {
+      alert("কোনো MCQ নেই! আগে MCQ যোগ করুন।");
+      return;
+  }
+  const quizData = mcqs.map((q, index) => {
+      let qText = q.text || "";
+      if (q.stimulusText) {
+          qText = `<div class='stim'>${q.stimulusText}</div>` + qText;
       }
+      if (q.images && q.images.length > 0) {
+          q.images.forEach(img => {
+              qText += `<br><img src="${img.src}" style="max-width:80%; height:auto; margin-top:5px; object-fit:contain;">`;
+          });
+      }
+      let stmtsArr = (q.statements && q.statements.length > 0) ? q.statements : null;
+      let ansIndex = 0;
+      if (q.answer === 'B') ansIndex = 1;
+      else if (q.answer === 'C') ansIndex = 2;
+      else if (q.answer === 'D') ansIndex = 3;
+      return {
+          q: qText,
+          opts: q.options.map((opt, i) => {
+              const prefix = isEnglishMode() ? ["(A) ", "(B) ", "(C) ", "(D) "][i] : ["(ক) ", "(খ) ", "(গ) ", "(ঘ) "][i];
+              return prefix + opt;
+          }),
+          ans: ansIndex,
+          stmts: stmtsArr
+      };
+  });
+  
+  const draftExam = {
+      title: state.examTitle || "Online Exam",
+      duration: state.durationLine ? parseInt(state.durationLine) || 30 : 30,
+      questions: quizData
+  };
+  
+  localStorage.setItem("draft_exam_data", JSON.stringify(draftExam));
+  alert("প্রশ্নগুলো তৈরি হয়েছে! এখন পাসওয়ার্ড ও পারমিশন সেট করার জন্য কন্ট্রোল প্যানেলে নিয়ে যাওয়া হচ্ছে...");
+  window.location.href = "../exam_controller.html"; 
+}
     </script>
   <div id="cropperModal">
   <div class="cropper-content">
