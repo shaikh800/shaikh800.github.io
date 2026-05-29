@@ -213,7 +213,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   position: relative; min-height: 240px; display: flex; flex-direction: column;
   padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface); color: inherit; text-decoration: none;
-  box-shadow: var(--shadow); transition: all 0.25s var(--ease-spring);
+  box-shadow: var(--shadow); transition: all 0.25s var(--ease-spring); overflow: hidden;
 }
 .project-card:hover { transform: translateY(-4px); border-color: rgba(37, 99, 235, 0.4); box-shadow: var(--shadow-lg); }
 .project-card.featured { grid-column: span 2; color: #fff; background: var(--ink); border: none; }
