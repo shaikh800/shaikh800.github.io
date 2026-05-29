@@ -307,6 +307,17 @@ function clearExamData(body) {
 
 
 // ════════════════════════════════════════
+//  MOBILE NORMALIZE HELPER
+//  Google Sheets leading zero বাদ দিয়ে number হিসেবে store করে।
+//  এই function দুই দিকেই normalize করে compare করার জন্য।
+// ════════════════════════════════════════
+function normalizeMobile(m) {
+  const digits = String(m || '').replace(/\D/g, ''); // শুধু সংখ্যা রাখো
+  return digits.length === 10 ? '0' + digits : digits; // 10 digit হলে '0' যোগ করো
+}
+
+
+// ════════════════════════════════════════
 //  7. REGISTER STUDENT
 // ════════════════════════════════════════
 function registerStudent(body) {
@@ -320,6 +331,9 @@ function registerStudent(body) {
   try {
     const ss    = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = getOrCreateSheet(ss, 'Users');
+
+    // Mobile column (C) কে Text format করো — Sheets leading zero না বাদ দেয়
+    sheet.getRange('C:C').setNumberFormat('@');
 
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(['ID', 'Name', 'Mobile', 'Time']);
@@ -344,11 +358,11 @@ function registerStudent(body) {
 
     for (let i = 1; i < data.length; i++) {
       const rowId     = Number(data[i][0]);
-      const rowMobile = String(data[i][2]).trim();
+      const rowMobile = normalizeMobile(data[i][2]); // ← normalize করে compare
 
       if (rowId > maxId) maxId = rowId;
 
-      if (rowMobile === mobile) {
+      if (rowMobile === normalizeMobile(mobile)) { // ← দুই দিকেই normalize
         if (String(data[i][1]).trim() !== name) {
           sheet.getRange(i + 1, 2).setValue(name);
         }
