@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════
-//  Online Exam System — Google Apps Script  [FIXED v2.0]
+//  Online Exam System — Google Apps Script  [FIXED v2.1]
 //  by shaikh800 | mdshaikh.me
 //
 //  Deploy করার নিয়ম:
@@ -18,8 +18,7 @@ const LOG_SHEET      = 'Log';
 
 // ── 🔐 Security Token ──
 // এই token টি exam_controller.html-এ ADMIN_TOKEN হিসেবে দিতে হবে
-// যেকোনো random string দিন, যেমন: 'fec_exam_2025_secure'
-const ADMIN_TOKEN = 'CHANGE_THIS_SECRET_TOKEN';
+const ADMIN_TOKEN = 'shaikh_fec_secure_2026';
 
 
 // ════════════════════════════════════════
@@ -37,12 +36,12 @@ function doPost(e) {
     switch (action) {
       case 'submit':         result = submitResult(body);      break;
       case 'getResults':     result = getResults(body);        break;
-      case 'getAllResults':  result = getAllResults(body);      break;  // FIX 5: token required
+      case 'getAllResults':  result = getAllResults(body);      break;  
       case 'updateStudents': result = updateStudents(body);    break;
       case 'clearData':      result = clearData(body);         break;
       case 'clearExamData':  result = clearExamData(body);     break;
-      case 'register':            result = registerStudent(body);       break;
-      case 'getStudentResults':   result = getStudentResults(body);     break;  // student portal-এর জন্য (token লাগবে না)
+      case 'register':       result = registerStudent(body);   break;
+      case 'getStudentResults': result = getStudentResults(body); break;  
       default:
         result = { status: 'error', message: 'Unknown action: ' + action };
     }
@@ -66,7 +65,6 @@ function doGet(e) {
 
 // ════════════════════════════════════════
 //  🔐 AUTH HELPER
-//  FIX 1: Destructive/sensitive actions এ token check
 // ════════════════════════════════════════
 function requireAdminToken(body) {
   if (!body.token || body.token !== ADMIN_TOKEN) {
@@ -78,7 +76,6 @@ function requireAdminToken(body) {
 
 // ════════════════════════════════════════
 //  1. SUBMIT — পরীক্ষার result জমা
-//  Body: { action, id, name, score, topic, examId, details }
 // ════════════════════════════════════════
 function submitResult(body) {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
@@ -100,7 +97,6 @@ function submitResult(body) {
 
   const data = sheet.getDataRange().getValues();
 
-  // Duplicate check — same id + same examId (উভয় match করতে হবে)
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][1]).trim() === id && String(data[i][5]).trim() === examId) {
       sheet.getRange(i + 1, 5).setValue(score);
@@ -110,9 +106,7 @@ function submitResult(body) {
     }
   }
 
-  // FIX 4: সঠিক serial — data row count থেকে (header বাদে)
-  const serial = sheet.getLastRow(); // header = row 1, পরেরটা থেকে count শুরু
-
+  const serial = sheet.getLastRow(); 
   sheet.appendRow([serial, id, name, topic, score, examId, details, time]);
 
   logActivity('submit', `${id} | ${name} | ${topic} | ${score}`);
@@ -122,8 +116,6 @@ function submitResult(body) {
 
 // ════════════════════════════════════════
 //  2. GET RESULTS — এক exam-এর result
-//  Body: { action, topic, examId }
-//  (Public — student নিজের result দেখতে পারবে)
 // ════════════════════════════════════════
 function getResults(body) {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
@@ -133,7 +125,6 @@ function getResults(body) {
   const topic  = String(body.topic  || '').trim();
   const examId = String(body.examId || '').trim();
 
-  // FIX 5: topic বা examId না দিলে empty return — সব dump হবে না
   if (!topic && !examId) {
     return { status: 'error', message: 'topic অথবা examId দিতে হবে' };
   }
@@ -169,8 +160,6 @@ function getResults(body) {
 
 // ════════════════════════════════════════
 //  3. GET ALL RESULTS — সব exam-এর result
-//  FIX 1+5: Admin token required
-//  Body: { action, token }
 // ════════════════════════════════════════
 function getAllResults(body) {
   const auth = requireAdminToken(body);
@@ -203,9 +192,6 @@ function getAllResults(body) {
 
 // ════════════════════════════════════════
 //  4. UPDATE STUDENTS — candidate list sync
-//  FIX 1: Admin token required
-//  FIX 3: OR → AND (overly broad delete ঠিক করা)
-//  Body: { action, token, examId, topic, students: ['101','102',...] }
 // ════════════════════════════════════════
 function updateStudents(body) {
   const auth = requireAdminToken(body);
@@ -228,14 +214,13 @@ function updateStudents(body) {
   const toDelete = [];
 
   for (let i = data.length - 1; i >= 1; i--) {
-    // FIX 3: OR → AND — দুটোই match করতে হবে, নাহলে অন্য exam-এর data মুছে যাবে
     const rowExamId = String(data[i][0]).trim();
     const rowTopic  = String(data[i][1]).trim();
     if (rowExamId === examId && rowTopic === topic) {
       toDelete.push(i + 1);
     }
   }
-  // toDelete already descending order এ আছে (loop উপর থেকে নিচে গেছে)
+  
   toDelete.forEach(r => sheet.deleteRow(r));
 
   const time = new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' });
@@ -249,9 +234,7 @@ function updateStudents(body) {
 
 
 // ════════════════════════════════════════
-//  5. CLEAR DATA — সব result মুছো
-//  FIX 1: Admin token required
-//  Body: { action, token }
+//  5. CLEAR DATA — A to Z সব কিছু মুছো
 // ════════════════════════════════════════
 function clearData(body) {
   const auth = requireAdminToken(body);
@@ -259,24 +242,32 @@ function clearData(body) {
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  const rSheet = ss.getSheetByName(RESULTS_SHEET);
-  if (rSheet) {
-    rSheet.clearContents();
-    ensureResultsHeader(rSheet);
-  }
+  // সব sheet-এর নাম — Users সহ সব কিছু clear হবে
+  const allSheets = [RESULTS_SHEET, STUDENTS_SHEET, 'Users', LOG_SHEET];
+  let cleared = [];
 
-  const sSheet = ss.getSheetByName(STUDENTS_SHEET);
-  if (sSheet) sSheet.clearContents();
+  allSheets.forEach(function(sheetName) {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return;
 
-  logActivity('clearData', 'All data cleared');
-  return { status: 'success', message: 'All data cleared' };
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+
+    // Header (Row 1) রেখে বাকি সব data মুছে ফেলো
+    if (lastRow > 1 && lastCol > 0) {
+      sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+    }
+    cleared.push(sheetName);
+  });
+
+  // সবার শেষে Log-এ একটা entry রাখো
+  logActivity('clearData', 'All data cleared safely ✅ Sheets: ' + cleared.join(', '));
+  return { status: 'success', message: 'All data cleared from: ' + cleared.join(', ') };
 }
 
 
 // ════════════════════════════════════════
 //  6. CLEAR EXAM DATA — একটি exam-এর result মুছো
-//  FIX 1: Admin token required
-//  Body: { action, token, topic, examId }
 // ════════════════════════════════════════
 function clearExamData(body) {
   const auth = requireAdminToken(body);
@@ -299,7 +290,12 @@ function clearExamData(body) {
   for (let i = data.length - 1; i >= 1; i--) {
     const rowTopic  = String(data[i][3] || '').trim();
     const rowExamId = String(data[i][5] || '').trim();
-    if ((topic && rowTopic === topic) || (examId && rowExamId === examId)) {
+    
+    if (topic && examId && rowTopic === topic && rowExamId === examId) {
+      toDelete.push(i + 1);
+    } else if (!examId && topic && rowTopic === topic) {
+      toDelete.push(i + 1);
+    } else if (!topic && examId && rowExamId === examId) {
       toDelete.push(i + 1);
     }
   }
@@ -311,15 +307,12 @@ function clearExamData(body) {
 
 
 // ════════════════════════════════════════
-//  7. REGISTER STUDENT (Auto 3-digit ID)
-//  FIX 2: LockService দিয়ে race condition ঠিক করা
-//  Body: { action, name, mobile }
+//  7. REGISTER STUDENT
 // ════════════════════════════════════════
 function registerStudent(body) {
-  // FIX 2: Script-level lock — concurrent registration এ same ID পাবে না
   const lock = LockService.getScriptLock();
   try {
-    lock.waitLock(10000); // 10 second পর্যন্ত অপেক্ষা করবে
+    lock.waitLock(10000); 
   } catch (e) {
     return { status: 'error', message: 'Server busy, আবার চেষ্টা করুন' };
   }
@@ -342,7 +335,6 @@ function registerStudent(body) {
       return { status: 'error', message: 'Name এবং Mobile দুটোই দরকার' };
     }
 
-    // Mobile number validation (Bangladesh — 11 digit)
     if (!/^01[3-9]\d{8}$/.test(mobile)) {
       return { status: 'error', message: 'সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)' };
     }
@@ -357,7 +349,6 @@ function registerStudent(body) {
       if (rowId > maxId) maxId = rowId;
 
       if (rowMobile === mobile) {
-        // আগে থেকে registered — name update করে পুরনো ID ফেরত দাও
         if (String(data[i][1]).trim() !== name) {
           sheet.getRange(i + 1, 2).setValue(name);
         }
@@ -372,15 +363,13 @@ function registerStudent(body) {
     return { status: 'success', id: newId, message: 'New ID generated' };
 
   } finally {
-    lock.releaseLock(); // lock সবসময় release করতে হবে
+    lock.releaseLock(); 
   }
 }
 
 
 // ════════════════════════════════════════
-//  8. GET STUDENT RESULTS — একজন student-এর সব result
-//  Student Portal-এর জন্য — token লাগবে না
-//  Body: { action, studentId }
+//  8. GET STUDENT RESULTS
 // ════════════════════════════════════════
 function getStudentResults(body) {
   const studentId = String(body.studentId || '').trim();
@@ -461,44 +450,4 @@ function logError(fn, msg) {
     if (sheet.getLastRow() === 0) sheet.appendRow(['Time', 'Action', 'Detail']);
     sheet.appendRow([new Date().toISOString(), '❌ ERROR in ' + fn, msg]);
   } catch (e) {}
-}
-
-
-// ════════════════════════════════════════
-//  TEST FUNCTIONS (browser থেকে manually run করুন)
-// ════════════════════════════════════════
-
-function testSubmit() {
-  const result = submitResult({
-    action: 'submit',
-    id: '101',
-    name: 'Test Student',
-    score: 25,
-    topic: 'Model Test 1',
-    examId: 'ex_test123',
-    details: 'Q3 ভুল, Q7 এড়ানো'
-  });
-  Logger.log(JSON.stringify(result));
-}
-
-function testGetResults() {
-  const result = getResults({ topic: 'Model Test 1' });
-  Logger.log(JSON.stringify(result));
-}
-
-function testGetAll() {
-  // token ছাড়া কাজ করবে না
-  const result = getAllResults({ token: ADMIN_TOKEN });
-  Logger.log(JSON.stringify(result));
-}
-
-function testClear() {
-  // token ছাড়া কাজ করবে না
-  const result = clearData({ token: ADMIN_TOKEN });
-  Logger.log(JSON.stringify(result));
-}
-
-function testRegister() {
-  const result = registerStudent({ name: 'Shaikh Alam', mobile: '01700000000' });
-  Logger.log(JSON.stringify(result));
 }
