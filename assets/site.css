@@ -313,7 +313,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   background: var(--ink);
   border-top: 1px solid rgba(255,255,255,0.08);
   z-index: 9999;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
 }
 .mobile-tab {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
