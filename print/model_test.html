@@ -510,7 +510,7 @@ th { background-color: #f8fafc; }
 const SCRIPT_GAS_URL = "https://script.google.com/macros/s/AKfycbwcb9QoNKZy_W2YtSPQRms3QYuLam4EkbT7oe26dUm6RzmWzdJ86NtISxymtUr2IfxB/exec";
 
 function getGasUrl() {
-    return SCRIPT_GAS_URL || localStorage.getItem('gas_url') || "";
+    return localStorage.getItem('gas_url') || SCRIPT_GAS_URL || "";
 }
 function getGasAdminToken() {
     return (document.getElementById('gas-admin-token') && document.getElementById('gas-admin-token').value.trim()) || localStorage.getItem('gas_admin_token') || "";
