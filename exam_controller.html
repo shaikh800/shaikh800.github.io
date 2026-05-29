@@ -612,8 +612,19 @@ async function clearGAS(){
 async function clearAll(){
   toast('সব মুছছি... ⏳', 8000);
   await clearGitHub();
-  await clearGAS();
-  toast('GitHub + GAS — সব ডেটা মুছে ফেলা হয়েছে! 🧹');
+  const gasOk = await clearGASsilent();
+  if(gasOk) toast('GitHub + GAS — সব ডেটা মুছে ফেলা হয়েছে! 🧹');
+  else toast('GitHub মুছেছে ✅ কিন্তু GAS token ভুল — GAS মোছা হয়নি ❌');
+}
+
+async function clearGASsilent(){
+  const url=gasUrl(); if(!url){ toast('GAS URL দিন!'); return false; }
+  try{
+    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:gasAdminToken()}),headers:{'Content-Type':'text/plain'}});
+    const d=await r.json();
+    if(d.status==='success'){ allResults=[]; updateStats(); return true; }
+    return false;
+  }catch(e){ return false; }
 }
 
 // ── Edit Exam ──
