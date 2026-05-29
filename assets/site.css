@@ -227,7 +227,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 }
 .project-card.featured .card-icon { color: #fff; background: rgba(255, 255, 255, 0.15); }
 .project-card h3 { margin-bottom: 10px; font-size: 20px; letter-spacing: -0.01em; }
-.project-card p { margin-bottom: 20px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+.project-card p { margin-bottom: 20px; color: var(--muted); line-height: 1.6; font-size: 14px; padding-right: 115px; }
 .card-meta { margin-top: auto; color: var(--blue); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: gap 0.2s ease; }
 .project-card:hover .card-meta { gap: 8px; }
 .project-card.featured .card-meta { color: #fff; }
