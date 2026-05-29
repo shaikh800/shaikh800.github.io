@@ -126,7 +126,6 @@ td{border:1px solid var(--line);padding:9px 12px;}
 </head>
 <body>
 
-<!-- ── Controller Password Gate ── -->
 <div id="ctrl-gate">
   <div class="gate-box">
     <div class="gate-logo">
@@ -149,7 +148,6 @@ td{border:1px solid var(--line);padding:9px 12px;}
 
 <div class="wrap">
 
-  <!-- Header -->
   <div class="hdr">
     <div style="display:flex;align-items:center;gap:14px;">
         <a href="../index.html" style="color:var(--muted);text-decoration:none;font-size:12px;display:flex;align-items:center;gap:5px;" title="সাইটে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
@@ -163,21 +161,18 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
   </div>
 
-  <!-- Stats row -->
   <div class="stat-row" id="stats-row" style="display:none;">
     <div class="stat-box"><div class="val" id="stat-exams">0</div><div class="lbl2">মোট Exam</div></div>
     <div class="stat-box"><div class="val" id="stat-candidates">0</div><div class="lbl2">মোট Candidate</div></div>
     <div class="stat-box"><div class="val" id="stat-submitted">0</div><div class="lbl2">Submit হয়েছে</div></div>
   </div>
 
-  <!-- Exam List Panel -->
   <div class="panel" id="dashboard-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
       <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-list"></i></div> Exam তালিকা</div>
       <button class="btn btn-blue" onclick="openBuilder()"><i class="fas fa-plus"></i> নতুন Exam</button>
     </div>
 
-    <!-- Search by exam code -->
     <div class="search-bar">
       <input class="inp" id="exam-code-search" placeholder="Exam Code দিয়ে খুঁজুন (e.g. ex_abc123)..." onkeydown="if(event.key==='Enter')searchExam()">
       <button class="btn btn-gray" onclick="searchExam()"><i class="fas fa-search"></i></button>
@@ -187,7 +182,6 @@ td{border:1px solid var(--line);padding:9px 12px;}
     <div id="exam-list"></div>
   </div>
 
-  <!-- Builder Panel -->
   <div class="panel" id="builder-panel" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-edit"></i></div> নতুন Exam তৈরি</div>
@@ -208,7 +202,6 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
   </div>
 
-  <!-- Edit Exam Panel -->
   <div class="panel" id="edit-panel" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-pen"></i></div> Exam Edit করুন</div>
@@ -233,7 +226,6 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
   </div>
 
-  <!-- Danger Zone -->
   <div class="danger-zone">
     <div class="danger-title"><i class="fas fa-radiation-alt"></i> Danger Zone</div>
     <div class="danger-btns">
@@ -243,7 +235,7 @@ td{border:1px solid var(--line);padding:9px 12px;}
       <button class="btn btn-orange" onclick="confirmAction('gas','Google Sheet থেকে সব Result মুছবে। নিশ্চিত?',clearGAS)">
         <i class="fas fa-table"></i> GAS Results মুছুন
       </button>
-      <button class="btn btn-red" style="background:#7c3aed;" onclick="confirmAction('all','GitHub + Google Sheet — সব ডেটা একসাথে মুছবে। এটি undo করা যাবে না!',clearAll)">
+      <button class="btn btn-red" style="background:#7c3aed;" onclick="confirmAction('all','GitHub + Google Sheet — সব ডেটা একসাথে মুছবে। এটি undo করা যাবেবিধা নেই!',clearAll)">
         <i class="fas fa-bomb"></i> সব কিছু মুছুন (Nuclear)
       </button>
     </div>
@@ -251,7 +243,6 @@ td{border:1px solid var(--line);padding:9px 12px;}
 
 </div>
 
-<!-- Confirm Modal -->
 <div class="modal" id="confirm-modal">
   <div class="modal-box">
     <div style="font-size:40px;margin-bottom:12px;">⚠️</div>
@@ -295,8 +286,25 @@ async function syncAll(){
   document.getElementById('loader-inner').style.display='block';
   document.getElementById('exam-list').innerHTML='';
   try{
-    const res=await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FILE}?_=${Date.now()}`);
-    if(res.ok){ fullData=await res.json(); fullData.exams=fullData.exams||[]; }
+    const tok = token();
+    let res;
+    // 🚀 FIX: Bypass GitHub CDN Cache using REST API to prevent old deleted data from appearing
+    if(tok){
+      res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}?ref=${BRANCH}&_=${Date.now()}`, {
+        headers: {
+          'Authorization': `token ${tok}`,
+          'Accept': 'application/vnd.github.v3.raw'
+        },
+        cache: 'no-store'
+      });
+    } else {
+      res = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FILE}?_=${Date.now()}`);
+    }
+
+    if(res.ok){ 
+      fullData=await res.json(); 
+      fullData.exams=fullData.exams||[]; 
+    }
   }catch(e){ toast('GitHub load failed'); }
 
   // GAS থেকে সব results আনো
