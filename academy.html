@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academy | Md. Shaikh Alam</title>
+  <meta name="description" content="Tuition tools, exam controllers, and academic utilities.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="index.html" aria-label="Md. Shaikh home">
+        <img src="favicon.svg" alt="Logo" style="width:38px;height:38px;border-radius:10px;">
+        <span>Md. Shaikh<small>Portfolio and tools</small></span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
+        <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+        <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
+        <a href="academy.html" data-page="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="intro" style="min-height: auto; padding-bottom: 20px;" aria-labelledby="intro-title">
+      <div class="intro-content" style="max-width: 100%;">
+        <p class="eyebrow">Tuition & Academic Tools</p>
+        <h1 id="intro-title">Academy</h1>
+        <p class="lead">All tuition-related tools in one place. Access question builders, manage model tests, control exam timings, and connect with the student portal.</p>
+      </div>
+    </section>
+
+    <section class="section" style="margin-top: 20px; padding-top: 20px; border-top: none;">
+      <div class="card-grid reveal-grid">
+        
+        <!-- Tool 1 -->
+        <a class="project-card" href="print/question-builder.html">
+          <span class="card-icon"><i class="fas fa-list-check"></i></span>
+          <h3>Question Builder</h3>
+          <p>Create, format, and generate structured question papers easily for Tuition 1 and Tuition 2 routines.</p>
+          <span class="card-meta">Open Tool →</span>
+        </a>
+
+        <!-- Tool 2 -->
+        <a class="project-card" href="print/model_test.html">
+          <span class="card-icon"><i class="fas fa-laptop-file"></i></span>
+          <h3>Online Exam System</h3>
+          <p>Setup model tests and manage online examination environments for students.</p>
+          <span class="card-meta">Open Tool →</span>
+        </a>
+
+        <!-- Tool 3 -->
+        <a class="project-card" href="exam_controller.html">
+          <span class="card-icon"><i class="fas fa-stopwatch"></i></span>
+          <h3>Exam Controller</h3>
+          <p>Control exam timings and Google Apps Script integrations for submission monitoring.</p>
+          <span class="card-meta">Open Tool →</span>
+        </a>
+
+        <!-- Tool 4 -->
+        <a class="project-card" href="student_portal.html">
+          <span class="card-icon"><i class="fas fa-user-graduate"></i></span>
+          <h3>Student Portal</h3>
+          <p>A centralized hub for accessing tuition resources, schedules, and academic materials.</p>
+          <span class="card-meta">Open Portal →</span>
+        </a>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-shell">
+      <span style="font-weight:700;color:var(--ink);">Md. Shaikh Alam</span>
+      <span>Built with GitHub Pages · Faridpur, Bangladesh</span>
+    </div>
+  </footer>
+
+  <nav class="mobile-tabbar" aria-label="Mobile navigation">
+    <a href="index.html" class="mobile-tab">
+      <i class="fas fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="civil.html" class="mobile-tab">
+      <i class="fas fa-helmet-safety"></i>
+      <span>Civil</span>
+    </a>
+    <a href="modeling.html" class="mobile-tab">
+      <i class="fas fa-cube"></i>
+      <span>3D</span>
+    </a>
+    <a href="academy.html" class="mobile-tab active">
+      <i class="fas fa-graduation-cap"></i>
+      <span>Academy</span>
+    </a>
+  </nav>
+
+  <script src="assets/site.js"></script>
+</body>
+</html>
