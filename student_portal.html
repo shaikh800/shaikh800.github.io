@@ -394,7 +394,7 @@
       allExams.forEach(ex => {
         const allowed = ex.examData.allowedIds || [];
         // Check if user is allowed (or if list is empty meaning public)
-        if (allowed.length === 0 || allowed.includes(currentUser.id)) {
+        if (allowed.length === 0 || allowed.map(String).includes(String(currentUser.id))) {
           
           // Check if already taken
           const isDone = myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
