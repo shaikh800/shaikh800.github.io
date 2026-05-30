@@ -40,6 +40,7 @@ function doPost(e) {
       case 'updateStudents': result = updateStudents(body);    break;
       case 'clearData':      result = clearData(body);         break;
       case 'clearExamData':  result = clearExamData(body);     break;
+      case 'checkMobile':    result = checkMobile(body);       break;
       case 'register':       result = registerStudent(body);   break;
       case 'getStudentResults': result = getStudentResults(body); break;  
       default:
@@ -303,6 +304,45 @@ function clearExamData(body) {
   toDelete.forEach(r => sheet.deleteRow(r));
   logActivity('clearExamData', `${topic || examId} | ${toDelete.length} rows deleted`);
   return { status: 'success', message: `${toDelete.length} results deleted` };
+}
+
+
+// ════════════════════════════════════════
+//  9. CHECK MOBILE — নম্বর আছে কিনা চেক করো
+// ════════════════════════════════════════
+function checkMobile(body) {
+  const mobile = String(body.mobile || '').trim();
+
+  if (!mobile) {
+    return { status: 'error', message: 'mobile দিতে হবে' };
+  }
+
+  if (!/^01[3-9]\d{8}$/.test(mobile)) {
+    return { status: 'error', message: 'সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)' };
+  }
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('Users');
+
+  if (!sheet || sheet.getLastRow() <= 1) {
+    return { status: 'success', found: false };
+  }
+
+  const data = sheet.getDataRange().getValues();
+
+  for (let i = 1; i < data.length; i++) {
+    const rowMobile = normalizeMobile(data[i][2]);
+    if (rowMobile === normalizeMobile(mobile)) {
+      return {
+        status: 'success',
+        found:  true,
+        id:     data[i][0],
+        name:   String(data[i][1]).trim()
+      };
+    }
+  }
+
+  return { status: 'success', found: false };
 }
 
 
