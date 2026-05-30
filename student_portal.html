@@ -17,9 +17,11 @@
     .portal-panel h2 { margin-top: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; color: var(--ink); }
     .portal-panel h2 i { color: var(--blue); }
     
-    /* Inputs */
+    /* Inputs & Form */
     .input-f { width: 100%; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); font-size: 15px; font-family: inherit; margin-bottom: 16px; transition: 0.2s; }
     .input-f:focus { outline: none; border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .forgot-link { font-size: 13px; color: var(--blue); text-decoration: none; font-weight: 600; float: right; margin-top: -10px; margin-bottom: 16px; }
+    .forgot-link:hover { text-decoration: underline; }
     
     /* Tabs */
     .tabs { display: flex; gap: 6px; border-bottom: 2px solid var(--line); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; }
@@ -47,6 +49,8 @@
     .history-table td { padding: 12px; border-bottom: 1px solid var(--line); }
     .score-high { color: #166534; font-weight: bold; }
     .score-low { color: #dc2626; font-weight: bold; }
+    .btn-mistake { background: rgba(37,99,235,0.1); color: var(--blue); border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-mistake:hover { background: rgba(37,99,235,0.2); }
     
     /* Utilities */
     .loader { text-align: center; padding: 40px; color: var(--muted); }
@@ -57,9 +61,18 @@
     
     /* User Profile Banner */
     .user-banner { display: flex; justify-content: space-between; align-items: center; background: var(--ink); color: #fff; padding: 16px 24px; border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow); flex-wrap: wrap; gap: 12px; }
-    .user-info h3 { margin: 0 0 4px; font-size: 20px; color: #fff; }
-    .user-info p { margin: 0; color: #94a3b8; font-size: 14px; }
+    .user-info h3 { margin: 0 0 4px; font-size: 20px; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .user-info p { margin: 0; color: #94a3b8; font-size: 13px; margin-bottom: 4px; }
     .user-id-badge { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 18px; font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); }
+    .btn-edit-profile { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+    .btn-edit-profile:hover { background: rgba(255,255,255,0.25); }
+
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
+    .modal-box { background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius-lg); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
+    .modal-header h3 { margin: 0; font-size: 18px; }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
 
     @media (max-width: 600px) {
       .portal-container { margin: 16px auto; padding: 0 12px; }
@@ -69,19 +82,17 @@
       .history-table th, .history-table td { padding: 9px 8px; }
       .user-banner { padding: 14px 16px; }
       .user-info h3 { font-size: 17px; }
-      /* Larger touch targets */
       .input-f { font-size: 16px; min-height: 50px; padding: 13px 16px; }
       .btn { min-height: 50px; font-size: 16px; }
       .tab-btn { padding: 10px 12px; font-size: 13px; }
       .exam-card { padding: 16px; }
-      .exam-card h3 { font-size: 16px; }
       .user-id-badge { font-size: 15px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header (Matches your site) -->
+  <!-- Header -->
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html">
@@ -92,10 +103,10 @@
         <i class="fas fa-bars"></i>
       </button>
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
-        <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
-        <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
-        <a href="academy.html" data-page="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
+        <a href="index.html"><i class="fas fa-house"></i> Home</a>
+        <a href="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+        <a href="modeling.html"><i class="fas fa-cube"></i> 3D</a>
+        <a href="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
       </nav>
     </div>
   </header>
@@ -115,33 +126,38 @@
         </button>
       </div>
 
-      <!-- ধাপ ২: নাম (hidden initially) -->
+      <!-- ধাপ ২: পাসওয়ার্ড ও বিস্তারিত -->
       <div id="step-2" class="hidden">
-        <div id="mobile-display" style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-soft); border:1px solid var(--line); border-radius:var(--radius); padding:10px 14px; margin-bottom:16px; font-size:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-soft); border:1px solid var(--line); border-radius:var(--radius); padding:10px 14px; margin-bottom:16px; font-size:14px;">
           <span><i class="fas fa-phone" style="color:var(--blue); margin-right:6px;"></i><span id="mobile-display-num"></span></span>
-          <button onclick="goBack()" style="background:none; border:none; color:var(--blue); cursor:pointer; font-size:13px; font-weight:700; font-family:inherit; padding:0;"><i class="fas fa-pencil"></i> পরিবর্তন</button>
+          <button onclick="goBack()" style="background:none; border:none; color:var(--blue); cursor:pointer; font-size:13px; font-weight:700;"><i class="fas fa-pencil"></i> পরিবর্তন</button>
         </div>
 
         <div id="user-found-msg" class="hidden" style="background:#dcfce7; color:#166534; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px;">
-          <i class="fas fa-check-circle"></i> আপনার তথ্য পাওয়া গেছে! নাম auto-fill হয়েছে।
+          <i class="fas fa-check-circle"></i> স্বাগতম ফিরে আসার জন্য, <b id="exist-name-display"></b>!
         </div>
         <div id="user-new-msg" class="hidden" style="background:#dbeafe; color:#1e40af; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px;">
-          <i class="fas fa-user-plus"></i> নতুন ব্যবহারকারী! আপনার পুরো নাম লিখুন।
+          <i class="fas fa-user-plus"></i> নতুন ব্যবহারকারী! আপনার তথ্য দিয়ে প্রোফাইল তৈরি করুন।
         </div>
 
-        <div style="position:relative;">
-          <input type="text" id="auth-name" class="input-f" placeholder="আপনার পুরো নাম" style="padding-right:130px;" onkeydown="if(event.key==='Enter') handleLogin()">
-          <button id="edit-name-btn" onclick="toggleNameEdit()" class="hidden" style="position:absolute; right:12px; top:50%; transform:translateY(-70%); background:none; border:none; color:var(--blue); cursor:pointer; font-size:13px; font-weight:700; font-family:inherit; white-space:nowrap;">
-            <i class="fas fa-pencil"></i> নাম পরিবর্তন
-          </button>
+        <div id="new-user-fields" class="hidden">
+          <input type="text" id="reg-name" class="input-f" placeholder="আপনার পুরো নাম *">
+          <input type="text" id="reg-school" class="input-f" placeholder="স্কুল/কলেজের নাম (ঐচ্ছিক)">
+          <input type="text" id="reg-class" class="input-f" placeholder="ক্লাস/বর্ষ (ঐচ্ছিক)">
         </div>
+
+        <input type="password" id="auth-password" class="input-f" placeholder="পাসওয়ার্ড দিন *" onkeydown="if(event.key==='Enter') handleLogin()">
+        <a href="#" id="forgot-pass-link" class="forgot-link hidden" onclick="requestPasswordReset()">পাসওয়ার্ড ভুলে গেছেন?</a>
+
+        <div style="clear: both;"></div>
 
         <button class="btn primary" id="auth-btn" style="width:100%;" onclick="handleLogin()">
           লগইন করুন <i class="fas fa-arrow-right"></i>
         </button>
       </div>
 
-      <div id="auth-error" style="color:#dc2626; margin-top:10px; font-size:14px; display:none;"></div>
+      <div id="auth-error" style="color:#dc2626; margin-top:10px; font-size:14px; display:none; padding:10px; background:#fef2f2; border-radius:8px; border:1px solid #fecaca;"></div>
+      <div id="auth-success" style="color:#166534; margin-top:10px; font-size:14px; display:none; padding:10px; background:#dcfce7; border-radius:8px; border:1px solid #bbf7d0;"></div>
     </div>
 
     <!-- 2. DASHBOARD SECTION (Hidden initially) -->
@@ -150,8 +166,9 @@
       <!-- Profile Banner -->
       <div class="user-banner">
         <div class="user-info">
-          <h3 id="dash-name">Student Name</h3>
+          <h3 id="dash-name">Student Name <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button></h3>
           <p><i class="fas fa-phone"></i> <span id="dash-mobile">01xxxxxxxxx</span></p>
+          <p style="font-size: 12px; opacity: 0.8;"><i class="fas fa-school"></i> <span id="dash-school">N/A</span> | <i class="fas fa-book"></i> <span id="dash-class">N/A</span></p>
         </div>
         <div style="text-align: center;">
           <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Student ID</div>
@@ -181,10 +198,12 @@
         <div id="tab-history" class="tab-content">
           <div id="history-loader" class="loader"><i class="fas fa-circle-notch"></i><br>ফলাফল লোড হচ্ছে...</div>
           <div id="history-content" class="hidden">
-            <table class="history-table">
-              <thead><tr><th>পরীক্ষার নাম</th><th>তারিখ</th><th>প্রাপ্ত নম্বর</th></tr></thead>
-              <tbody id="history-list"></tbody>
-            </table>
+            <div style="overflow-x: auto;">
+              <table class="history-table">
+                <thead><tr><th>পরীক্ষার নাম</th><th>তারিখ</th><th>প্রাপ্ত নম্বর</th><th style="text-align: right;">বিস্তারিত</th></tr></thead>
+                <tbody id="history-list"></tbody>
+              </table>
+            </div>
           </div>
           <div id="history-empty" class="empty-state hidden">
             <i class="fas fa-history" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
@@ -197,11 +216,50 @@
 
   </main>
 
+  <!-- Modals -->
+  <!-- Edit Profile Modal -->
+  <div class="modal-overlay" id="modal-edit-profile">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> প্রোফাইল আপডেট রিকোয়েস্ট</h3>
+        <button class="close-btn" onclick="closeModal('modal-edit-profile')"><i class="fas fa-times"></i></button>
+      </div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">আপনার সঠিক তথ্য দিন। অ্যাডমিন অ্যাপ্রুভ করার পর প্রোফাইল আপডেট হবে।</p>
+      
+      <label style="font-size: 12px; font-weight: bold; color: var(--muted);">নাম</label>
+      <input type="text" id="edit-name" class="input-f">
+      
+      <label style="font-size: 12px; font-weight: bold; color: var(--muted);">স্কুল/কলেজ</label>
+      <input type="text" id="edit-school" class="input-f">
+      
+      <label style="font-size: 12px; font-weight: bold; color: var(--muted);">ক্লাস/বর্ষ</label>
+      <input type="text" id="edit-class" class="input-f">
+      
+      <div id="edit-msg" style="display:none; font-size: 13px; margin-bottom: 10px; padding: 10px; border-radius: 6px;"></div>
+      
+      <button class="btn primary" id="submit-edit-btn" style="width: 100%;" onclick="submitProfileUpdate()">রিকোয়েস্ট পাঠান</button>
+    </div>
+  </div>
+
+  <!-- View Mistakes Modal -->
+  <div class="modal-overlay" id="modal-mistakes">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> আপনার ভুলসমূহ</h3>
+        <button class="close-btn" onclick="closeModal('modal-mistakes')"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="mistakes-content" style="font-size: 14px; line-height: 1.6; color: var(--ink); background: var(--surface-soft); padding: 16px; border-radius: 8px; border: 1px solid var(--line);">
+        <!-- Content injected via JS -->
+      </div>
+    </div>
+  </div>
+
   <script>
     const SCRIPT_GAS_URL = localStorage.getItem('gas_url') || "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
     const GITHUB_JSON_URL = "https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json";
 
-    let currentUser = { id: '', name: '', mobile: '' };
+    let currentUser = null;
+    let isNewUser = false;
     let allExams = [];
     let myHistory = [];
 
@@ -210,22 +268,12 @@
       const savedUser = localStorage.getItem('portal_user');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
-        // Background-এ GAS-এ re-sync — sheet ফাঁকা হলেও user আবার add হবে
-        // এতে laptop/অন্য device-এও "নতুন user" সমস্যা হবে না
-        try {
-          fetch(SCRIPT_GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'register', name: currentUser.name, mobile: currentUser.mobile }),
-            headers: { 'Content-Type': 'text/plain' }
-          });
-        } catch(e) {}
         showDashboard();
       }
     };
 
     // ── ধাপ ১: মোবাইল চেক ──
     async function checkMobileStep() {
-      // leading/trailing space এবং +880 prefix সরিয়ে normalize করো
       let mobile = document.getElementById('auth-mobile').value.trim();
       if (mobile.startsWith('+880')) mobile = '0' + mobile.slice(4);
       if (mobile.startsWith('880') && mobile.length === 13) mobile = '0' + mobile.slice(3);
@@ -233,19 +281,12 @@
       const errEl = document.getElementById('auth-error');
       const btn   = document.getElementById('next-btn');
 
-      if (!mobile) {
-        errEl.innerText = 'মোবাইল নম্বর দিন!';
-        errEl.style.display = 'block'; return;
-      }
-      if (!/^01[3-9]\d{8}$/.test(mobile)) {
-        errEl.innerText = 'সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)';
-        errEl.style.display = 'block'; return;
-      }
+      if (!mobile) return showAuthError('মোবাইল নম্বর দিন!');
+      if (!/^01[3-9]\d{8}$/.test(mobile)) return showAuthError('সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)');
 
-      // input field-এ normalized number সেট করো
       document.getElementById('auth-mobile').value = mobile;
-
       errEl.style.display = 'none';
+      document.getElementById('auth-success').style.display = 'none';
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> খোঁজা হচ্ছে...';
       btn.disabled = true;
 
@@ -256,157 +297,156 @@
           headers: { 'Content-Type': 'text/plain' }
         });
 
-        // GAS থেকে valid JSON না আসলে আলাদা error দেখাও
-        let data;
-        try {
-          data = await res.json();
-        } catch (jsonErr) {
-          errEl.innerText = 'সার্ভার থেকে ভুল response এসেছে। পেজ reload করে আবার চেষ্টা করুন।';
-          errEl.style.display = 'block';
-          btn.innerHTML = 'পরবর্তী <i class="fas fa-arrow-right"></i>';
-          btn.disabled = false;
-          return;
-        }
-
-        // মোবাইল নম্বর দেখাও উপরে
+        const data = await res.json();
         document.getElementById('mobile-display-num').innerText = mobile;
 
-        const nameInput = document.getElementById('auth-name');
-        const editBtn   = document.getElementById('edit-name-btn');
-        const foundMsg  = document.getElementById('user-found-msg');
-        const newMsg    = document.getElementById('user-new-msg');
+        isNewUser = !(data.status === 'success' && (data.found === true || data.found === 'true'));
 
-        // found চেক: string 'true' বা boolean true দুটোই handle করো
-        const isFound = data.status === 'success' && (data.found === true || data.found === 'true');
-
-        if (isFound) {
-          // পুরনো user — নাম auto-fill, readonly
-          nameInput.value    = data.name || '';
-          nameInput.readOnly = true;
-          nameInput.style.background = 'var(--surface-soft)';
-          editBtn.classList.remove('hidden');
-          foundMsg.classList.remove('hidden');
-          newMsg.classList.add('hidden');
+        if (!isNewUser) {
+          document.getElementById('exist-name-display').innerText = data.name;
+          document.getElementById('user-found-msg').classList.remove('hidden');
+          document.getElementById('user-new-msg').classList.add('hidden');
+          document.getElementById('new-user-fields').classList.add('hidden');
+          document.getElementById('forgot-pass-link').classList.remove('hidden');
+          document.getElementById('auth-btn').innerHTML = 'লগইন করুন <i class="fas fa-arrow-right"></i>';
         } else {
-          // নতুন user — নাম খালি, editable
-          nameInput.value    = '';
-          nameInput.readOnly = false;
-          nameInput.style.background = '';
-          editBtn.classList.add('hidden');
-          newMsg.classList.remove('hidden');
-          foundMsg.classList.add('hidden');
+          document.getElementById('user-new-msg').classList.remove('hidden');
+          document.getElementById('user-found-msg').classList.add('hidden');
+          document.getElementById('new-user-fields').classList.remove('hidden');
+          document.getElementById('forgot-pass-link').classList.add('hidden');
+          document.getElementById('auth-btn').innerHTML = 'অ্যাকাউন্ট খুলুন <i class="fas fa-arrow-right"></i>';
         }
 
-        // ধাপ ১ লুকাও, ধাপ ২ দেখাও
         document.getElementById('step-1').classList.add('hidden');
         document.getElementById('step-2').classList.remove('hidden');
-        nameInput.focus();
+        
+        if(isNewUser) document.getElementById('reg-name').focus();
+        else document.getElementById('auth-password').focus();
 
       } catch (e) {
-        errEl.innerText = 'ইন্টারনেট কানেকশন চেক করুন! সমস্যা থাকলে একটু পরে আবার চেষ্টা করুন।';
-        errEl.style.display = 'block';
+        showAuthError('সার্ভারে কানেক্ট করা যাচ্ছে না। ইন্টারনেট চেক করুন।');
       }
 
       btn.innerHTML = 'পরবর্তী <i class="fas fa-arrow-right"></i>';
       btn.disabled = false;
     }
 
-    // নাম edit toggle
-    function toggleNameEdit() {
-      const nameInput = document.getElementById('auth-name');
-      const editBtn   = document.getElementById('edit-name-btn');
-      nameInput.readOnly = false;
-      nameInput.style.background = '';
-      editBtn.classList.add('hidden');
-      nameInput.focus();
-      nameInput.select();
-    }
-
-    // ধাপ ১-এ ফিরে যাও
     function goBack() {
       document.getElementById('step-2').classList.add('hidden');
       document.getElementById('step-1').classList.remove('hidden');
       document.getElementById('auth-error').style.display = 'none';
-      document.getElementById('user-found-msg').classList.add('hidden');
-      document.getElementById('user-new-msg').classList.add('hidden');
+      document.getElementById('auth-success').style.display = 'none';
+      document.getElementById('auth-password').value = '';
       document.getElementById('auth-mobile').focus();
+    }
+
+    function showAuthError(msg) {
+      const errEl = document.getElementById('auth-error');
+      errEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
+      errEl.style.display = 'block';
+    }
+    
+    function showAuthSuccess(msg) {
+      const sucEl = document.getElementById('auth-success');
+      sucEl.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+      sucEl.style.display = 'block';
     }
 
     // ── ধাপ ২: লগইন / রেজিস্টার ──
     async function handleLogin() {
-      const name   = document.getElementById('auth-name').value.trim();
       const mobile = document.getElementById('auth-mobile').value.trim();
-      const errEl  = document.getElementById('auth-error');
-      const btn    = document.getElementById('auth-btn');
+      const password = document.getElementById('auth-password').value.trim();
+      const btn = document.getElementById('auth-btn');
 
-      if (!name) {
-        errEl.innerText = 'আপনার নাম দিতে হবে!';
-        errEl.style.display = 'block'; return;
+      if (!password) return showAuthError('পাসওয়ার্ড দিতে হবে!');
+
+      let payload = { mobile, password };
+
+      if (isNewUser) {
+        payload.action = 'register';
+        payload.name = document.getElementById('reg-name').value.trim();
+        payload.school = document.getElementById('reg-school').value.trim();
+        payload.studentClass = document.getElementById('reg-class').value.trim();
+        if(!payload.name) return showAuthError('আপনার নাম দিতে হবে!');
+      } else {
+        payload.action = 'login';
       }
 
-      errEl.style.display = 'none';
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...';
-      btn.disabled  = true;
+      document.getElementById('auth-error').style.display = 'none';
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...';
+      btn.disabled = true;
 
       try {
-        const res  = await fetch(SCRIPT_GAS_URL, {
+        const res = await fetch(SCRIPT_GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register', name: name, mobile: mobile }),
+          body: JSON.stringify(payload),
           headers: { 'Content-Type': 'text/plain' }
         });
-
-        let data;
-        try {
-          data = await res.json();
-        } catch (jsonErr) {
-          errEl.innerText = 'সার্ভার থেকে ভুল response এসেছে। পেজ reload করে আবার চেষ্টা করুন।';
-          errEl.style.display = 'block';
-          btn.innerHTML = 'লগইন করুন <i class="fas fa-arrow-right"></i>';
-          btn.disabled  = false;
-          return;
-        }
+        const data = await res.json();
 
         if (data.status === 'success') {
-          // GAS থেকে name আসলে সেটাই ব্যবহার করো (existing user হলে saved name নেবে)
-          const finalName = data.name || name;
-          currentUser = { id: String(data.id), name: finalName, mobile: mobile };
+          currentUser = { 
+            id: String(data.id), 
+            name: data.name, 
+            mobile: mobile,
+            school: data.school || '',
+            studentClass: data.studentClass || ''
+          };
           localStorage.setItem('portal_user', JSON.stringify(currentUser));
           showDashboard();
         } else {
-          errEl.innerText = 'সার্ভার এরর: ' + (data.message || 'অজানা সমস্যা');
-          errEl.style.display = 'block';
+          showAuthError(data.message || 'পাসওয়ার্ড ভুল হয়েছে!');
         }
       } catch (e) {
-        errEl.innerText = 'ইন্টারনেট কানেকশন চেক করুন!';
-        errEl.style.display = 'block';
+        showAuthError('ইন্টারনেট কানেকশন চেক করুন!');
       }
 
-      btn.innerHTML = 'লগইন করুন <i class="fas fa-arrow-right"></i>';
-      btn.disabled  = false;
+      btn.innerHTML = isNewUser ? 'অ্যাকাউন্ট খুলুন <i class="fas fa-arrow-right"></i>' : 'লগইন করুন <i class="fas fa-arrow-right"></i>';
+      btn.disabled = false;
     }
 
+    async function requestPasswordReset() {
+      const mobile = document.getElementById('auth-mobile').value.trim();
+      document.getElementById('auth-error').style.display = 'none';
+      document.getElementById('auth-success').style.display = 'none';
+      
+      try {
+        const res = await fetch(SCRIPT_GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'requestPasswordReset', mobile }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const data = await res.json();
+        if(data.status === 'success') {
+          showAuthSuccess('পাসওয়ার্ড রিসেটের রিকোয়েস্ট অ্যাডমিনের কাছে পাঠানো হয়েছে। অ্যাডমিন অ্যাপ্রুভ করলে নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারবেন।');
+        } else {
+          showAuthError(data.message);
+        }
+      } catch(e) {
+        showAuthError('রিকোয়েস্ট পাঠানো যায়নি।');
+      }
+    }
 
-    // Show Dashboard UI
+    // ── ড্যাশবোর্ড ──
     function showDashboard() {
       document.getElementById('auth-section').classList.add('hidden');
       document.getElementById('dashboard-section').classList.remove('hidden');
       
-      document.getElementById('dash-name').innerText = currentUser.name;
+      document.getElementById('dash-name').innerHTML = `${currentUser.name} <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button>`;
       document.getElementById('dash-mobile').innerText = currentUser.mobile;
       document.getElementById('dash-id').innerText = currentUser.id;
+      document.getElementById('dash-school').innerText = currentUser.school || 'Not Set';
+      document.getElementById('dash-class').innerText = currentUser.studentClass || 'Not Set';
 
       fetchDashboardData();
     }
 
-    // Fetch Exams and History
     async function fetchDashboardData() {
       try {
-        // 1. Fetch GitHub Exams
         const resGit = await fetch(`${GITHUB_JSON_URL}?_=${Date.now()}`);
         const gitData = await resGit.json();
         allExams = gitData.exams || [];
 
-        // 2. Fetch History from GAS — শুধু এই student-এর results (token লাগবে না)
         const resGas = await fetch(SCRIPT_GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'getStudentResults', studentId: currentUser.id }),
@@ -424,7 +464,6 @@
       }
     }
 
-    // Render Available Exams Tab
     function renderExams() {
       document.getElementById('exams-loader').classList.add('hidden');
       const grid = document.getElementById('exams-grid');
@@ -435,27 +474,20 @@
 
       allExams.forEach(ex => {
         const allowed = ex.examData.allowedIds || [];
-        // Check if user is allowed (or if list is empty meaning public)
         if (allowed.length === 0 || allowed.map(String).includes(String(currentUser.id))) {
-          
-          // Check if already taken
           const isDone = myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
-          
           availableCount++;
           
           const qCount = ex.examData.questions ? ex.examData.questions.length : 0;
           const duration = ex.examData.duration || '30 minutes';
           
-          let actionBtn = '';
-          let badge = '';
-
-          if (isDone) {
-            badge = `<div class="status-badge status-done"><i class="fas fa-check-circle"></i> Completed</div>`;
-            actionBtn = `<a href="print/model_test.html?examId=${ex.id}&practice=1" class="btn secondary" style="width:100%;"><i class="fas fa-redo"></i> Practice Mode</a>`;
-          } else {
-            badge = `<div class="status-badge status-new">New</div>`;
-            actionBtn = `<a href="print/model_test.html?examId=${ex.id}" class="btn primary" style="width:100%;"><i class="fas fa-play"></i> Start Exam</a>`;
-          }
+          let actionBtn = isDone 
+            ? `<a href="print/model_test.html?examId=${ex.id}&practice=1" class="btn secondary" style="width:100%;"><i class="fas fa-redo"></i> Practice Mode</a>`
+            : `<a href="print/model_test.html?examId=${ex.id}" class="btn primary" style="width:100%;"><i class="fas fa-play"></i> Start Exam</a>`;
+          
+          let badge = isDone 
+            ? `<div class="status-badge status-done"><i class="fas fa-check-circle"></i> Completed</div>`
+            : `<div class="status-badge status-new">New</div>`;
 
           grid.innerHTML += `
             <div class="exam-card">
@@ -472,14 +504,10 @@
         }
       });
 
-      if (availableCount > 0) {
-        grid.classList.remove('hidden');
-      } else {
-        empty.classList.remove('hidden');
-      }
+      if (availableCount > 0) grid.classList.remove('hidden');
+      else empty.classList.remove('hidden');
     }
 
-    // Render History Tab
     function renderHistory() {
       document.getElementById('history-loader').classList.add('hidden');
       const content = document.getElementById('history-content');
@@ -492,15 +520,18 @@
           const score = h.score !== undefined ? h.score : (h.Score || 0);
           const topic = h.topic || h.Topic || 'Unknown Exam';
           const dateStr = h.time || h.Time || '-';
-          
-          // Let's assume > 40% is pass (just for coloring)
+          const details = h.details || 'No data';
           const scoreClass = score > 0 ? 'score-high' : 'score-low';
+
+          // Escape quotes for the onclick handler
+          const safeDetails = details.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
           tbody.innerHTML += `
             <tr>
               <td style="font-weight: 600;">${topic}</td>
               <td style="color: var(--muted);">${dateStr}</td>
               <td class="${scoreClass}">${score}</td>
+              <td style="text-align: right;"><button class="btn-mistake" onclick="viewMistakes('${safeDetails}')">Mistakes</button></td>
             </tr>
           `;
         });
@@ -510,42 +541,89 @@
       }
     }
 
-    // Switch Tabs
+    // ── Profile Update ──
+    function openEditProfile() {
+      document.getElementById('edit-name').value = currentUser.name;
+      document.getElementById('edit-school').value = currentUser.school || '';
+      document.getElementById('edit-class').value = currentUser.studentClass || '';
+      document.getElementById('edit-msg').style.display = 'none';
+      document.getElementById('modal-edit-profile').style.display = 'flex';
+    }
+
+    async function submitProfileUpdate() {
+      const btn = document.getElementById('submit-edit-btn');
+      const msg = document.getElementById('edit-msg');
+      
+      const payload = {
+        action: 'requestProfileUpdate',
+        id: currentUser.id,
+        name: document.getElementById('edit-name').value.trim(),
+        school: document.getElementById('edit-edit-school') ? document.getElementById('edit-school').value.trim() : document.getElementById('edit-school').value.trim(), // fallback
+        studentClass: document.getElementById('edit-class').value.trim()
+      };
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(SCRIPT_GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const data = await res.json();
+        
+        msg.style.display = 'block';
+        if(data.status === 'success') {
+          msg.style.background = '#dcfce7'; msg.style.color = '#166534';
+          msg.innerHTML = '<i class="fas fa-check"></i> রিকোয়েস্ট পাঠানো হয়েছে। অ্যাডমিন অ্যাপ্রুভ করলে ড্যাশবোর্ডে আপডেট দেখতে পাবেন।';
+          setTimeout(() => closeModal('modal-edit-profile'), 3000);
+        } else {
+          msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+          msg.innerHTML = '<i class="fas fa-times"></i> ' + data.message;
+        }
+      } catch(e) {
+        msg.style.display = 'block';
+        msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+        msg.innerHTML = '<i class="fas fa-times"></i> নেটওয়ার্ক সমস্যা!';
+      }
+      
+      btn.innerHTML = 'রিকোয়েস্ট পাঠান';
+      btn.disabled = false;
+    }
+
+    // ── Mistakes View ──
+    function viewMistakes(detailStr) {
+      let contentHtml = '';
+      if(detailStr === 'Perfect Score') {
+        contentHtml = '<div style="color:#166534; font-weight:bold; text-align:center;"><i class="fas fa-trophy" style="font-size:24px; display:block; margin-bottom:10px;"></i>অসাধারণ! আপনার কোনো ভুল হয়নি।</div>';
+      } else if (!detailStr || detailStr === 'No data') {
+         contentHtml = '<div style="color:var(--muted); text-align:center;">ভুলের কোনো তথ্য পাওয়া যায়নি।</div>';
+      } else {
+        // Format the mistakes: "Q1 (দেওয়া: A | সঠিক: B), Q2 (...)"
+        const mistakes = detailStr.split(', ');
+        contentHtml = '<ul style="margin:0; padding-left:20px;">' + mistakes.map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') + '</ul>';
+      }
+      
+      document.getElementById('mistakes-content').innerHTML = contentHtml;
+      document.getElementById('modal-mistakes').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
     function switchTab(tabName) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
       event.currentTarget.classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
     }
 
-    // Logout
     function logout() {
       localStorage.removeItem('portal_user');
       location.reload();
     }
   </script>
-
-  <!-- Mobile Bottom Tab Bar -->
-  <nav class="mobile-tabbar" aria-label="Mobile navigation">
-    <a href="index.html" class="mobile-tab">
-      <i class="fas fa-house"></i>
-      <span>Home</span>
-    </a>
-    <a href="civil.html" class="mobile-tab">
-      <i class="fas fa-helmet-safety"></i>
-      <span>Civil</span>
-    </a>
-    <a href="modeling.html" class="mobile-tab">
-      <i class="fas fa-cube"></i>
-      <span>3D</span>
-    </a>
-    <a href="academy.html" class="mobile-tab active">
-      <i class="fas fa-graduation-cap"></i>
-      <span>Academy</span>
-    </a>
-  </nav>
-
-  <script src="assets/site.js"></script>
 </body>
 </html>
