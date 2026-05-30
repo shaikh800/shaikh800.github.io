@@ -324,15 +324,31 @@ function checkMobile(body) {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName('Users');
 
-  if (!sheet || sheet.getLastRow() <= 1) {
+  // ── DEBUG LOG ──
+  if (!sheet) {
+    logActivity('🔍 checkMobile', `FAIL: Users sheet নেই | mobile=${mobile}`);
+    return { status: 'success', found: false };
+  }
+
+  const lastRow = sheet.getLastRow();
+  logActivity('🔍 checkMobile', `mobile="${mobile}" | Users lastRow=${lastRow}`);
+
+  if (lastRow <= 1) {
+    logActivity('🔍 checkMobile', `FAIL: sheet ফাঁকা (lastRow=${lastRow})`);
     return { status: 'success', found: false };
   }
 
   const data = sheet.getDataRange().getValues();
 
   for (let i = 1; i < data.length; i++) {
-    const rowMobile = normalizeMobile(data[i][2]);
-    if (rowMobile === normalizeMobile(mobile)) {
+    const rawVal    = data[i][2];
+    const rowMobile = normalizeMobile(rawVal);
+    const normInput = normalizeMobile(mobile);
+
+    // প্রতিটা row-এর comparison Log-এ লেখো
+    logActivity('🔍 checkMobile', `row${i}: raw="${rawVal}" (type=${typeof rawVal}) → norm="${rowMobile}" vs input="${normInput}" → ${rowMobile === normInput ? '✅ MATCH' : '❌ no match'}`);
+
+    if (rowMobile === normInput) {
       return {
         status: 'success',
         found:  true,
@@ -342,6 +358,7 @@ function checkMobile(body) {
     }
   }
 
+  logActivity('🔍 checkMobile', `NOT FOUND: "${mobile}" checked ${data.length - 1} rows`);
   return { status: 'success', found: false };
 }
 
