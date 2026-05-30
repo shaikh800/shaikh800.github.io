@@ -378,11 +378,6 @@ function registerStudent(body) {
       hRange.setBackground('#0f172a').setFontColor('#ffffff').setFontWeight('bold');
     }
 
-    // ✅ FIX: Mobile column (C) সম্পূর্ণ text format করো
-    // Google Sheets leading zero সহ number দেখলে auto-convert করে ফেলে।
-    // '@' format দিলে সবসময় text হিসেবে থাকবে।
-    sheet.getRange(2, 3, Math.max(sheet.getLastRow(), 1000), 1).setNumberFormat('@');
-
 
     const name   = String(body.name   || '').trim();
     const mobile = String(body.mobile || '').trim();
@@ -416,11 +411,7 @@ function registerStudent(body) {
     }
 
     const newId = maxId + 1;
-    sheet.appendRow([newId, name, String(mobile), time]);
-
-    // ✅ FIX: নতুন row-এর mobile cell টাকে explicitly text format করো
-    const newRow = sheet.getLastRow();
-    sheet.getRange(newRow, 3).setNumberFormat('@').setValue(String(mobile));
+    sheet.appendRow([newId, name, String(mobile), time]); // mobile সবসময় text
 
     logActivity('register', `${newId} | ${name} | ${mobile}`);
     return { status: 'success', id: newId, message: 'New ID generated' };
