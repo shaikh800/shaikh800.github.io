@@ -105,15 +105,43 @@
     <!-- 1. LOGIN SECTION -->
     <div id="auth-section" class="portal-panel">
       <h2><i class="fas fa-user-graduate"></i> পোর্টালে প্রবেশ করুন</h2>
-      <p style="margin-bottom: 20px; color: var(--muted);">আপনার নাম এবং মোবাইল নম্বর দিয়ে পোর্টালে লগইন করুন। সিস্টেম আপনাকে অটোমেটিক একটি ৩-ডিজিটের স্টুডেন্ট আইডি প্রদান করবে।</p>
-      
-      <input type="text" id="auth-name" class="input-f" placeholder="আপনার পুরো নাম">
-      <input type="tel" id="auth-mobile" class="input-f" placeholder="মোবাইল নম্বর (১১ ডিজিট)">
-      
-      <button class="btn primary" id="auth-btn" style="width: 100%;" onclick="handleLogin()">
-        লগইন / রেজিস্টার করুন <i class="fas fa-arrow-right"></i>
-      </button>
-      <div id="auth-error" style="color: #dc2626; margin-top: 10px; font-size: 14px; display: none;"></div>
+
+      <!-- ধাপ ১: মোবাইল নম্বর -->
+      <div id="step-1">
+        <p style="margin-bottom: 16px; color: var(--muted);">আপনার মোবাইল নম্বর দিন। সিস্টেম আপনার তথ্য খুঁজে দেবে।</p>
+        <input type="tel" id="auth-mobile" class="input-f" placeholder="মোবাইল নম্বর (01XXXXXXXXX)" maxlength="11" onkeydown="if(event.key==='Enter') checkMobileStep()">
+        <button class="btn primary" id="next-btn" style="width: 100%;" onclick="checkMobileStep()">
+          পরবর্তী <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- ধাপ ২: নাম (hidden initially) -->
+      <div id="step-2" class="hidden">
+        <div id="mobile-display" style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-soft); border:1px solid var(--line); border-radius:var(--radius); padding:10px 14px; margin-bottom:16px; font-size:14px;">
+          <span><i class="fas fa-phone" style="color:var(--blue); margin-right:6px;"></i><span id="mobile-display-num"></span></span>
+          <button onclick="goBack()" style="background:none; border:none; color:var(--blue); cursor:pointer; font-size:13px; font-weight:700; font-family:inherit; padding:0;"><i class="fas fa-pencil"></i> পরিবর্তন</button>
+        </div>
+
+        <div id="user-found-msg" class="hidden" style="background:#dcfce7; color:#166534; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px;">
+          <i class="fas fa-check-circle"></i> আপনার তথ্য পাওয়া গেছে! নাম auto-fill হয়েছে।
+        </div>
+        <div id="user-new-msg" class="hidden" style="background:#dbeafe; color:#1e40af; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px;">
+          <i class="fas fa-user-plus"></i> নতুন ব্যবহারকারী! আপনার পুরো নাম লিখুন।
+        </div>
+
+        <div style="position:relative;">
+          <input type="text" id="auth-name" class="input-f" placeholder="আপনার পুরো নাম" style="padding-right:130px;" onkeydown="if(event.key==='Enter') handleLogin()">
+          <button id="edit-name-btn" onclick="toggleNameEdit()" class="hidden" style="position:absolute; right:12px; top:50%; transform:translateY(-70%); background:none; border:none; color:var(--blue); cursor:pointer; font-size:13px; font-weight:700; font-family:inherit; white-space:nowrap;">
+            <i class="fas fa-pencil"></i> নাম পরিবর্তন
+          </button>
+        </div>
+
+        <button class="btn primary" id="auth-btn" style="width:100%;" onclick="handleLogin()">
+          লগইন করুন <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div id="auth-error" style="color:#dc2626; margin-top:10px; font-size:14px; display:none;"></div>
     </div>
 
     <!-- 2. DASHBOARD SECTION (Hidden initially) -->
@@ -186,46 +214,135 @@
       }
     };
 
-    // Handle Login / Registration
-    async function handleLogin() {
-      const name = document.getElementById('auth-name').value.trim();
+    // ── ধাপ ১: মোবাইল চেক ──
+    async function checkMobileStep() {
       const mobile = document.getElementById('auth-mobile').value.trim();
-      const errEl = document.getElementById('auth-error');
-      const btn = document.getElementById('auth-btn');
+      const errEl  = document.getElementById('auth-error');
+      const btn    = document.getElementById('next-btn');
 
-      if (!name || !mobile) {
-        errEl.innerText = "নাম এবং মোবাইল নম্বর দুটিই দিতে হবে!";
-        errEl.style.display = "block"; return;
+      if (!mobile) {
+        errEl.innerText = 'মোবাইল নম্বর দিন!';
+        errEl.style.display = 'block'; return;
+      }
+      if (!/^01[3-9]\d{8}$/.test(mobile)) {
+        errEl.innerText = 'সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)';
+        errEl.style.display = 'block'; return;
       }
 
-      errEl.style.display = "none";
-      btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...`;
+      errEl.style.display = 'none';
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> খোঁজা হচ্ছে...';
       btn.disabled = true;
 
       try {
-        const res = await fetch(SCRIPT_GAS_URL, {
+        const res  = await fetch(SCRIPT_GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'checkMobile', mobile: mobile }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const data = await res.json();
+
+        // মোবাইল নম্বর দেখাও উপরে
+        document.getElementById('mobile-display-num').innerText = mobile;
+
+        const nameInput    = document.getElementById('auth-name');
+        const editBtn      = document.getElementById('edit-name-btn');
+        const foundMsg     = document.getElementById('user-found-msg');
+        const newMsg       = document.getElementById('user-new-msg');
+
+        if (data.status === 'success' && data.found) {
+          // পুরনো user — নাম auto-fill, readonly
+          nameInput.value    = data.name;
+          nameInput.readOnly = true;
+          nameInput.style.background = 'var(--surface-soft)';
+          editBtn.classList.remove('hidden');
+          foundMsg.classList.remove('hidden');
+          newMsg.classList.add('hidden');
+        } else {
+          // নতুন user — নাম খালি, editable
+          nameInput.value    = '';
+          nameInput.readOnly = false;
+          nameInput.style.background = '';
+          editBtn.classList.add('hidden');
+          newMsg.classList.remove('hidden');
+          foundMsg.classList.add('hidden');
+        }
+
+        // ধাপ ১ লুকাও, ধাপ ২ দেখাও
+        document.getElementById('step-1').classList.add('hidden');
+        document.getElementById('step-2').classList.remove('hidden');
+        nameInput.focus();
+
+      } catch (e) {
+        errEl.innerText = 'ইন্টারনেট কানেকশন চেক করুন!';
+        errEl.style.display = 'block';
+      }
+
+      btn.innerHTML = 'পরবর্তী <i class="fas fa-arrow-right"></i>';
+      btn.disabled = false;
+    }
+
+    // নাম edit toggle
+    function toggleNameEdit() {
+      const nameInput = document.getElementById('auth-name');
+      const editBtn   = document.getElementById('edit-name-btn');
+      nameInput.readOnly = false;
+      nameInput.style.background = '';
+      editBtn.classList.add('hidden');
+      nameInput.focus();
+      nameInput.select();
+    }
+
+    // ধাপ ১-এ ফিরে যাও
+    function goBack() {
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('step-1').classList.remove('hidden');
+      document.getElementById('auth-error').style.display = 'none';
+      document.getElementById('user-found-msg').classList.add('hidden');
+      document.getElementById('user-new-msg').classList.add('hidden');
+      document.getElementById('auth-mobile').focus();
+    }
+
+    // ── ধাপ ২: লগইন / রেজিস্টার ──
+    async function handleLogin() {
+      const name   = document.getElementById('auth-name').value.trim();
+      const mobile = document.getElementById('auth-mobile').value.trim();
+      const errEl  = document.getElementById('auth-error');
+      const btn    = document.getElementById('auth-btn');
+
+      if (!name) {
+        errEl.innerText = 'আপনার নাম দিতে হবে!';
+        errEl.style.display = 'block'; return;
+      }
+
+      errEl.style.display = 'none';
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ভেরিফাই করা হচ্ছে...';
+      btn.disabled  = true;
+
+      try {
+        const res  = await fetch(SCRIPT_GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'register', name: name, mobile: mobile }),
           headers: { 'Content-Type': 'text/plain' }
         });
         const data = await res.json();
-        
+
         if (data.status === 'success') {
           currentUser = { id: String(data.id), name: name, mobile: mobile };
           localStorage.setItem('portal_user', JSON.stringify(currentUser));
           showDashboard();
         } else {
-          errEl.innerText = "সার্ভার এরর: " + data.message;
-          errEl.style.display = "block";
+          errEl.innerText = 'সার্ভার এরর: ' + data.message;
+          errEl.style.display = 'block';
         }
       } catch (e) {
-        errEl.innerText = "ইন্টারনেট কানেকশন চেক করুন!";
-        errEl.style.display = "block";
+        errEl.innerText = 'ইন্টারনেট কানেকশন চেক করুন!';
+        errEl.style.display = 'block';
       }
 
-      btn.innerHTML = `লগইন / রেজিস্টার করুন <i class="fas fa-arrow-right"></i>`;
-      btn.disabled = false;
+      btn.innerHTML = 'লগইন করুন <i class="fas fa-arrow-right"></i>';
+      btn.disabled  = false;
     }
+
 
     // Show Dashboard UI
     function showDashboard() {
