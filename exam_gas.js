@@ -378,8 +378,6 @@ function registerStudent(body) {
       hRange.setBackground('#0f172a').setFontColor('#ffffff').setFontWeight('bold');
     }
 
-    // Mobile column (C) কে Text format করো — typed column হলে skip
-    try { sheet.getRange('C:C').setNumberFormat('@STRING@'); } catch(e) {}
 
     const name   = String(body.name   || '').trim();
     const mobile = String(body.mobile || '').trim();
