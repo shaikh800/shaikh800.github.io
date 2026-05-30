@@ -216,9 +216,13 @@
 
     // ── ধাপ ১: মোবাইল চেক ──
     async function checkMobileStep() {
-      const mobile = document.getElementById('auth-mobile').value.trim();
-      const errEl  = document.getElementById('auth-error');
-      const btn    = document.getElementById('next-btn');
+      // leading/trailing space এবং +880 prefix সরিয়ে normalize করো
+      let mobile = document.getElementById('auth-mobile').value.trim();
+      if (mobile.startsWith('+880')) mobile = '0' + mobile.slice(4);
+      if (mobile.startsWith('880') && mobile.length === 13) mobile = '0' + mobile.slice(3);
+
+      const errEl = document.getElementById('auth-error');
+      const btn   = document.getElementById('next-btn');
 
       if (!mobile) {
         errEl.innerText = 'মোবাইল নম্বর দিন!';
@@ -229,29 +233,46 @@
         errEl.style.display = 'block'; return;
       }
 
+      // input field-এ normalized number সেট করো
+      document.getElementById('auth-mobile').value = mobile;
+
       errEl.style.display = 'none';
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> খোঁজা হচ্ছে...';
       btn.disabled = true;
 
       try {
-        const res  = await fetch(SCRIPT_GAS_URL, {
+        const res = await fetch(SCRIPT_GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'checkMobile', mobile: mobile }),
           headers: { 'Content-Type': 'text/plain' }
         });
-        const data = await res.json();
+
+        // GAS থেকে valid JSON না আসলে আলাদা error দেখাও
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          errEl.innerText = 'সার্ভার থেকে ভুল response এসেছে। পেজ reload করে আবার চেষ্টা করুন।';
+          errEl.style.display = 'block';
+          btn.innerHTML = 'পরবর্তী <i class="fas fa-arrow-right"></i>';
+          btn.disabled = false;
+          return;
+        }
 
         // মোবাইল নম্বর দেখাও উপরে
         document.getElementById('mobile-display-num').innerText = mobile;
 
-        const nameInput    = document.getElementById('auth-name');
-        const editBtn      = document.getElementById('edit-name-btn');
-        const foundMsg     = document.getElementById('user-found-msg');
-        const newMsg       = document.getElementById('user-new-msg');
+        const nameInput = document.getElementById('auth-name');
+        const editBtn   = document.getElementById('edit-name-btn');
+        const foundMsg  = document.getElementById('user-found-msg');
+        const newMsg    = document.getElementById('user-new-msg');
 
-        if (data.status === 'success' && data.found) {
+        // found চেক: string 'true' বা boolean true দুটোই handle করো
+        const isFound = data.status === 'success' && (data.found === true || data.found === 'true');
+
+        if (isFound) {
           // পুরনো user — নাম auto-fill, readonly
-          nameInput.value    = data.name;
+          nameInput.value    = data.name || '';
           nameInput.readOnly = true;
           nameInput.style.background = 'var(--surface-soft)';
           editBtn.classList.remove('hidden');
@@ -273,7 +294,7 @@
         nameInput.focus();
 
       } catch (e) {
-        errEl.innerText = 'ইন্টারনেট কানেকশন চেক করুন!';
+        errEl.innerText = 'ইন্টারনেট কানেকশন চেক করুন! সমস্যা থাকলে একটু পরে আবার চেষ্টা করুন।';
         errEl.style.display = 'block';
       }
 
@@ -324,14 +345,26 @@
           body: JSON.stringify({ action: 'register', name: name, mobile: mobile }),
           headers: { 'Content-Type': 'text/plain' }
         });
-        const data = await res.json();
+
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          errEl.innerText = 'সার্ভার থেকে ভুল response এসেছে। পেজ reload করে আবার চেষ্টা করুন।';
+          errEl.style.display = 'block';
+          btn.innerHTML = 'লগইন করুন <i class="fas fa-arrow-right"></i>';
+          btn.disabled  = false;
+          return;
+        }
 
         if (data.status === 'success') {
-          currentUser = { id: String(data.id), name: name, mobile: mobile };
+          // GAS থেকে name আসলে সেটাই ব্যবহার করো (existing user হলে saved name নেবে)
+          const finalName = data.name || name;
+          currentUser = { id: String(data.id), name: finalName, mobile: mobile };
           localStorage.setItem('portal_user', JSON.stringify(currentUser));
           showDashboard();
         } else {
-          errEl.innerText = 'সার্ভার এরর: ' + data.message;
+          errEl.innerText = 'সার্ভার এরর: ' + (data.message || 'অজানা সমস্যা');
           errEl.style.display = 'block';
         }
       } catch (e) {
