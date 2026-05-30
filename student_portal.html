@@ -206,10 +206,19 @@
     let myHistory = [];
 
     // On Load: Check if already logged in
-    window.onload = () => {
+    window.onload = async () => {
       const savedUser = localStorage.getItem('portal_user');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
+        // Background-এ GAS-এ re-sync — sheet ফাঁকা হলেও user আবার add হবে
+        // এতে laptop/অন্য device-এও "নতুন user" সমস্যা হবে না
+        try {
+          fetch(SCRIPT_GAS_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'register', name: currentUser.name, mobile: currentUser.mobile }),
+            headers: { 'Content-Type': 'text/plain' }
+          });
+        } catch(e) {}
         showDashboard();
       }
     };
