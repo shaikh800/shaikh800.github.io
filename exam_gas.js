@@ -401,10 +401,12 @@ function registerStudent(body) {
       if (rowId > maxId) maxId = rowId;
 
       if (rowMobile === normalizeMobile(mobile)) { // ← দুই দিকেই normalize
-        if (String(data[i][1]).trim() !== name) {
+        const oldName = String(data[i][1]).trim();
+        if (oldName !== name) {
           sheet.getRange(i + 1, 2).setValue(name);
+          logActivity('updateName', `${rowId} | ${oldName} → ${name} | ${mobile}`);
         }
-        return { status: 'success', id: rowId, message: 'Already registered' };
+        return { status: 'success', id: rowId, message: oldName !== name ? 'Name updated' : 'Already registered' };
       }
     }
 
