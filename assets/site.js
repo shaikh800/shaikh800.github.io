@@ -37,21 +37,3 @@ const observer = new IntersectionObserver(
 document.querySelectorAll(".reveal, .reveal-grid").forEach((el) => {
   observer.observe(el);
 });
-
-
-    function toggleAcademyMenuMobile(event) {
-      event.preventDefault();
-      document.getElementById("academyDropdownMobile").classList.toggle("show-mobile");
-    }
-
-    // Click outside to hide mobile menu
-    document.addEventListener("click", function(event) {
-      const mobileMenu = document.getElementById("academyDropdownMobile");
-      const academyBtn = document.querySelector(".mobile-tab[onclick*='toggleAcademyMenuMobile']");
-      
-      if (mobileMenu && mobileMenu.classList.contains("show-mobile")) {
-        if (!mobileMenu.contains(event.target) && !academyBtn.contains(event.target)) {
-          mobileMenu.classList.remove("show-mobile");
-        }
-      }
-    });
