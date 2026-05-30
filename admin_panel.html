@@ -19,9 +19,19 @@
     .stat-card .val { font-size: 32px; font-weight: 800; color: var(--blue); }
     .stat-card .lbl { font-size: 13px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
 
+    /* Tabs */
+    .tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--line); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { background: none; border: none; padding: 12px 20px; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; white-space: nowrap; }
+    .tab-btn:hover { color: var(--blue); }
+    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     .panel { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--line); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
-    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
-    .panel-head h2 { margin: 0; font-size: 18px; color: var(--ink); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; flex-wrap: wrap; gap: 12px; }
+    .panel-head h2 { margin: 0; font-size: 18px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
     
     .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .data-table th { background: var(--surface-soft); padding: 12px; text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; }
@@ -45,14 +55,16 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
     .modal-box { background: var(--surface); width: 100%; max-width: 600px; border-radius: var(--radius-lg); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
-    .modal-header h3 { margin: 0; font-size: 18px; }
+    .modal-header h3 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
     .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
 
     .result-card { background: var(--surface-soft); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
     .result-card h4 { margin: 0 0 8px; color: var(--blue); font-size: 16px; }
     .mistakes-box { font-size: 13px; color: #991b1b; background: #fff5f5; padding: 10px; border-radius: 6px; border: 1px solid #fecaca; margin-top: 10px; }
     
-    .input-f { width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); font-family: inherit; font-size: 14px; margin-bottom: 12px; }
+    .input-f { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); font-family: inherit; font-size: 14px; margin-bottom: 16px; transition: 0.2s; }
+    .input-f:focus { outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
 
     /* Login Gate */
     #ctrl-gate { position: fixed; inset: 0; background: var(--ink); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px; }
@@ -76,15 +88,16 @@
 <div class="admin-container">
   <div class="header-card">
     <h1><i class="fas fa-user-tie"></i> Academy Admin Panel</h1>
-    <div>
-      <a href="academy.html" class="action-btn" style="color: #fff; background: rgba(255,255,255,0.2); text-decoration: none;"><i class="fas fa-arrow-left"></i> Back to Academy</a>
-      <button class="action-btn" style="color: #fff; background: var(--blue); margin-left: 10px;" onclick="loadData()"><i class="fas fa-sync"></i> Refresh Data</button>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <span style="font-size: 13px; color: rgba(255,255,255,0.7);"><i class="fas fa-circle-notch fa-spin" id="loading-spinner" style="display:none;"></i></span>
+      <a href="academy.html" class="action-btn" style="color: #fff; background: rgba(255,255,255,0.2); text-decoration: none;"><i class="fas fa-arrow-left"></i> Back</a>
+      <button class="action-btn" style="color: #fff; background: var(--blue);" onclick="loadData()"><i class="fas fa-sync"></i> Refresh</button>
     </div>
   </div>
 
-  <!-- Server Config (Hidden by default, used internally) -->
-  <input type="hidden" id="gas-url" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
-  <input type="hidden" id="gas-admin-token" value="shaikh_fec_secure_2026">
+  <!-- Server Config Defaults (Hidden) -->
+  <input type="hidden" id="default-gas-url" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
+  <input type="hidden" id="default-gas-token" value="shaikh_fec_secure_2026">
 
   <div class="dashboard-grid">
     <div class="stat-card">
@@ -92,69 +105,138 @@
       <span class="val" id="stat-total">0</span>
     </div>
     <div class="stat-card">
-      <span class="lbl">Pending Profile Updates</span>
+      <span class="lbl">Pending Updates</span>
       <span class="val" id="stat-pending" style="color: #eab308;">0</span>
     </div>
     <div class="stat-card">
-      <span class="lbl">Password Reset Requests</span>
-      <span class="val" id="stat-resets" style="color: #ef4444;">0</span>
+      <span class="lbl">Total Submissions</span>
+      <span class="val" id="stat-submissions" style="color: #10b981;">0</span>
     </div>
   </div>
 
-  <!-- Students List & Requests -->
-  <div class="panel">
-    <div class="panel-head">
-      <h2><i class="fas fa-users"></i> Registered Students & Requests</h2>
-      <div style="font-size: 13px; color: var(--muted);"><i class="fas fa-circle-notch fa-spin" id="loading-spinner" style="display:none;"></i></div>
-    </div>
-    <div style="overflow-x: auto;">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name & Contact</th>
-            <th>Academic Bio</th>
-            <th>Requests / Status</th>
-            <th style="text-align: right;">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="student-list-body">
-          <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--muted);">Loading students data...</td></tr>
-        </tbody>
-      </table>
+  <div class="tabs">
+    <button class="tab-btn active" id="btn-students" onclick="switchTab('students')"><i class="fas fa-users"></i> Students & Requests</button>
+    <button class="tab-btn" id="btn-results" onclick="switchTab('results')"><i class="fas fa-poll"></i> Exam Results</button>
+    <button class="tab-btn" id="btn-settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings & Danger Zone</button>
+  </div>
+
+  <!-- TAB 1: Students -->
+  <div id="tab-students" class="tab-content active">
+    <div class="panel">
+      <div class="panel-head">
+        <h2><i class="fas fa-user-graduate"></i> Registered Students</h2>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name & Contact</th>
+              <th>Academic Bio</th>
+              <th>Requests / Status</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="student-list-body">
+            <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--muted);">Loading students data...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
+
+  <!-- TAB 2: Results -->
+  <div id="tab-results" class="tab-content">
+    <div class="panel">
+      <div class="panel-head">
+        <h2><i class="fas fa-list-check"></i> All Submissions</h2>
+        <select id="filter-exam" class="input-f" style="width: auto; min-width: 250px; margin: 0; padding: 8px 12px;" onchange="renderAllResults()">
+          <option value="all">All Exams</option>
+        </select>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Student</th>
+              <th>Exam Topic</th>
+              <th>Score</th>
+              <th style="text-align: right;">Details</th>
+            </tr>
+          </thead>
+          <tbody id="all-results-body">
+            <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--muted);">Loading results...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Settings -->
+  <div id="tab-settings" class="tab-content">
+    <div class="panel">
+      <div class="panel-head"><h2><i class="fas fa-server"></i> Server Configuration</h2></div>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Update Google Apps Script URL and Token if you deploy a new backend script.</p>
+      <div class="form-group">
+        <label>Google Apps Script URL</label>
+        <input type="text" id="setting-gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
+      </div>
+      <div class="form-group">
+        <label>GAS Admin Token</label>
+        <input type="password" id="setting-gas-token" class="input-f">
+      </div>
+      <button class="action-btn" style="background:var(--blue); color:#fff; padding:10px 20px; font-size: 14px;" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>
+    </div>
+
+    <div class="panel" style="border-color: #fecaca; background: #fff5f5;">
+      <div class="panel-head"><h2 style="color: #991b1b;"><i class="fas fa-radiation-alt"></i> Danger Zone</h2></div>
+      <p style="font-size: 14px; color: #991b1b; margin-bottom: 16px;">This action will permanently delete all exam results and activity logs from the server. User accounts will remain safe.</p>
+      <button class="action-btn btn-reject" style="padding: 12px 20px; font-size: 14px;" onclick="clearAllServerData()"><i class="fas fa-trash"></i> Clear All Results & Logs</button>
+    </div>
+  </div>
+
 </div>
 
 <!-- Modal: View Student Details & Results -->
 <div class="modal-overlay" id="student-modal">
   <div class="modal-box">
     <div class="modal-header">
-      <h3 id="modal-student-name">Student Details</h3>
+      <h3 id="modal-student-name"><i class="fas fa-user-circle" style="color:var(--blue);"></i> Student Details</h3>
       <button class="close-btn" onclick="closeModal('student-modal')"><i class="fas fa-times"></i></button>
     </div>
-    <div id="modal-student-bio" style="margin-bottom: 20px; font-size: 14px; color: var(--muted); line-height: 1.6;"></div>
+    <div id="modal-student-bio" style="margin-bottom: 20px; font-size: 14px; color: var(--muted); line-height: 1.6; background: var(--surface-soft); padding: 16px; border-radius: 8px;"></div>
     
-    <h4 style="margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 8px;">Exam History & Mistakes</h4>
-    <div id="modal-student-results">
-      <p style="text-align:center; color:var(--muted);"><i class="fas fa-spinner fa-spin"></i> Fetching results...</p>
-    </div>
+    <h4 style="margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 8px; color: var(--ink);">Exam History</h4>
+    <div id="modal-student-results"></div>
     
     <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #fecaca;">
-      <h4 style="color: #991b1b; margin-top: 0;">Danger Zone</h4>
-      <button class="action-btn btn-reject" onclick="deleteStudent()" style="width: 100%;"><i class="fas fa-trash"></i> Delete Student Account & Data</button>
+      <h4 style="color: #991b1b; margin-top: 0; margin-bottom: 10px;">Account Management</h4>
+      <button class="action-btn btn-reject" onclick="deleteStudent()" style="width: 100%;"><i class="fas fa-user-times"></i> Delete Student Account</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal: View Single Result Mistakes -->
+<div class="modal-overlay" id="mistake-modal">
+  <div class="modal-box" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Mistakes Detail</h3>
+      <button class="close-btn" onclick="closeModal('mistake-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="mistake-modal-content" style="font-size: 14px; line-height: 1.6; color: var(--ink); background: var(--surface-soft); padding: 16px; border-radius: 8px; border: 1px solid var(--line);"></div>
   </div>
 </div>
 
 <script>
 // ── GATE SECURITY ──
-const ADMIN_PW = 'fec_admin_2025'; // আপনার পছন্দমত পাসওয়ার্ড দিন
+const ADMIN_PW = 'fec_admin_2025';
 
 function gateUnlock() {
   const input = document.getElementById('gate-pw-input').value;
   if (input === ADMIN_PW) {
     document.getElementById('ctrl-gate').style.display = 'none';
+    initSettings();
     loadData();
   } else {
     document.getElementById('gate-err').innerText = "❌ ভুল পাসওয়ার্ড!";
@@ -162,10 +244,36 @@ function gateUnlock() {
   }
 }
 
-// ── APP LOGIC ──
-const GAS_URL = document.getElementById('gas-url').value;
-const ADMIN_TOKEN = document.getElementById('gas-admin-token').value;
+// ── UTILS & CONFIG ──
+function getGasUrl() {
+  return localStorage.getItem('gas_url') || document.getElementById('default-gas-url').value;
+}
+function getGasToken() {
+  return localStorage.getItem('gas_admin_token') || document.getElementById('default-gas-token').value;
+}
 
+function initSettings() {
+  document.getElementById('setting-gas-url').value = getGasUrl();
+  document.getElementById('setting-gas-token').value = getGasToken();
+}
+
+function saveSettings() {
+  const url = document.getElementById('setting-gas-url').value.trim();
+  const token = document.getElementById('setting-gas-token').value.trim();
+  if(url) localStorage.setItem('gas_url', url);
+  if(token) localStorage.setItem('gas_admin_token', token);
+  alert('Server settings saved successfully!');
+  loadData();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('btn-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── APP LOGIC ──
 let studentsData = [];
 let allResultsData = [];
 let selectedStudentId = null;
@@ -173,9 +281,9 @@ let selectedStudentId = null;
 async function gasRequest(action, payload = {}) {
   document.getElementById('loading-spinner').style.display = 'inline-block';
   try {
-    const res = await fetch(GAS_URL, {
+    const res = await fetch(getGasUrl(), {
       method: 'POST',
-      body: JSON.stringify({ action, token: ADMIN_TOKEN, ...payload }),
+      body: JSON.stringify({ action, token: getGasToken(), ...payload }),
       headers: { 'Content-Type': 'text/plain' }
     });
     const data = await res.json();
@@ -195,12 +303,17 @@ async function loadData() {
     renderStudents();
   }
   
-  // Background fetch all results for fast modal loading
-  gasRequest('getAllResults').then(rRes => {
-    if (rRes && rRes.status === 'success') allResultsData = rRes.results;
-  });
+  const rRes = await gasRequest('getAllResults');
+  if (rRes && rRes.status === 'success') {
+    // Reverse array to show newest first
+    allResultsData = rRes.results.reverse();
+    document.getElementById('stat-submissions').innerText = allResultsData.length;
+    populateExamFilter();
+    renderAllResults();
+  }
 }
 
+// ── TAB 1: STUDENTS ──
 function renderStudents() {
   const tbody = document.getElementById('student-list-body');
   let pendingCount = 0;
@@ -208,6 +321,9 @@ function renderStudents() {
 
   if (studentsData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">No students found.</td></tr>`;
+    document.getElementById('stat-total').innerText = 0;
+    document.getElementById('stat-pending').innerText = 0;
+    document.getElementById('stat-resets').innerText = 0;
     return;
   }
 
@@ -217,9 +333,9 @@ function renderStudents() {
     if (s.pendingUpdate) {
       pendingCount++;
       requestsHtml += `<div style="margin-bottom: 8px;">
-        <span class="badge warn">Profile Update Requested</span><br>
+        <span class="badge warn">Profile Update</span><br>
         <span style="font-size:11px; color:var(--muted);">New: ${s.pendingUpdate.name || '-'} | ${s.pendingUpdate.school || '-'}</span><br>
-        <div style="margin-top: 4px;">
+        <div style="margin-top: 6px;">
           <button class="action-btn btn-approve" onclick="approveProfile('${s.id}')">✓ Accept</button>
           <button class="action-btn btn-reject" onclick="rejectProfile('${s.id}')">✕ Reject</button>
         </div>
@@ -229,9 +345,9 @@ function renderStudents() {
     if (s.resetRequest) {
       resetCount++;
       requestsHtml += `<div>
-        <span class="badge danger">Password Reset Requested</span><br>
-        <div style="margin-top: 4px; display:flex; gap:6px;">
-          <input type="text" id="newpass-${s.id}" class="input-f" style="margin:0; padding:4px 8px; width:100px;" placeholder="New Pass">
+        <span class="badge danger">Password Reset</span><br>
+        <div style="margin-top: 6px; display:flex; gap:6px;">
+          <input type="text" id="newpass-${s.id}" class="input-f" style="margin:0; padding:6px 10px; width:110px;" placeholder="New Pass">
           <button class="action-btn btn-approve" onclick="resetPassword('${s.id}')">Set</button>
         </div>
       </div>`;
@@ -252,7 +368,7 @@ function renderStudents() {
         </td>
         <td>${requestsHtml}</td>
         <td style="text-align: right;">
-          <button class="action-btn btn-view" onclick="viewStudentDetails('${s.id}')"><i class="fas fa-eye"></i> View History</button>
+          <button class="action-btn btn-view" onclick="viewStudentDetails('${s.id}')"><i class="fas fa-eye"></i> Details</button>
         </td>
       </tr>
     `;
@@ -263,7 +379,6 @@ function renderStudents() {
   document.getElementById('stat-resets').innerText = resetCount;
 }
 
-// ── Actions ──
 async function approveProfile(id) {
   if(!confirm("Approve this profile update?")) return;
   const res = await gasRequest('adminApproveProfile', { id });
@@ -288,19 +403,21 @@ async function resetPassword(id) {
   }
 }
 
-// ── View Details Modal ──
 function viewStudentDetails(id) {
   selectedStudentId = id;
   const student = studentsData.find(s => s.id == id);
   if(!student) return;
 
-  document.getElementById('modal-student-name').innerText = student.name + ` (ID: ${student.id})`;
+  document.getElementById('modal-student-name').innerHTML = `<i class="fas fa-user-circle" style="color:var(--blue);"></i> ${student.name} <span style="font-size:14px; color:var(--muted);">(ID: ${student.id})</span>`;
   document.getElementById('modal-student-bio').innerHTML = `
-    <strong>Mobile:</strong> ${student.mobile} <br>
-    <strong>School:</strong> ${student.school || 'N/A'} | <strong>Class:</strong> ${student.studentClass || 'N/A'}
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+      <div><strong>Mobile:</strong><br>${student.mobile}</div>
+      <div><strong>Password:</strong><br>Protected</div>
+      <div><strong>School:</strong><br>${student.school || 'N/A'}</div>
+      <div><strong>Class:</strong><br>${student.studentClass || 'N/A'}</div>
+    </div>
   `;
 
-  // Render Results
   const resultsWrap = document.getElementById('modal-student-results');
   const sResults = allResultsData.filter(r => r.id == id);
 
@@ -309,17 +426,19 @@ function viewStudentDetails(id) {
   } else {
     resultsWrap.innerHTML = sResults.map(r => `
       <div class="result-card">
-        <div style="display:flex; justify-content:space-between;">
-          <h4>${r.topic}</h4>
-          <span class="badge success">Score: ${r.score}</span>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <h4 style="margin:0 0 4px;">${r.topic}</h4>
+            <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px;"><i class="far fa-clock"></i> ${r.time}</div>
+          </div>
+          <span class="badge success" style="font-size:14px; padding:6px 12px;">${r.score}</span>
         </div>
-        <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px;"><i class="far fa-clock"></i> Submitted: ${r.time}</div>
         ${r.details && r.details !== 'Perfect Score' ? `
           <div class="mistakes-box">
             <strong>Mistakes Made:</strong><br>
             ${r.details}
           </div>
-        ` : `<div style="font-size:12px; color:#166534; font-weight:bold;">🏆 Perfect Score! No mistakes.</div>`}
+        ` : `<div style="font-size:12px; color:#166534; font-weight:bold; margin-top:4px;">🏆 Perfect Score! No mistakes.</div>`}
       </div>
     `).join('');
   }
@@ -329,7 +448,6 @@ function viewStudentDetails(id) {
 
 async function deleteStudent() {
   if(!confirm("WARNING! This will delete the student and ALL their exam results forever. Are you absolutely sure?")) return;
-  
   const res = await gasRequest('adminDeleteStudent', { id: selectedStudentId, deleteResults: true });
   if (res && res.status === 'success') {
     closeModal('student-modal');
@@ -337,6 +455,80 @@ async function deleteStudent() {
   }
 }
 
+// ── TAB 2: EXAM RESULTS ──
+function populateExamFilter() {
+  const select = document.getElementById('filter-exam');
+  const topics = [...new Set(allResultsData.map(r => r.topic))];
+  let options = '<option value="all">All Exams</option>';
+  topics.forEach(t => { options += `<option value="${t}">${t}</option>`; });
+  select.innerHTML = options;
+}
+
+function renderAllResults() {
+  const tbody = document.getElementById('all-results-body');
+  const filter = document.getElementById('filter-exam').value;
+
+  let filtered = allResultsData;
+  if (filter !== 'all') {
+    filtered = allResultsData.filter(r => r.topic === filter);
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:var(--muted);">No submissions found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r, i) => {
+    // Need original index for the modal
+    const origIndex = allResultsData.indexOf(r);
+    
+    // Safely escape details for onclick
+    const safeDetails = (r.details || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+    return `
+      <tr>
+        <td style="font-size:13px; color:var(--muted);"><i class="far fa-calendar-alt"></i> ${r.time}</td>
+        <td>
+          <strong>${r.name}</strong><br>
+          <span style="font-size:12px; color:var(--muted);">ID: ${r.id}</span>
+        </td>
+        <td style="font-weight:600; color:var(--ink);">${r.topic}</td>
+        <td><span class="badge success" style="font-size:13px;">${r.score}</span></td>
+        <td style="text-align: right;">
+          <button class="action-btn btn-view" style="padding:6px 12px;" onclick="viewMistakes('${safeDetails}')">View Mistakes</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function viewMistakes(detailStr) {
+  const content = document.getElementById('mistake-modal-content');
+  if (detailStr === 'Perfect Score') {
+    content.innerHTML = '<div style="color:#166534; font-weight:bold; text-align:center;"><i class="fas fa-trophy" style="font-size:24px; display:block; margin-bottom:10px;"></i>Perfect Score! No mistakes made.</div>';
+  } else if (!detailStr || detailStr === 'No data') {
+    content.innerHTML = '<div style="color:var(--muted); text-align:center;">No mistake details found for this submission.</div>';
+  } else {
+    const mistakes = detailStr.split(', ');
+    content.innerHTML = '<ul style="margin:0; padding-left:20px;">' + mistakes.map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') + '</ul>';
+  }
+  document.getElementById('mistake-modal').style.display = 'flex';
+}
+
+// ── TAB 3: DANGER ZONE ──
+async function clearAllServerData() {
+  if(!confirm("⚠️ WARNING: This will permanently delete ALL exam results and activity logs from the server. This action cannot be undone. Are you absolutely sure?")) return;
+  
+  const res = await gasRequest('clearData');
+  if(res && res.status === 'success') {
+    alert("All server data (Results & Logs) cleared successfully.");
+    loadData();
+  } else {
+    alert("Failed to clear data.");
+  }
+}
+
+// ── MODAL UTILS ──
 function closeModal(id) {
   document.getElementById(id).style.display = 'none';
 }
