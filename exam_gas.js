@@ -243,8 +243,8 @@ function clearData(body) {
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  // সব sheet-এর নাম — Users সহ সব কিছু clear হবে
-  const allSheets = [RESULTS_SHEET, STUDENTS_SHEET, 'Users', LOG_SHEET];
+  // Users sheet বাদ — clear করলে login data হারিয়ে যায়
+  const allSheets = [RESULTS_SHEET, STUDENTS_SHEET, LOG_SHEET];
   let cleared = [];
 
   allSheets.forEach(function(sheetName) {
