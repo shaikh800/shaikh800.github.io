@@ -372,14 +372,14 @@ function registerStudent(body) {
     const ss    = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = getOrCreateSheet(ss, 'Users');
 
-    // Mobile column (C) কে Text format করো — Sheets leading zero না বাদ দেয়
-    sheet.getRange('C:C').setNumberFormat('@');
-
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(['ID', 'Name', 'Mobile', 'Time']);
       const hRange = sheet.getRange(1, 1, 1, 4);
       hRange.setBackground('#0f172a').setFontColor('#ffffff').setFontWeight('bold');
     }
+
+    // Mobile column (C) কে Text format করো — typed column হলে skip
+    try { sheet.getRange('C:C').setNumberFormat('@STRING@'); } catch(e) {}
 
     const name   = String(body.name   || '').trim();
     const mobile = String(body.mobile || '').trim();
@@ -411,7 +411,7 @@ function registerStudent(body) {
     }
 
     const newId = maxId + 1;
-    sheet.appendRow([newId, name, mobile, time]);
+    sheet.appendRow([newId, name, String(mobile), time]); // mobile সবসময় text
 
     logActivity('register', `${newId} | ${name} | ${mobile}`);
     return { status: 'success', id: newId, message: 'New ID generated' };
