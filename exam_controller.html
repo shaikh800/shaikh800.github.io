@@ -161,10 +161,8 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
   </div>
 
-  <div class="stat-row" id="stats-row" style="display:none;">
-    <div class="stat-box"><div class="val" id="stat-exams">0</div><div class="lbl2">মোট Exam</div></div>
-    <div class="stat-box"><div class="val" id="stat-candidates">0</div><div class="lbl2">মোট Candidate</div></div>
-    <div class="stat-box"><div class="val" id="stat-submitted">0</div><div class="lbl2">Submit হয়েছে</div></div>
+  <div style="text-align:center; padding: 15px; color: var(--muted); font-size: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--rl); margin-bottom: 20px;">
+    💡 <b>Note:</b> Results, Stats, এবং Danger Zone এখন <a href="admin_panel.html" style="color: var(--blue); font-weight: bold; text-decoration: none;">Admin Panel</a>-এ শিফট করা হয়েছে।
   </div>
 
   <div class="panel" id="dashboard-panel">
@@ -193,7 +191,13 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
     <div class="grid-2">
       <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="exam-pass" placeholder="e.g. fec123 (Optional)"></div>
-      <div class="field"><label class="lbl">Allowed IDs (কমা দিয়ে)</label><input class="inp" id="exam-ids" placeholder="e.g. 101, 102, 103 (Optional)"></div>
+      <div class="field">
+  <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <div id="builder-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
+     <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
+  </div>
+  <div style="font-size: 11px; color: var(--muted); margin-top: 5px;">* কাউকে সিলেক্ট না করলে পরীক্ষাটি সবার জন্য উন্মুক্ত (Public) থাকবে।</div>
+</div>
     </div>
     <div id="questions-container"></div>
     <button class="btn btn-gray" style="width:100%;justify-content:center;margin-bottom:16px;border-style:dashed;" onclick="addQ()"><i class="fas fa-plus"></i> প্রশ্ন যোগ করুন</button>
@@ -213,7 +217,12 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
     <div class="grid-2">
       <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="edit-pass" placeholder="Optional"></div>
-      <div class="field"><label class="lbl">Allowed Student IDs (কমা দিয়ে)</label><input class="inp" id="edit-ids" placeholder="101, 102, 103 (ফাঁকা = Public)"></div>
+      <div class="field">
+  <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <div id="edit-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
+     <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
+  </div>
+</div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 10px;">
       <div class="panel-title" style="margin:0;font-size:13px;"><i class="fas fa-list-ol" style="color:var(--blue);margin-right:6px;"></i>প্রশ্নসমূহ</div>
@@ -226,20 +235,7 @@ td{border:1px solid var(--line);padding:9px 12px;}
     </div>
   </div>
 
-  <div class="danger-zone">
-    <div class="danger-title"><i class="fas fa-radiation-alt"></i> Danger Zone</div>
-    <div class="danger-btns">
-      <button class="btn btn-red" onclick="confirmAction('github','GitHub থেকে সব Exam ডেটা মুছবে। নিশ্চিত?',clearGitHub)">
-        <i class="fas fa-github"></i> GitHub সব Exam মুছুন
-      </button>
-      <button class="btn btn-orange" onclick="confirmAction('gas','Google Sheet থেকে সব Result মুছবে। নিশ্চিত?',clearGAS)">
-        <i class="fas fa-table"></i> GAS Results মুছুন
-      </button>
-      <button class="btn btn-red" style="background:#7c3aed;" onclick="confirmAction('all','GitHub + Google Sheet — সব ডেটা একসাথে মুছবে। এটি undo করা যাবেবিধা নেই!',clearAll)">
-        <i class="fas fa-bomb"></i> সব কিছু মুছুন (Nuclear)
-      </button>
-    </div>
-  </div>
+  
 
 </div>
 
@@ -261,7 +257,7 @@ td{border:1px solid var(--line);padding:9px 12px;}
 const OWNER='shaikh800', REPO='shaikh800.github.io', FILE='civil_data.json', BRANCH='main';
 let fullData={semesters:{},notices:[],exams:[],updated:''};
 let qCount=0;
-let allResults=[]; // GAS থেকে আনা results
+let globalStudents=[]; // GAS থেকে আনা students
 
 // ── Utils ──
 function toast(msg, dur=3000){
@@ -307,28 +303,21 @@ async function syncAll(){
     }
   }catch(e){ toast('GitHub load failed'); }
 
-  // GAS থেকে সব results আনো
+  // GAS থেকে Student List আনো
   const url=gasUrl();
   if(url){
     try{
-      const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'getAllResults',token:gasAdminToken()}),headers:{'Content-Type':'text/plain'}});
+      const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'adminGetStudents',token:gasAdminToken()}),headers:{'Content-Type':'text/plain'}});
       const d=await r.json();
-      allResults=d.results||d.data||[];
-    }catch(e){ allResults=[]; }
+      if(d.status === 'success') {
+          globalStudents = d.students || [];
+      }
+    }catch(e){ globalStudents=[]; }
   }
 
   document.getElementById('loader-inner').style.display='none';
-  updateStats();
   renderList(fullData.exams);
-  document.getElementById('stats-row').style.display='flex';
-}
-
-function updateStats(){
-  const totalCands = fullData.exams.reduce((a,e)=>(e.examData.allowedIds||[]).length ? a+(e.examData.allowedIds||[]).length : a, 0);
-  document.getElementById('stat-exams').innerText=fullData.exams.length;
-  document.getElementById('stat-candidates').innerText=totalCands||'—';
-  document.getElementById('stat-submitted').innerText=allResults.length;
-}
+} // <-- এই ব্র্যাকেটটি মিসিং ছিল
 
 // ── Render Exam List ──
 function renderList(exams){
@@ -338,16 +327,10 @@ function renderList(exams){
     return;
   }
   list.innerHTML=exams.map(ex=>{
-    const results=allResults.filter(r=>{
-      const rtopic=r.topic||r['Topic']||'';
-      return rtopic===ex.examData.title;
-    });
-    const submitted=results.length;
-    const total=(ex.examData.allowedIds||[]).length;
     const dateStr=ex.date ? new Date(ex.date).toLocaleDateString('bn-BD') : '';
     return `
     <div class="exam-card" id="card-${ex.id}">
-      <div class="exam-head" onclick="toggleDetail('${ex.id}')">
+      <div class="exam-head" style="cursor:default;">
         <div>
           <h3>${ex.examData.title}</h3>
           <p>
@@ -357,94 +340,17 @@ function renderList(exams){
             ${dateStr?`&nbsp;|&nbsp;<i class="far fa-calendar"></i> ${dateStr}`:''}
           </p>
         </div>
-        <div class="exam-actions" onclick="event.stopPropagation()">
+        <div class="exam-actions">
           <button class="btn btn-gray btn-sm" onclick="copyLink('${ex.id}')"><i class="fas fa-link"></i> Link</button>
           <button class="btn btn-sm" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;" onclick="openEdit('${ex.id}')"><i class="fas fa-pen"></i> Edit</button>
           <button class="btn btn-red btn-sm" onclick="deleteExam('${ex.id}')"><i class="fas fa-trash"></i></button>
         </div>
       </div>
-      <div class="exam-detail" id="detail-${ex.id}">
-        <div class="stat-row" style="margin-bottom:12px;">
-          <div class="stat-box"><div class="val" style="font-size:18px;">${total||'—'}</div><div class="lbl2">Candidates</div></div>
-          <div class="stat-box"><div class="val" style="font-size:18px;color:#16a34a;">${submitted}</div><div class="lbl2">Submit হয়েছে</div></div>
-          <div class="stat-box"><div class="val" style="font-size:18px;color:#dc2626;">${total?Math.max(0,total-submitted):'—'}</div><div class="lbl2">বাকি</div></div>
-          <div class="stat-box"><div class="val" style="font-size:18px;">${ex.examData.password||'—'}</div><div class="lbl2">Password</div></div>
-        </div>
-        ${renderExamDetail(ex, results)}
-      </div>
     </div>`;
   }).join('');
 }
 
-function renderExamDetail(ex, results){
-  const ids = ex.examData.allowedIds||[];
-  const resultMap={};
-  results.forEach(r=>{ const k=String(r.id||r['Student ID']||'').trim(); if(k) resultMap[k]=r; });
 
-  let rows='';
-  if(ids.length>0){
-    ids.forEach(id=>{
-      const r=resultMap[id];
-      if(r){
-        const score=(r.score!==undefined&&r.score!==null)?r.score:(r['Score']||'?');
-        const name=r.name||r['Name']||'—';
-        rows+=`<tr>
-          <td><b>${id}</b></td><td>${name}</td>
-          <td style="text-align:center;font-weight:700;">${score}/${ex.examData.questions.length}</td>
-          <td style="text-align:center;"><span class="badge badge-green">✅ দিয়েছে</span></td>
-        </tr>`;
-      } else {
-        rows+=`<tr>
-          <td><b>${id}</b></td><td style="color:var(--muted);">—</td>
-          <td style="text-align:center;color:var(--muted);">—</td>
-          <td style="text-align:center;"><span class="badge badge-red">❌ দেয়নি</span></td>
-        </tr>`;
-      }
-    });
-    // unlisted submissions
-    Object.entries(resultMap).forEach(([id,r])=>{
-      if(!ids.includes(id)){
-        const score=(r.score!==undefined&&r.score!==null)?r.score:(r['Score']||'?');
-        const name=r.name||r['Name']||'—';
-        rows+=`<tr style="opacity:.7;">
-          <td><b>${id}</b> <span class="badge badge-gray">unlisted</span></td><td>${name}</td>
-          <td style="text-align:center;font-weight:700;">${score}/${ex.examData.questions.length}</td>
-          <td style="text-align:center;"><span class="badge badge-green">✅ দিয়েছে</span></td>
-        </tr>`;
-      }
-    });
-  } else {
-    // No allowedIds — just show submissions
-    if(results.length===0){
-      return `<p style="color:var(--muted);text-align:center;padding:12px;">এখনো কেউ পরীক্ষা দেয়নি।</p>`;
-    }
-    results.forEach(r=>{
-      const id=r.id||r['Student ID']||'—';
-      const score=(r.score!==undefined&&r.score!==null)?r.score:(r['Score']||'?');
-      const name=r.name||r['Name']||'—';
-      rows+=`<tr><td><b>${id}</b></td><td>${name}</td>
-        <td style="text-align:center;font-weight:700;">${score}/${ex.examData.questions.length}</td>
-        <td style="text-align:center;"><span class="badge badge-green">✅ দিয়েছে</span></td>
-      </tr>`;
-    });
-  }
-
-  if(!rows) return `<p style="color:var(--muted);text-align:center;padding:12px;">কোনো candidate নেই।</p>`;
-
-  return `
-    <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Student ID</th><th>নাম</th><th style="text-align:center;">স্কোর</th><th style="text-align:center;">স্ট্যাটাস</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn btn-gray btn-sm" onclick="refreshExamResults('${ex.id}')"><i class="fas fa-sync"></i> Refresh</button>
-      <button class="btn btn-gray btn-sm" onclick="copyLink('${ex.id}')"><i class="fas fa-link"></i> Exam Link কপি</button>
-      <a class="btn btn-sm" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;text-decoration:none;" href="print/model_test.html?examId=${ex.id}" target="_blank"><i class="fas fa-external-link-alt"></i> Exam খুলুন</a>
-    </div>
-  `;
-}
 
 function toggleDetail(id){
   const d=document.getElementById(`detail-${id}`);
@@ -490,7 +396,31 @@ function copyLink(id){
   const link=`https://mdshaikh.me/print/model_test.html?examId=${id}`;
   navigator.clipboard.writeText(link).then(()=>toast('Link copied!'));
 }
+function populateStudentCheckboxes(containerId, selectedIds = []) {
+  const container = document.getElementById(containerId);
+  if (!globalStudents || globalStudents.length === 0) {
+     container.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">কোনো স্টুডেন্ট পাওয়া যায়নি। Sync করুন বা Admin Panel থেকে স্টুডেন্ট অ্যাড করুন।</div>';
+     return;
+  }
+  
+  let html = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px;">`;
+  globalStudents.forEach(s => {
+      const isChecked = selectedIds.includes(String(s.id)) ? 'checked' : '';
+      html += `
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; background:#f1f5f9; padding:6px 10px; border-radius:6px; border:1px solid var(--line);">
+           <input type="checkbox" class="student-cb-${containerId}" value="${s.id}" ${isChecked}>
+           <span style="font-weight:600; color:var(--ink);">${s.name} <small style="color:var(--muted); display:block; font-weight:normal;">ID: ${s.id}</small></span>
+        </label>
+      `;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
 
+function getSelectedStudents(containerId) {
+  const checkboxes = document.querySelectorAll(`.student-cb-${containerId}:checked`);
+  return Array.from(checkboxes).map(cb => cb.value);
+}
 // ── Builder ──
 function openBuilder(){
   document.getElementById('dashboard-panel').style.display='none';
@@ -498,7 +428,7 @@ function openBuilder(){
   document.getElementById('exam-title').value='';
   document.getElementById('exam-duration').value='30';
   document.getElementById('exam-pass').value='';
-  document.getElementById('exam-ids').value='';
+  populateStudentCheckboxes('builder-student-list', []);
   document.getElementById('questions-container').innerHTML='';
   qCount=0; addQ();
 }
@@ -535,8 +465,7 @@ async function saveExam(){
   const title=document.getElementById('exam-title').value.trim();
   const dur=document.getElementById('exam-duration').value.trim();
   const pass=document.getElementById('exam-pass').value.trim();
-  const idsStr=document.getElementById('exam-ids').value.trim();
-  const allowedIds=idsStr?idsStr.split(',').map(s=>s.trim()).filter(Boolean):[];
+  const allowedIds = getSelectedStudents('builder-student-list');
   if(!title) return toast('Title দিন!');
 
   let questions = [];
@@ -652,7 +581,7 @@ function openEdit(id) {
   const durStr = ex.examData.duration || '30 minutes';
   document.getElementById('edit-duration').value = parseInt(durStr) || 30;
   document.getElementById('edit-pass').value = ex.examData.password || '';
-  document.getElementById('edit-ids').value = (ex.examData.allowedIds || []).join(', ');
+  populateStudentCheckboxes('edit-student-list', ex.examData.allowedIds || []);
 
   // Render existing questions
   const container = document.getElementById('edit-questions-container');
@@ -724,8 +653,7 @@ async function saveEdit() {
   const title = document.getElementById('edit-title').value.trim();
   const dur = document.getElementById('edit-duration').value.trim();
   const pass = document.getElementById('edit-pass').value.trim();
-  const idsStr = document.getElementById('edit-ids').value.trim();
-  const allowedIds = idsStr ? idsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const allowedIds = getSelectedStudents('edit-student-list');
 
   if (!title) return toast('Title দিন!');
 
