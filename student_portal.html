@@ -3,627 +3,914 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Portal | Civil Engineering</title>
+  <title>Student Portal | Academy</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
-    body { font-family: 'Noto Serif Bengali', 'Inter', sans-serif; background: var(--bg); color: var(--ink); }
-    .portal-container { max-width: 800px; margin: 40px auto; padding: 0 20px; min-height: 70vh; }
-    
-    /* Panel Styles */
-    .portal-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 30px; box-shadow: var(--shadow); margin-bottom: 24px; animation: fadeSlideUp 0.4s ease-out both; }
-    .portal-panel h2 { margin-top: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; color: var(--ink); }
-    .portal-panel h2 i { color: var(--blue); }
-    
-    /* Inputs & Form */
-    .input-f { width: 100%; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); font-size: 15px; font-family: inherit; margin-bottom: 16px; transition: 0.2s; }
-    .input-f:focus { outline: none; border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    .forgot-link { font-size: 13px; color: var(--blue); text-decoration: none; font-weight: 600; float: right; margin-top: -10px; margin-bottom: 16px; }
-    .forgot-link:hover { text-decoration: underline; }
-    
-    /* Tabs */
-    .tabs { display: flex; gap: 6px; border-bottom: 2px solid var(--line); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; }
+    body { font-family: 'Noto Serif Bengali', 'Inter', sans-serif; }
+
+    /* ── GLOBAL LOADER ── */
+    #g-loader {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,0.55);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9999; backdrop-filter: blur(4px);
+    }
+    .loader-card {
+      background: #fff; border-radius: 16px;
+      padding: 36px 44px; text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+      max-width: 320px; width: 90%;
+    }
+    .spin-ring {
+      width: 52px; height: 52px; margin: 0 auto 18px;
+      border: 4px solid #e2e8f0; border-top-color: var(--blue);
+      border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-txt { font-size: 14px; color: var(--muted); font-weight: 600; line-height: 1.6; }
+
+    /* ── LAYOUT ── */
+    .portal-wrap {
+      max-width: 800px; margin: 0 auto;
+      padding: 32px 20px 100px;
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-lg); padding: 28px;
+      box-shadow: var(--shadow); margin-bottom: 20px;
+      animation: fadeSlideUp .35s var(--ease-out) both;
+    }
+    .panel-title {
+      margin: 0 0 22px; font-size: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-title i { color: var(--blue); }
+
+    /* ── FORM ── */
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 800;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: .06em; margin-bottom: 6px;
+    }
+    .inp {
+      width: 100%; padding: 12px 16px;
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--surface-soft); font-family: inherit;
+      font-size: 15px; color: var(--ink); transition: .2s;
+    }
+    .inp:focus {
+      outline: none; border-color: var(--blue);
+      background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+    }
+
+    /* ── ALERT BOXES ── */
+    .alert {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-radius: var(--radius);
+      font-size: 14px; margin-bottom: 14px; line-height: 1.6;
+    }
+    .al-success { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+    .al-error   { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+    .al-info    { background:#dbeafe; color:#1e40af; border:1px solid #bfdbfe; }
+
+    /* ── MOBILE DISPLAY ROW ── */
+    .mobile-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      background: var(--surface-soft); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px;
+    }
+    .mobile-row span { font-size: 14px; font-weight: 600; }
+    .mobile-row button {
+      background: none; border: none; color: var(--blue);
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+
+    /* ── FORGOT LINK ── */
+    .forgot-btn {
+      display: block; text-align: right; margin: -6px 0 14px;
+      background: none; border: none; color: var(--blue);
+      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .forgot-btn:hover { text-decoration: underline; }
+
+    /* ── USER BANNER ── */
+    .user-banner {
+      background: var(--ink); color: #fff;
+      border-radius: var(--radius-lg); padding: 22px 26px;
+      margin-bottom: 20px; display: flex;
+      justify-content: space-between; align-items: center;
+      gap: 16px; flex-wrap: wrap; box-shadow: var(--shadow-lg);
+      animation: fadeSlideUp .35s var(--ease-out) both;
+    }
+    .u-info h3 {
+      margin: 0 0 6px; font-size: 19px; color: #fff;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .u-info p { margin: 0; color: rgba(255,255,255,.6); font-size: 13px; }
+    .u-info p+p { margin-top: 4px; font-size: 12px; }
+    .id-badge {
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 10px; padding: 10px 18px; text-align: center; flex-shrink: 0;
+    }
+    .id-badge .id-lbl { font-size: 10px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
+    .id-badge .id-val { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+    .btn-edit-profile {
+      background: rgba(255,255,255,.15); border: none; color: rgba(255,255,255,.9);
+      padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      font-weight: 700; font-family: inherit; transition: .2s;
+    }
+    .btn-edit-profile:hover { background: rgba(255,255,255,.25); }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 4px; border-bottom: 2px solid var(--line);
+      margin-bottom: 24px; overflow-x: auto; scrollbar-width: none;
+    }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { background: none; border: none; padding: 10px 16px; font-size: 14px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .tab-btn {
+      background: none; border: none;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      padding: 10px 16px; font-size: 14px; font-weight: 700;
+      color: var(--muted); cursor: pointer; transition: .2s;
+      white-space: nowrap; flex-shrink: 0; font-family: inherit;
+    }
     .tab-btn:hover { color: var(--blue); }
     .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
-    
-    /* Exam Cards */
-    .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .exam-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; background: var(--surface-soft); transition: 0.2s; position: relative; overflow: hidden; }
-    .exam-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-3px); }
-    .exam-card h3 { margin: 0 0 8px; font-size: 18px; color: var(--ink); }
-    .exam-meta { font-size: 13px; color: var(--muted); margin-bottom: 16px; display: flex; flex-direction: column; gap: 4px; }
-    .exam-meta i { width: 16px; color: var(--blue); }
-    .status-badge { position: absolute; top: 16px; right: 16px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; }
-    .status-new { background: #dbeafe; color: #1e40af; }
-    .status-done { background: #dcfce7; color: #166534; }
-    
-    /* History Table */
-    .history-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .history-table th { text-align: left; padding: 12px; background: var(--surface-soft); border-bottom: 2px solid var(--line); color: var(--muted); }
-    .history-table td { padding: 12px; border-bottom: 1px solid var(--line); }
-    .score-high { color: #166534; font-weight: bold; }
-    .score-low { color: #dc2626; font-weight: bold; }
-    .btn-mistake { background: rgba(37,99,235,0.1); color: var(--blue); border: none; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-mistake:hover { background: rgba(37,99,235,0.2); }
-    
-    /* Utilities */
-    .loader { text-align: center; padding: 40px; color: var(--muted); }
-    .loader i { font-size: 30px; animation: spin 1s linear infinite; margin-bottom: 10px; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    .hidden { display: none !important; }
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); border: 2px dashed var(--line); border-radius: var(--radius); }
-    
-    /* User Profile Banner */
-    .user-banner { display: flex; justify-content: space-between; align-items: center; background: var(--ink); color: #fff; padding: 16px 24px; border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow); flex-wrap: wrap; gap: 12px; }
-    .user-info h3 { margin: 0 0 4px; font-size: 20px; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .user-info p { margin: 0; color: #94a3b8; font-size: 13px; margin-bottom: 4px; }
-    .user-id-badge { background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; font-size: 18px; font-weight: 900; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.2); }
-    .btn-edit-profile { background: rgba(255,255,255,0.15); border: none; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: 0.2s; }
-    .btn-edit-profile:hover { background: rgba(255,255,255,0.25); }
+    .tab-pane { display: none; animation: fadeIn .25s ease; }
+    .tab-pane.active { display: block; }
 
-    /* Modals */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
-    .modal-box { background: var(--surface); width: 100%; max-width: 500px; border-radius: var(--radius-lg); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
-    .modal-header h3 { margin: 0; font-size: 18px; }
-    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+    /* ── EXAM GRID ── */
+    .exam-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 14px;
+    }
+    .exam-card {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 18px; background: var(--surface-soft);
+      position: relative; transition: .2s;
+    }
+    .exam-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-2px); }
+    .exam-card h3 { margin: 0 0 8px; font-size: 16px; padding-right: 64px; }
+    .exam-meta { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+    .exam-meta span { display: flex; align-items: center; gap: 6px; }
+    .exam-meta i { color: var(--blue); width: 14px; text-align: center; }
+    .ekbadge {
+      position: absolute; top: 14px; right: 14px;
+      font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px;
+    }
+    .eb-new  { background: #dbeafe; color: #1e40af; }
+    .eb-done { background: #dcfce7; color: #166534; }
 
+    /* ── HISTORY TABLE ── */
+    .h-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .h-table th {
+      text-align: left; padding: 10px 12px;
+      background: var(--surface-soft); border-bottom: 2px solid var(--line);
+      color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .h-table td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .h-table tr:hover td { background: var(--surface-soft); }
+    .s-hi { color: #166534; font-weight: 800; }
+    .s-lo { color: #dc2626; font-weight: 800; }
+    .btn-mis {
+      background: rgba(37,99,235,.1); color: var(--blue); border: none;
+      padding: 5px 12px; border-radius: 6px; font-size: 12px;
+      font-weight: 700; cursor: pointer; font-family: inherit; transition: .2s;
+    }
+    .btn-mis:hover { background: rgba(37,99,235,.2); }
+
+    /* ── LOADER INLINE ── */
+    .pane-loader { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .pane-loader i { font-size: 28px; display: block; margin-bottom: 12px; }
+
+    /* ── EMPTY STATE ── */
+    .empty-st {
+      text-align: center; padding: 48px 20px; color: var(--muted);
+      border: 2px dashed var(--line); border-radius: var(--radius);
+    }
+    .empty-st i { font-size: 32px; display: block; margin-bottom: 14px; opacity: .45; }
+    .empty-st p { margin: 0; font-size: 14px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); display: none;
+      align-items: center; justify-content: center;
+      z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
+    }
+    .modal-box {
+      background: var(--surface); width: 100%; max-width: 500px;
+      border-radius: var(--radius-lg); padding: 24px;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+      animation: fadeSlideUp .3s var(--ease-out) both;
+    }
+    .modal-hd {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 18px;
+    }
+    .modal-hd h3 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+    .modal-close {
+      background: none; border: none; font-size: 18px;
+      color: var(--muted); cursor: pointer; padding: 4px 8px;
+      border-radius: 6px; transition: .2s;
+    }
+    .modal-close:hover { background: var(--surface-soft); }
+
+    /* ── MOBILE ── */
     @media (max-width: 600px) {
-      .portal-container { margin: 16px auto; padding: 0 12px; }
-      .portal-panel { padding: 20px 16px; }
+      .portal-wrap { padding: 16px 12px 90px; }
+      .panel { padding: 18px 16px; }
+      .panel-title { font-size: 18px; }
+      .user-banner { padding: 16px; }
+      .u-info h3 { font-size: 16px; }
+      .id-badge .id-val { font-size: 18px; }
+      .inp { font-size: 16px; min-height: 50px; }
+      .btn.primary, .btn.secondary { min-height: 50px; font-size: 15px; }
       .exam-grid { grid-template-columns: 1fr; }
-      .history-table { font-size: 13px; }
-      .history-table th, .history-table td { padding: 9px 8px; }
-      .user-banner { padding: 14px 16px; }
-      .user-info h3 { font-size: 17px; }
-      .input-f { font-size: 16px; min-height: 50px; padding: 13px 16px; }
-      .btn { min-height: 50px; font-size: 16px; }
+      .h-table { font-size: 12px; }
+      .h-table th, .h-table td { padding: 9px 8px; }
       .tab-btn { padding: 10px 12px; font-size: 13px; }
-      .exam-card { padding: 16px; }
-      .user-id-badge { font-size: 15px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="site-header">
-    <div class="nav-shell">
-      <a class="brand" href="index.html">
-        <img src="favicon.svg" alt="Logo" style="width:38px;height:38px;border-radius:10px;">
-        <span>Md. Shaikh<small>Student Portal</small></span>
-      </a>
-      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
-        <i class="fas fa-bars"></i>
-      </button>
-      <nav class="site-nav" aria-label="Main navigation">
-        <a href="index.html"><i class="fas fa-house"></i> Home</a>
-        <a href="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
-        <a href="modeling.html"><i class="fas fa-cube"></i> 3D</a>
-        <a href="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
-      </nav>
-    </div>
-  </header>
+<!-- ══ GLOBAL LOADER ══ -->
+<div id="g-loader">
+  <div class="loader-card">
+    <div class="spin-ring"></div>
+    <div class="loader-txt" id="loader-txt">সার্ভারে যোগাযোগ করা হচ্ছে...<br>একটু অপেক্ষা করুন।</div>
+  </div>
+</div>
 
-  <main class="portal-container">
+<!-- ══ HEADER ══ -->
+<header class="site-header">
+  <div class="nav-shell">
+    <a class="brand" href="index.html">
+      <img src="favicon.svg" alt="Logo">
+      <span>Academy<small>Student Portal</small></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+      <i class="fas fa-bars"></i>
+    </button>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html"><i class="fas fa-house"></i> Home</a>
+      <a href="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+      <a href="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
+    </nav>
+  </div>
+</header>
 
-    <!-- 1. LOGIN SECTION -->
-    <div id="auth-section" class="portal-panel">
-      <h2><i class="fas fa-user-graduate"></i> পোর্টালে প্রবেশ করুন</h2>
+<main class="portal-wrap">
 
-      <!-- ধাপ ১: মোবাইল নম্বর -->
+  <!-- ══════════ AUTH SECTION ══════════ -->
+  <div id="auth-section">
+    <div class="panel">
+      <h2 class="panel-title"><i class="fas fa-user-graduate"></i> পোর্টালে প্রবেশ করুন</h2>
+
+      <!-- Step 1: Mobile number -->
       <div id="step-1">
-        <p style="margin-bottom: 16px; color: var(--muted);">আপনার মোবাইল নম্বর দিন। সিস্টেম আপনার তথ্য খুঁজে দেবে।</p>
-        <input type="tel" id="auth-mobile" class="input-f" placeholder="মোবাইল নম্বর (01XXXXXXXXX)" maxlength="11" onkeydown="if(event.key==='Enter') checkMobileStep()">
-        <button class="btn primary" id="next-btn" style="width: 100%;" onclick="checkMobileStep()">
+        <p style="margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.8;">
+          আপনার মোবাইল নম্বর দিন। সিস্টেম ডেটাবেজ চেক করে জানাবে আপনি নতুন নাকি পুরনো ব্যবহারকারী।
+        </p>
+        <div class="field">
+          <label>মোবাইল নম্বর</label>
+          <input type="tel" id="auth-mobile" class="inp"
+            placeholder="01XXXXXXXXX" maxlength="11"
+            onkeydown="if(event.key==='Enter') checkMobile()">
+        </div>
+        <div id="s1-error" class="alert al-error" style="display:none;"></div>
+        <button class="btn primary" style="width:100%;" id="s1-btn" onclick="checkMobile()">
           পরবর্তী <i class="fas fa-arrow-right"></i>
         </button>
       </div>
 
-      <!-- ধাপ ২: পাসওয়ার্ড ও বিস্তারিত -->
-      <div id="step-2" class="hidden">
-        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-soft); border:1px solid var(--line); border-radius:var(--radius); padding:10px 14px; margin-bottom:16px; font-size:14px;">
-          <span><i class="fas fa-phone" style="color:var(--blue); margin-right:6px;"></i><span id="mobile-display-num"></span></span>
-          <button onclick="goBack()" style="background:none; border:none; color:var(--blue); cursor:pointer; font-size:13px; font-weight:700;"><i class="fas fa-pencil"></i> পরিবর্তন</button>
+      <!-- Step 2: Password (+ new user fields) -->
+      <div id="step-2" style="display:none;">
+
+        <!-- Mobile display -->
+        <div class="mobile-row">
+          <span><i class="fas fa-phone" style="color:var(--blue); margin-right:6px;"></i><span id="mobile-disp"></span></span>
+          <button onclick="goBack()"><i class="fas fa-pencil"></i> পরিবর্তন</button>
         </div>
 
-        <div id="user-found-msg" class="hidden" style="background:#dcfce7; color:#166534; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px;">
-          <i class="fas fa-check-circle"></i> স্বাগতম ফিরে আসার জন্য, <b id="exist-name-display"></b>!
-        </div>
-        <div id="user-new-msg" class="hidden" style="background:#dbeafe; color:#1e40af; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px;">
-          <i class="fas fa-user-plus"></i> নতুন ব্যবহারকারী! আপনার তথ্য দিয়ে প্রোফাইল তৈরি করুন।
-        </div>
-
-        <div id="new-user-fields" class="hidden">
-          <input type="text" id="reg-name" class="input-f" placeholder="আপনার পুরো নাম *">
-          <input type="text" id="reg-school" class="input-f" placeholder="স্কুল/কলেজের নাম (ঐচ্ছিক)">
-          <input type="text" id="reg-class" class="input-f" placeholder="ক্লাস/বর্ষ (ঐচ্ছিক)">
+        <!-- Existing user welcome -->
+        <div id="msg-exist" class="alert al-success" style="display:none;">
+          <i class="fas fa-check-circle fa-lg"></i>
+          <span>স্বাগতম ফিরে আসার জন্য, <b id="exist-name"></b>! পাসওয়ার্ড দিয়ে প্রবেশ করুন।</span>
         </div>
 
-        <input type="password" id="auth-password" class="input-f" placeholder="পাসওয়ার্ড দিন *" onkeydown="if(event.key==='Enter') handleLogin()">
-        <a href="#" id="forgot-pass-link" class="forgot-link hidden" onclick="requestPasswordReset()">পাসওয়ার্ড ভুলে গেছেন?</a>
+        <!-- New user notice -->
+        <div id="msg-new" class="alert al-info" style="display:none;">
+          <i class="fas fa-user-plus fa-lg"></i>
+          <span>নতুন ব্যবহারকারী! নিচের তথ্যগুলো পূরণ করুন।</span>
+        </div>
 
-        <div style="clear: both;"></div>
+        <!-- New user fields -->
+        <div id="new-fields" style="display:none;">
+          <div class="field">
+            <label>পুরো নাম <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="reg-name" class="inp" placeholder="আপনার পুরো নাম লিখুন">
+          </div>
+          <div class="field">
+            <label>স্কুল / কলেজের নাম</label>
+            <input type="text" id="reg-school" class="inp" placeholder="প্রতিষ্ঠানের নাম (ঐচ্ছিক)">
+          </div>
+          <div class="field">
+            <label>ক্লাস / বর্ষ</label>
+            <input type="text" id="reg-class" class="inp" placeholder="যেমন: Class 10, 2nd Year (ঐচ্ছিক)">
+          </div>
+        </div>
 
-        <button class="btn primary" id="auth-btn" style="width:100%;" onclick="handleLogin()">
-          লগইন করুন <i class="fas fa-arrow-right"></i>
+        <!-- Password -->
+        <div class="field">
+          <label>পাসওয়ার্ড <span style="color:#ef4444;">*</span></label>
+          <input type="password" id="auth-pass" class="inp" placeholder="পাসওয়ার্ড দিন"
+            onkeydown="if(event.key==='Enter') handleLogin()">
+        </div>
+
+        <!-- Forgot password -->
+        <button id="forgot-btn" class="forgot-btn" style="display:none;" onclick="requestReset()">
+          <i class="fas fa-key"></i> পাসওয়ার্ড ভুলে গেছেন?
+        </button>
+
+        <div id="s2-error"   class="alert al-error"   style="display:none;"></div>
+        <div id="s2-success" class="alert al-success"  style="display:none;"></div>
+
+        <button class="btn primary" style="width:100%;" id="auth-btn" onclick="handleLogin()">
+          <span id="auth-btn-txt">লগইন করুন</span> <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ DASHBOARD SECTION ══════════ -->
+  <div id="dashboard-section" style="display:none;">
+
+    <!-- User Banner -->
+    <div class="user-banner">
+      <div class="u-info">
+        <h3 id="d-name">
+          —
+          <button class="btn-edit-profile" onclick="openEditProfile()">
+            <i class="fas fa-pen"></i> Edit
+          </button>
+        </h3>
+        <p><i class="fas fa-phone" style="margin-right:5px;"></i><span id="d-mobile">—</span></p>
+        <p>
+          <i class="fas fa-school" style="margin-right:4px;"></i><span id="d-school">—</span>
+          &nbsp;·&nbsp;
+          <i class="fas fa-book" style="margin-right:4px;"></i><span id="d-class">—</span>
+        </p>
+      </div>
+      <div class="id-badge">
+        <div class="id-lbl">Student ID</div>
+        <div class="id-val" id="d-id">—</div>
+      </div>
+    </div>
+
+    <!-- Panel with tabs -->
+    <div class="panel" style="padding:20px 28px 28px;">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('exams',this)">
+          <i class="fas fa-list-check"></i> পরীক্ষাসমূহ
+        </button>
+        <button class="tab-btn" onclick="switchTab('history',this)">
+          <i class="fas fa-clock-rotate-left"></i> আমার ইতিহাস
+        </button>
+        <button class="tab-btn" style="margin-left:auto; color:#ef4444;" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> বের হন
         </button>
       </div>
 
-      <div id="auth-error" style="color:#dc2626; margin-top:10px; font-size:14px; display:none; padding:10px; background:#fef2f2; border-radius:8px; border:1px solid #fecaca;"></div>
-      <div id="auth-success" style="color:#166534; margin-top:10px; font-size:14px; display:none; padding:10px; background:#dcfce7; border-radius:8px; border:1px solid #bbf7d0;"></div>
-    </div>
-
-    <!-- 2. DASHBOARD SECTION (Hidden initially) -->
-    <div id="dashboard-section" class="hidden">
-      
-      <!-- Profile Banner -->
-      <div class="user-banner">
-        <div class="user-info">
-          <h3 id="dash-name">Student Name <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button></h3>
-          <p><i class="fas fa-phone"></i> <span id="dash-mobile">01xxxxxxxxx</span></p>
-          <p style="font-size: 12px; opacity: 0.8;"><i class="fas fa-school"></i> <span id="dash-school">N/A</span> | <i class="fas fa-book"></i> <span id="dash-class">N/A</span></p>
+      <!-- Tab: Exams -->
+      <div id="tab-exams" class="tab-pane active">
+        <div id="exams-loader" class="pane-loader">
+          <i class="fas fa-circle-notch fa-spin"></i>
+          পরীক্ষার তালিকা লোড হচ্ছে...
         </div>
-        <div style="text-align: center;">
-          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Student ID</div>
-          <div class="user-id-badge" id="dash-id">---</div>
+        <div id="exams-grid" class="exam-grid" style="display:none;"></div>
+        <div id="exams-empty" class="empty-st" style="display:none;">
+          <i class="fas fa-folder-open"></i>
+          <p>আপনার জন্য এই মুহূর্তে কোনো পরীক্ষা নেই।</p>
         </div>
       </div>
 
-      <div class="portal-panel" style="padding: 20px 30px 30px;">
-        <!-- Tabs -->
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('exams')"><i class="fas fa-list-check"></i> Available Exams</button>
-          <button class="tab-btn" onclick="switchTab('history')"><i class="fas fa-clock-rotate-left"></i> My History</button>
-          <button class="tab-btn" style="margin-left: auto; color: #ef4444;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <!-- Tab: History -->
+      <div id="tab-history" class="tab-pane">
+        <div id="history-loader" class="pane-loader">
+          <i class="fas fa-circle-notch fa-spin"></i>
+          ফলাফল লোড হচ্ছে...
         </div>
-
-        <!-- Tab 1: Available Exams -->
-        <div id="tab-exams" class="tab-content active">
-          <div id="exams-loader" class="loader"><i class="fas fa-circle-notch"></i><br>পরীক্ষার তালিকা খোঁজা হচ্ছে...</div>
-          <div id="exams-grid" class="exam-grid hidden"></div>
-          <div id="exams-empty" class="empty-state hidden">
-            <i class="fas fa-folder-open" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
-            <p>এই মুহূর্তে আপনার জন্য কোনো পরীক্ষা অ্যাসাইন করা নেই।</p>
-          </div>
+        <div id="history-wrap" style="display:none; overflow-x:auto;">
+          <table class="h-table">
+            <thead>
+              <tr>
+                <th>পরীক্ষার নাম</th>
+                <th>তারিখ</th>
+                <th>নম্বর</th>
+                <th style="text-align:right;">বিস্তারিত</th>
+              </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+          </table>
         </div>
-
-        <!-- Tab 2: History -->
-        <div id="tab-history" class="tab-content">
-          <div id="history-loader" class="loader"><i class="fas fa-circle-notch"></i><br>ফলাফল লোড হচ্ছে...</div>
-          <div id="history-content" class="hidden">
-            <div style="overflow-x: auto;">
-              <table class="history-table">
-                <thead><tr><th>পরীক্ষার নাম</th><th>তারিখ</th><th>প্রাপ্ত নম্বর</th><th style="text-align: right;">বিস্তারিত</th></tr></thead>
-                <tbody id="history-list"></tbody>
-              </table>
-            </div>
-          </div>
-          <div id="history-empty" class="empty-state hidden">
-            <i class="fas fa-history" style="font-size: 30px; margin-bottom: 10px; opacity: 0.5;"></i>
-            <p>আপনি এখনো কোনো পরীক্ষায় অংশ নেননি।</p>
-          </div>
+        <div id="history-empty" class="empty-st" style="display:none;">
+          <i class="fas fa-history"></i>
+          <p>আপনি এখনো কোনো পরীক্ষায় অংশ নেননি।</p>
         </div>
-
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Modals -->
-  <!-- Edit Profile Modal -->
-  <div class="modal-overlay" id="modal-edit-profile">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> প্রোফাইল আপডেট রিকোয়েস্ট</h3>
-        <button class="close-btn" onclick="closeModal('modal-edit-profile')"><i class="fas fa-times"></i></button>
-      </div>
-      <p style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">আপনার সঠিক তথ্য দিন। অ্যাডমিন অ্যাপ্রুভ করার পর প্রোফাইল আপডেট হবে।</p>
-      
-      <label style="font-size: 12px; font-weight: bold; color: var(--muted);">নাম</label>
-      <input type="text" id="edit-name" class="input-f">
-      
-      <label style="font-size: 12px; font-weight: bold; color: var(--muted);">স্কুল/কলেজ</label>
-      <input type="text" id="edit-school" class="input-f">
-      
-      <label style="font-size: 12px; font-weight: bold; color: var(--muted);">ক্লাস/বর্ষ</label>
-      <input type="text" id="edit-class" class="input-f">
-      
-      <div id="edit-msg" style="display:none; font-size: 13px; margin-bottom: 10px; padding: 10px; border-radius: 6px;"></div>
-      
-      <button class="btn primary" id="submit-edit-btn" style="width: 100%;" onclick="submitProfileUpdate()">রিকোয়েস্ট পাঠান</button>
-    </div>
-  </div>
-
-  <!-- View Mistakes Modal -->
-  <div class="modal-overlay" id="modal-mistakes">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> আপনার ভুলসমূহ</h3>
-        <button class="close-btn" onclick="closeModal('modal-mistakes')"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="mistakes-content" style="font-size: 14px; line-height: 1.6; color: var(--ink); background: var(--surface-soft); padding: 16px; border-radius: 8px; border: 1px solid var(--line);">
-        <!-- Content injected via JS -->
       </div>
     </div>
   </div>
 
-  <script>
-    const SCRIPT_GAS_URL = localStorage.getItem('gas_url') || "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
-    const GITHUB_JSON_URL = "https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json";
+</main>
 
-    let currentUser = null;
-    let isNewUser = false;
-    let allExams = [];
-    let myHistory = [];
+<!-- ══ MODAL: Edit Profile ══ -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> প্রোফাইল আপডেট রিকোয়েস্ট</h3>
+      <button class="modal-close" onclick="closeModal('modal-edit')"><i class="fas fa-times"></i></button>
+    </div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.7;">
+      নাম, স্কুল বা ক্লাস পরিবর্তনের রিকোয়েস্ট পাঠান।
+      অ্যাডমিন অনুমোদন করলে প্রোফাইল আপডেট হবে।
+    </p>
+    <div class="field"><label>নাম</label><input type="text" id="edit-name" class="inp"></div>
+    <div class="field"><label>স্কুল / কলেজ</label><input type="text" id="edit-school" class="inp"></div>
+    <div class="field"><label>ক্লাস / বর্ষ</label><input type="text" id="edit-class" class="inp"></div>
+    <div id="edit-msg" style="display:none; margin-bottom:14px;"></div>
+    <button class="btn primary" style="width:100%;" id="edit-btn" onclick="submitProfileUpdate()">
+      রিকোয়েস্ট পাঠান <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+</div>
 
-    // On Load: Check if already logged in
-    window.onload = async () => {
-      const savedUser = localStorage.getItem('portal_user');
-      if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        showDashboard();
-      }
-    };
+<!-- ══ MODAL: View Mistakes ══ -->
+<div class="modal-overlay" id="modal-mis">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-hd">
+      <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> ভুলসমূহ</h3>
+      <button class="modal-close" onclick="closeModal('modal-mis')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="mis-content"
+      style="font-size:14px; line-height:1.8; background:var(--surface-soft);
+             padding:16px; border-radius:var(--radius); border:1px solid var(--line);">
+    </div>
+  </div>
+</div>
 
-    // ── ধাপ ১: মোবাইল চেক ──
-    async function checkMobileStep() {
-      let mobile = document.getElementById('auth-mobile').value.trim();
-      if (mobile.startsWith('+880')) mobile = '0' + mobile.slice(4);
-      if (mobile.startsWith('880') && mobile.length === 13) mobile = '0' + mobile.slice(3);
+<!-- Mobile Tab Bar -->
+<nav class="mobile-tabbar">
+  <a href="index.html"   class="mobile-tab"><i class="fas fa-house"></i>Home</a>
+  <a href="civil.html"   class="mobile-tab"><i class="fas fa-helmet-safety"></i>Civil</a>
+  <a href="academy.html" class="mobile-tab active"><i class="fas fa-graduation-cap"></i>Academy</a>
+  <a href="modeling.html" class="mobile-tab"><i class="fas fa-cube"></i>3D</a>
+</nav>
 
-      const errEl = document.getElementById('auth-error');
-      const btn   = document.getElementById('next-btn');
+<script src="assets/site.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIG
+//  ⚠️ localStorage বা sessionStorage কোথাও ব্যবহার হয়নি
+// ══════════════════════════════════════════════════════════════
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
+const GH_RAW  = "https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json";
 
-      if (!mobile) return showAuthError('মোবাইল নম্বর দিন!');
-      if (!/^01[3-9]\d{8}$/.test(mobile)) return showAuthError('সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)');
+// ══════════════════════════════════════════════════════════════
+//  STATE — শুধু মেমোরিতে। পেজ বন্ধ/রিলোড করলে মুছে যাবে।
+// ══════════════════════════════════════════════════════════════
+let currentUser = null; // { id, name, mobile, school, studentClass }
+let isNewUser   = false;
+let allExams    = [];
+let myHistory   = [];
 
-      document.getElementById('auth-mobile').value = mobile;
-      errEl.style.display = 'none';
-      document.getElementById('auth-success').style.display = 'none';
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> খোঁজা হচ্ছে...';
-      btn.disabled = true;
+// ══════════════════════════════════════════════════════════════
+//  LOADER HELPERS
+// ══════════════════════════════════════════════════════════════
+function showLoader(msg) {
+  if (msg) document.getElementById('loader-txt').innerHTML = msg;
+  document.getElementById('g-loader').style.display = 'flex';
+}
+function hideLoader() {
+  document.getElementById('g-loader').style.display = 'none';
+}
 
-      try {
-        const res = await fetch(SCRIPT_GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'checkMobile', mobile: mobile }),
-          headers: { 'Content-Type': 'text/plain' }
-        });
+// ══════════════════════════════════════════════════════════════
+//  GAS CALL
+// ══════════════════════════════════════════════════════════════
+async function gasCall(payload) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'text/plain' }
+  });
+  return res.json();
+}
 
-        const data = await res.json();
-        document.getElementById('mobile-display-num').innerText = mobile;
+// ══════════════════════════════════════════════════════════════
+//  STEP 1 — মোবাইল নম্বর চেক
+// ══════════════════════════════════════════════════════════════
+async function checkMobile() {
+  let mobile = document.getElementById('auth-mobile').value.trim();
 
-        isNewUser = !(data.status === 'success' && (data.found === true || data.found === 'true'));
+  // নম্বর normalize
+  if (mobile.startsWith('+880')) mobile = '0' + mobile.slice(4);
+  if (mobile.startsWith('880') && mobile.length === 13) mobile = '0' + mobile.slice(3);
+  document.getElementById('auth-mobile').value = mobile;
 
-        if (!isNewUser) {
-          document.getElementById('exist-name-display').innerText = data.name;
-          document.getElementById('user-found-msg').classList.remove('hidden');
-          document.getElementById('user-new-msg').classList.add('hidden');
-          document.getElementById('new-user-fields').classList.add('hidden');
-          document.getElementById('forgot-pass-link').classList.remove('hidden');
-          document.getElementById('auth-btn').innerHTML = 'লগইন করুন <i class="fas fa-arrow-right"></i>';
-        } else {
-          document.getElementById('user-new-msg').classList.remove('hidden');
-          document.getElementById('user-found-msg').classList.add('hidden');
-          document.getElementById('new-user-fields').classList.remove('hidden');
-          document.getElementById('forgot-pass-link').classList.add('hidden');
-          document.getElementById('auth-btn').innerHTML = 'অ্যাকাউন্ট খুলুন <i class="fas fa-arrow-right"></i>';
-        }
+  // Validation
+  if (!mobile)                              return setS1Error('মোবাইল নম্বর দিন!');
+  if (!/^01[3-9]\d{8}$/.test(mobile))      return setS1Error('সঠিক বাংলাদেশি নম্বর দিন (01XXXXXXXXX)');
+  setS1Error('');
 
-        document.getElementById('step-1').classList.add('hidden');
-        document.getElementById('step-2').classList.remove('hidden');
-        
-        if(isNewUser) document.getElementById('reg-name').focus();
-        else document.getElementById('auth-password').focus();
+  showLoader('ডেটাবেজে নম্বর খোঁজা হচ্ছে...<br>একটু অপেক্ষা করুন।');
 
-      } catch (e) {
-        showAuthError('সার্ভারে কানেক্ট করা যাচ্ছে না। ইন্টারনেট চেক করুন।');
-      }
+  try {
+    const data = await gasCall({ action: 'checkMobile', mobile });
+    hideLoader();
 
-      btn.innerHTML = 'পরবর্তী <i class="fas fa-arrow-right"></i>';
-      btn.disabled = false;
+    document.getElementById('mobile-disp').innerText = mobile;
+    isNewUser = !(data.status === 'success' && (data.found === true || data.found === 'true'));
+
+    if (!isNewUser) {
+      // পুরনো user
+      document.getElementById('exist-name').innerText = data.name || 'Student';
+      flexShow('msg-exist'); hide('msg-new'); hide('new-fields');
+      show('forgot-btn');
+      document.getElementById('auth-btn-txt').innerText = 'লগইন করুন';
+    } else {
+      // নতুন user
+      flexShow('msg-new'); hide('msg-exist');
+      show('new-fields'); hide('forgot-btn');
+      document.getElementById('auth-btn-txt').innerText = 'অ্যাকাউন্ট তৈরি করুন';
     }
 
-    function goBack() {
-      document.getElementById('step-2').classList.add('hidden');
-      document.getElementById('step-1').classList.remove('hidden');
-      document.getElementById('auth-error').style.display = 'none';
-      document.getElementById('auth-success').style.display = 'none';
-      document.getElementById('auth-password').value = '';
-      document.getElementById('auth-mobile').focus();
-    }
+    hide('step-1'); show('step-2');
+    setTimeout(() => {
+      const f = isNewUser
+        ? document.getElementById('reg-name')
+        : document.getElementById('auth-pass');
+      f && f.focus();
+    }, 80);
 
-    function showAuthError(msg) {
-      const errEl = document.getElementById('auth-error');
-      errEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
-      errEl.style.display = 'block';
-    }
-    
-    function showAuthSuccess(msg) {
-      const sucEl = document.getElementById('auth-success');
-      sucEl.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-      sucEl.style.display = 'block';
-    }
+  } catch (e) {
+    hideLoader();
+    setS1Error('সার্ভারে সংযোগ হচ্ছে না। ইন্টারনেট চেক করুন।');
+  }
+}
 
-    // ── ধাপ ২: লগইন / রেজিস্টার ──
-    async function handleLogin() {
-      const mobile = document.getElementById('auth-mobile').value.trim();
-      const password = document.getElementById('auth-password').value.trim();
-      const btn = document.getElementById('auth-btn');
+function setS1Error(msg) {
+  const el = document.getElementById('s1-error');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
+  el.style.display = 'flex';
+}
 
-      if (!password) return showAuthError('পাসওয়ার্ড দিতে হবে!');
+function goBack() {
+  hide('step-2'); show('step-1');
+  hide('s2-error'); hide('s2-success');
+  document.getElementById('auth-pass').value = '';
+  document.getElementById('auth-mobile').focus();
+}
 
-      let payload = { mobile, password };
+// ══════════════════════════════════════════════════════════════
+//  STEP 2 — লগইন বা রেজিস্ট্রেশন
+// ══════════════════════════════════════════════════════════════
+async function handleLogin() {
+  const mobile   = document.getElementById('auth-mobile').value.trim();
+  const password = document.getElementById('auth-pass').value.trim();
+  if (!password) return setS2Error('পাসওয়ার্ড দিতে হবে!');
 
-      if (isNewUser) {
-        payload.action = 'register';
-        payload.name = document.getElementById('reg-name').value.trim();
-        payload.school = document.getElementById('reg-school').value.trim();
-        payload.studentClass = document.getElementById('reg-class').value.trim();
-        if(!payload.name) return showAuthError('আপনার নাম দিতে হবে!');
-      } else {
-        payload.action = 'login';
-      }
+  const payload = { mobile, password };
 
-      document.getElementById('auth-error').style.display = 'none';
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেস হচ্ছে...';
-      btn.disabled = true;
+  if (isNewUser) {
+    payload.action       = 'register';
+    payload.name         = document.getElementById('reg-name').value.trim();
+    payload.school       = document.getElementById('reg-school').value.trim();
+    payload.studentClass = document.getElementById('reg-class').value.trim();
+    if (!payload.name)  return setS2Error('আপনার নাম দিতে হবে!');
+  } else {
+    payload.action = 'login';
+  }
 
-      try {
-        const res = await fetch(SCRIPT_GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain' }
-        });
-        const data = await res.json();
+  setS2Error('');
+  showLoader(isNewUser
+    ? 'অ্যাকাউন্ট তৈরি হচ্ছে...'
+    : 'লগইন যাচাই করা হচ্ছে...'
+  );
 
-        if (data.status === 'success') {
-          currentUser = { 
-            id: String(data.id), 
-            name: data.name, 
-            mobile: mobile,
-            school: data.school || '',
-            studentClass: data.studentClass || ''
-          };
-          localStorage.setItem('portal_user', JSON.stringify(currentUser));
-          showDashboard();
-        } else {
-          showAuthError(data.message || 'পাসওয়ার্ড ভুল হয়েছে!');
-        }
-      } catch (e) {
-        showAuthError('ইন্টারনেট কানেকশন চেক করুন!');
-      }
+  try {
+    const data = await gasCall(payload);
+    hideLoader();
 
-      btn.innerHTML = isNewUser ? 'অ্যাকাউন্ট খুলুন <i class="fas fa-arrow-right"></i>' : 'লগইন করুন <i class="fas fa-arrow-right"></i>';
-      btn.disabled = false;
-    }
-
-    async function requestPasswordReset() {
-      const mobile = document.getElementById('auth-mobile').value.trim();
-      document.getElementById('auth-error').style.display = 'none';
-      document.getElementById('auth-success').style.display = 'none';
-      
-      try {
-        const res = await fetch(SCRIPT_GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'requestPasswordReset', mobile }),
-          headers: { 'Content-Type': 'text/plain' }
-        });
-        const data = await res.json();
-        if(data.status === 'success') {
-          showAuthSuccess('পাসওয়ার্ড রিসেটের রিকোয়েস্ট অ্যাডমিনের কাছে পাঠানো হয়েছে। অ্যাডমিন অ্যাপ্রুভ করলে নতুন পাসওয়ার্ড দিয়ে লগইন করতে পারবেন।');
-        } else {
-          showAuthError(data.message);
-        }
-      } catch(e) {
-        showAuthError('রিকোয়েস্ট পাঠানো যায়নি।');
-      }
-    }
-
-    // ── ড্যাশবোর্ড ──
-    function showDashboard() {
-      document.getElementById('auth-section').classList.add('hidden');
-      document.getElementById('dashboard-section').classList.remove('hidden');
-      
-      document.getElementById('dash-name').innerHTML = `${currentUser.name} <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button>`;
-      document.getElementById('dash-mobile').innerText = currentUser.mobile;
-      document.getElementById('dash-id').innerText = currentUser.id;
-      document.getElementById('dash-school').innerText = currentUser.school || 'Not Set';
-      document.getElementById('dash-class').innerText = currentUser.studentClass || 'Not Set';
-
-      fetchDashboardData();
-    }
-
-    async function fetchDashboardData() {
-      try {
-        const resGit = await fetch(`${GITHUB_JSON_URL}?_=${Date.now()}`);
-        const gitData = await resGit.json();
-        allExams = gitData.exams || [];
-
-        const resGas = await fetch(SCRIPT_GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'getStudentResults', studentId: currentUser.id }),
-          headers: { 'Content-Type': 'text/plain' }
-        });
-        const gasData = await resGas.json();
-        myHistory = gasData.results || gasData.data || [];
-
-        renderExams();
-        renderHistory();
-
-      } catch (e) {
-        console.error(e);
-        alert("ডেটা লোড করতে সমস্যা হচ্ছে। পেজটি রিলোড করুন।");
-      }
-    }
-
-    function renderExams() {
-      document.getElementById('exams-loader').classList.add('hidden');
-      const grid = document.getElementById('exams-grid');
-      const empty = document.getElementById('exams-empty');
-      grid.innerHTML = '';
-
-      let availableCount = 0;
-
-      allExams.forEach(ex => {
-        const allowed = ex.examData.allowedIds || [];
-        if (allowed.length === 0 || allowed.map(String).includes(String(currentUser.id))) {
-          const isDone = myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
-          availableCount++;
-          
-          const qCount = ex.examData.questions ? ex.examData.questions.length : 0;
-          const duration = ex.examData.duration || '30 minutes';
-          
-          let actionBtn = isDone 
-            ? `<a href="print/model_test.html?examId=${ex.id}&practice=1" class="btn secondary" style="width:100%;"><i class="fas fa-redo"></i> Practice Mode</a>`
-            : `<a href="print/model_test.html?examId=${ex.id}" class="btn primary" style="width:100%;"><i class="fas fa-play"></i> Start Exam</a>`;
-          
-          let badge = isDone 
-            ? `<div class="status-badge status-done"><i class="fas fa-check-circle"></i> Completed</div>`
-            : `<div class="status-badge status-new">New</div>`;
-
-          grid.innerHTML += `
-            <div class="exam-card">
-              ${badge}
-              <h3>${ex.examData.title}</h3>
-              <div class="exam-meta">
-                <span><i class="far fa-clock"></i> সময়: ${duration}</span>
-                <span><i class="fas fa-list-ol"></i> প্রশ্ন: ${qCount} টি</span>
-                <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${ex.examData.password ? 'প্রয়োজন' : 'নেই'}</span>
-              </div>
-              ${actionBtn}
-            </div>
-          `;
-        }
-      });
-
-      if (availableCount > 0) grid.classList.remove('hidden');
-      else empty.classList.remove('hidden');
-    }
-
-    function renderHistory() {
-      document.getElementById('history-loader').classList.add('hidden');
-      const content = document.getElementById('history-content');
-      const empty = document.getElementById('history-empty');
-      const tbody = document.getElementById('history-list');
-      tbody.innerHTML = '';
-
-      if (myHistory.length > 0) {
-        myHistory.forEach(h => {
-          const score = h.score !== undefined ? h.score : (h.Score || 0);
-          const topic = h.topic || h.Topic || 'Unknown Exam';
-          const dateStr = h.time || h.Time || '-';
-          const details = h.details || 'No data';
-          const scoreClass = score > 0 ? 'score-high' : 'score-low';
-
-          // Escape quotes for the onclick handler
-          const safeDetails = details.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-
-          tbody.innerHTML += `
-            <tr>
-              <td style="font-weight: 600;">${topic}</td>
-              <td style="color: var(--muted);">${dateStr}</td>
-              <td class="${scoreClass}">${score}</td>
-              <td style="text-align: right;"><button class="btn-mistake" onclick="viewMistakes('${safeDetails}')">Mistakes</button></td>
-            </tr>
-          `;
-        });
-        content.classList.remove('hidden');
-      } else {
-        empty.classList.remove('hidden');
-      }
-    }
-
-    // ── Profile Update ──
-    function openEditProfile() {
-      document.getElementById('edit-name').value = currentUser.name;
-      document.getElementById('edit-school').value = currentUser.school || '';
-      document.getElementById('edit-class').value = currentUser.studentClass || '';
-      document.getElementById('edit-msg').style.display = 'none';
-      document.getElementById('modal-edit-profile').style.display = 'flex';
-    }
-
-    async function submitProfileUpdate() {
-      const btn = document.getElementById('submit-edit-btn');
-      const msg = document.getElementById('edit-msg');
-      
-      const payload = {
-        action: 'requestProfileUpdate',
-        id: currentUser.id,
-        name: document.getElementById('edit-name').value.trim(),
-        school: document.getElementById('edit-edit-school') ? document.getElementById('edit-school').value.trim() : document.getElementById('edit-school').value.trim(), // fallback
-        studentClass: document.getElementById('edit-class').value.trim()
+    if (data.status === 'success') {
+      currentUser = {
+        id:           String(data.id),
+        name:         data.name,
+        mobile:       mobile,
+        school:       data.school       || '',
+        studentClass: data.studentClass || ''
       };
-
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(SCRIPT_GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload),
-          headers: { 'Content-Type': 'text/plain' }
-        });
-        const data = await res.json();
-        
-        msg.style.display = 'block';
-        if(data.status === 'success') {
-          msg.style.background = '#dcfce7'; msg.style.color = '#166534';
-          msg.innerHTML = '<i class="fas fa-check"></i> রিকোয়েস্ট পাঠানো হয়েছে। অ্যাডমিন অ্যাপ্রুভ করলে ড্যাশবোর্ডে আপডেট দেখতে পাবেন।';
-          setTimeout(() => closeModal('modal-edit-profile'), 3000);
-        } else {
-          msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
-          msg.innerHTML = '<i class="fas fa-times"></i> ' + data.message;
-        }
-      } catch(e) {
-        msg.style.display = 'block';
-        msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
-        msg.innerHTML = '<i class="fas fa-times"></i> নেটওয়ার্ক সমস্যা!';
-      }
-      
-      btn.innerHTML = 'রিকোয়েস্ট পাঠান';
-      btn.disabled = false;
+      showDashboard();
+    } else {
+      setS2Error(data.message || 'পাসওয়ার্ড ভুল হয়েছে!');
     }
+  } catch (e) {
+    hideLoader();
+    setS2Error('সার্ভারে সংযোগ হচ্ছে না। ইন্টারনেট চেক করুন।');
+  }
+}
 
-    // ── Mistakes View ──
-    function viewMistakes(detailStr) {
-      let contentHtml = '';
-      if(detailStr === 'Perfect Score') {
-        contentHtml = '<div style="color:#166534; font-weight:bold; text-align:center;"><i class="fas fa-trophy" style="font-size:24px; display:block; margin-bottom:10px;"></i>অসাধারণ! আপনার কোনো ভুল হয়নি।</div>';
-      } else if (!detailStr || detailStr === 'No data') {
-         contentHtml = '<div style="color:var(--muted); text-align:center;">ভুলের কোনো তথ্য পাওয়া যায়নি।</div>';
-      } else {
-        // Format the mistakes: "Q1 (দেওয়া: A | সঠিক: B), Q2 (...)"
-        const mistakes = detailStr.split(', ');
-        contentHtml = '<ul style="margin:0; padding-left:20px;">' + mistakes.map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') + '</ul>';
-      }
-      
-      document.getElementById('mistakes-content').innerHTML = contentHtml;
-      document.getElementById('modal-mistakes').style.display = 'flex';
-    }
+function setS2Error(msg) {
+  const el = document.getElementById('s2-error');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
+  el.style.display = 'flex';
+  hide('s2-success');
+}
+function setS2Success(msg) {
+  const el = document.getElementById('s2-success');
+  el.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+  el.style.display = 'flex';
+  hide('s2-error');
+}
 
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
+// ══════════════════════════════════════════════════════════════
+//  পাসওয়ার্ড রিসেট রিকোয়েস্ট
+// ══════════════════════════════════════════════════════════════
+async function requestReset() {
+  const mobile = document.getElementById('auth-mobile').value.trim();
+  setS2Error('');
+  showLoader('পাসওয়ার্ড রিসেট রিকোয়েস্ট পাঠানো হচ্ছে...');
+  try {
+    const data = await gasCall({ action: 'requestPasswordReset', mobile });
+    hideLoader();
+    if (data.status === 'success') {
+      setS2Success('রিকোয়েস্ট পাঠানো হয়েছে! অ্যাডমিন পাসওয়ার্ড সেট করে দিলে লগইন করতে পারবেন।');
+    } else {
+      setS2Error(data.message || 'রিকোয়েস্ট পাঠানো যায়নি।');
     }
+  } catch (e) {
+    hideLoader();
+    setS2Error('সার্ভারে সংযোগ হচ্ছে না।');
+  }
+}
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
+// ══════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════════════════
+function showDashboard() {
+  hide('auth-section');
+  show('dashboard-section');
 
-    function logout() {
-      localStorage.removeItem('portal_user');
-      location.reload();
+  document.getElementById('d-name').innerHTML =
+    `${esc(currentUser.name)} <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button>`;
+  document.getElementById('d-mobile').innerText = currentUser.mobile;
+  document.getElementById('d-id').innerText     = currentUser.id;
+  document.getElementById('d-school').innerText = currentUser.school       || 'সেট করা হয়নি';
+  document.getElementById('d-class').innerText  = currentUser.studentClass || 'সেট করা হয়নি';
+
+  fetchDashboardData();
+}
+
+async function fetchDashboardData() {
+  showLoader('পরীক্ষার তালিকা ও ফলাফল লোড হচ্ছে...<br>একটু অপেক্ষা করুন।');
+  try {
+    // GitHub থেকে exam list
+    const ghRes  = await fetch(`${GH_RAW}?_=${Date.now()}`);
+    const ghData = await ghRes.json();
+    allExams = ghData.exams || [];
+
+    // GAS থেকে student results
+    const gasData = await gasCall({ action: 'getStudentResults', studentId: currentUser.id });
+    myHistory = gasData.results || gasData.data || [];
+
+    hideLoader();
+    renderExams();
+    renderHistory();
+  } catch (e) {
+    hideLoader();
+    document.getElementById('exams-loader').innerHTML =
+      `<i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:28px; display:block; margin-bottom:12px;"></i>
+       ডেটা লোড করতে সমস্যা হচ্ছে।<br>পেজ রিলোড করুন।`;
+  }
+}
+
+// ── Render Exams ──
+function renderExams() {
+  hide('exams-loader');
+  const grid  = document.getElementById('exams-grid');
+  const empty = document.getElementById('exams-empty');
+  grid.innerHTML = '';
+  let count = 0;
+
+  allExams.forEach(ex => {
+    const allowed = ex.examData.allowedIds || [];
+    // allowedIds empty মানে সবার জন্য open
+    const isAllowed = allowed.length === 0 ||
+      allowed.map(String).includes(String(currentUser.id));
+    if (!isAllowed) return;
+    // live === false হলে দেখাবে না
+    if (ex.live === false) return;
+
+    count++;
+    const isDone   = myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
+    const qCount   = ex.examData.questions ? ex.examData.questions.length : 0;
+    const duration = ex.examData.duration || '30 minutes';
+    const hasPass  = !!ex.examData.password;
+
+    // Student info URL params হিসেবে পাঠানো — localStorage নয়
+    const base = `print/model_test.html?examId=${ex.id}` +
+      `&studentId=${enc(currentUser.id)}` +
+      `&studentName=${enc(currentUser.name)}` +
+      `&studentMobile=${enc(currentUser.mobile)}`;
+
+    const badge = isDone
+      ? `<span class="ekbadge eb-done"><i class="fas fa-check"></i> সম্পন্ন</span>`
+      : `<span class="ekbadge eb-new">নতুন</span>`;
+
+    const btn = isDone
+      ? `<a href="${base}&practice=1" class="btn secondary" style="width:100%;justify-content:center;">
+           <i class="fas fa-redo"></i> Practice Mode
+         </a>`
+      : `<a href="${base}" class="btn primary" style="width:100%;justify-content:center;">
+           <i class="fas fa-play"></i> পরীক্ষা শুরু করুন
+         </a>`;
+
+    grid.innerHTML += `
+      <div class="exam-card">
+        ${badge}
+        <h3>${esc(ex.examData.title)}</h3>
+        <div class="exam-meta">
+          <span><i class="far fa-clock"></i> ${esc(duration)}</span>
+          <span><i class="fas fa-list-ol"></i> ${qCount} টি প্রশ্ন</span>
+          <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${hasPass ? 'প্রয়োজন' : 'নেই'}</span>
+        </div>
+        ${btn}
+      </div>`;
+  });
+
+  if (count > 0) {
+    grid.style.display = 'grid';
+    hide('exams-empty');
+  } else {
+    hide('exams-grid');
+    show('exams-empty');
+  }
+}
+
+// ── Render History ──
+function renderHistory() {
+  hide('history-loader');
+  const tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+
+  if (myHistory.length === 0) {
+    hide('history-wrap');
+    show('history-empty');
+    return;
+  }
+
+  myHistory.forEach(h => {
+    const score   = h.score !== undefined ? h.score : (h.Score  || 0);
+    const topic   = h.topic || h.Topic   || 'Unknown';
+    const dateStr = h.time  || h.Time    || '—';
+    const details = String(h.details || 'No data');
+    const safeD   = details.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    const cls     = Number(score) > 0 ? 's-hi' : 's-lo';
+
+    tbody.innerHTML += `
+      <tr>
+        <td style="font-weight:600;">${esc(topic)}</td>
+        <td style="color:var(--muted);font-size:12px;">${esc(dateStr)}</td>
+        <td class="${cls}">${score}</td>
+        <td style="text-align:right;">
+          <button class="btn-mis" onclick="viewMistakes('${safeD}')">ভুল দেখুন</button>
+        </td>
+      </tr>`;
+  });
+
+  show('history-wrap');
+  hide('history-empty');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PROFILE UPDATE REQUEST
+// ══════════════════════════════════════════════════════════════
+function openEditProfile() {
+  document.getElementById('edit-name').value   = currentUser.name;
+  document.getElementById('edit-school').value = currentUser.school       || '';
+  document.getElementById('edit-class').value  = currentUser.studentClass || '';
+  hide('edit-msg');
+  document.getElementById('modal-edit').style.display = 'flex';
+}
+
+async function submitProfileUpdate() {
+  const btn  = document.getElementById('edit-btn');
+  const name         = document.getElementById('edit-name').value.trim();
+  const school       = document.getElementById('edit-school').value.trim();
+  const studentClass = document.getElementById('edit-class').value.trim();
+  if (!name) { showEditMsg('নাম দিতে হবে!', false); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...';
+
+  try {
+    const data = await gasCall({
+      action: 'requestProfileUpdate',
+      id: currentUser.id, name, school, studentClass
+    });
+    if (data.status === 'success') {
+      showEditMsg('রিকোয়েস্ট পাঠানো হয়েছে! অ্যাডমিন অনুমোদন করলে প্রোফাইল আপডেট হবে।', true);
+      setTimeout(() => closeModal('modal-edit'), 3000);
+    } else {
+      showEditMsg(data.message || 'কোনো সমস্যা হয়েছে।', false);
     }
-  </script>
+  } catch (e) {
+    showEditMsg('নেটওয়ার্ক সমস্যা!', false);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'রিকোয়েস্ট পাঠান <i class="fas fa-paper-plane"></i>';
+}
+
+function showEditMsg(msg, ok) {
+  const el = document.getElementById('edit-msg');
+  el.className = 'alert ' + (ok ? 'al-success' : 'al-error');
+  el.innerHTML = `<i class="fas fa-${ok ? 'check-circle' : 'exclamation-triangle'}"></i> ${msg}`;
+  el.style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MISTAKES MODAL
+// ══════════════════════════════════════════════════════════════
+function viewMistakes(str) {
+  let html = '';
+  if (str === 'Perfect Score') {
+    html = `<div style="text-align:center;color:#166534;font-weight:700;">
+      <i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:14px;"></i>
+      অসাধারণ! কোনো ভুল হয়নি। Perfect Score! 🏆
+    </div>`;
+  } else if (!str || str === 'No data') {
+    html = `<div style="text-align:center;color:var(--muted);">ভুলের তথ্য পাওয়া যায়নি।</div>`;
+  } else {
+    html = '<ul style="margin:0;padding-left:20px;">' +
+      str.split(', ').filter(Boolean).map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') +
+      '</ul>';
+  }
+  document.getElementById('mis-content').innerHTML = html;
+  document.getElementById('modal-mis').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════════
+function show(id)         { document.getElementById(id).style.display = 'block'; }
+function hide(id)         { document.getElementById(id).style.display = 'none'; }
+function flexShow(id)     { document.getElementById(id).style.display = 'flex'; }
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function enc(s)           { return encodeURIComponent(s||''); }
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LOGOUT — শুধু মেমোরি clear, কোনো storage নেই
+// ══════════════════════════════════════════════════════════════
+function logout() {
+  currentUser = null;
+  isNewUser   = false;
+  allExams    = [];
+  myHistory   = [];
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT — কোনো auto-login নেই। localStorage/sessionStorage নেই।
+//  পেজ লোড হলে শুধু mobile input-এ focus।
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  document.getElementById('auth-mobile').focus();
+});
+</script>
 </body>
 </html>
