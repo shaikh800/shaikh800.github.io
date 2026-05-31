@@ -94,17 +94,17 @@ td{border:1px solid var(--line);padding:9px 12px;}
 
 @media(max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr;}.hdr{flex-direction:column;gap:12px;align-items:flex-start;}.token-row{width:100%;flex-direction:column;gap:8px;}.token-row .inp{width:100% !important;}.token-row .btn{width:100%;justify-content:center;}.danger-btns{flex-direction:column;}}
 /* ── Password Gate ── */
-#ctrl-gate{position:fixed;inset:0;background:#0f172a;display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;}
-.gate-box{background:#1e293b;border:1px solid #334155;border-radius:20px;padding:36px 32px;width:100%;max-width:380px;text-align:center;}
+#ctrl-gate{position:fixed;inset:0;background:rgba(241,245,249,0.96);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;}
+.gate-box{background:#fff;border:1px solid var(--line);border-radius:20px;padding:36px 32px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(15,23,42,.12);}
 .gate-logo{width:60px;height:60px;margin:0 auto 18px;border-radius:16px;overflow:hidden;}
-.gate-box h2{color:#f8fafc;font-size:22px;margin-bottom:6px;}
-.gate-box p{color:#94a3b8;font-size:14px;margin-bottom:24px;}
-.gate-inp{width:100%;padding:12px 16px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#f8fafc;font-size:15px;font-family:inherit;margin-bottom:12px;text-align:center;letter-spacing:2px;}
-.gate-inp:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.25);}
-.gate-btn{width:100%;padding:12px;border-radius:10px;background:#2563eb;color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
-.gate-btn:hover{background:#1d4ed8;}
-.gate-err{color:#f87171;font-size:13px;margin-top:8px;min-height:20px;}
-.gate-hint{color:#475569;font-size:12px;margin-top:16px;line-height:1.5;}
+.gate-box h2{color:var(--ink);font-size:22px;margin-bottom:6px;}
+.gate-box p{color:var(--muted);font-size:14px;margin-bottom:24px;}
+.gate-inp{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:15px;font-family:inherit;margin-bottom:12px;text-align:center;letter-spacing:2px;}
+.gate-inp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.18);background:#fff;}
+.gate-btn{width:100%;padding:12px;border-radius:10px;background:var(--blue);color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.gate-btn:hover{background:var(--blue-dark);}
+.gate-err{color:#ef4444;font-size:13px;margin-top:8px;min-height:20px;}
+.gate-hint{color:var(--muted);font-size:12px;margin-top:16px;line-height:1.5;}
 
 /* ── Exam Controller Mobile ── */
 @media(max-width:700px){
@@ -155,9 +155,10 @@ td{border:1px solid var(--line);padding:9px 12px;}
       </div>
     <div class="token-row">
       <input type="password" id="gh-token" class="inp" style="width:170px;" placeholder="GitHub Token" autocomplete="off">
-      <input type="text" id="gas-url-hdr" class="inp" style="width:200px;" placeholder="Google Script URL">
-      <input type="password" id="gas-admin-token" class="inp" style="width:150px;" placeholder="GAS Admin Token" autocomplete="off">
+      <input type="text" id="gas-url-hdr" class="inp" style="width:200px;" placeholder="Google Script URL" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
+      <input type="password" id="gas-admin-token" class="inp" style="width:150px;" placeholder="GAS Admin Token" autocomplete="off" value="shaikh_fec_secure_2026">
       <button class="btn btn-blue" onclick="syncAll()"><i class="fas fa-sync"></i> Sync</button>
+      <button class="btn btn-gray" onclick="ctrlLogout()" title="এই device থেকে logout"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </div>
 
@@ -265,10 +266,6 @@ function toast(msg, dur=3000){
   t.innerText=msg; t.style.display='block';
   setTimeout(()=>t.style.display='none', dur);
 }
-// শুধু input field থেকে পড়া হয় — কোনো storage নেই
-function token(){ return document.getElementById('gh-token').value.trim(); }
-function gasUrl(){ return document.getElementById('gas-url-hdr').value.trim(); }
-function gasAdminToken(){ return document.getElementById('gas-admin-token').value.trim(); }
 function genId(){ return 'ex_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 
 // ── Sync / Load ──
@@ -719,13 +716,47 @@ async function saveEdit() {
   }
 }
 
-// ── Controller Gate ── (memory only, no storage)
+// ── Controller Gate ──
 const CTRL_GATE_PW = 'Shaikh**7';
+const CTRL_SESSION_KEY = 'shaikh_ctrl_auth_v1';
+const CTRL_GH_TOKEN_KEY = 'shaikh_gh_token_v1';       // admin_panel এর মতোই একই key
+const CTRL_GAS_URL_KEY  = 'shaikh_gas_url_v1';
+const CTRL_GAS_TOK_KEY  = 'shaikh_gas_tok_v1';
+
+// Config helpers — পড়লে localStorage-এও save করে
+function token(){
+  const v = document.getElementById('gh-token').value.trim();
+  if(v) localStorage.setItem(CTRL_GH_TOKEN_KEY, v);
+  return v || localStorage.getItem(CTRL_GH_TOKEN_KEY) || '';
+}
+function gasUrl(){
+  const v = document.getElementById('gas-url-hdr').value.trim();
+  if(v) localStorage.setItem(CTRL_GAS_URL_KEY, v);
+  return v || localStorage.getItem(CTRL_GAS_URL_KEY) || '';
+}
+function gasAdminToken(){
+  const v = document.getElementById('gas-admin-token').value.trim();
+  if(v) localStorage.setItem(CTRL_GAS_TOK_KEY, v);
+  return v || localStorage.getItem(CTRL_GAS_TOK_KEY) || '';
+}
+
+// Saved values দিয়ে inputs ভরো
+function loadSavedInputs(){
+  const ghTok = localStorage.getItem(CTRL_GH_TOKEN_KEY);
+  const gasU  = localStorage.getItem(CTRL_GAS_URL_KEY);
+  const gasTk = localStorage.getItem(CTRL_GAS_TOK_KEY);
+  if(ghTok) document.getElementById('gh-token').value = ghTok;
+  if(gasU)  document.getElementById('gas-url-hdr').value = gasU;
+  if(gasTk) document.getElementById('gas-admin-token').value = gasTk;
+}
 
 function gateUnlock() {
   const input = document.getElementById('gate-pw-input').value.trim();
   if (input === CTRL_GATE_PW) {
+    localStorage.setItem(CTRL_SESSION_KEY, 'granted');
     document.getElementById('ctrl-gate').style.display = 'none';
+    loadSavedInputs();
+    syncAll();
   } else {
     const errEl = document.getElementById('gate-err');
     errEl.textContent = '❌ ভুল পাসওয়ার্ড!';
@@ -735,14 +766,23 @@ function gateUnlock() {
   }
 }
 
+function ctrlLogout(){
+  localStorage.removeItem(CTRL_SESSION_KEY);
+  location.reload();
+}
+
 // ── Init ──
 window.onload=()=>{
-  // Gate সবসময় দেখাবে — পেজ reload মানেই আবার password লাগবে
-  // কোনো localStorage / sessionStorage নেই
-  document.getElementById('ctrl-gate').style.display = 'flex';
-  document.getElementById('exam-list').innerHTML =
-    `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;
-  setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
+  if(localStorage.getItem(CTRL_SESSION_KEY) === 'granted'){
+    document.getElementById('ctrl-gate').style.display = 'none';
+    loadSavedInputs();
+    syncAll();
+  } else {
+    document.getElementById('ctrl-gate').style.display = 'flex';
+    document.getElementById('exam-list').innerHTML =
+      `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;
+    setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
+  }
 };
 </script>
 </body>
