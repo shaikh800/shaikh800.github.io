@@ -663,6 +663,21 @@ window.onload = async function() {
       return;
     }
 
+    // ── Live Status Check ──
+    const isLive = foundExam.live !== false; 
+    const isPracticeMode = new URLSearchParams(window.location.search).get('practice') === '1';
+
+    if (!isLive && !isPracticeMode) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('no-id-state').innerHTML = `
+        <h3 style='color:#ef4444; margin-bottom:10px;'><i class="fas fa-lock"></i> পরীক্ষা বন্ধ আছে!</h3>
+        <p style='color:var(--muted); margin-bottom:20px;'>এই পরীক্ষাটি বর্তমানে বন্ধ রয়েছে। কর্তৃপক্ষ আবার লাইভ করলে আপনি অংশ নিতে পারবেন।</p>
+        <button class='btn secondary' onclick='window.location.href="academy.html"'>Back to Academy</button>
+      `;
+      document.getElementById('no-id-state').style.display = 'block';
+      return;
+    }
+
     examData = foundExam.examData;
     qd = examData.questions;
     totalQ = qd.length;
@@ -677,7 +692,7 @@ window.onload = async function() {
 
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('login-screen').style.display = 'block';
-        checkResumeBanner();
+    checkResumeBanner();
 
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
