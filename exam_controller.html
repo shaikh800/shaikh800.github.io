@@ -265,20 +265,14 @@ function toast(msg, dur=3000){
   t.innerText=msg; t.style.display='block';
   setTimeout(()=>t.style.display='none', dur);
 }
-function token(){ return document.getElementById('gh-token').value.trim() || sessionStorage.getItem('ctrl_token'); }
-function gasUrl(){ return document.getElementById('gas-url-hdr').value.trim() || localStorage.getItem('ctrl_gas_url'); }
-function gasAdminToken(){ return document.getElementById('gas-admin-token').value.trim() || sessionStorage.getItem('ctrl_gas_admin_token'); }
+// শুধু input field থেকে পড়া হয় — কোনো storage নেই
+function token(){ return document.getElementById('gh-token').value.trim(); }
+function gasUrl(){ return document.getElementById('gas-url-hdr').value.trim(); }
+function gasAdminToken(){ return document.getElementById('gas-admin-token').value.trim(); }
 function genId(){ return 'ex_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
-
-function saveLocal(){
-  if(token()) sessionStorage.setItem('ctrl_token', token());
-  if(gasUrl()) localStorage.setItem('ctrl_gas_url', gasUrl());
-  if(gasAdminToken()) sessionStorage.setItem('ctrl_gas_admin_token', gasAdminToken());
-}
 
 // ── Sync / Load ──
 async function syncAll(){
-  saveLocal();
   document.getElementById('loader-inner').style.display='block';
   document.getElementById('exam-list').innerHTML='';
   try{
@@ -725,16 +719,12 @@ async function saveEdit() {
   }
 }
 
-// ── Controller Gate ──
-const CTRL_GATE_KEY = 'ctrl_gate_unlocked';
-const CTRL_GATE_PW_KEY = 'ctrl_gate_pw';
-const CTRL_GATE_DEFAULT = 'fec_admin_2025'; // ← এটি পরিবর্তন করুন!
+// ── Controller Gate ── (memory only, no storage)
+const CTRL_GATE_PW = 'Shaikh**7';
 
 function gateUnlock() {
   const input = document.getElementById('gate-pw-input').value.trim();
-  const stored = localStorage.getItem(CTRL_GATE_PW_KEY) || CTRL_GATE_DEFAULT;
-  if (input === stored) {
-    sessionStorage.setItem(CTRL_GATE_KEY, '1');
+  if (input === CTRL_GATE_PW) {
     document.getElementById('ctrl-gate').style.display = 'none';
   } else {
     const errEl = document.getElementById('gate-err');
@@ -745,41 +735,14 @@ function gateUnlock() {
   }
 }
 
-function checkGate() {
-  if (sessionStorage.getItem(CTRL_GATE_KEY) === '1') {
-    document.getElementById('ctrl-gate').style.display = 'none';
-  } else {
-    document.getElementById('ctrl-gate').style.display = 'flex';
-    setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
-  }
-}
-
 // ── Init ──
 window.onload=()=>{
-  checkGate();
-  const savedToken=sessionStorage.getItem('ctrl_token');
-  const savedGas=localStorage.getItem('ctrl_gas_url');
-  const savedGasToken=sessionStorage.getItem('ctrl_gas_admin_token');
-  if(savedToken) document.getElementById('gh-token').value=savedToken;
-  if(savedGas) document.getElementById('gas-url-hdr').value=savedGas;
-  if(savedGasToken) document.getElementById('gas-admin-token').value=savedGasToken;
-  if(savedToken) syncAll();
-  else{ document.getElementById('exam-list').innerHTML=`<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token দিয়ে Sync করুন।</p>`; }
-
-  const draftExamStr = localStorage.getItem('draft_exam_data');
-  if (draftExamStr) {
-     const draftExam = JSON.parse(draftExamStr);
-     openBuilder();
-     document.getElementById('exam-title').value = draftExam.title;
-     document.getElementById('exam-duration').value = draftExam.duration;
-     window.draftQuestions = draftExam.questions;
-     document.getElementById('questions-container').innerHTML = `
-        <div style="margin:15px 0; padding:15px; background:#dcfce7; color:#166534; border-radius:8px; font-weight:bold; border: 1px solid #bbf7d0;">
-          ✅ Question Builder থেকে ${draftExam.questions.length} টি প্রশ্ন ইম্পোর্ট করা হয়েছে! <br><br>
-          এখন শুধু Exam Password এবং Allowed IDs (যদি থাকে) সেট করে নিচের "Save & Publish" বাটনে ক্লিক করুন।
-        </div>`;
-     localStorage.removeItem('draft_exam_data'); 
-  }
+  // Gate সবসময় দেখাবে — পেজ reload মানেই আবার password লাগবে
+  // কোনো localStorage / sessionStorage নেই
+  document.getElementById('ctrl-gate').style.display = 'flex';
+  document.getElementById('exam-list').innerHTML =
+    `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;
+  setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
 };
 </script>
 </body>
