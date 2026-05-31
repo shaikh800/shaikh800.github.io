@@ -186,6 +186,11 @@ td{border:1px solid var(--line);padding:9px 12px;}
       <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-edit"></i></div> নতুন Exam তৈরি</div>
       <button class="btn btn-gray" onclick="closeBuilder()"><i class="fas fa-arrow-left"></i> Back</button>
     </div>
+    <!-- Draft Banner: question-builder থেকে এলে দেখা যাবে -->
+    <div id="draft-banner" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;color:#166534;display:flex;align-items:center;gap:8px;">
+      <i class="fas fa-file-import"></i>
+      <span>Question Builder থেকে প্রশ্নগুলো লোড হয়েছে। Password ও Student permission সেট করে <b>Save &amp; Publish</b> করুন।</span>
+    </div>
     <div class="grid-2">
       <div class="field"><label class="lbl">Exam Title</label><input class="inp" id="exam-title" placeholder="Model Test 1"></div>
       <div class="field"><label class="lbl">Duration (Minutes)</label><input type="number" class="inp" id="exam-duration" placeholder="30" value="30"></div>
@@ -259,6 +264,10 @@ const OWNER='shaikh800', REPO='shaikh800.github.io', FILE='civil_data.json', BRA
 let fullData={semesters:{},notices:[],exams:[],updated:''};
 let qCount=0;
 let globalStudents=[]; // GAS থেকে আনা students
+let allResults=[]; // stats admin_panel-এ — এখানে শুধু compat-এর জন্য
+
+// Stats admin_panel.html-এ শিফট হয়েছে, এখানে stub
+function updateStats(){}
 
 // ── Utils ──
 function toast(msg, dur=3000){
@@ -308,7 +317,17 @@ async function syncAll(){
 
   document.getElementById('loader-inner').style.display='none';
   renderList(fullData.exams);
-} // <-- এই ব্র্যাকেটটি মিসিং ছিল
+
+  // ── Draft Detection: question-builder থেকে এলে auto-open ──
+  const rawDraft = localStorage.getItem('draft_exam_data');
+  if(rawDraft){
+    try{
+      const draft = JSON.parse(rawDraft);
+      localStorage.removeItem('draft_exam_data');
+      _openBuilderWithDraft(draft);
+    }catch(e){ localStorage.removeItem('draft_exam_data'); }
+  }
+}
 
 // ── Render Exam List ──
 // ── Render Exam List ──
@@ -392,23 +411,9 @@ function searchExam(){
 }
 
 // Refresh a single exam's results from GAS
-async function refreshExamResults(examId){
-  const url=gasUrl();
-  const ex=fullData.exams.find(e=>e.id===examId);
-  if(!url||!ex){ toast('GAS URL নেই'); return; }
-  try{
-    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'getResults',examId,topic:ex.examData.title}),headers:{'Content-Type':'text/plain'}});
-    const d=await r.json();
-    const fresh=d.results||d.data||[];
-    // Update allResults for this exam
-    allResults=allResults.filter(r=>(r.topic||r['Topic']||'')!==ex.examData.title);
-    allResults.push(...fresh);
-    // Re-render detail
-    const det=document.getElementById(`detail-${examId}`);
-    if(det){ det.innerHTML=renderExamDetail(ex, fresh); det.classList.add('open'); }
-    updateStats();
-    toast('Refreshed!');
-  }catch(e){ toast('Refresh failed'); }
+// refreshExamResults: results এখন admin_panel.html-এ — এখানে শুধু redirect করে
+function refreshExamResults(examId){
+  toast('Results দেখতে Admin Panel ব্যবহার করুন।', 4000);
 }
 
 // ── Copy Link ──
@@ -441,6 +446,59 @@ function getSelectedStudents(containerId) {
   const checkboxes = document.querySelectorAll(`.student-cb-${containerId}:checked`);
   return Array.from(checkboxes).map(cb => cb.value);
 }
+// ── Open Builder with pre-filled draft (question-builder.html থেকে) ──
+function _openBuilderWithDraft(draft){
+  document.getElementById('dashboard-panel').style.display='none';
+  document.getElementById('builder-panel').style.display='block';
+  document.getElementById('exam-title').value = draft.title||'';
+  document.getElementById('exam-duration').value = draft.duration||'30';
+  document.getElementById('exam-pass').value='';
+  populateStudentCheckboxes('builder-student-list',[]);
+  document.getElementById('questions-container').innerHTML='';
+  qCount=0;
+  const qs = draft.questions||[];
+  if(qs.length>0){
+    qs.forEach(q=>addQPrefilled(q));
+    // Show the green banner
+    const banner = document.getElementById('draft-banner');
+    if(banner) banner.style.display='flex';
+    toast(`✅ ${qs.length}টি প্রশ্ন লোড হয়েছে! Password ও Student permission সেট করে Publish করুন।`,6000);
+  } else {
+    addQ();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Add a pre-filled question block ──
+function addQPrefilled(q){
+  qCount++;
+  const c=document.getElementById('questions-container');
+  const d=document.createElement('div');
+  d.className='q-block'; d.id=`qb-${qCount}`;
+  const _e=str=>String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const opts=q.opts||['','','',''];
+  const ans=parseInt(q.ans)||0;
+  d.innerHTML=`
+    <h4>প্রশ্ন ${qCount}</h4>
+    <button class="rmv-q" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp q-txt" value="${_e(q.q||'')}" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="opts-grid">
+      <input class="inp opt-0" value="${_e(opts[0]||'')}" placeholder="Option A (0)">
+      <input class="inp opt-1" value="${_e(opts[1]||'')}" placeholder="Option B (1)">
+      <input class="inp opt-2" value="${_e(opts[2]||'')}" placeholder="Option C (2)">
+      <input class="inp opt-3" value="${_e(opts[3]||'')}" placeholder="Option D (3)">
+    </div>
+    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+    <select class="inp correct-ans">
+      <option value="0" ${ans===0?'selected':''}>Option A (0)</option>
+      <option value="1" ${ans===1?'selected':''}>Option B (1)</option>
+      <option value="2" ${ans===2?'selected':''}>Option C (2)</option>
+      <option value="3" ${ans===3?'selected':''}>Option D (3)</option>
+    </select></div>
+  `;
+  c.appendChild(d);
+}
+
 // ── Builder ──
 function openBuilder(){
   document.getElementById('dashboard-panel').style.display='none';
@@ -455,6 +513,8 @@ function openBuilder(){
 function closeBuilder(){
   document.getElementById('builder-panel').style.display='none';
   document.getElementById('dashboard-panel').style.display='block';
+  const banner = document.getElementById('draft-banner');
+  if(banner) banner.style.display='none';
 }
 function addQ(){
   qCount++;
@@ -488,26 +548,21 @@ async function saveExam(){
   const allowedIds = getSelectedStudents('builder-student-list');
   if(!title) return toast('Title দিন!');
 
-  let questions = [];
-  if (window.draftQuestions && window.draftQuestions.length > 0) {
-     questions = window.draftQuestions;
-  } else {
-     const qBlocks=document.querySelectorAll('.q-block');
-     let valid=true;
-     qBlocks.forEach(b=>{
-       const q=b.querySelector('.q-txt').value.trim();
-       const opts=[0,1,2,3].map(i=>b.querySelector(`.opt-${i}`).value.trim());
-       const ans=parseInt(b.querySelector('.correct-ans').value);
-       if(!q||opts.some(o=>!o)) valid=false;
-       questions.push({q,opts,ans,stmts:null});
-     });
-     if(!valid) return toast('সব option পূরণ করুন!');
-  }
+  const qBlocks=document.querySelectorAll('#questions-container .q-block');
+  let questions=[]; let valid=true;
+  qBlocks.forEach(b=>{
+    const q=b.querySelector('.q-txt').value.trim();
+    const opts=[0,1,2,3].map(i=>b.querySelector(`.opt-${i}`).value.trim());
+    const ans=parseInt(b.querySelector('.correct-ans').value);
+    if(!q||opts.some(o=>!o)) valid=false;
+    questions.push({q,opts,ans,stmts:null});
+  });
+  if(!valid) return toast('সব option পূরণ করুন!');
+  if(questions.length===0) return toast('কমপক্ষে ১টি প্রশ্ন লাগবে!');
 
   const newExam={id:genId(),date:new Date().toISOString(),examData:{title,duration:dur+' minutes',password:pass,allowedIds,questions}};
   fullData.exams.unshift(newExam);
   await pushGitHub(tok,'New exam added from builder');
-  window.draftQuestions = null; 
   closeBuilder();
   toast('Exam publish হয়েছে! ✅');
 }
