@@ -347,6 +347,7 @@
         <i class="fas fa-circle-notch spin"></i> লোড হচ্ছে...
       </span>
       <button class="hdr-btn blue" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
+      <button class="hdr-btn ghost" onclick="adminLogout()" title="এই device থেকে logout করুন"><i class="fas fa-sign-out-alt"></i> Logout</button>
       <a href="academy.html" class="hdr-btn ghost"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
   </div>
@@ -619,7 +620,7 @@
 
 <script>
 // ════════════════════════════════════════════════════════
-//  CONFIG  — কোনো localStorage / sessionStorage নেই
+//  CONFIG
 // ════════════════════════════════════════════════════════
 const ADMIN_PW  = 'Shaikh**7';
 const GH_OWNER  = 'shaikh800';
@@ -636,18 +637,40 @@ let selectedStuId   = null;   // for modal
 // ── Config helpers ──
 function gasUrl()   { return document.getElementById('cfg-gas-url').value.trim(); }
 function gasToken() { return document.getElementById('cfg-gas-token').value.trim(); }
-function ghToken()  {
-  return (document.getElementById('gh-token').value.trim()) ||
-         (document.getElementById('dz-gh-token').value.trim());
+const GH_TOKEN_KEY = 'shaikh_gh_token_v1';
+
+// Token পড়া: input → localStorage-এ save করে return করে
+function ghToken() {
+  const tok = (document.getElementById('gh-token').value.trim()) ||
+              (document.getElementById('dz-gh-token').value.trim());
+  if (tok) {
+    localStorage.setItem(GH_TOKEN_KEY, tok);
+    document.getElementById('gh-token').value = tok;
+    document.getElementById('dz-gh-token').value = tok;
+  }
+  return tok || localStorage.getItem(GH_TOKEN_KEY) || '';
+}
+
+// Login-এর পর saved token দুটো input-এ ভরে দাও
+function loadSavedToken() {
+  const saved = localStorage.getItem(GH_TOKEN_KEY);
+  if (saved) {
+    document.getElementById('gh-token').value = saved;
+    document.getElementById('dz-gh-token').value = saved;
+  }
 }
 
 // ════════════════════════════════════════════════════════
-//  GATE — পেজ reload হলে আবার পাসওয়ার্ড লাগবে
+//  GATE — একবার login করলে এই device-এ আর password লাগবে না
 // ════════════════════════════════════════════════════════
+const SESSION_KEY = 'shaikh_admin_auth_v1';
+
 function gateUnlock() {
   const pw = document.getElementById('gate-pw').value.trim();
   if (pw === ADMIN_PW) {
+    localStorage.setItem(SESSION_KEY, 'granted');
     document.getElementById('ctrl-gate').style.display = 'none';
+    loadSavedToken();
     loadAll();
   } else {
     const err = document.getElementById('gate-err');
@@ -657,6 +680,19 @@ function gateUnlock() {
     setTimeout(() => { err.textContent = ''; }, 2500);
   }
 }
+
+function adminLogout() {
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+// Auto-login: এই device-এ আগে login থাকলে gate দেখাবে না
+(function autoLogin() {
+  if (localStorage.getItem(SESSION_KEY) === 'granted') {
+    document.getElementById('ctrl-gate').style.display = 'none';
+    document.addEventListener('DOMContentLoaded', () => { loadSavedToken(); loadAll(); });
+  }
+})();
 
 // ════════════════════════════════════════════════════════
 //  LOADER
