@@ -2,536 +2,1257 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Academy Admin Panel</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
   <style>
-    body { background: var(--bg); font-family: 'Noto Serif Bengali', sans-serif; color: var(--ink); padding: 20px; }
-    .admin-container { max-width: 1100px; margin: 0 auto; }
-    .header-card { background: var(--ink); color: #fff; padding: 24px; border-radius: var(--radius-lg); margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-lg); }
-    .header-card h1 { margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px; color: #fff; }
-    
-    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 24px; }
-    .stat-card { background: var(--surface); padding: 20px; border-radius: var(--radius-lg); border: 1px solid var(--line); box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
-    .stat-card .val { font-size: 32px; font-weight: 800; color: var(--blue); }
-    .stat-card .lbl { font-size: 13px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    body { font-family: 'Noto Serif Bengali', sans-serif; color: var(--ink); padding: 0; }
 
-    /* Tabs */
-    .tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--line); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+    /* ── Gate ── */
+    #ctrl-gate {
+      position: fixed; inset: 0; background: #0f172a;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 99999; padding: 20px;
+    }
+    .gate-box {
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: 20px; padding: 40px 32px;
+      width: 100%; max-width: 380px; text-align: center;
+    }
+    .gate-box h2 { color: #f8fafc; font-size: 22px; margin-bottom: 6px; }
+    .gate-box p  { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+    .gate-inp {
+      width: 100%; padding: 12px 16px; border-radius: 10px;
+      border: 1px solid #334155; background: #0f172a; color: #f8fafc;
+      font-size: 15px; font-family: inherit; margin-bottom: 12px;
+      text-align: center; letter-spacing: 2px;
+    }
+    .gate-inp:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.25); }
+    .gate-btn {
+      width: 100%; padding: 12px; border-radius: 10px;
+      background: var(--blue); color: #fff; border: none;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: .15s;
+    }
+    .gate-btn:hover { background: var(--blue-dark); }
+    .gate-err { color: #f87171; font-size: 13px; margin-top: 10px; min-height: 20px; }
+
+    /* ── Container ── */
+    .admin-wrap { max-width: 1140px; margin: 0 auto; padding: 20px 16px 60px; }
+
+    /* ── Header card ── */
+    .header-card {
+      background: var(--ink); color: #fff;
+      padding: 20px 24px; border-radius: var(--radius-lg);
+      margin-bottom: 16px; box-shadow: var(--shadow-lg);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .header-card h1 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; color: #fff; }
+    .hdr-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .hdr-btn {
+      padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px;
+      font-weight: 700; cursor: pointer; font-family: inherit; transition: .15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hdr-btn.blue  { background: var(--blue); color: #fff; }
+    .hdr-btn.ghost { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); }
+    .hdr-btn.ghost:hover { background: rgba(255,255,255,.22); }
+    .hdr-btn.blue:hover { background: var(--blue-dark); }
+
+    /* ── Config bar ── */
+    .config-bar {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-lg); padding: 14px 18px;
+      margin-bottom: 20px; box-shadow: var(--shadow);
+    }
+    .config-toggle {
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none; font-size: 13px; font-weight: 800;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
+    }
+    .config-toggle i { transition: .2s; }
+    .config-fields {
+      display: none; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line);
+    }
+    .config-fields.open { display: grid; }
+    .cfg-field label {
+      display: block; font-size: 11px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px;
+    }
+    .cfg-inp {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--line);
+      border-radius: 8px; background: var(--surface-soft);
+      font-family: inherit; font-size: 13px; color: var(--ink);
+    }
+    .cfg-inp:focus { outline: none; border-color: var(--blue); background: #fff; }
+
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-lg); padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .lbl { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .stat-card .val { font-size: 30px; font-weight: 900; color: var(--blue); }
+    .stat-card .val.warn   { color: #eab308; }
+    .stat-card .val.danger { color: #ef4444; }
+    .stat-card .val.green  { color: #10b981; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 4px; border-bottom: 2px solid var(--line);
+      margin-bottom: 22px; overflow-x: auto; scrollbar-width: none;
+    }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { background: none; border: none; padding: 12px 20px; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; white-space: nowrap; }
+    .tab-btn {
+      background: none; border: none; padding: 11px 18px;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      cursor: pointer; border-bottom: 3px solid transparent;
+      margin-bottom: -2px; transition: .2s; white-space: nowrap;
+      font-family: inherit;
+    }
     .tab-btn:hover { color: var(--blue); }
     .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
-    .tab-content { display: none; animation: fadeIn 0.3s ease-out; }
-    .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-pane { display: none; animation: fadeIn .25s ease; }
+    .tab-pane.active { display: block; }
 
-    .panel { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--line); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
-    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; flex-wrap: wrap; gap: 12px; }
-    .panel-head h2 { margin: 0; font-size: 18px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
-    
-    .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .data-table th { background: var(--surface-soft); padding: 12px; text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; }
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius-lg); padding: 22px;
+      box-shadow: var(--shadow); margin-bottom: 18px;
+    }
+    .panel-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line);
+      flex-wrap: wrap; gap: 10px;
+    }
+    .panel-head h2 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* ── Table ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th {
+      background: var(--surface-soft); padding: 11px 12px;
+      text-align: left; font-size: 11px; font-weight: 800;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .05em;
+      border-bottom: 2px solid var(--line);
+    }
     .data-table td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .data-table tr:last-child td { border-bottom: none; }
     .data-table tr:hover td { background: var(--surface-soft); }
-    
-    .badge { padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: bold; }
-    .badge.warn { background: #fef08a; color: #854d0e; }
-    .badge.danger { background: #fee2e2; color: #991b1b; }
+    .t-wrap { overflow-x: auto; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 100px;
+      font-size: 11px; font-weight: 800;
+    }
+    .badge.warn    { background: #fef08a; color: #854d0e; }
+    .badge.danger  { background: #fee2e2; color: #991b1b; }
     .badge.success { background: #dcfce7; color: #166534; }
+    .badge.blue    { background: #dbeafe; color: #1e40af; }
+    .badge.gray    { background: var(--surface-soft); color: var(--muted); }
 
-    .action-btn { background: none; border: none; cursor: pointer; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; transition: 0.2s; }
-    .btn-approve { color: #166534; background: #dcfce7; }
-    .btn-approve:hover { background: #bbf7d0; }
-    .btn-reject { color: #991b1b; background: #fee2e2; }
-    .btn-reject:hover { background: #fca5a5; }
-    .btn-view { color: #1d4ed8; background: #dbeafe; }
-    .btn-view:hover { background: #bfdbfe; }
+    /* ── Action buttons ── */
+    .act-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 5px 10px; border-radius: 7px; font-size: 12px;
+      font-weight: 700; transition: .15s; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .act-approve { color: #166534; background: #dcfce7; }
+    .act-approve:hover { background: #bbf7d0; }
+    .act-reject  { color: #991b1b; background: #fee2e2; }
+    .act-reject:hover  { background: #fca5a5; }
+    .act-view    { color: #1d4ed8; background: #dbeafe; }
+    .act-view:hover    { background: #bfdbfe; }
+    .act-warn    { color: #854d0e; background: #fef9c3; }
+    .act-warn:hover { background: #fef08a; }
+    .act-gray    { color: var(--muted); background: var(--surface-soft); border: 1px solid var(--line); }
+    .act-gray:hover { border-color: var(--blue); color: var(--blue); }
 
-    /* Modal */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
-    .modal-box { background: var(--surface); width: 100%; max-width: 600px; border-radius: var(--radius-lg); padding: 24px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
-    .modal-header h3 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+    /* ── Exam Cards (Exam Management tab) ── */
+    .exam-mgmt-card {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 16px 18px; margin-bottom: 10px; background: var(--surface);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 14px; flex-wrap: wrap; transition: .2s;
+    }
+    .exam-mgmt-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
+    .exam-mgmt-info h3 { margin: 0 0 4px; font-size: 15px; }
+    .exam-mgmt-meta { font-size: 12px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .exam-mgmt-meta span { display: flex; align-items: center; gap: 4px; }
+    .exam-mgmt-actions { display: flex; gap: 7px; flex-wrap: wrap; flex-shrink: 0; }
 
-    .result-card { background: var(--surface-soft); border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-    .result-card h4 { margin: 0 0 8px; color: var(--blue); font-size: 16px; }
-    .mistakes-box { font-size: 13px; color: #991b1b; background: #fff5f5; padding: 10px; border-radius: 6px; border: 1px solid #fecaca; margin-top: 10px; }
-    
-    .input-f { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); font-family: inherit; font-size: 14px; margin-bottom: 16px; transition: 0.2s; }
-    .input-f:focus { outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    /* ── Input ── */
+    .inp-f {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--line);
+      border-radius: 8px; background: var(--surface-soft);
+      font-family: inherit; font-size: 14px; color: var(--ink);
+      transition: .2s; margin-bottom: 14px;
+    }
+    .inp-f:focus { outline: none; border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .inp-lbl { display: block; font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
 
-    /* Login Gate */
-    #ctrl-gate { position: fixed; inset: 0; background: var(--ink); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px; }
-    .gate-box { background: #1e293b; padding: 36px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid #334155; }
-    .gate-inp { width: 100%; padding: 12px; border-radius: 10px; border: none; margin-bottom: 16px; text-align: center; font-size: 16px; }
-    .btn-gate { width: 100%; padding: 12px; border-radius: 10px; background: var(--blue); color: #fff; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
+    /* ── Danger Zone ── */
+    .danger-panel {
+      border: 1px solid #fecaca; border-radius: var(--radius-lg);
+      padding: 22px; margin-bottom: 16px; background: #fff5f5;
+    }
+    .danger-title { color: #dc2626; font-weight: 800; font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .danger-desc  { font-size: 13px; color: #991b1b; line-height: 1.7; margin-bottom: 14px; }
+    .danger-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 18px; border-radius: 9px; border: none;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: .15s;
+    }
+    .danger-btn.red   { background: #ef4444; color: #fff; }
+    .danger-btn.red:hover   { background: #dc2626; }
+    .danger-btn.orange { background: #f97316; color: #fff; }
+    .danger-btn.orange:hover { background: #ea6d0f; }
+    .danger-btn.gray  { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+    .danger-btn.gray:hover { border-color: var(--blue); color: var(--blue); }
+    .danger-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .danger-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.6);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 16px; backdrop-filter: blur(4px);
+    }
+    .modal-box {
+      background: var(--surface); width: 100%; max-width: 600px;
+      border-radius: var(--radius-lg); padding: 24px;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+      animation: fadeSlideUp .3s var(--ease-out) both;
+    }
+    .modal-hd {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .modal-hd h3 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+    .modal-close { background: none; border: none; font-size: 18px; color: var(--muted); cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+    .modal-close:hover { background: var(--surface-soft); }
+
+    /* ── Result Card (in modal) ── */
+    .result-card {
+      background: var(--surface-soft); border: 1px solid var(--line);
+      border-radius: 9px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .result-card h4 { margin: 0 0 4px; color: var(--blue); font-size: 14px; }
+    .mistakes-box {
+      font-size: 12px; color: #991b1b; background: #fff5f5;
+      padding: 10px; border-radius: 6px; border: 1px solid #fecaca;
+      margin-top: 8px; line-height: 1.8;
+    }
+    .bio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-bottom: 18px; }
+    .bio-grid div { background: var(--surface-soft); padding: 10px 14px; border-radius: 8px; }
+    .bio-grid strong { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+
+    /* ── Empty state ── */
+    .empty-box {
+      text-align: center; padding: 40px 20px; color: var(--muted);
+      border: 2px dashed var(--line); border-radius: var(--radius);
+    }
+    .empty-box i { font-size: 28px; display: block; margin-bottom: 12px; opacity: .4; }
+    .empty-box p { margin: 0; font-size: 14px; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: #fff; padding: 10px 22px;
+      border-radius: 50px; font-size: 13px; display: none;
+      z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      white-space: nowrap; pointer-events: none;
+    }
+
+    /* ── Spinner ── */
+    .spin { animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Loader bar ── */
+    #page-loader {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--blue), #60a5fa, var(--blue));
+      background-size: 200% 100%; display: none; z-index: 99998;
+      animation: loadbar 1s linear infinite;
+    }
+    @keyframes loadbar { 0% { background-position: 200% 0; } 100% { background-position: 0 0; } }
+
+    /* ── GitHub token row in Exam tab ── */
+    .gh-row {
+      display: flex; gap: 10px; align-items: flex-end; margin-bottom: 18px;
+      padding: 14px; background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+    }
+    .gh-row > div { flex: 1; }
+    .gh-row label { display: block; font-size: 11px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+    .gh-row .cfg-inp { background: #fff; }
+
+    /* ── Responsive ── */
+    @media (max-width: 800px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .config-fields { grid-template-columns: 1fr; }
+      .bio-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 500px) {
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .admin-wrap { padding: 12px 10px 60px; }
+      .panel { padding: 14px; }
+      .header-card { padding: 14px 16px; }
+      .header-card h1 { font-size: 16px; }
+      .hdr-btn { font-size: 12px; padding: 6px 10px; }
+      .data-table { font-size: 12px; }
+      .data-table th, .data-table td { padding: 8px 10px; }
+      .exam-mgmt-card { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
 
-<!-- Security Gate -->
+<!-- ═══ TOP LOADER ═══ -->
+<div id="page-loader"></div>
+
+<!-- ═══ GATE ═══ -->
 <div id="ctrl-gate">
   <div class="gate-box">
-    <h2 style="color:#fff; margin-bottom: 20px;"><i class="fas fa-user-shield"></i> Admin Login</h2>
-    <input type="password" id="gate-pw-input" class="gate-inp" placeholder="Admin Password" onkeydown="if(event.key==='Enter') gateUnlock()">
-    <button class="btn-gate" onclick="gateUnlock()">Unlock Panel</button>
-    <p id="gate-err" style="color: #f87171; margin-top: 12px; font-size: 14px;"></p>
+    <div style="font-size:40px; margin-bottom:14px;">🛡️</div>
+    <h2>Admin Panel</h2>
+    <p>Admin পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
+    <input type="password" id="gate-pw" class="gate-inp" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter') gateUnlock()" autocomplete="off">
+    <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> প্রবেশ করুন</button>
+    <div class="gate-err" id="gate-err"></div>
+    <p style="color:#475569; font-size:12px; margin-top:16px;">🔒 Admin-only। URL শেয়ার করবেন না।</p>
   </div>
 </div>
 
-<div class="admin-container">
+<!-- ═══ MAIN PANEL ═══ -->
+<div class="admin-wrap">
+
+  <!-- Header -->
   <div class="header-card">
-    <h1><i class="fas fa-user-tie"></i> Academy Admin Panel</h1>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <span style="font-size: 13px; color: rgba(255,255,255,0.7);"><i class="fas fa-circle-notch fa-spin" id="loading-spinner" style="display:none;"></i></span>
-      <a href="academy.html" class="action-btn" style="color: #fff; background: rgba(255,255,255,0.2); text-decoration: none;"><i class="fas fa-arrow-left"></i> Back</a>
-      <button class="action-btn" style="color: #fff; background: var(--blue);" onclick="loadData()"><i class="fas fa-sync"></i> Refresh</button>
+    <h1><i class="fas fa-user-shield"></i> Academy Admin Panel</h1>
+    <div class="hdr-btns">
+      <span id="hdr-spinner" style="display:none; color:rgba(255,255,255,.6); font-size:14px;">
+        <i class="fas fa-circle-notch spin"></i> লোড হচ্ছে...
+      </span>
+      <button class="hdr-btn blue" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
+      <a href="academy.html" class="hdr-btn ghost"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
   </div>
 
-  <!-- Server Config Defaults (Hidden) -->
-  <input type="hidden" id="default-gas-url" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
-  <input type="hidden" id="default-gas-token" value="shaikh_fec_secure_2026">
-
-  <div class="dashboard-grid">
-    <div class="stat-card">
-      <span class="lbl">Total Students</span>
-      <span class="val" id="stat-total">0</span>
+  <!-- Server Config (collapsible) -->
+  <div class="config-bar">
+    <div class="config-toggle" onclick="toggleConfig()" id="cfg-toggle">
+      <span><i class="fas fa-server" style="margin-right:8px; color:var(--blue);"></i> Server Config (GAS URL ও Token)</span>
+      <i class="fas fa-chevron-down" id="cfg-chevron"></i>
     </div>
-    <div class="stat-card">
-      <span class="lbl">Pending Updates</span>
-      <span class="val" id="stat-pending" style="color: #eab308;">0</span>
-    </div>
-    <div class="stat-card">
-      <span class="lbl">Total Submissions</span>
-      <span class="val" id="stat-submissions" style="color: #10b981;">0</span>
+    <div class="config-fields" id="cfg-fields">
+      <div class="cfg-field">
+        <label>Google Apps Script URL</label>
+        <input type="text" class="cfg-inp" id="cfg-gas-url"
+          value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec"
+          placeholder="https://script.google.com/macros/s/...">
+      </div>
+      <div class="cfg-field">
+        <label>GAS Admin Token</label>
+        <input type="password" class="cfg-inp" id="cfg-gas-token" value="shaikh_fec_secure_2026" placeholder="Token">
+      </div>
+      <div class="cfg-field" style="display:flex; flex-direction:column; justify-content:flex-end;">
+        <label>&nbsp;</label>
+        <button class="hdr-btn blue" style="width:100%; justify-content:center;"
+          onclick="loadAll()"><i class="fas fa-sync"></i> Config সেভ করে Refresh</button>
+      </div>
     </div>
   </div>
 
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="lbl">মোট Student</div>
+      <div class="val" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">Pending Updates</div>
+      <div class="val warn" id="stat-pending">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">Password Resets</div>
+      <div class="val danger" id="stat-resets">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="lbl">মোট Submissions</div>
+      <div class="val green" id="stat-submissions">—</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
   <div class="tabs">
-    <button class="tab-btn active" id="btn-students" onclick="switchTab('students')"><i class="fas fa-users"></i> Students & Requests</button>
-    <button class="tab-btn" id="btn-results" onclick="switchTab('results')"><i class="fas fa-poll"></i> Exam Results</button>
-    <button class="tab-btn" id="btn-settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings & Danger Zone</button>
+    <button class="tab-btn active" onclick="switchTab('students',this)">
+      <i class="fas fa-users"></i> Students
+    </button>
+    <button class="tab-btn" onclick="switchTab('results',this)">
+      <i class="fas fa-poll"></i> Exam Results
+    </button>
+    <button class="tab-btn" onclick="switchTab('exams',this)">
+      <i class="fas fa-list-check"></i> Exam Management
+    </button>
+    <button class="tab-btn" onclick="switchTab('danger',this)" style="margin-left:auto; color:#ef4444;">
+      <i class="fas fa-radiation-alt"></i> Danger Zone
+    </button>
   </div>
 
-  <!-- TAB 1: Students -->
-  <div id="tab-students" class="tab-content active">
+  <!-- ─── TAB 1: Students ─── -->
+  <div id="tab-students" class="tab-pane active">
     <div class="panel">
       <div class="panel-head">
-        <h2><i class="fas fa-user-graduate"></i> Registered Students</h2>
+        <h2><i class="fas fa-user-graduate" style="color:var(--blue);"></i> Registered Students</h2>
+        <span style="font-size:13px; color:var(--muted);">Pending request আছে এমন student উপরে থাকবে।</span>
       </div>
-      <div style="overflow-x: auto;">
+      <div class="t-wrap">
         <table class="data-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name & Contact</th>
-              <th>Academic Bio</th>
-              <th>Requests / Status</th>
-              <th style="text-align: right;">Actions</th>
+              <th>নাম ও যোগাযোগ</th>
+              <th>শিক্ষা-তথ্য</th>
+              <th>Requests</th>
+              <th style="text-align:right;">Actions</th>
             </tr>
           </thead>
-          <tbody id="student-list-body">
-            <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--muted);">Loading students data...</td></tr>
+          <tbody id="student-tbody">
+            <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
+              <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> লোড হচ্ছে...
+            </td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- TAB 2: Results -->
-  <div id="tab-results" class="tab-content">
+  <!-- ─── TAB 2: Exam Results ─── -->
+  <div id="tab-results" class="tab-pane">
     <div class="panel">
       <div class="panel-head">
-        <h2><i class="fas fa-list-check"></i> All Submissions</h2>
-        <select id="filter-exam" class="input-f" style="width: auto; min-width: 250px; margin: 0; padding: 8px 12px;" onchange="renderAllResults()">
-          <option value="all">All Exams</option>
+        <h2><i class="fas fa-chart-bar" style="color:var(--blue);"></i> সব Submissions</h2>
+        <select id="filter-exam" class="inp-f" style="width:auto; min-width:220px; margin:0; padding:8px 12px;"
+          onchange="renderAllResults()">
+          <option value="all">— সব Exam —</option>
         </select>
       </div>
-      <div style="overflow-x: auto;">
+      <div class="t-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Date & Time</th>
+              <th>তারিখ ও সময়</th>
               <th>Student</th>
               <th>Exam Topic</th>
               <th>Score</th>
-              <th style="text-align: right;">Details</th>
+              <th style="text-align:right;">Mistakes</th>
             </tr>
           </thead>
-          <tbody id="all-results-body">
-            <tr><td colspan="5" style="text-align: center; padding: 30px; color: var(--muted);">Loading results...</td></tr>
+          <tbody id="results-tbody">
+            <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
+              <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> লোড হচ্ছে...
+            </td></tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- TAB 3: Settings -->
-  <div id="tab-settings" class="tab-content">
+  <!-- ─── TAB 3: Exam Management ─── -->
+  <div id="tab-exams" class="tab-pane">
     <div class="panel">
-      <div class="panel-head"><h2><i class="fas fa-server"></i> Server Configuration</h2></div>
-      <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">Update Google Apps Script URL and Token if you deploy a new backend script.</p>
-      <div class="form-group">
-        <label>Google Apps Script URL</label>
-        <input type="text" id="setting-gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
+      <div class="panel-head">
+        <h2><i class="fas fa-list-check" style="color:var(--blue);"></i> GitHub Exam List</h2>
+        <button class="act-btn act-view" onclick="loadExamList()">
+          <i class="fas fa-cloud-download-alt"></i> Exams লোড করুন
+        </button>
       </div>
-      <div class="form-group">
-        <label>GAS Admin Token</label>
-        <input type="password" id="setting-gas-token" class="input-f">
-      </div>
-      <button class="action-btn" style="background:var(--blue); color:#fff; padding:10px 20px; font-size: 14px;" onclick="saveSettings()"><i class="fas fa-save"></i> Save Settings</button>
-    </div>
 
-    <div class="panel" style="border-color: #fecaca; background: #fff5f5;">
-      <div class="panel-head"><h2 style="color: #991b1b;"><i class="fas fa-radiation-alt"></i> Danger Zone</h2></div>
-      <p style="font-size: 14px; color: #991b1b; margin-bottom: 16px;">This action will permanently delete all exam results and activity logs from the server. User accounts will remain safe.</p>
-      <button class="action-btn btn-reject" style="padding: 12px 20px; font-size: 14px;" onclick="clearAllServerData()"><i class="fas fa-trash"></i> Clear All Results & Logs</button>
+      <!-- GitHub Token row -->
+      <div class="gh-row">
+        <div>
+          <label><i class="fab fa-github"></i> GitHub Token (Live toggle / Delete-এর জন্য প্রয়োজন)</label>
+          <input type="password" class="cfg-inp" id="gh-token" placeholder="ghp_xxxxxxxxxxxxx" autocomplete="off">
+        </div>
+        <button class="hdr-btn blue" style="flex-shrink:0; height:38px;" onclick="loadExamList()">
+          <i class="fas fa-sync"></i> Sync
+        </button>
+      </div>
+
+      <div id="exam-list-area">
+        <div class="empty-box">
+          <i class="fas fa-cloud-download-alt"></i>
+          <p>উপরে "Exams লোড করুন" চাপুন</p>
+        </div>
+      </div>
     </div>
   </div>
 
-</div>
+  <!-- ─── TAB 4: Danger Zone ─── -->
+  <div id="tab-danger" class="tab-pane">
 
-<!-- Modal: View Student Details & Results -->
-<div class="modal-overlay" id="student-modal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3 id="modal-student-name"><i class="fas fa-user-circle" style="color:var(--blue);"></i> Student Details</h3>
-      <button class="close-btn" onclick="closeModal('student-modal')"><i class="fas fa-times"></i></button>
+    <!-- Clear student exam results only -->
+    <div class="danger-panel">
+      <div class="danger-title"><i class="fas fa-user-times"></i> নির্দিষ্ট Student-এর সব Exam Results মুছুন</div>
+      <div class="danger-desc">
+        Student ID দিয়ে শুধু তার exam results মুছবেন। Account থাকবে, শুধু পরীক্ষার ইতিহাস মুছে যাবে।
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+        <input type="text" class="inp-f" id="dz-student-id" style="max-width:200px; margin:0;" placeholder="Student ID (যেমন: 101)">
+        <button class="danger-btn orange" onclick="deleteStudentResults()">
+          <i class="fas fa-eraser"></i> Results মুছুন
+        </button>
+      </div>
     </div>
-    <div id="modal-student-bio" style="margin-bottom: 20px; font-size: 14px; color: var(--muted); line-height: 1.6; background: var(--surface-soft); padding: 16px; border-radius: 8px;"></div>
-    
-    <h4 style="margin-bottom: 10px; border-bottom: 1px solid var(--line); padding-bottom: 8px; color: var(--ink);">Exam History</h4>
-    <div id="modal-student-results"></div>
-    
-    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #fecaca;">
-      <h4 style="color: #991b1b; margin-top: 0; margin-bottom: 10px;">Account Management</h4>
-      <button class="action-btn btn-reject" onclick="deleteStudent()" style="width: 100%;"><i class="fas fa-user-times"></i> Delete Student Account</button>
+
+    <!-- Clear specific exam results from GAS -->
+    <div class="danger-panel">
+      <div class="danger-title"><i class="fas fa-file-excel"></i> নির্দিষ্ট Exam-এর Results মুছুন (GAS)</div>
+      <div class="danger-desc">
+        Exam ID দিন। ওই exam-এ সবার submission GAS থেকে মুছে যাবে।
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="text" class="inp-f" id="dz-exam-id" style="max-width:260px; margin:0;" placeholder="Exam ID (যেমন: ex_abc123)">
+        <button class="danger-btn orange" onclick="clearExamResults()">
+          <i class="fas fa-trash-alt"></i> Clear করুন
+        </button>
+      </div>
+    </div>
+
+    <!-- GitHub token for danger actions -->
+    <div class="panel" style="border-color:#fbbf24; background:#fffbeb;">
+      <div class="panel-head">
+        <h2 style="color:#92400e;"><i class="fas fa-github"></i> GitHub Exams মুছতে Token লাগবে</h2>
+      </div>
+      <div class="gh-row" style="margin-bottom:16px;">
+        <div>
+          <label>GitHub Token</label>
+          <input type="password" class="cfg-inp" id="dz-gh-token" placeholder="ghp_xxxxxxxxxxxxx" autocomplete="off">
+        </div>
+      </div>
+      <div class="danger-row">
+        <button class="danger-btn red" onclick="clearAllGitHubExams()">
+          <i class="fas fa-github"></i> সব GitHub Exams মুছুন
+        </button>
+        <button class="danger-btn orange" onclick="clearAllGASData()">
+          <i class="fas fa-database"></i> GAS Results & Logs মুছুন
+        </button>
+        <button class="danger-btn red" id="clear-all-btn" onclick="clearEverything()">
+          <i class="fas fa-bomb"></i> সব কিছু মুছুন (GitHub + GAS)
+        </button>
+      </div>
+    </div>
+
+    <!-- Delete student account -->
+    <div class="danger-panel">
+      <div class="danger-title"><i class="fas fa-user-slash"></i> Student Account সম্পূর্ণ Delete</div>
+      <div class="danger-desc">
+        Students tab থেকে "Details" খুলে নিচে "Account Delete" করুন।
+        অথবা এখানে সরাসরি ID দিন:
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="text" class="inp-f" id="dz-del-id" style="max-width:200px; margin:0;" placeholder="Student ID">
+        <button class="danger-btn red" onclick="deleteStudentById()">
+          <i class="fas fa-user-times"></i> Account মুছুন (Results সহ)
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /tab-danger -->
+
+</div><!-- /admin-wrap -->
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<!-- ══ MODAL: Student Details ══ -->
+<div class="modal-overlay" id="modal-student">
+  <div class="modal-box" style="max-width:650px;">
+    <div class="modal-hd">
+      <h3 id="modal-stu-title"><i class="fas fa-user-circle" style="color:var(--blue);"></i> Student Details</h3>
+      <button class="modal-close" onclick="closeModal('modal-student')"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="modal-stu-bio" class="bio-grid"></div>
+    <h4 style="margin:0 0 12px; padding-bottom:10px; border-bottom:1px solid var(--line);">
+      <i class="fas fa-history" style="color:var(--blue);"></i> Exam History
+    </h4>
+    <div id="modal-stu-results"></div>
+    <div style="margin-top:22px; padding-top:16px; border-top:2px solid #fecaca;">
+      <h4 style="color:#991b1b; margin:0 0 12px;">Account Management</h4>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="danger-btn orange" onclick="deleteStudentResultsOnly()">
+          <i class="fas fa-eraser"></i> Results মুছুন (Account রাখুন)
+        </button>
+        <button class="danger-btn red" onclick="deleteStudentFull()">
+          <i class="fas fa-user-times"></i> Account সম্পূর্ণ Delete
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal: View Single Result Mistakes -->
-<div class="modal-overlay" id="mistake-modal">
-  <div class="modal-box" style="max-width: 500px;">
-    <div class="modal-header">
+<!-- ══ MODAL: Mistakes ══ -->
+<div class="modal-overlay" id="modal-mistakes">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-hd">
       <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Mistakes Detail</h3>
-      <button class="close-btn" onclick="closeModal('mistake-modal')"><i class="fas fa-times"></i></button>
+      <button class="modal-close" onclick="closeModal('modal-mistakes')"><i class="fas fa-times"></i></button>
     </div>
-    <div id="mistake-modal-content" style="font-size: 14px; line-height: 1.6; color: var(--ink); background: var(--surface-soft); padding: 16px; border-radius: 8px; border: 1px solid var(--line);"></div>
+    <div id="modal-mistakes-content"
+      style="font-size:14px; line-height:1.9; background:var(--surface-soft); padding:16px; border-radius:var(--radius); border:1px solid var(--line);">
+    </div>
   </div>
 </div>
 
 <script>
-// ── GATE SECURITY ──
-const ADMIN_PW = 'fec_admin_2025';
+// ════════════════════════════════════════════════════════
+//  CONFIG  — কোনো localStorage / sessionStorage নেই
+// ════════════════════════════════════════════════════════
+const ADMIN_PW  = 'fec_admin_2025';
+const GH_OWNER  = 'shaikh800';
+const GH_REPO   = 'shaikh800.github.io';
+const GH_FILE   = 'civil_data.json';
+const GH_BRANCH = 'main';
 
+// ── State (in-memory only) ──
+let studentsData    = [];
+let allResultsData  = [];
+let ghExamData      = null;   // { exams: [...] } from GitHub
+let selectedStuId   = null;   // for modal
+
+// ── Config helpers ──
+function gasUrl()   { return document.getElementById('cfg-gas-url').value.trim(); }
+function gasToken() { return document.getElementById('cfg-gas-token').value.trim(); }
+function ghToken()  {
+  return (document.getElementById('gh-token').value.trim()) ||
+         (document.getElementById('dz-gh-token').value.trim());
+}
+
+// ════════════════════════════════════════════════════════
+//  GATE — পেজ reload হলে আবার পাসওয়ার্ড লাগবে
+// ════════════════════════════════════════════════════════
 function gateUnlock() {
-  const input = document.getElementById('gate-pw-input').value;
-  if (input === ADMIN_PW) {
+  const pw = document.getElementById('gate-pw').value.trim();
+  if (pw === ADMIN_PW) {
     document.getElementById('ctrl-gate').style.display = 'none';
-    initSettings();
-    loadData();
+    loadAll();
   } else {
-    document.getElementById('gate-err').innerText = "❌ ভুল পাসওয়ার্ড!";
-    setTimeout(() => document.getElementById('gate-err').innerText = "", 2000);
+    const err = document.getElementById('gate-err');
+    err.textContent = '❌ ভুল পাসওয়ার্ড!';
+    document.getElementById('gate-pw').value = '';
+    document.getElementById('gate-pw').focus();
+    setTimeout(() => { err.textContent = ''; }, 2500);
   }
 }
 
-// ── UTILS & CONFIG ──
-function getGasUrl() {
-  return localStorage.getItem('gas_url') || document.getElementById('default-gas-url').value;
+// ════════════════════════════════════════════════════════
+//  LOADER
+// ════════════════════════════════════════════════════════
+let loadCount = 0;
+function startLoad() {
+  loadCount++;
+  document.getElementById('page-loader').style.display = 'block';
+  document.getElementById('hdr-spinner').style.display = 'flex';
 }
-function getGasToken() {
-  return localStorage.getItem('gas_admin_token') || document.getElementById('default-gas-token').value;
-}
-
-function initSettings() {
-  document.getElementById('setting-gas-url').value = getGasUrl();
-  document.getElementById('setting-gas-token').value = getGasToken();
-}
-
-function saveSettings() {
-  const url = document.getElementById('setting-gas-url').value.trim();
-  const token = document.getElementById('setting-gas-token').value.trim();
-  if(url) localStorage.setItem('gas_url', url);
-  if(token) localStorage.setItem('gas_admin_token', token);
-  alert('Server settings saved successfully!');
-  loadData();
+function stopLoad() {
+  loadCount = Math.max(0, loadCount - 1);
+  if (loadCount === 0) {
+    document.getElementById('page-loader').style.display = 'none';
+    document.getElementById('hdr-spinner').style.display = 'none';
+  }
 }
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('btn-' + tab).classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
-}
-
-// ── APP LOGIC ──
-let studentsData = [];
-let allResultsData = [];
-let selectedStudentId = null;
-
-async function gasRequest(action, payload = {}) {
-  document.getElementById('loading-spinner').style.display = 'inline-block';
+// ════════════════════════════════════════════════════════
+//  GAS CALL
+// ════════════════════════════════════════════════════════
+async function gasCall(action, payload = {}) {
+  startLoad();
   try {
-    const res = await fetch(getGasUrl(), {
+    const res = await fetch(gasUrl(), {
       method: 'POST',
-      body: JSON.stringify({ action, token: getGasToken(), ...payload }),
+      body: JSON.stringify({ action, token: gasToken(), ...payload }),
       headers: { 'Content-Type': 'text/plain' }
     });
     const data = await res.json();
-    document.getElementById('loading-spinner').style.display = 'none';
+    stopLoad();
     return data;
   } catch (err) {
-    document.getElementById('loading-spinner').style.display = 'none';
-    alert("Network Error!");
+    stopLoad();
+    toast('❌ Server connection failed!');
     return null;
   }
 }
 
-async function loadData() {
-  const sRes = await gasRequest('adminGetStudents');
-  if (sRes && sRes.status === 'success') {
-    studentsData = sRes.students;
-    renderStudents();
-  }
-  
-  const rRes = await gasRequest('getAllResults');
-  if (rRes && rRes.status === 'success') {
-    // Reverse array to show newest first
-    allResultsData = rRes.results.reverse();
-    document.getElementById('stat-submissions').innerText = allResultsData.length;
-    populateExamFilter();
-    renderAllResults();
-  }
+// ════════════════════════════════════════════════════════
+//  LOAD ALL DATA
+// ════════════════════════════════════════════════════════
+async function loadAll() {
+  await Promise.all([ loadStudents(), loadResults() ]);
 }
 
-// ── TAB 1: STUDENTS ──
+async function loadStudents() {
+  const data = await gasCall('adminGetStudents');
+  if (!data || data.status !== 'success') {
+    document.getElementById('student-tbody').innerHTML =
+      `<tr><td colspan="5" style="text-align:center;padding:20px;color:#ef4444;">
+        ❌ Students লোড করা যায়নি। GAS URL ও Token চেক করুন।
+      </td></tr>`;
+    return;
+  }
+  studentsData = data.students || [];
+  renderStudents();
+}
+
+async function loadResults() {
+  const data = await gasCall('getAllResults');
+  if (!data || data.status !== 'success') return;
+  allResultsData = (data.results || []).reverse();
+  document.getElementById('stat-submissions').textContent = allResultsData.length;
+  populateExamFilter();
+  renderAllResults();
+}
+
+// ════════════════════════════════════════════════════════
+//  TAB 1: STUDENTS
+// ════════════════════════════════════════════════════════
 function renderStudents() {
-  const tbody = document.getElementById('student-list-body');
-  let pendingCount = 0;
-  let resetCount = 0;
+  const tbody = document.getElementById('student-tbody');
 
   if (studentsData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">No students found.</td></tr>`;
-    document.getElementById('stat-total').innerText = 0;
-    document.getElementById('stat-pending').innerText = 0;
-    document.getElementById('stat-resets').innerText = 0;
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-box" style="border:none;">
+      <i class="fas fa-users"></i><p>কোনো Student নেই।</p>
+    </td></tr>`;
+    ['stat-total','stat-pending','stat-resets'].forEach(id =>
+      document.getElementById(id).textContent = '0');
     return;
   }
 
-  tbody.innerHTML = studentsData.map(s => {
-    let requestsHtml = '';
-    
+  // Sort: pending requests first
+  const sorted = [...studentsData].sort((a,b) => {
+    const aHas = (a.pendingUpdate || a.resetRequest) ? 1 : 0;
+    const bHas = (b.pendingUpdate || b.resetRequest) ? 1 : 0;
+    return bHas - aHas;
+  });
+
+  let pendingCount = 0, resetCount = 0;
+
+  tbody.innerHTML = sorted.map(s => {
+    let reqHtml = '';
+
     if (s.pendingUpdate) {
       pendingCount++;
-      requestsHtml += `<div style="margin-bottom: 8px;">
-        <span class="badge warn">Profile Update</span><br>
-        <span style="font-size:11px; color:var(--muted);">New: ${s.pendingUpdate.name || '-'} | ${s.pendingUpdate.school || '-'}</span><br>
-        <div style="margin-top: 6px;">
-          <button class="action-btn btn-approve" onclick="approveProfile('${s.id}')">✓ Accept</button>
-          <button class="action-btn btn-reject" onclick="rejectProfile('${s.id}')">✕ Reject</button>
-        </div>
-      </div>`;
+      const u = s.pendingUpdate;
+      reqHtml += `
+        <div style="margin-bottom:8px;">
+          <span class="badge warn"><i class="fas fa-pen-to-square"></i> Profile Update</span>
+          <div style="font-size:11px; color:var(--muted); margin:4px 0;">
+            নাম: <b>${esc(u.name||'—')}</b> · স্কুল: <b>${esc(u.school||'—')}</b> · ক্লাস: <b>${esc(u.studentClass||'—')}</b>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="act-btn act-approve" onclick="approveProfile('${s.id}')">✓ Accept</button>
+            <button class="act-btn act-reject"  onclick="rejectProfile('${s.id}')">✕ Reject</button>
+          </div>
+        </div>`;
     }
-    
+
     if (s.resetRequest) {
       resetCount++;
-      requestsHtml += `<div>
-        <span class="badge danger">Password Reset</span><br>
-        <div style="margin-top: 6px; display:flex; gap:6px;">
-          <input type="text" id="newpass-${s.id}" class="input-f" style="margin:0; padding:6px 10px; width:110px;" placeholder="New Pass">
-          <button class="action-btn btn-approve" onclick="resetPassword('${s.id}')">Set</button>
-        </div>
-      </div>`;
+      reqHtml += `
+        <div>
+          <span class="badge danger"><i class="fas fa-key"></i> Password Reset</span>
+          <div style="display:flex;gap:6px;margin-top:6px;align-items:center;">
+            <input type="text" id="np-${s.id}" class="inp-f" style="margin:0;padding:7px 10px;width:110px;" placeholder="New Pass">
+            <button class="act-btn act-approve" onclick="resetPassword('${s.id}')">Set</button>
+          </div>
+        </div>`;
     }
 
-    if (!requestsHtml) requestsHtml = '<span style="color:var(--muted); font-size:12px;">All Clear</span>';
+    if (!reqHtml) reqHtml = `<span style="font-size:12px;color:var(--muted);">✅ All clear</span>`;
 
-    return `
-      <tr>
-        <td><strong>${s.id}</strong></td>
-        <td>
-          <strong>${s.name}</strong><br>
-          <span style="font-size:12px; color:var(--muted);"><i class="fas fa-phone"></i> ${s.mobile}</span>
-        </td>
-        <td>
-          <span style="font-size:13px;"><i class="fas fa-school"></i> ${s.school || 'N/A'}</span><br>
-          <span style="font-size:13px;"><i class="fas fa-book"></i> Class: ${s.studentClass || 'N/A'}</span>
-        </td>
-        <td>${requestsHtml}</td>
-        <td style="text-align: right;">
-          <button class="action-btn btn-view" onclick="viewStudentDetails('${s.id}')"><i class="fas fa-eye"></i> Details</button>
-        </td>
-      </tr>
-    `;
+    return `<tr>
+      <td><strong style="font-size:15px;">${s.id}</strong></td>
+      <td>
+        <strong>${esc(s.name)}</strong><br>
+        <span style="font-size:12px;color:var(--muted);"><i class="fas fa-phone"></i> ${esc(String(s.mobile))}</span>
+      </td>
+      <td style="font-size:13px;">
+        <span><i class="fas fa-school" style="color:var(--blue);"></i> ${esc(s.school||'N/A')}</span><br>
+        <span><i class="fas fa-book" style="color:var(--blue);"></i> ${esc(s.studentClass||'N/A')}</span>
+      </td>
+      <td>${reqHtml}</td>
+      <td style="text-align:right;">
+        <button class="act-btn act-view" onclick="openStudentModal('${s.id}')">
+          <i class="fas fa-eye"></i> Details
+        </button>
+      </td>
+    </tr>`;
   }).join('');
 
-  document.getElementById('stat-total').innerText = studentsData.length;
-  document.getElementById('stat-pending').innerText = pendingCount;
-  document.getElementById('stat-resets').innerText = resetCount;
+  document.getElementById('stat-total').textContent   = studentsData.length;
+  document.getElementById('stat-pending').textContent = pendingCount;
+  document.getElementById('stat-resets').textContent  = resetCount;
 }
 
 async function approveProfile(id) {
-  if(!confirm("Approve this profile update?")) return;
-  const res = await gasRequest('adminApproveProfile', { id });
-  if (res && res.status === 'success') loadData();
+  if (!confirm('এই profile update approve করবেন?')) return;
+  const res = await gasCall('adminApproveProfile', { id });
+  if (res?.status === 'success') { toast('✅ Profile approved!'); loadStudents(); }
+  else toast('❌ ' + (res?.message || 'Failed'));
 }
 
 async function rejectProfile(id) {
-  if(!confirm("Reject this profile update?")) return;
-  const res = await gasRequest('adminRejectProfile', { id });
-  if (res && res.status === 'success') loadData();
+  if (!confirm('এই profile update reject করবেন?')) return;
+  const res = await gasCall('adminRejectProfile', { id });
+  if (res?.status === 'success') { toast('🗑️ Request rejected.'); loadStudents(); }
+  else toast('❌ ' + (res?.message || 'Failed'));
 }
 
 async function resetPassword(id) {
-  const newPass = document.getElementById(`newpass-${id}`).value.trim();
-  if(!newPass) return alert("Please enter a new password.");
-  if(!confirm(`Set new password to: ${newPass}?`)) return;
-  
-  const res = await gasRequest('adminResetPassword', { id, newPassword: newPass });
-  if (res && res.status === 'success') {
-    alert("Password Updated!");
-    loadData();
-  }
+  const el  = document.getElementById(`np-${id}`);
+  const pw  = el ? el.value.trim() : '';
+  if (!pw) { toast('পাসওয়ার্ড লিখুন!'); return; }
+  if (!confirm(`ID ${id}-এর পাসওয়ার্ড "${pw}" করবেন?`)) return;
+  const res = await gasCall('adminResetPassword', { id, newPassword: pw });
+  if (res?.status === 'success') { toast('🔐 Password updated!'); loadStudents(); }
+  else toast('❌ ' + (res?.message || 'Failed'));
 }
 
-function viewStudentDetails(id) {
-  selectedStudentId = id;
-  const student = studentsData.find(s => s.id == id);
-  if(!student) return;
+// ── Student Modal ──
+function openStudentModal(id) {
+  selectedStuId = id;
+  const s = studentsData.find(x => String(x.id) === String(id));
+  if (!s) return;
 
-  document.getElementById('modal-student-name').innerHTML = `<i class="fas fa-user-circle" style="color:var(--blue);"></i> ${student.name} <span style="font-size:14px; color:var(--muted);">(ID: ${student.id})</span>`;
-  document.getElementById('modal-student-bio').innerHTML = `
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-      <div><strong>Mobile:</strong><br>${student.mobile}</div>
-      <div><strong>Password:</strong><br>Protected</div>
-      <div><strong>School:</strong><br>${student.school || 'N/A'}</div>
-      <div><strong>Class:</strong><br>${student.studentClass || 'N/A'}</div>
-    </div>
+  document.getElementById('modal-stu-title').innerHTML =
+    `<i class="fas fa-user-circle" style="color:var(--blue);"></i> ${esc(s.name)} <span style="font-size:13px;color:var(--muted);">(ID: ${s.id})</span>`;
+
+  document.getElementById('modal-stu-bio').innerHTML = `
+    <div><strong>মোবাইল</strong>${esc(String(s.mobile))}</div>
+    <div><strong>পাসওয়ার্ড</strong>Protected 🔒</div>
+    <div><strong>স্কুল/কলেজ</strong>${esc(s.school||'সেট করা হয়নি')}</div>
+    <div><strong>ক্লাস/বর্ষ</strong>${esc(s.studentClass||'সেট করা হয়নি')}</div>
   `;
 
-  const resultsWrap = document.getElementById('modal-student-results');
-  const sResults = allResultsData.filter(r => r.id == id);
+  const sResults = allResultsData.filter(r => String(r.id) === String(id));
+  const wrap = document.getElementById('modal-stu-results');
 
   if (sResults.length === 0) {
-    resultsWrap.innerHTML = `<p style="text-align:center; color:var(--muted); padding: 10px;">No exams attended yet.</p>`;
+    wrap.innerHTML = `<div class="empty-box"><i class="fas fa-history"></i><p>এখনো কোনো পরীক্ষা দেননি।</p></div>`;
   } else {
-    resultsWrap.innerHTML = sResults.map(r => `
-      <div class="result-card">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+    wrap.innerHTML = sResults.map(r => {
+      const isPerfect = r.details === 'Perfect Score';
+      return `<div class="result-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div>
-            <h4 style="margin:0 0 4px;">${r.topic}</h4>
-            <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px;"><i class="far fa-clock"></i> ${r.time}</div>
+            <h4>${esc(r.topic)}</h4>
+            <div style="font-size:11px;color:var(--muted);">${esc(r.time||'')}</div>
           </div>
-          <span class="badge success" style="font-size:14px; padding:6px 12px;">${r.score}</span>
+          <span class="badge success" style="font-size:13px;padding:5px 12px;">${r.score}</span>
         </div>
-        ${r.details && r.details !== 'Perfect Score' ? `
-          <div class="mistakes-box">
-            <strong>Mistakes Made:</strong><br>
-            ${r.details}
-          </div>
-        ` : `<div style="font-size:12px; color:#166534; font-weight:bold; margin-top:4px;">🏆 Perfect Score! No mistakes.</div>`}
-      </div>
-    `).join('');
+        ${isPerfect
+          ? `<div style="font-size:12px;color:#166534;font-weight:700;margin-top:6px;">🏆 Perfect Score!</div>`
+          : `<div class="mistakes-box"><strong>ভুল প্রশ্নসমূহ:</strong><br>${esc(r.details||'No data')}</div>`
+        }
+      </div>`;
+    }).join('');
   }
 
-  document.getElementById('student-modal').style.display = 'flex';
+  document.getElementById('modal-student').style.display = 'flex';
 }
 
-async function deleteStudent() {
-  if(!confirm("WARNING! This will delete the student and ALL their exam results forever. Are you absolutely sure?")) return;
-  const res = await gasRequest('adminDeleteStudent', { id: selectedStudentId, deleteResults: true });
-  if (res && res.status === 'success') {
-    closeModal('student-modal');
-    loadData();
+async function deleteStudentResultsOnly() {
+  if (!selectedStuId) return;
+  if (!confirm(`ID ${selectedStuId}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
+
+  // We delete results by iterating - use a custom action on GAS
+  // Using adminDeleteStudent with deleteResults:true but keeping account - 
+  // Actually GAS doesn't have "delete results only" — we use clearData per student
+  // Let's call adminDeleteStudent with deleteResults:true then re-register isn't possible
+  // Better: we call the general approach - 
+  // The GAS has adminDeleteStudent which deletes account + optionally results
+  // For results-only we need a different approach.
+  // We can send a custom payload - let's add this functionality by clearing results
+  // via the existing clearExamData won't work (it's by exam ID not student ID)
+  // We'll need to handle this on the GAS side - but we can't modify GAS here
+  // So let's just do it the same way as the danger zone deleteStudentResults function
+  const res = await gasCall('adminDeleteStudentResults', { id: selectedStuId });
+  if (res?.status === 'success') {
+    toast('✅ Results মুছে ফেলা হয়েছে!');
+    closeModal('modal-student');
+    await loadAll();
+  } else {
+    // Fallback: GAS doesn't have this action yet - inform user
+    toast('⚠️ GAS-এ এই feature যোগ করতে হবে। Danger Zone ব্যবহার করুন।');
   }
 }
 
-// ── TAB 2: EXAM RESULTS ──
+async function deleteStudentFull() {
+  if (!selectedStuId) return;
+  if (!confirm(`⚠️ সতর্কতা! ID ${selectedStuId}-এর account ও সব results চিরতরে মুছবে। নিশ্চিত?`)) return;
+  if (!confirm('আবার নিশ্চিত করুন — এই কাজ ফেরানো যাবে না।')) return;
+
+  const res = await gasCall('adminDeleteStudent', { id: selectedStuId, deleteResults: true });
+  if (res?.status === 'success') {
+    toast('🗑️ Student account মুছে ফেলা হয়েছে।');
+    closeModal('modal-student');
+    await loadAll();
+  } else {
+    toast('❌ ' + (res?.message || 'Failed'));
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  TAB 2: EXAM RESULTS
+// ════════════════════════════════════════════════════════
 function populateExamFilter() {
-  const select = document.getElementById('filter-exam');
+  const sel = document.getElementById('filter-exam');
   const topics = [...new Set(allResultsData.map(r => r.topic))];
-  let options = '<option value="all">All Exams</option>';
-  topics.forEach(t => { options += `<option value="${t}">${t}</option>`; });
-  select.innerHTML = options;
+  sel.innerHTML = '<option value="all">— সব Exam —</option>' +
+    topics.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
 }
 
 function renderAllResults() {
-  const tbody = document.getElementById('all-results-body');
+  const tbody  = document.getElementById('results-tbody');
   const filter = document.getElementById('filter-exam').value;
+  const list   = filter === 'all' ? allResultsData : allResultsData.filter(r => r.topic === filter);
 
-  let filtered = allResultsData;
-  if (filter !== 'all') {
-    filtered = allResultsData.filter(r => r.topic === filter);
-  }
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 30px; color:var(--muted);">No submissions found.</td></tr>`;
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">কোনো submission নেই।</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = filtered.map((r, i) => {
-    // Need original index for the modal
-    const origIndex = allResultsData.indexOf(r);
-    
-    // Safely escape details for onclick
-    const safeDetails = (r.details || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
-
-    return `
-      <tr>
-        <td style="font-size:13px; color:var(--muted);"><i class="far fa-calendar-alt"></i> ${r.time}</td>
-        <td>
-          <strong>${r.name}</strong><br>
-          <span style="font-size:12px; color:var(--muted);">ID: ${r.id}</span>
-        </td>
-        <td style="font-weight:600; color:var(--ink);">${r.topic}</td>
-        <td><span class="badge success" style="font-size:13px;">${r.score}</span></td>
-        <td style="text-align: right;">
-          <button class="action-btn btn-view" style="padding:6px 12px;" onclick="viewMistakes('${safeDetails}')">View Mistakes</button>
-        </td>
-      </tr>
-    `;
+  tbody.innerHTML = list.map(r => {
+    const safe = (r.details||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return `<tr>
+      <td style="font-size:12px;color:var(--muted);">${esc(r.time||'—')}</td>
+      <td>
+        <strong>${esc(r.name)}</strong><br>
+        <span style="font-size:11px;color:var(--muted);">ID: ${r.id}</span>
+      </td>
+      <td style="font-weight:600;">${esc(r.topic)}</td>
+      <td><span class="badge success" style="font-size:13px;">${r.score}</span></td>
+      <td style="text-align:right;">
+        <button class="act-btn act-view" onclick="showMistakes('${safe}')">
+          <i class="fas fa-search"></i> Mistakes
+        </button>
+      </td>
+    </tr>`;
   }).join('');
 }
 
-function viewMistakes(detailStr) {
-  const content = document.getElementById('mistake-modal-content');
-  if (detailStr === 'Perfect Score') {
-    content.innerHTML = '<div style="color:#166534; font-weight:bold; text-align:center;"><i class="fas fa-trophy" style="font-size:24px; display:block; margin-bottom:10px;"></i>Perfect Score! No mistakes made.</div>';
-  } else if (!detailStr || detailStr === 'No data') {
-    content.innerHTML = '<div style="color:var(--muted); text-align:center;">No mistake details found for this submission.</div>';
+function showMistakes(str) {
+  const el = document.getElementById('modal-mistakes-content');
+  if (str === 'Perfect Score' || str === '') {
+    el.innerHTML = `<div style="text-align:center;color:#166534;font-weight:700;">
+      <i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:12px;"></i>
+      Perfect Score! কোনো ভুল নেই। 🏆
+    </div>`;
+  } else if (!str || str === 'No data') {
+    el.innerHTML = `<div style="text-align:center;color:var(--muted);">ভুলের তথ্য পাওয়া যায়নি।</div>`;
   } else {
-    const mistakes = detailStr.split(', ');
-    content.innerHTML = '<ul style="margin:0; padding-left:20px;">' + mistakes.map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') + '</ul>';
+    el.innerHTML = '<ul style="margin:0;padding-left:20px;">' +
+      str.split(', ').filter(Boolean).map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') +
+      '</ul>';
   }
-  document.getElementById('mistake-modal').style.display = 'flex';
+  document.getElementById('modal-mistakes').style.display = 'flex';
 }
 
-// ── TAB 3: DANGER ZONE ──
-async function clearAllServerData() {
-  if(!confirm("⚠️ WARNING: This will permanently delete ALL exam results and activity logs from the server. This action cannot be undone. Are you absolutely sure?")) return;
-  
-  const res = await gasRequest('clearData');
-  if(res && res.status === 'success') {
-    alert("All server data (Results & Logs) cleared successfully.");
-    loadData();
-  } else {
-    alert("Failed to clear data.");
+// ════════════════════════════════════════════════════════
+//  TAB 3: EXAM MANAGEMENT
+// ════════════════════════════════════════════════════════
+let examFullData = { exams: [] };
+
+async function loadExamList() {
+  const area = document.getElementById('exam-list-area');
+  area.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);">
+    <i class="fas fa-circle-notch spin fa-2x" style="display:block;margin-bottom:12px;"></i>
+    GitHub থেকে লোড হচ্ছে...
+  </div>`;
+
+  startLoad();
+  try {
+    const tok = document.getElementById('gh-token').value.trim();
+    const api = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}&_=${Date.now()}`;
+    const headers = { 'Accept': 'application/vnd.github.v3.raw' };
+    if (tok) headers['Authorization'] = `token ${tok}`;
+
+    const res  = await fetch(api, { headers });
+    const data = await res.json();
+    examFullData = data;
+    stopLoad();
+    renderExamList();
+  } catch (e) {
+    stopLoad();
+    area.innerHTML = `<div class="empty-box" style="border-color:#fecaca;background:#fff5f5;color:#991b1b;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <p>GitHub থেকে লোড করা যায়নি। Token চেক করুন।</p>
+    </div>`;
   }
 }
 
-// ── MODAL UTILS ──
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
+function renderExamList() {
+  const area  = document.getElementById('exam-list-area');
+  const exams = examFullData.exams || [];
+
+  if (exams.length === 0) {
+    area.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><p>কোনো Exam নেই।</p></div>`;
+    return;
+  }
+
+  area.innerHTML = exams.map(ex => {
+    const isLive    = ex.live !== false;
+    const qCount    = (ex.examData?.questions || []).length;
+    const allowed   = (ex.examData?.allowedIds || []).length;
+    const hasPass   = !!ex.examData?.password;
+    const liveBadge = isLive
+      ? `<span class="badge success">🟢 Live</span>`
+      : `<span class="badge danger">🔴 Paused</span>`;
+
+    return `<div class="exam-mgmt-card">
+      <div class="exam-mgmt-info">
+        <h3>${esc(ex.examData?.title||'Untitled')} ${liveBadge}</h3>
+        <div class="exam-mgmt-meta">
+          <span><i class="fas fa-list-ol" style="color:var(--blue);"></i> ${qCount} প্রশ্ন</span>
+          <span><i class="fas fa-users" style="color:var(--blue);"></i>
+            ${allowed === 0 ? 'সবার জন্য Open' : allowed + ' জন allowed'}</span>
+          <span><i class="fas fa-lock" style="color:var(--blue);"></i>
+            পাসওয়ার্ড: ${hasPass ? 'আছে' : 'নেই'}</span>
+          <span style="font-size:11px; color:var(--muted);">ID: ${esc(ex.id)}</span>
+        </div>
+      </div>
+      <div class="exam-mgmt-actions">
+        <button class="act-btn ${isLive ? 'act-warn' : 'act-approve'}" onclick="toggleExamLive('${ex.id}')">
+          <i class="fas ${isLive ? 'fa-pause' : 'fa-play'}"></i>
+          ${isLive ? 'Pause' : 'Live'}
+        </button>
+        <button class="act-btn act-view" onclick="clearExamGASResults('${ex.id}', '${esc(ex.examData?.title||'')}')">
+          <i class="fas fa-eraser"></i> Results Clear
+        </button>
+        <button class="act-btn act-reject" onclick="deleteExam('${ex.id}', '${esc(ex.examData?.title||'')}')">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+async function toggleExamLive(id) {
+  const tok = document.getElementById('gh-token').value.trim();
+  if (!tok) { toast('GitHub Token দিন!'); return; }
+
+  const idx = examFullData.exams.findIndex(e => e.id === id);
+  if (idx === -1) return;
+
+  const wasLive = examFullData.exams[idx].live !== false;
+  examFullData.exams[idx].live = !wasLive;
+
+  const ok = await pushGitHub(tok, `Toggle live: ${id}`);
+  if (ok) {
+    toast(examFullData.exams[idx].live ? '🟢 Exam Live করা হয়েছে!' : '🔴 Exam Pause করা হয়েছে!');
+    renderExamList();
+  } else {
+    // Revert on failure
+    examFullData.exams[idx].live = wasLive;
+  }
+}
+
+async function deleteExam(id, title) {
+  if (!confirm(`"${title}" exam মুছবেন?`)) return;
+  const tok = document.getElementById('gh-token').value.trim();
+  if (!tok) { toast('GitHub Token দিন!'); return; }
+
+  examFullData.exams = examFullData.exams.filter(e => e.id !== id);
+  const ok = await pushGitHub(tok, `Delete exam: ${id}`);
+  if (ok) { toast('🗑️ Exam মুছে ফেলা হয়েছে।'); renderExamList(); }
+}
+
+async function clearExamGASResults(examId, title) {
+  if (!confirm(`"${title}"-এর সব GAS results মুছবেন?`)) return;
+  const res = await gasCall('clearExamData', { examId });
+  if (res?.status === 'success') {
+    toast(`✅ ${res.message}`);
+    await loadResults();
+  } else toast('❌ ' + (res?.message || 'Failed'));
+}
+
+// ════════════════════════════════════════════════════════
+//  GITHUB PUSH
+// ════════════════════════════════════════════════════════
+async function pushGitHub(tok, msg = 'Update') {
+  startLoad();
+  try {
+    const api = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+    const headers = { 'Authorization': `token ${tok}`, 'Content-Type': 'application/json' };
+
+    let sha = null;
+    const getRes = await fetch(api, { headers });
+    if (getRes.ok) { const j = await getRes.json(); sha = j.sha; }
+
+    examFullData.updated = new Date().toISOString();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(examFullData, null, 2))));
+    const body    = { message: msg, content, ...(sha ? { sha } : {}) };
+
+    const putRes = await fetch(api, { method: 'PUT', headers, body: JSON.stringify(body) });
+    stopLoad();
+    if (putRes.ok) return true;
+    toast('❌ GitHub push failed!');
+    return false;
+  } catch (e) {
+    stopLoad();
+    toast('❌ Network error!');
+    return false;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+//  TAB 4: DANGER ZONE
+// ════════════════════════════════════════════════════════
+async function deleteStudentResults() {
+  const id = document.getElementById('dz-student-id').value.trim();
+  if (!id) { toast('Student ID দিন!'); return; }
+  if (!confirm(`ID ${id}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
+  const res = await gasCall('adminDeleteStudentResults', { id });
+  if (res?.status === 'success') {
+    toast('✅ Results মুছে ফেলা হয়েছে!');
+    document.getElementById('dz-student-id').value = '';
+    await loadResults();
+  } else {
+    toast('❌ ' + (res?.message || 'GAS-এ এই feature আপডেট করতে হবে।'));
+  }
+}
+
+async function clearExamResults() {
+  const examId = document.getElementById('dz-exam-id').value.trim();
+  if (!examId) { toast('Exam ID দিন!'); return; }
+  if (!confirm(`Exam ID "${examId}"-এর সব results মুছবেন?`)) return;
+  const res = await gasCall('clearExamData', { examId });
+  if (res?.status === 'success') {
+    toast(`✅ ${res.message}`);
+    document.getElementById('dz-exam-id').value = '';
+    await loadResults();
+  } else toast('❌ ' + (res?.message || 'Failed'));
+}
+
+async function clearAllGASData() {
+  if (!confirm('⚠️ GAS-এর সব results ও logs মুছবেন? User accounts অক্ষত থাকবে।')) return;
+  const res = await gasCall('clearData');
+  if (res?.status === 'success') {
+    toast('✅ GAS Data মুছে ফেলা হয়েছে।');
+    await loadAll();
+  } else toast('❌ Failed');
+}
+
+async function clearAllGitHubExams() {
+  const tok = getDzToken();
+  if (!tok) return;
+  if (!confirm('⚠️ GitHub-এর সব exams মুছবেন? ফেরানো যাবে না।')) return;
+  examFullData.exams = [];
+  const ok = await pushGitHub(tok, 'Clear all exams');
+  if (ok) toast('✅ GitHub-এর সব Exam মুছে ফেলা হয়েছে!');
+}
+
+async function clearEverything() {
+  const tok = getDzToken();
+  if (!tok) return;
+  if (!confirm('⚠️⚠️ সব কিছু মুছবেন? GitHub Exams + GAS Results + Logs — কিছুই থাকবে না!')) return;
+  if (!confirm('শেষবার নিশ্চিত করুন।')) return;
+
+  const btn = document.getElementById('clear-all-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> মুছছি...';
+
+  examFullData.exams = [];
+  const [ghOk] = await Promise.all([
+    pushGitHub(tok, 'Clear everything'),
+    gasCall('clearData')
+  ]);
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-bomb"></i> সব কিছু মুছুন (GitHub + GAS)';
+
+  if (ghOk) {
+    toast('✅ সব মুছে ফেলা হয়েছে!');
+    await loadAll();
+  }
+}
+
+async function deleteStudentById() {
+  const id = document.getElementById('dz-del-id').value.trim();
+  if (!id) { toast('Student ID দিন!'); return; }
+  if (!confirm(`⚠️ ID ${id}-এর account ও সব results মুছবেন?`)) return;
+  if (!confirm('শেষবার নিশ্চিত।')) return;
+  const res = await gasCall('adminDeleteStudent', { id, deleteResults: true });
+  if (res?.status === 'success') {
+    toast('🗑️ Student মুছে ফেলা হয়েছে।');
+    document.getElementById('dz-del-id').value = '';
+    await loadAll();
+  } else toast('❌ ' + (res?.message || 'Failed'));
+}
+
+function getDzToken() {
+  const tok = document.getElementById('dz-gh-token').value.trim();
+  if (!tok) { toast('GitHub Token দিন!'); return null; }
+  return tok;
+}
+
+// ════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, dur = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.style.display = 'none'; }, dur);
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function toggleConfig() {
+  const fields   = document.getElementById('cfg-fields');
+  const chevron  = document.getElementById('cfg-chevron');
+  const isOpen   = fields.classList.toggle('open');
+  chevron.style.transform = isOpen ? 'rotate(180deg)' : '';
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+});
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  document.getElementById('gate-pw').focus();
+});
 </script>
 </body>
 </html>
