@@ -320,6 +320,7 @@ async function syncAll(){
 } // <-- এই ব্র্যাকেটটি মিসিং ছিল
 
 // ── Render Exam List ──
+// ── Render Exam List ──
 function renderList(exams){
   const list=document.getElementById('exam-list');
   if(!exams||exams.length===0){
@@ -328,12 +329,18 @@ function renderList(exams){
   }
   list.innerHTML=exams.map(ex=>{
     const dateStr=ex.date ? new Date(ex.date).toLocaleDateString('bn-BD') : '';
+    // লাইভ স্ট্যাটাস চেক (ডিফল্টভাবে true)
+    const isLive = ex.live !== false; 
+    const liveBadge = isLive 
+        ? `<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; margin-left:8px;">🟢 Live</span>`
+        : `<span style="background:#fee2e2; color:#991b1b; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; margin-left:8px;">🔴 Paused</span>`;
+
     return `
     <div class="exam-card" id="card-${ex.id}">
       <div class="exam-head" style="cursor:default;">
         <div>
-          <h3>${ex.examData.title}</h3>
-          <p>
+          <h3 style="display:flex; align-items:center;">${ex.examData.title} ${liveBadge}</h3>
+          <p style="margin-top:6px;">
             <i class="far fa-clock"></i> ${ex.examData.duration} &nbsp;|&nbsp;
             <i class="fas fa-list-ol"></i> ${ex.examData.questions.length} প্রশ্ন &nbsp;|&nbsp;
             <i class="fas fa-code"></i> <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;font-size:11px;">${ex.id}</code>
@@ -341,6 +348,9 @@ function renderList(exams){
           </p>
         </div>
         <div class="exam-actions">
+          <button class="btn btn-sm ${isLive ? 'btn-orange' : 'btn-blue'}" onclick="toggleLiveStatus('${ex.id}')">
+             <i class="fas ${isLive ? 'fa-pause' : 'fa-play'}"></i> ${isLive ? 'Pause' : 'Live'}
+          </button>
           <button class="btn btn-gray btn-sm" onclick="copyLink('${ex.id}')"><i class="fas fa-link"></i> Link</button>
           <button class="btn btn-sm" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;" onclick="openEdit('${ex.id}')"><i class="fas fa-pen"></i> Edit</button>
           <button class="btn btn-red btn-sm" onclick="deleteExam('${ex.id}')"><i class="fas fa-trash"></i></button>
@@ -348,6 +358,25 @@ function renderList(exams){
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Toggle Live Status ──
+async function toggleLiveStatus(id) {
+  const tok = token(); 
+  if(!tok) return toast('GitHub Token দিন!');
+  
+  const exIdx = fullData.exams.findIndex(e => e.id === id);
+  if (exIdx === -1) return;
+
+  // স্ট্যাটাস পরিবর্তন করা হচ্ছে
+  const currentStatus = fullData.exams[exIdx].live !== false;
+  fullData.exams[exIdx].live = !currentStatus;
+
+  toast('Status Update হচ্ছে...', 2000);
+  const ok = await pushGitHub(tok, `Toggle live status for exam ${id}`);
+  if(ok) {
+    toast(fullData.exams[exIdx].live ? 'Exam Live করা হয়েছে! 🟢' : 'Exam Pause করা হয়েছে! 🔴');
+  }
 }
 
 
