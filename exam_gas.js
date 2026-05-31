@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════
-//  Online Exam System & Academy Portal — Google Apps Script [v3.0]
+//  Online Exam System & Academy Portal — Google Apps Script [v3.1]
 //  by shaikh800 | mdshaikh.me
 // ════════════════════════════════════════════════════════════════
 
@@ -38,13 +38,14 @@ function doPost(e) {
       case 'getStudentResults':    result = getStudentResults(body);    break;
       
       // -- Admin Controls --
-      case 'adminGetStudents':     result = adminGetStudents(body);     break;
-      case 'adminApproveProfile':  result = adminApproveProfile(body);  break;
-      case 'adminRejectProfile':   result = adminRejectProfile(body);   break;
-      case 'adminResetPassword':   result = adminResetPassword(body);   break;
-      case 'adminDeleteStudent':   result = adminDeleteStudent(body);   break;
-      case 'clearData':            result = clearData(body);            break;
-      case 'clearExamData':        result = clearExamData(body);        break;
+      case 'adminGetStudents':           result = adminGetStudents(body);           break;
+      case 'adminApproveProfile':        result = adminApproveProfile(body);        break;
+      case 'adminRejectProfile':         result = adminRejectProfile(body);         break;
+      case 'adminResetPassword':         result = adminResetPassword(body);         break;
+      case 'adminDeleteStudent':         result = adminDeleteStudent(body);         break;
+      case 'adminDeleteStudentResults':  result = adminDeleteStudentResults(body);  break;
+      case 'clearData':                  result = clearData(body);                  break;
+      case 'clearExamData':              result = clearExamData(body);              break;
       
       // Legacy (Kept for compatibility)
       case 'updateStudents':       result = updateStudents(body);       break;
@@ -64,7 +65,7 @@ function doPost(e) {
 
 function doGet(e) {
   return ContentService.createTextOutput(
-    JSON.stringify({ status: 'ok', message: 'Academy GAS is running v3.0 ✅', time: new Date().toISOString() })
+    JSON.stringify({ status: 'ok', message: 'Academy GAS is running v3.1 ✅', time: new Date().toISOString() })
   ).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -352,6 +353,44 @@ function adminDeleteStudent(body) {
     }
   }
   return { status: 'error', message: 'Student not found' };
+}
+
+// ════════════════════════════════════════
+//  ADMIN: DELETE STUDENT RESULTS ONLY
+// ════════════════════════════════════════
+
+function adminDeleteStudentResults(body) {
+  const auth = requireAdminToken(body);
+  if (!auth.authorized) return auth.error;
+
+  const id = String(body.id || '').trim();
+  if (!id) return { status: 'error', message: 'Student ID আবশ্যক' };
+
+  const ss       = SpreadsheetApp.getActiveSpreadsheet();
+  const resSheet = ss.getSheetByName(RESULTS_SHEET);
+
+  if (!resSheet || resSheet.getLastRow() <= 1) {
+    return { status: 'success', message: '0 results deleted (sheet empty)', deleted: 0 };
+  }
+
+  const rData    = resSheet.getDataRange().getValues();
+  const toDelete = [];
+
+  // Bottom-up to avoid row-shift issues after each delete
+  for (let j = rData.length - 1; j >= 1; j--) {
+    if (String(rData[j][1]).trim() === id) {
+      toDelete.push(j + 1); // 1-based
+    }
+  }
+
+  toDelete.forEach(rowNum => resSheet.deleteRow(rowNum));
+  logActivity('adminDeleteStudentResults', 'ID: ' + id + ' | ' + toDelete.length + ' rows deleted');
+
+  return {
+    status:  'success',
+    message: toDelete.length + ' টি result মুছে ফেলা হয়েছে (account অক্ষত)',
+    deleted: toDelete.length
+  };
 }
 
 // ════════════════════════════════════════
