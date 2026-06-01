@@ -4,11 +4,11 @@
   "exams": [
     {
       "id": "ex_mpur6cy78zh",
-      "date": "2026-06-01T05:13:36.347Z",
+      "date": "2026-06-01T05:16:35.471Z",
       "examData": {
         "title": "Model Test",
         "duration": "30 minutes",
-        "password": "",
+        "password": "PHY211",
         "allowedIds": [
           "101"
         ],
@@ -347,5 +347,5 @@
       }
     }
   ],
-  "updated": "2026-06-01T05:13:37.271Z"
+  "updated": "2026-06-01T05:16:36.485Z"
 }
