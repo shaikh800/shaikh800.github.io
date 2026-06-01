@@ -15,7 +15,7 @@
     .page-title h1 { font-size: clamp(32px, 5vw, 54px); margin-bottom: 10px; }
 
     /* ── STATS BAR ──────────────────────────────────── */
-    .stats-bar { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 28px; }
+    .stats-bar { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 24px; }
     .stat-item { text-align: center; }
     .stat-num { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--blue); display: block; }
     .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -28,7 +28,6 @@
       text-decoration: none; position: relative; overflow: hidden;
       transition: all 0.22s var(--ease-spring);
       box-shadow: 0 8px 24px rgba(15,23,42,0.16);
-      grid-column: span 2;
     }
     .academy-hero-card::before {
       content: ''; position: absolute; inset: 0;
@@ -40,12 +39,12 @@
     .academy-hero-card h3 { font-size: 22px; letter-spacing: -0.02em; margin-bottom: 10px; }
     .academy-hero-card p { color: rgba(255,255,255,0.72); font-size: 14px; line-height: 1.65; margin-bottom: 18px; }
     .academy-hero-card .card-meta { color: #a5b4fc; font-size: 13px; font-weight: 700; margin-top: auto; }
-    .hero-tools { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 16px; }
+    .hero-tools { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
     .acad-tool-chip {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 6px 12px; border-radius: 100px;
       background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.88); font-size: 12px; font-weight: 600; transition: all 0.18s ease;
+      color: rgba(255,255,255,0.88); font-size: 12px; font-weight: 600;
     }
 
     /* ── 3-COL CARD GRID ────────────────────────────── */
@@ -56,21 +55,6 @@
     }
     @media (max-width: 900px) { .card-grid-3 { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 560px) { .card-grid-3 { grid-template-columns: 1fr; } }
-
-    /* ── ADMIN FAB & BADGE ──────────────────────────── */
-    .admin-fab {
-      position: fixed; bottom: 24px; right: 24px; z-index: 500;
-      width: 46px; height: 46px; border-radius: 50%; border: none;
-      background: var(--ink); color: #fff; font-size: 16px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: all 0.2s var(--ease-spring);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .admin-fab:hover { transform: scale(1.1); }
-    .admin-fab.active { background: var(--blue); }
-
-    @media (max-width: 900px) {
-      .academy-hero-card { grid-column: span 1; }
-    }
   </style>
 </head>
 <body>
@@ -99,147 +83,74 @@
     <section class="page-title reveal">
       <p class="eyebrow">Tuition & Exam Management</p>
       <h1>Academy Hub</h1>
-      <p class="lead">Build question papers, run online exams, track students, and manage everything from one platform. Built for Tuition 1 &amp; Tuition 2 workflows.</p>
+      <p class="lead">All tools for building questions, running exams, and managing students — in one place.</p>
       <div class="stats-bar">
         <div class="stat-item"><span class="stat-num">5</span><span class="stat-label">Tools</span></div>
         <div class="stat-item"><span class="stat-num">MCQ</span><span class="stat-label">Builder</span></div>
         <div class="stat-item"><span class="stat-num">Live</span><span class="stat-label">Exams</span></div>
-        <div class="stat-item"><span class="stat-num">GAS</span><span class="stat-label">Backed</span></div>
       </div>
     </section>
 
     <!-- ── FEATURED HERO ────────────────────────────────── -->
     <section class="section" aria-labelledby="academy-hero-title">
-      <div class="card-grid reveal-grid">
-        <a class="academy-hero-card" href="#tools" id="academy-hero-title">
-          <span class="card-icon"><i class="fas fa-graduation-cap"></i></span>
-          <h3>Complete Academy Management System</h3>
-          <p>Build MCQ question papers, conduct live model tests, monitor submissions in real-time via Google Sheets, and manage student profiles — all from a single unified platform designed for FEC tuition sessions.</p>
-          <div class="hero-tools">
-            <span class="acad-tool-chip"><i class="fas fa-list-check"></i> Question Builder</span>
-            <span class="acad-tool-chip"><i class="fas fa-laptop-file"></i> Online Exam</span>
-            <span class="acad-tool-chip"><i class="fas fa-stopwatch"></i> Exam Controller</span>
-            <span class="acad-tool-chip"><i class="fas fa-user-graduate"></i> Student Portal</span>
-            <span class="acad-tool-chip"><i class="fas fa-user-tie"></i> Admin Panel</span>
-          </div>
-          <span class="card-meta" style="margin-top:20px;">Explore all tools →</span>
-        </a>
-      </div>
-    </section>
-
-    <!-- ── QUICK ACCESS ─────────────────────────────────── -->
-    <section class="section" aria-labelledby="quick-tools-title" id="tools">
-      <div class="section-head reveal">
-        <h2 id="quick-tools-title">Quick Access</h2>
-        <p>Jump directly to the most-used tools in your tuition workflow.</p>
-      </div>
-      <div class="quick-tools-bar">
-        <a class="quick-tool-card" href="print/question-builder.html">
-          <div class="qt-icon"><i class="fas fa-list-check"></i></div>
-          <div class="qt-text">
-            <div class="qt-name">Question Builder</div>
-            <div class="qt-desc">Create structured MCQ and question papers for Tuition 1 &amp; 2.</div>
-          </div>
-          <div class="qt-arrow">Open →</div>
-        </a>
-        <a class="quick-tool-card" href="print/model_test.html">
-          <div class="qt-icon"><i class="fas fa-laptop-file"></i></div>
-          <div class="qt-text">
-            <div class="qt-name">Online Exam System</div>
-            <div class="qt-desc">Run live model tests with timer and GAS submission.</div>
-          </div>
-          <div class="qt-arrow">Open →</div>
-        </a>
-        <a class="quick-tool-card" href="exam_controller.html">
-          <div class="qt-icon"><i class="fas fa-stopwatch"></i></div>
-          <div class="qt-text">
-            <div class="qt-name">Exam Controller</div>
-            <div class="qt-desc">Control exam timing and monitor Google Sheets results.</div>
-          </div>
-          <div class="qt-arrow">Open →</div>
-        </a>
-      </div>
+      <a class="academy-hero-card" href="#tools">
+        <span class="card-icon"><i class="fas fa-graduation-cap"></i></span>
+        <h3 id="academy-hero-title">Complete Academy Management System</h3>
+        <p>Build MCQ papers, run timed model tests with auto-submit, monitor results via Google Sheets, and manage student profiles — all designed for Tuition 1 &amp; 2 workflows.</p>
+        <div class="hero-tools">
+          <span class="acad-tool-chip"><i class="fas fa-list-check"></i> Question Builder</span>
+          <span class="acad-tool-chip"><i class="fas fa-laptop-file"></i> Online Exam</span>
+          <span class="acad-tool-chip"><i class="fas fa-stopwatch"></i> Exam Controller</span>
+          <span class="acad-tool-chip"><i class="fas fa-user-graduate"></i> Student Portal</span>
+          <span class="acad-tool-chip"><i class="fas fa-user-tie"></i> Admin Panel</span>
+        </div>
+        <span class="card-meta" style="margin-top:20px;">Explore all tools →</span>
+      </a>
     </section>
 
     <!-- ── ALL TOOLS GRID ───────────────────────────────── -->
-    <section class="section" aria-labelledby="all-tools-title">
+    <section class="section" id="tools" aria-labelledby="all-tools-title">
       <div class="section-head reveal">
-        <h2 id="all-tools-title">All Academy Tools</h2>
-        <p>Every tool available in the platform — from building questions to managing students and reviewing results.</p>
+        <h2 id="all-tools-title">Academy Tools</h2>
+        <p>Use these tools to manage MCQ papers, model tests, student access, and admin controls.</p>
       </div>
       <div class="card-grid-3 reveal-grid">
 
         <a class="project-card" href="print/question-builder.html">
           <span class="card-icon"><i class="fas fa-list-check"></i></span>
           <h3>Question Builder</h3>
-          <p>Create, format, and generate structured MCQ question papers for Tuition 1 and Tuition 2 sessions. Export as print-ready PDF.</p>
+          <p>Create and format structured MCQ question papers for Tuition 1 and Tuition 2. Export as print-ready PDF.</p>
           <span class="card-meta">Open Tool →</span>
         </a>
 
         <a class="project-card" href="print/model_test.html">
           <span class="card-icon"><i class="fas fa-laptop-file"></i></span>
           <h3>Online Exam System</h3>
-          <p>Set up model tests with login, countdown timer, auto-submit and Google Apps Script integration for result submission.</p>
+          <p>Run live model tests with student login, countdown timer, and GAS-backed auto-submission.</p>
           <span class="card-meta">Open Tool →</span>
         </a>
 
         <a class="project-card" href="exam_controller.html">
           <span class="card-icon"><i class="fas fa-stopwatch"></i></span>
           <h3>Exam Controller</h3>
-          <p>Monitor and control exam timing in real-time. Integrates with Google Apps Script for live submission tracking.</p>
+          <p>Control exam timing and monitor live submissions through Google Apps Script integration.</p>
           <span class="card-meta">Open Tool →</span>
         </a>
 
         <a class="project-card" href="student_portal.html">
           <span class="card-icon"><i class="fas fa-user-graduate"></i></span>
           <h3>Student Portal</h3>
-          <p>A dedicated hub for students to access schedules, tuition resources, and academic materials in one place.</p>
+          <p>A hub for students to access tuition schedules, resources, and academic materials.</p>
           <span class="card-meta">Open Portal →</span>
         </a>
 
         <a class="project-card" href="admin_panel.html">
           <span class="card-icon"><i class="fas fa-user-tie"></i></span>
           <h3>Admin Panel</h3>
-          <p>Manage students, approve profile updates, reset passwords, and review detailed exam results and analytics.</p>
+          <p>Manage students, approve profile updates, reset passwords, and review exam results.</p>
           <span class="card-meta">Open Panel →</span>
         </a>
 
-      </div>
-    </section>
-
-    <!-- ── SPLIT BAND ───────────────────────────────────── -->
-    <section class="section" aria-labelledby="about-academy-title">
-      <div class="split-band reveal">
-        <div>
-          <p class="eyebrow">How it works</p>
-          <h2 id="about-academy-title">Designed for tuition, powered by Google Sheets.</h2>
-          <p class="lead" style="font-size:16px;margin-bottom:20px;">The academy system is built around two tuition sessions. Students register, take timed MCQ exams, and results are recorded automatically into Google Sheets via GAS — no manual entry needed.</p>
-          <ul class="note-list">
-            <li>Students log in with their mobile number — no password needed.</li>
-            <li>Exams run on a live countdown timer with auto-submit on expiry.</li>
-            <li>All results go straight to Google Sheets for easy review.</li>
-            <li>Admin panel handles profile updates, resets, and result analysis.</li>
-          </ul>
-        </div>
-        <div class="media-note">
-          <span style="font-size:48px;color:var(--blue);opacity:0.7;display:block;margin-bottom:20px;"><i class="fas fa-graduation-cap"></i></span>
-          <h3>Two tuition sessions</h3>
-          <p>The platform handles both Tuition 1 and Tuition 2 separately, with individual student registrations, question sets, and result sheets — all synchronized through a single Google Apps Script backend.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── CONTACT STRIP ─────────────────────────────────── -->
-    <section class="contact-strip reveal" aria-label="Contact and links">
-      <div>
-        <h2>Need help or have feedback?</h2>
-        <p>Reach out for bug reports, feature requests, or any academy-related questions.</p>
-      </div>
-      <div class="contact-links">
-        <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
-        <a href="https://www.facebook.com/shaikh.069" target="_blank" rel="noopener"><i class="fab fa-facebook"></i> Facebook</a>
-        <a href="index.html"><i class="fas fa-house"></i> Home</a>
-        <a href="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
       </div>
     </section>
 
