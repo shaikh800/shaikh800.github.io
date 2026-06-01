@@ -567,6 +567,11 @@ let studentsList = [];
 let userAnswers = {};
 let isPublicMode = false;
 let examId = new URLSearchParams(window.location.search).get('examId');
+// Student Portal থেকে আসা URL params
+const _sp = new URLSearchParams(window.location.search);
+let portalStudentId     = _sp.get('studentId')   ? String(_sp.get('studentId'))   : null;
+let portalStudentName   = _sp.get('studentName')  ? decodeURIComponent(_sp.get('studentName'))  : null;
+let portalStudentMobile = _sp.get('studentMobile')? decodeURIComponent(_sp.get('studentMobile')): null;
 const ADMIN_PW_KEY = 'civil_admin_pw';
 let adminUnlocked = sessionStorage.getItem('civil_admin') === '1';
 let fullGithubData = { semesters: {}, notices: [], exams: [] };
@@ -745,6 +750,27 @@ function initializeExamUI() {
   updateQNav();
   // Show admin FAB only after exam is loaded (not on empty page)
   document.getElementById('admin-fab').style.display = 'flex';
+  prefillFromPortal();
+}
+
+function prefillFromPortal() {
+  if (!portalStudentName && !portalStudentMobile) return;
+  const unameEl   = document.getElementById('uname');
+  const umobileEl = document.getElementById('umobile');
+  if (portalStudentName && unameEl) {
+    unameEl.value    = portalStudentName;
+    unameEl.readOnly = true;
+    unameEl.style.opacity = '0.75';
+  }
+  if (portalStudentMobile && umobileEl) {
+    umobileEl.value    = portalStudentMobile;
+    umobileEl.readOnly = true;
+    umobileEl.style.opacity = '0.75';
+  }
+  const desc = document.getElementById('login-desc');
+  if (desc && portalStudentId) {
+    desc.innerHTML = `স্বাগতম, <strong>${portalStudentName}</strong>! আপনার স্টুডেন্ট আইডি: <strong>${portalStudentId}</strong>`;
+  }
 }
 
 function renderSection(containerId, start, end) {
@@ -1199,46 +1225,52 @@ async function startExam(){
   let studentId = "Guest";
 
   if(!isPublicMode) {
-    const url = getGasUrl();
-    if(!url) {
-       btn.innerText = "পরীক্ষা শুরু করুন";
-       btn.disabled = false;
-       return showAlert("সার্ভার লিংক (GAS URL) যুক্ত করা হয়নি! এডমিনকে জানান।", "⚠️");
-    }
-    
-    try {
-      // Step 1: Check if student already has an account (cross-device support)
-      const checkRes = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'checkMobile', mobile: umobile }),
-        headers: { 'Content-Type': 'text/plain' }
-      });
-      const checkData = await checkRes.json();
-
-      if (checkData.status === 'success' && checkData.found) {
-        // Existing student — retrieve stored ID directly
-        studentId = String(checkData.id);
-      } else {
-        // New student — auto-register with mobile as password
-        const regRes = await fetch(url, {
+    // Student Portal থেকে আসলে GAS call লাগবে না
+    if (portalStudentId && portalStudentMobile && umobile === portalStudentMobile) {
+      studentId = String(portalStudentId);
+    } else {
+      const url = getGasUrl();
+      if(!url) {
+         btn.innerText = "পরীক্ষা শুরু করুন";
+         btn.disabled = false;
+         return showAlert("সার্ভার লিংক (GAS URL) যুক্ত করা হয়নি! এডমিনকে জানান।", "⚠️");
+      }
+      
+      try {
+        // Step 1: Check if student already has an account (cross-device support)
+        const checkRes = await fetch(url, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register', name: uname, mobile: umobile, password: umobile }),
+          body: JSON.stringify({ action: 'checkMobile', mobile: umobile }),
           headers: { 'Content-Type': 'text/plain' }
         });
-        const regData = await regRes.json();
-        if(regData.status === 'success') {
-           studentId = String(regData.id);
+        const checkData = await checkRes.json();
+  
+        if (checkData.status === 'success' && checkData.found) {
+          // Existing student — retrieve stored ID directly
+          studentId = String(checkData.id);
         } else {
-           btn.innerText = "পরীক্ষা শুরু করুন";
-           btn.disabled = false;
-           return showAlert("রেজিস্ট্রেশনে সমস্যা হয়েছে: " + regData.message, "❌");
+          // New student — auto-register with mobile as password
+          const regRes = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'register', name: uname, mobile: umobile, password: umobile }),
+            headers: { 'Content-Type': 'text/plain' }
+          });
+          const regData = await regRes.json();
+          if(regData.status === 'success') {
+             studentId = String(regData.id);
+          } else {
+             btn.innerText = "পরীক্ষা শুরু করুন";
+             btn.disabled = false;
+             return showAlert("রেজিস্ট্রেশনে সমস্যা হয়েছে: " + regData.message, "❌");
+          }
         }
+      } catch(e) {
+         btn.innerText = "পরীক্ষা শুরু করুন";
+         btn.disabled = false;
+         return showAlert("সার্ভারে কানেক্ট করা যাচ্ছে না। ইন্টারনেট চেক করুন।", "⚠️");
       }
-    } catch(e) {
-       btn.innerText = "পরীক্ষা শুরু করুন";
-       btn.disabled = false;
-       return showAlert("সার্ভারে কানেক্ট করা যাচ্ছে না। ইন্টারনেট চেক করুন।", "⚠️");
     }
+
 
     const allowedIds = examData.allowedIds || [];
     if(allowedIds.length > 0 && !allowedIds.map(String).includes(String(studentId))) {
