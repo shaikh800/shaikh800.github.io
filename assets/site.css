@@ -411,6 +411,12 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 
 /* ─── MOBILE UI IMPROVEMENTS ──────────────────────────────── */
 
+/* Reduce motion on mobile for snappier feel + better battery */
+@media (max-width: 600px) {
+  * { animation-duration: 0.15s !important; transition-duration: 0.1s !important; }
+  html { scroll-behavior: auto; }
+}
+
 /* Larger touch targets on mobile */
 @media (max-width: 600px) {
   .btn { min-height: 48px; font-size: 15px; }

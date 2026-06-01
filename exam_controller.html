@@ -5,6 +5,10 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Exam Controller</title>
+<!-- Resource Hints for Performance -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -568,12 +572,13 @@ async function saveExam(){
 }
 
 // ── Delete Exam ──
-async function deleteExam(id){
-  if(!confirm('এই Exam মুছে ফেলবেন?')) return;
-  const tok=token(); if(!tok) return toast('Token দিন!');
-  fullData.exams=fullData.exams.filter(e=>e.id!==id);
-  await pushGitHub(tok,'Delete exam');
-  toast('Exam মুছে ফেলা হয়েছে।');
+function deleteExam(id){
+  confirmAction('delete', 'এই Exam মুছে ফেলবেন?', async () => {
+    const tok=token(); if(!tok) return toast('Token দিন!');
+    fullData.exams=fullData.exams.filter(e=>e.id!==id);
+    await pushGitHub(tok,'Delete exam');
+    toast('Exam মুছে ফেলা হয়েছে।');
+  });
 }
 
 // ── GitHub Push ──

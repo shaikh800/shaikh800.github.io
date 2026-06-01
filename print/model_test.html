@@ -5,6 +5,11 @@
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Online Exam</title>
+<!-- Resource Hints for Performance -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
@@ -1249,7 +1254,14 @@ async function startExam(){
           // Existing student — retrieve stored ID directly
           studentId = String(checkData.id);
         } else {
-          // New student — auto-register with mobile as password
+          const allowedIds = examData.allowedIds || [];
+          if (allowedIds.length > 0) {
+            btn.innerText = "পরীক্ষা শুরু করুন";
+            btn.disabled = false;
+            return showAlert("এই মোবাইল নম্বরটি আগে রেজিস্টার করা হয়নি বা অনুমোদিত নয়। মোবাইল নম্বর ঠিক করে আবার চেষ্টা করুন।", "⚠️");
+          }
+
+          // No allowed list configured, allow new student registration
           const regRes = await fetch(url, {
             method: 'POST',
             body: JSON.stringify({ action: 'register', name: uname, mobile: umobile, password: umobile }),

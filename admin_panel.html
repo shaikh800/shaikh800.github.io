@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Academy Admin Panel</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!-- Resource Hints for Performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <!-- Fonts: swap for better FCP -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
@@ -621,6 +626,23 @@
   </div>
 </div>
 
+<!-- ══ MODAL: Confirm Action ══ -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-hd">
+      <h3><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> Confirm Action</h3>
+      <button class="modal-close" onclick="closeConfirmModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="modal-confirm-text" style="font-size:15px; color:var(--ink); line-height:1.75;">
+      Confirm this action.
+    </div>
+    <div style="margin-top:24px; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+      <button class="danger-btn gray" onclick="closeConfirmModal()">Cancel</button>
+      <button class="danger-btn red" id="modal-confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════════════════════
 //  CONFIG
@@ -889,14 +911,14 @@ function renderStudents() {
 }
 
 async function approveProfile(id) {
-  if (!confirm('এই profile update approve করবেন?')) return;
+  if (!await askConfirm('এই profile update approve করবেন?')) return;
   const res = await gasCall('adminApproveProfile', { id });
   if (res?.status === 'success') { toast('✅ Profile approved!'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
 }
 
 async function rejectProfile(id) {
-  if (!confirm('এই profile update reject করবেন?')) return;
+  if (!await askConfirm('এই profile update reject করবেন?')) return;
   const res = await gasCall('adminRejectProfile', { id });
   if (res?.status === 'success') { toast('🗑️ Request rejected.'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
@@ -906,7 +928,7 @@ async function resetPassword(id) {
   const el  = document.getElementById(`np-${id}`);
   const pw  = el ? el.value.trim() : '';
   if (!pw) { toast('পাসওয়ার্ড লিখুন!'); return; }
-  if (!confirm(`ID ${id}-এর পাসওয়ার্ড "${pw}" করবেন?`)) return;
+  if (!await askConfirm(`ID ${id}-এর পাসওয়ার্ড "${pw}" করবেন?`)) return;
   const res = await gasCall('adminResetPassword', { id, newPassword: pw });
   if (res?.status === 'success') { toast('🔐 Password updated!'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
@@ -957,7 +979,7 @@ function openStudentModal(id) {
 
 async function deleteStudentResultsOnly() {
   if (!selectedStuId) return;
-  if (!confirm(`ID ${selectedStuId}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
+  if (!await askConfirm(`ID ${selectedStuId}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
 
   // We delete results by iterating - use a custom action on GAS
   // Using adminDeleteStudent with deleteResults:true but keeping account - 
@@ -983,8 +1005,8 @@ async function deleteStudentResultsOnly() {
 
 async function deleteStudentFull() {
   if (!selectedStuId) return;
-  if (!confirm(`⚠️ সতর্কতা! ID ${selectedStuId}-এর account ও সব results চিরতরে মুছবে। নিশ্চিত?`)) return;
-  if (!confirm('আবার নিশ্চিত করুন — এই কাজ ফেরানো যাবে না।')) return;
+  if (!await askConfirm(`⚠️ সতর্কতা! ID ${selectedStuId}-এর account ও সব results চিরতরে মুছবে। নিশ্চিত?`)) return;
+  if (!await askConfirm('আবার নিশ্চিত করুন — এই কাজ ফেরানো যাবে না।')) return;
 
   const res = await gasCall('adminDeleteStudent', { id: selectedStuId, deleteResults: true });
   if (res?.status === 'success') {
@@ -1152,7 +1174,7 @@ async function toggleExamLive(id) {
 }
 
 async function deleteExam(id, title) {
-  if (!confirm(`"${title}" exam মুছবেন?`)) return;
+  if (!await askConfirm(`"${title}" exam মুছবেন?`)) return;
   const tok = document.getElementById('gh-token').value.trim();
   if (!tok) { toast('GitHub Token দিন!'); return; }
 
@@ -1162,7 +1184,7 @@ async function deleteExam(id, title) {
 }
 
 async function clearExamGASResults(examId, title) {
-  if (!confirm(`"${title}"-এর সব GAS results মুছবেন?`)) return;
+  if (!await askConfirm(`"${title}"-এর সব GAS results মুছবেন?`)) return;
   const res = await gasCall('clearExamData', { examId });
   if (res?.status === 'success') {
     toast(`✅ ${res.message}`);
@@ -1205,7 +1227,7 @@ async function pushGitHub(tok, msg = 'Update') {
 async function deleteStudentResults() {
   const id = document.getElementById('dz-student-id').value.trim();
   if (!id) { toast('Student ID দিন!'); return; }
-  if (!confirm(`ID ${id}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
+  if (!await askConfirm(`ID ${id}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
   const res = await gasCall('adminDeleteStudentResults', { id });
   if (res?.status === 'success') {
     toast('✅ Results মুছে ফেলা হয়েছে!');
@@ -1219,7 +1241,7 @@ async function deleteStudentResults() {
 async function clearExamResults() {
   const examId = document.getElementById('dz-exam-id').value.trim();
   if (!examId) { toast('Exam ID দিন!'); return; }
-  if (!confirm(`Exam ID "${examId}"-এর সব results মুছবেন?`)) return;
+  if (!await askConfirm(`Exam ID "${examId}"-এর সব results মুছবেন?`)) return;
   const res = await gasCall('clearExamData', { examId });
   if (res?.status === 'success') {
     toast(`✅ ${res.message}`);
@@ -1229,7 +1251,7 @@ async function clearExamResults() {
 }
 
 async function clearAllGASData() {
-  if (!confirm('⚠️ GAS-এর সব results ও logs মুছবেন? User accounts অক্ষত থাকবে।')) return;
+  if (!await askConfirm('⚠️ GAS-এর সব results ও logs মুছবেন? User accounts অক্ষত থাকবে।')) return;
   const res = await gasCall('clearData');
   if (res?.status === 'success') {
     toast('✅ GAS Data মুছে ফেলা হয়েছে।');
@@ -1240,7 +1262,7 @@ async function clearAllGASData() {
 async function clearAllGitHubExams() {
   const tok = getDzToken();
   if (!tok) return;
-  if (!confirm('⚠️ GitHub-এর সব exams মুছবেন? ফেরানো যাবে না।')) return;
+  if (!await askConfirm('⚠️ GitHub-এর সব exams মুছবেন? ফেরানো যাবে না।')) return;
   examFullData.exams = [];
   const ok = await pushGitHub(tok, 'Clear all exams');
   if (ok) toast('✅ GitHub-এর সব Exam মুছে ফেলা হয়েছে!');
@@ -1249,8 +1271,8 @@ async function clearAllGitHubExams() {
 async function clearEverything() {
   const tok = getDzToken();
   if (!tok) return;
-  if (!confirm('⚠️⚠️ সব কিছু মুছবেন? GitHub Exams + GAS Results + Logs — কিছুই থাকবে না!')) return;
-  if (!confirm('শেষবার নিশ্চিত করুন।')) return;
+  if (!await askConfirm('⚠️⚠️ সব কিছু মুছবেন? GitHub Exams + GAS Results + Logs — কিছুই থাকবে না!')) return;
+  if (!await askConfirm('শেষবার নিশ্চিত করুন।')) return;
 
   const btn = document.getElementById('clear-all-btn');
   btn.disabled = true;
@@ -1274,8 +1296,8 @@ async function clearEverything() {
 async function deleteStudentById() {
   const id = document.getElementById('dz-del-id').value.trim();
   if (!id) { toast('Student ID দিন!'); return; }
-  if (!confirm(`⚠️ ID ${id}-এর account ও সব results মুছবেন?`)) return;
-  if (!confirm('শেষবার নিশ্চিত।')) return;
+  if (!await askConfirm(`⚠️ ID ${id}-এর account ও সব results মুছবেন?`)) return;
+  if (!await askConfirm('শেষবার নিশ্চিত।')) return;
   const res = await gasCall('adminDeleteStudent', { id, deleteResults: true });
   if (res?.status === 'success') {
     toast('🗑️ Student মুছে ফেলা হয়েছে।');
@@ -1288,6 +1310,49 @@ function getDzToken() {
   const tok = document.getElementById('dz-gh-token').value.trim();
   if (!tok) { toast('GitHub Token দিন!'); return null; }
   return tok;
+}
+
+let confirmResolve = null;
+
+async function askConfirm(message) {
+  return new Promise(resolve => {
+    const modal = document.getElementById('modal-confirm');
+    const textEl = document.getElementById('modal-confirm-text');
+    const okBtn = document.getElementById('modal-confirm-ok');
+
+    const finalize = result => {
+      if (modal._confirmOverlayHandler) {
+        modal.removeEventListener('click', modal._confirmOverlayHandler);
+        modal._confirmOverlayHandler = null;
+      }
+      modal.style.display = 'none';
+      if (confirmResolve) {
+        confirmResolve(result);
+        confirmResolve = null;
+      }
+    };
+
+    confirmResolve = resolve;
+    textEl.textContent = message;
+    okBtn.onclick = () => finalize(true);
+    modal.querySelector('.modal-close').onclick = () => finalize(false);
+    modal.style.display = 'flex';
+
+    modal._confirmOverlayHandler = function onOverlay(e) {
+      if (e.target === modal) finalize(false);
+    };
+    modal.addEventListener('click', modal._confirmOverlayHandler);
+  });
+}
+
+function closeConfirmModal() {
+  if (confirmResolve) confirmResolve(false);
+  const modal = document.getElementById('modal-confirm');
+  if (modal._confirmOverlayHandler) {
+    modal.removeEventListener('click', modal._confirmOverlayHandler);
+    modal._confirmOverlayHandler = null;
+  }
+  modal.style.display = 'none';
 }
 
 // ════════════════════════════════════════════════════════
