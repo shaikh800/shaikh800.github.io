@@ -123,11 +123,14 @@ body { background:#f1f5f9; font-family:'Noto Serif Bengali', sans-serif; margin:
 /* Resume banner */
 #resume-banner { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; font-size: 14px; padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; display: none; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; } 
 
+#refresh-note { background:#f8fafc; border:1px solid #cbd5e1; color:#334155; font-size:13px; padding:10px 14px; border-radius:12px; margin-bottom:16px; display:none; align-items:center; gap:10px; }
+#refresh-note i { color:#2563eb; }
+
 #exam-screen, #summary-screen, #admin-screen, #login-screen { display:none; }
-.top-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; padding:15px 20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
+.top-bar { display:flex; justify-content:space-between; align-items:center; background:#fff; padding:15px 20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); position:sticky; top:0; z-index:100; }
 .time-left { font-size:18px; font-weight:bold; color:#dc2626; }
 
-#progress-wrap { background:#fff; border-radius:10px; padding:10px 15px; margin-bottom:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); }
+#progress-wrap { background:#fff; border-radius:10px; padding:10px 15px; margin-bottom:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05); position:sticky; top:58px; z-index:99; }
 #progress-track { background:#e2e8f0; border-radius:99px; height:8px; overflow:hidden; margin-bottom:6px; }
 #progress-fill { height:100%; width:0%; border-radius:99px; background:#dc2626; transition:width 0.4s ease, background 0.4s; }
 #progress-text { font-size:13px; font-weight:bold; color:#475569; display:flex; justify-content:space-between; }
@@ -157,6 +160,8 @@ body { background:#f1f5f9; font-family:'Noto Serif Bengali', sans-serif; margin:
 #pdf-wrap.pdf-mode .exam-header h1 { margin:0; font-size:17px; letter-spacing:1px; }
 #pdf-wrap.pdf-mode .exam-header p { margin:2px 0 0; font-size:12px; font-weight:bold; }
 #pdf-wrap.pdf-mode .pdf-section-break { display:block; height:0; page-break-before:always; break-before:page; }
+#pdf-wrap.pdf-mode #page2 { display:block !important; page-break-before:always; break-before:page; }
+#pdf-wrap.pdf-mode .pdf-section { page-break-inside: avoid; break-inside: avoid-column; }
 #pdf-wrap.pdf-mode .page-questions { column-count:2; column-gap:18px; display:block; }
 #pdf-wrap.pdf-mode .q-block { font-size:12px; line-height:1.38; margin-bottom:5px; padding:4px 5px; background:transparent; box-shadow:none; border-radius:0; }
 #pdf-wrap.pdf-mode .q-txt { margin-bottom:2px; font-size:12px; }
@@ -430,6 +435,7 @@ th { background-color: #f8fafc; }
   </div>
 
   <div id="resume-banner"><span><i class="fas fa-redo" style="margin-right:6px;"></i>আগের অসমাপ্ত পরীক্ষা পাওয়া গেছে! রিজিউম করবেন?</span><button class="btn primary" style="padding:7px 16px; font-size:13px;" onclick="resumeExam()">রিজিউম করুন</button></div>
+  <div id="refresh-note"><i class="fas fa-info-circle"></i> আপনার উত্তর অটোসেভ হবে। Refresh করলে আবার ঢুকলে Resume ব্যানার দেখাবে; পরীক্ষার সময় পেজ বন্ধ করলে সাবমিট হবে না।</div>
 <div id="login-screen" class="panel">
     <div class="panel-row" style="align-items:flex-start;">
       <div>
@@ -1320,7 +1326,10 @@ function proceedToExamScreen(studentId, uname, remainingSeconds) {
   document.getElementById("student-name-display").innerText = `নাম: ${uname}` + (studentId !== "Guest" ? ` | আইডি: ${studentId}` : '');
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("exam-screen").style.display = "block";
+  document.getElementById("refresh-note").style.display = "flex";
   examInProgress = true;
+  updateProgress();
+  updateQNav();
   
   let t = (remainingSeconds !== undefined) ? remainingSeconds : finalDuration * 60;
   tInt = setInterval(() => {
@@ -1412,6 +1421,8 @@ function reviewWithPdf(){
   document.getElementById("progress-wrap").style.display = "none";
   document.getElementById("pdf-score-wrap").style.display = "flex";
   document.getElementById("pdf-dummy-space").style.display = "block";
+  document.getElementById("page1").style.display = "block";
+  document.getElementById("page2").style.display = "block";
   window.scrollTo(0,0);
   dlPdf();
 }
@@ -1438,7 +1449,7 @@ async function dlPdf(){
         image: { type:'jpeg', quality:1 },
         html2canvas: { scale:2, useCORS:true, scrollY:0, scrollX:0 },
         jsPDF: { unit:'mm', format:'a4', orientation:'portrait' },
-        pagebreak: { mode:['css'], before:['#page-break'] }
+        pagebreak: { mode:['css','legacy'], before:['#page-break'] }
       }).from(wrap).save();
     } catch(e) {
       window.print();
