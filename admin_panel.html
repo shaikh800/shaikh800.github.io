@@ -369,8 +369,8 @@
           placeholder="https://script.google.com/macros/s/...">
       </div>
       <div class="cfg-field">
-        <label>GAS Admin Token</label>
-        <input type="password" class="cfg-inp" id="cfg-gas-token" value="shaikh_fec_secure_2026" placeholder="Token">
+        <label>Session Status</label>
+        <input type="text" class="cfg-inp" id="cfg-gas-token" placeholder="✅ Session token auto-managed" readonly style="color:var(--muted); cursor:default;">
       </div>
       <div class="cfg-field" style="display:flex; flex-direction:column; justify-content:flex-end;">
         <label>&nbsp;</label>
@@ -624,12 +624,16 @@
 <script>
 // ════════════════════════════════════════════════════════
 //  CONFIG
+//  ⚠️ ADMIN_PW এখানে নেই — GAS Script Properties-এ থাকে
 // ════════════════════════════════════════════════════════
-const ADMIN_PW  = 'Shaikh**7';
 const GH_OWNER  = 'shaikh800';
 const GH_REPO   = 'shaikh800.github.io';
 const GH_FILE   = 'civil_data.json';
 const GH_BRANCH = 'main';
+
+// Session token keys — sessionStorage (browser বন্ধে auto-মুছে যাবে)
+const SESSION_TOKEN_KEY  = 'shaikh_admin_token_v1';
+const SESSION_EXPIRY_KEY = 'shaikh_admin_expiry_v1';
 
 // ── State (in-memory only) ──
 let studentsData    = [];
@@ -638,25 +642,25 @@ let ghExamData      = null;   // { exams: [...] } from GitHub
 let selectedStuId   = null;   // for modal
 
 // ── Config helpers ──
-function gasUrl()   { return document.getElementById('cfg-gas-url').value.trim(); }
-function gasToken() { return document.getElementById('cfg-gas-token').value.trim(); }
+function gasUrl() { return document.getElementById('cfg-gas-url').value.trim(); }
+// gasToken() সরানো হয়েছে — token এখন sessionStorage থেকে আসে
 const GH_TOKEN_KEY = 'shaikh_gh_token_v1';
 
-// Token পড়া: input → localStorage-এ save করে return করে
+// GitHub PAT: input → sessionStorage-এ save করে return
 function ghToken() {
   const tok = (document.getElementById('gh-token').value.trim()) ||
               (document.getElementById('dz-gh-token').value.trim());
   if (tok) {
-    localStorage.setItem(GH_TOKEN_KEY, tok);
+    sessionStorage.setItem(GH_TOKEN_KEY, tok);
     document.getElementById('gh-token').value = tok;
     document.getElementById('dz-gh-token').value = tok;
   }
-  return tok || localStorage.getItem(GH_TOKEN_KEY) || '';
+  return tok || sessionStorage.getItem(GH_TOKEN_KEY) || '';
 }
 
-// Login-এর পর saved token দুটো input-এ ভরে দাও
+// Login-এর পর saved GitHub token দুটো input-এ ভরে দাও
 function loadSavedToken() {
-  const saved = localStorage.getItem(GH_TOKEN_KEY);
+  const saved = sessionStorage.getItem(GH_TOKEN_KEY);
   if (saved) {
     document.getElementById('gh-token').value = saved;
     document.getElementById('dz-gh-token').value = saved;
@@ -664,34 +668,63 @@ function loadSavedToken() {
 }
 
 // ════════════════════════════════════════════════════════
-//  GATE — একবার login করলে এই device-এ আর password লাগবে না
+//  GATE — password GAS-এ verify হয়, session token পাঠায়
 // ════════════════════════════════════════════════════════
-const SESSION_KEY = 'shaikh_admin_auth_v1';
 
-function gateUnlock() {
-  const pw = document.getElementById('gate-pw').value.trim();
-  if (pw === ADMIN_PW) {
-    localStorage.setItem(SESSION_KEY, 'granted');
-    document.getElementById('ctrl-gate').style.display = 'none';
-    loadSavedToken();
-    loadAll();
-  } else {
-    const err = document.getElementById('gate-err');
-    err.textContent = '❌ ভুল পাসওয়ার্ড!';
-    document.getElementById('gate-pw').value = '';
-    document.getElementById('gate-pw').focus();
-    setTimeout(() => { err.textContent = ''; }, 2500);
+async function gateUnlock() {
+  const pw  = document.getElementById('gate-pw').value.trim();
+  const err = document.getElementById('gate-err');
+  const btn = document.querySelector('.gate-btn');
+
+  if (!pw) { err.textContent = '❌ পাসওয়ার্ড দিন!'; return; }
+
+  const url = gasUrl();
+  if (!url) { err.textContent = '❌ GAS URL সেট করুন!'; return; }
+
+  btn.disabled  = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> যাচাই হচ্ছে...';
+  err.textContent = '';
+
+  try {
+    const res  = await fetch(url, {
+      method:  'POST',
+      body:    JSON.stringify({ action: 'adminLogin', password: pw }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    const data = await res.json();
+
+    if (data.status === 'success' && data.token) {
+      sessionStorage.setItem(SESSION_TOKEN_KEY,  data.token);
+      sessionStorage.setItem(SESSION_EXPIRY_KEY, String(data.expiry));
+      document.getElementById('ctrl-gate').style.display = 'none';
+      loadSavedToken();
+      loadAll();
+    } else {
+      err.textContent = '❌ ' + (data.message || 'ভুল পাসওয়ার্ড!');
+      document.getElementById('gate-pw').value = '';
+      document.getElementById('gate-pw').focus();
+      setTimeout(() => { err.textContent = ''; }, 3000);
+    }
+  } catch (e) {
+    err.textContent = '❌ সার্ভারে সংযোগ হচ্ছে না।';
   }
+
+  btn.disabled  = false;
+  btn.innerHTML = '<i class="fas fa-unlock"></i> প্রবেশ করুন';
 }
 
 function adminLogout() {
-  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_TOKEN_KEY);
+  sessionStorage.removeItem(SESSION_EXPIRY_KEY);
+  sessionStorage.removeItem(GH_TOKEN_KEY);
   location.reload();
 }
 
-// Auto-login: এই device-এ আগে login থাকলে gate দেখাবে না
+// Auto-login: sessionStorage-এ valid token থাকলে gate দেখাবে না
 (function autoLogin() {
-  if (localStorage.getItem(SESSION_KEY) === 'granted') {
+  const token  = sessionStorage.getItem(SESSION_TOKEN_KEY);
+  const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);
+  if (token && expiry && Date.now() < parseInt(expiry)) {
     document.getElementById('ctrl-gate').style.display = 'none';
     document.addEventListener('DOMContentLoaded', () => { loadSavedToken(); loadAll(); });
   }
@@ -715,18 +748,28 @@ function stopLoad() {
 }
 
 // ════════════════════════════════════════════════════════
-//  GAS CALL
+//  GAS CALL — token এখন sessionStorage থেকে আসে
 // ════════════════════════════════════════════════════════
 async function gasCall(action, payload = {}) {
   startLoad();
+  const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
   try {
-    const res = await fetch(gasUrl(), {
-      method: 'POST',
-      body: JSON.stringify({ action, token: gasToken(), ...payload }),
+    const res  = await fetch(gasUrl(), {
+      method:  'POST',
+      body:    JSON.stringify({ action, token, ...payload }),
       headers: { 'Content-Type': 'text/plain' }
     });
     const data = await res.json();
     stopLoad();
+
+    // Token মেয়াদ শেষ বা invalid — force re-login
+    if (data && data.status === 'unauthorized') {
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
+      sessionStorage.removeItem(SESSION_EXPIRY_KEY);
+      toast('⏱️ Session শেষ! আবার login করুন।');
+      setTimeout(() => location.reload(), 1500);
+      return null;
+    }
     return data;
   } catch (err) {
     stopLoad();
