@@ -723,7 +723,7 @@ function renderExams() {
     if (ex.live === false) return;
 
     count++;
-    const isDone   = myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
+    const isDone   = myHistory.some(h => String(h.examId || h.ExamId || '') === String(ex.id)) || myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
     const qCount   = ex.examData.questions ? ex.examData.questions.length : 0;
     const duration = ex.examData.duration || '30 minutes';
     const hasPass  = !!ex.examData.password;
