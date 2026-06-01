@@ -20,33 +20,6 @@
     .stat-num { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--blue); display: block; }
     .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* ── ACADEMY HERO CARD ──────────────────────────── */
-    .academy-hero-card {
-      display: flex; flex-direction: column;
-      padding: 32px; border-radius: var(--radius-lg);
-      background: var(--ink); color: #fff;
-      text-decoration: none; position: relative; overflow: hidden;
-      transition: all 0.22s var(--ease-spring);
-      box-shadow: 0 8px 24px rgba(15,23,42,0.16);
-    }
-    .academy-hero-card::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(99,102,241,0.35) 0%, rgba(37,99,235,0.15) 60%, transparent 100%);
-      pointer-events: none;
-    }
-    .academy-hero-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(15,23,42,0.22); }
-    .academy-hero-card .card-icon { color: #a5b4fc; background: rgba(165,180,252,0.15); width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius); font-size: 20px; margin-bottom: 18px; }
-    .academy-hero-card h3 { font-size: 22px; letter-spacing: -0.02em; margin-bottom: 10px; }
-    .academy-hero-card p { color: rgba(255,255,255,0.72); font-size: 14px; line-height: 1.65; margin-bottom: 18px; }
-    .academy-hero-card .card-meta { color: #a5b4fc; font-size: 13px; font-weight: 700; margin-top: auto; }
-    .hero-tools { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; }
-    .acad-tool-chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 12px; border-radius: 100px;
-      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-      color: rgba(255,255,255,0.88); font-size: 12px; font-weight: 600;
-    }
-
     /* ── 3-COL CARD GRID ────────────────────────────── */
     .card-grid-3 {
       display: grid;
@@ -89,23 +62,6 @@
         <div class="stat-item"><span class="stat-num">MCQ</span><span class="stat-label">Builder</span></div>
         <div class="stat-item"><span class="stat-num">Live</span><span class="stat-label">Exams</span></div>
       </div>
-    </section>
-
-    <!-- ── FEATURED HERO ────────────────────────────────── -->
-    <section class="section" aria-labelledby="academy-hero-title">
-      <a class="academy-hero-card" href="#tools">
-        <span class="card-icon"><i class="fas fa-graduation-cap"></i></span>
-        <h3 id="academy-hero-title">Complete Academy Management System</h3>
-        <p>Build MCQ papers, run timed model tests with auto-submit, monitor results via Google Sheets, and manage student profiles — all designed for Tuition 1 &amp; 2 workflows.</p>
-        <div class="hero-tools">
-          <span class="acad-tool-chip"><i class="fas fa-list-check"></i> Question Builder</span>
-          <span class="acad-tool-chip"><i class="fas fa-laptop-file"></i> Online Exam</span>
-          <span class="acad-tool-chip"><i class="fas fa-stopwatch"></i> Exam Controller</span>
-          <span class="acad-tool-chip"><i class="fas fa-user-graduate"></i> Student Portal</span>
-          <span class="acad-tool-chip"><i class="fas fa-user-tie"></i> Admin Panel</span>
-        </div>
-        <span class="card-meta" style="margin-top:20px;">Explore all tools →</span>
-      </a>
     </section>
 
     <!-- ── ALL TOOLS GRID ───────────────────────────────── -->
@@ -151,6 +107,20 @@
           <span class="card-meta">Open Panel →</span>
         </a>
 
+      </div>
+    </section>
+
+
+    <!-- ── FOLLOW THE WORK ─────────────────────────────── -->
+    <section class="contact-strip reveal" aria-label="Contact">
+      <div>
+        <h2>Follow the work</h2>
+        <p>Academy tools, tuition resources, and web projects — updates as things grow.</p>
+      </div>
+      <div class="contact-links">
+        <a href="https://www.facebook.com/shaikh.069" target="_blank" rel="noopener"><i class="fab fa-facebook"></i> Facebook</a>
+        <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+        <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
       </div>
     </section>
 
