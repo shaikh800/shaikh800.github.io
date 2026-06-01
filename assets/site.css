@@ -272,7 +272,18 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 
 /* ─── MOBILE RESPONSIVENESS ──────────────────────────────── */
 @media (max-width: 900px) {
-  .nav-shell { min-height: 60px; }
+  body {
+    background-image: none;
+  }
+  body::after {
+    display: none;
+  }
+  .nav-shell {
+    min-height: 60px;
+    gap: 14px;
+    padding: 12px 0;
+  }
+  .brand small { display: none; }
   .nav-toggle { display: inline-flex; align-items: center; justify-content: center; }
   
   .site-nav {
@@ -283,7 +294,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   }
   .site-nav.is-open { display: flex; }
   
-  .intro { min-height: auto; padding: 40px 0; display: block; }
+  .intro { min-height: auto; padding: 36px 0; display: block; }
   .intro-content { max-width: 100%; text-align: center; margin: 0 auto; }
   .intro-content .eyebrow { justify-content: center; }
   .actions { justify-content: center; }
@@ -304,6 +315,9 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   .actions { flex-direction: column; }
   .btn { width: 100%; }
   .footer-shell { flex-direction: column; text-align: center; }
+  .eyebrow { justify-content: center; }
+  .lead { font-size: 15px; }
+  .contact-links a { flex: 1 1 100%; }
 }
 
 /* ── MOBILE BOTTOM TAB BAR (GLOBAL) ── */
@@ -326,12 +340,12 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 .mobile-tab.active { color: #38bdf8; }
 
 @media (max-width: 900px) {
-  body { padding-bottom: 56px; } /* ট্যাবারের জন্য নিচে জায়গা রাখা */
+  body.has-mobile-tabbar { padding-bottom: 56px; } /* ট্যাবারের জন্য নিচে জায়গা রাখা */
   .mobile-tabbar { display: grid; }
   
-  /* মোবাইল ভিউতে উপরের মেনু হাইড করা */
-  .nav-toggle { display: none !important; }
-  .site-nav   { display: none !important; }
+  /* মোবাইল ভিউতে উপরের মেনু হাইড করা শুধুমাত্র যখন ট্যাববার থাকে */
+  body.has-mobile-tabbar .nav-toggle { display: none !important; }
+  body.has-mobile-tabbar .site-nav   { display: none !important; }
   
   /* অ্যাডমিন বাটনটি ট্যাবারের উপরে তুলে দেওয়া */
   .admin-fab { bottom: 80px !important; }

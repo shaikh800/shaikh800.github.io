@@ -2,6 +2,9 @@
 const navToggle = document.querySelector(".nav-toggle");
 const siteNav   = document.querySelector(".site-nav");
 
+const mobileTabbar = document.querySelector(".mobile-tabbar");
+if (mobileTabbar) document.body.classList.add("has-mobile-tabbar");
+
 if (navToggle && siteNav) {
   navToggle.addEventListener("click", () => {
     const isOpen = siteNav.classList.toggle("is-open");
@@ -18,7 +21,19 @@ if (navToggle && siteNav) {
 /* ── ACTIVE NAV LINK ─────────────────────────────────────── */
 const pagePath = window.location.pathname.split("/").pop() || "index.html";
 document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
-  if (link.getAttribute("data-page") === pagePath) link.classList.add("is-active");
+  const isCurrent = link.getAttribute("data-page") === pagePath;
+  if (isCurrent) {
+    link.classList.add("is-active");
+    link.setAttribute("aria-current", "page");
+  }
+});
+
+document.querySelectorAll(".mobile-tab").forEach((tab) => {
+  const href = tab.getAttribute("href");
+  if (href === pagePath || (href === "index.html" && pagePath === "index.html")) {
+    tab.classList.add("active");
+    tab.setAttribute("aria-current", "page");
+  }
 });
 
 /* ── SCROLL REVEAL ───────────────────────────────────────── */

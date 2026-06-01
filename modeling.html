@@ -173,7 +173,7 @@
     .form-group input, .form-group textarea, .form-group select {
       width:100%; padding:10px 14px; border:1px solid var(--line);
       border-radius:var(--radius); background:var(--surface-soft); color:var(--ink);
-      font-size:14px; font-family:inherit; transition:border-color 0.2s; -webkit-appearance:none;
+      font-size:14px; font-family:inherit; transition:border-color 0.2s; appearance:none; -webkit-appearance:none;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       outline:none; border-color:var(--blue); background:var(--surface);
@@ -421,7 +421,7 @@
               <input type="file" id="w-img-file" accept="image/*">
             </div>
           </div>
-          <div class="thumb-preview" id="thumb-preview"><img id="thumb-preview-img" src="" alt=""></div>
+          <div class="thumb-preview" id="thumb-preview"><img id="thumb-preview-img" src="" alt="Thumbnail preview"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -468,7 +468,7 @@
         <button class="modal-close" data-close="modal-img"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body" style="padding:12px;">
-        <img id="img-view-src" src="" alt="" style="width:100%;border-radius:var(--radius);display:block;">
+        <img id="img-view-src" src="" alt="Full image preview" style="width:100%;border-radius:var(--radius);display:block;">
         <p id="img-view-desc" style="margin:12px 0 0;color:var(--muted);font-size:13px;text-align:center;"></p>
       </div>
     </div>
