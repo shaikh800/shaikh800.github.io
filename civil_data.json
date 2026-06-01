@@ -4,12 +4,14 @@
   "exams": [
     {
       "id": "ex_mpur6cy78zh",
-      "date": "2026-06-01T05:13:20.143Z",
+      "date": "2026-06-01T05:13:36.347Z",
       "examData": {
         "title": "Model Test",
         "duration": "30 minutes",
         "password": "",
-        "allowedIds": [],
+        "allowedIds": [
+          "101"
+        ],
         "questions": [
           {
             "q": "বৈদ্যুতিক পাখার গতি কী রূপ গতি?",
@@ -345,5 +347,5 @@
       }
     }
   ],
-  "updated": "2026-06-01T05:13:20.969Z"
+  "updated": "2026-06-01T05:13:37.271Z"
 }
