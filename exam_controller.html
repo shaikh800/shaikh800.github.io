@@ -156,7 +156,7 @@ td{border:1px solid var(--line);padding:9px 12px;}
     <div class="token-row">
       <input type="password" id="gh-token" class="inp" style="width:170px;" placeholder="GitHub Token" autocomplete="off">
       <input type="text" id="gas-url-hdr" class="inp" style="width:200px;" placeholder="Google Script URL" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
-      <input type="password" id="gas-admin-token" class="inp" style="width:150px;" placeholder="GAS Admin Token" autocomplete="off" value="shaikh_fec_secure_2026">
+      <input type="password" id="gas-admin-token" class="inp" style="width:150px;" placeholder="GAS Admin Token" autocomplete="off">
       <button class="btn btn-blue" onclick="syncAll()"><i class="fas fa-sync"></i> Sync</button>
       <button class="btn btn-gray" onclick="ctrlLogout()" title="এই device থেকে logout"><i class="fas fa-sign-out-alt"></i></button>
     </div>
@@ -307,7 +307,7 @@ async function syncAll(){
   const url=gasUrl();
   if(url){
     try{
-      const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'adminGetStudents',token:gasAdminToken()}),headers:{'Content-Type':'text/plain'}});
+      const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'adminGetStudents',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
       const d=await r.json();
       if(d.status === 'success') {
           globalStudents = d.students || [];
@@ -614,9 +614,10 @@ async function clearGAS(){
   const url=gasUrl(); if(!url) return toast('GAS URL দিন!');
   toast('GAS clearing...', 5000);
   try{
-    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:gasAdminToken()}),headers:{'Content-Type':'text/plain'}});
+    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
     const d=await r.json();
     if(d.status==='success'){ allResults=[]; updateStats(); toast('Google Sheet সব data মুছে ফেলা হয়েছে! ✅'); }
+    else if(d.status==='unauthorized'){ toast('⏱️ Session শেষ! আবার login করুন।'); setTimeout(()=>location.reload(),1500); }
     else toast('GAS error: '+(d.message||'failed'));
   }catch(e){ toast('GAS connection failed!'); }
 }
@@ -632,7 +633,7 @@ async function clearAll(){
 async function clearGASsilent(){
   const url=gasUrl(); if(!url){ toast('GAS URL দিন!'); return false; }
   try{
-    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:gasAdminToken()}),headers:{'Content-Type':'text/plain'}});
+    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
     const d=await r.json();
     if(d.status==='success'){ allResults=[]; updateStats(); return true; }
     return false;
@@ -771,68 +772,100 @@ async function saveEdit() {
   }
 }
 
-// ── Controller Gate ──
-const CTRL_GATE_PW = 'Shaikh**7';
-const CTRL_SESSION_KEY = 'shaikh_ctrl_auth_v1';
-const CTRL_GH_TOKEN_KEY = 'shaikh_gh_token_v1';       // admin_panel এর মতোই একই key
-const CTRL_GAS_URL_KEY  = 'shaikh_gas_url_v1';
-const CTRL_GAS_TOK_KEY  = 'shaikh_gas_tok_v1';
+// ── Controller Gate — session-based (GAS auth) ──
+// ⚠️ CTRL_GATE_PW hardcode সম্পূর্ণ সরানো হয়েছে — GAS Script Properties-এ থাকে
+const CTRL_SESSION_TOKEN_KEY  = 'shaikh_ctrl_token_v1';
+const CTRL_SESSION_EXPIRY_KEY = 'shaikh_ctrl_expiry_v1';
+const CTRL_GH_TOKEN_KEY  = 'shaikh_gh_token_v1';       // admin_panel এর মতোই একই key
+const CTRL_GAS_URL_KEY   = 'shaikh_gas_url_v1';
 
-// Config helpers — পড়লে localStorage-এও save করে
+// Config helpers — sessionStorage ব্যবহার করে (browser বন্ধে expire)
 function token(){
   const v = document.getElementById('gh-token').value.trim();
-  if(v) localStorage.setItem(CTRL_GH_TOKEN_KEY, v);
-  return v || localStorage.getItem(CTRL_GH_TOKEN_KEY) || '';
+  if(v) sessionStorage.setItem(CTRL_GH_TOKEN_KEY, v);
+  return v || sessionStorage.getItem(CTRL_GH_TOKEN_KEY) || '';
 }
 function gasUrl(){
   const v = document.getElementById('gas-url-hdr').value.trim();
-  if(v) localStorage.setItem(CTRL_GAS_URL_KEY, v);
-  return v || localStorage.getItem(CTRL_GAS_URL_KEY) || '';
+  if(v) sessionStorage.setItem(CTRL_GAS_URL_KEY, v);
+  return v || sessionStorage.getItem(CTRL_GAS_URL_KEY) || '';
 }
-function gasAdminToken(){
-  const v = document.getElementById('gas-admin-token').value.trim();
-  if(v) localStorage.setItem(CTRL_GAS_TOK_KEY, v);
-  return v || localStorage.getItem(CTRL_GAS_TOK_KEY) || '';
+// Session token — sessionStorage থেকে dynamic ভাবে আসে
+function ctrlToken(){
+  return sessionStorage.getItem(CTRL_SESSION_TOKEN_KEY) || '';
 }
 
 // Saved values দিয়ে inputs ভরো
 function loadSavedInputs(){
-  const ghTok = localStorage.getItem(CTRL_GH_TOKEN_KEY);
-  const gasU  = localStorage.getItem(CTRL_GAS_URL_KEY);
-  const gasTk = localStorage.getItem(CTRL_GAS_TOK_KEY);
+  const ghTok = sessionStorage.getItem(CTRL_GH_TOKEN_KEY);
+  const gasU  = sessionStorage.getItem(CTRL_GAS_URL_KEY);
   if(ghTok) document.getElementById('gh-token').value = ghTok;
   if(gasU)  document.getElementById('gas-url-hdr').value = gasU;
-  if(gasTk) document.getElementById('gas-admin-token').value = gasTk;
 }
 
-function gateUnlock() {
-  const input = document.getElementById('gate-pw-input').value.trim();
-  if (input === CTRL_GATE_PW) {
-    localStorage.setItem(CTRL_SESSION_KEY, 'granted');
-    document.getElementById('ctrl-gate').style.display = 'none';
-    loadSavedInputs();
-    syncAll();
-  } else {
-    const errEl = document.getElementById('gate-err');
-    errEl.textContent = '❌ ভুল পাসওয়ার্ড!';
-    document.getElementById('gate-pw-input').value = '';
-    document.getElementById('gate-pw-input').focus();
-    setTimeout(() => errEl.textContent = '', 2500);
+async function gateUnlock() {
+  const pw  = document.getElementById('gate-pw-input').value.trim();
+  const errEl = document.getElementById('gate-err');
+  const btn = document.querySelector('.gate-btn');
+
+  if (!pw) { errEl.textContent = '❌ পাসওয়ার্ড দিন!'; return; }
+
+  const url = document.getElementById('gas-url-hdr').value.trim();
+  if (!url) { errEl.textContent = '❌ GAS URL সেট করুন (Header-এ)!'; return; }
+
+  btn.disabled  = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> যাচাই হচ্ছে...';
+  errEl.textContent = '';
+
+  try {
+    const res  = await fetch(url, {
+      method:  'POST',
+      body:    JSON.stringify({ action: 'adminLogin', password: pw }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    const data = await res.json();
+
+    if (data.status === 'success' && data.token) {
+      sessionStorage.setItem(CTRL_SESSION_TOKEN_KEY,  data.token);
+      sessionStorage.setItem(CTRL_SESSION_EXPIRY_KEY, String(data.expiry));
+      sessionStorage.setItem(CTRL_GAS_URL_KEY, url);
+      document.getElementById('ctrl-gate').style.display = 'none';
+      loadSavedInputs();
+      syncAll();
+    } else {
+      errEl.textContent = '❌ ' + (data.message || 'ভুল পাসওয়ার্ড!');
+      document.getElementById('gate-pw-input').value = '';
+      document.getElementById('gate-pw-input').focus();
+      setTimeout(() => { errEl.textContent = ''; }, 3000);
+    }
+  } catch(e) {
+    errEl.textContent = '❌ সার্ভারে সংযোগ হচ্ছে না।';
   }
+
+  btn.disabled  = false;
+  btn.innerHTML = '<i class="fas fa-unlock"></i> প্রবেশ করুন';
 }
 
 function ctrlLogout(){
-  localStorage.removeItem(CTRL_SESSION_KEY);
+  sessionStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
+  sessionStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
+  sessionStorage.removeItem(CTRL_GH_TOKEN_KEY);
+  sessionStorage.removeItem(CTRL_GAS_URL_KEY);
   location.reload();
 }
 
 // ── Init ──
 window.onload=()=>{
-  if(localStorage.getItem(CTRL_SESSION_KEY) === 'granted'){
+  const token  = sessionStorage.getItem(CTRL_SESSION_TOKEN_KEY);
+  const expiry = sessionStorage.getItem(CTRL_SESSION_EXPIRY_KEY);
+  if(token && expiry && Date.now() < parseInt(expiry)){
     document.getElementById('ctrl-gate').style.display = 'none';
     loadSavedInputs();
     syncAll();
   } else {
+    // Expired বা নেই — gate দেখাও
+    sessionStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
+    sessionStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
     document.getElementById('ctrl-gate').style.display = 'flex';
     document.getElementById('exam-list').innerHTML =
       `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;

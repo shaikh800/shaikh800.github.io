@@ -8,8 +8,8 @@ const STUDENTS_SHEET = 'Students';
 const LOG_SHEET      = 'Log';
 const USERS_SHEET    = 'Users';
 
-// ── 🔐 Security Token ──
-const ADMIN_TOKEN = 'shaikh_fec_secure_2026';
+// ── 🔐 Admin Auth — password GAS Script Properties-এ থাকে (admin_password key)
+//    Hardcoded token সম্পূর্ণ সরানো হয়েছে।
 
 // ════════════════════════════════════════
 //  MAIN ENTRY POINT
@@ -37,6 +37,10 @@ function doPost(e) {
       case 'getAllResults':        result = getAllResults(body);        break;
       case 'getStudentResults':    result = getStudentResults(body);    break;
       
+      // -- Admin Auth (session-based) --
+      case 'adminLogin':                 result = adminLogin(body);                 break;
+      case 'adminVerify':                result = adminVerifySession(body);         break;
+
       // -- Admin Controls --
       case 'adminGetStudents':           result = adminGetStudents(body);           break;
       case 'adminApproveProfile':        result = adminApproveProfile(body);        break;
@@ -69,12 +73,52 @@ function doGet(e) {
   ).setMimeType(ContentService.MimeType.JSON);
 }
 
-function requireAdminToken(body) {
-  if (!body.token || body.token !== ADMIN_TOKEN) {
-    return { authorized: false, error: { status: 'error', message: 'Unauthorized: invalid token' } };
+// ════════════════════════════════════════
+//  ADMIN AUTH — SESSION BASED
+// ════════════════════════════════════════
+
+/**
+ * Admin login — password Script Properties-এ থাকে (admin_password key)।
+ * সফল হলে 4 ঘণ্টার session token return করে।
+ */
+function adminLogin(body) {
+  const pw        = body.password || '';
+  const correctPw = PropertiesService.getScriptProperties().getProperty('admin_password');
+
+  if (!correctPw || pw !== correctPw) {
+    return { status: 'error', message: 'ভুল পাসওয়ার্ড' };
   }
-  return { authorized: true };
+
+  const token  = Utilities.getUuid();
+  const expiry = Date.now() + (4 * 60 * 60 * 1000);  // 4 ঘণ্টা
+
+  PropertiesService.getScriptProperties().setProperty('admin_session_token',  token);
+  PropertiesService.getScriptProperties().setProperty('admin_session_expiry', String(expiry));
+
+  return { status: 'success', token: token, expiry: expiry };
 }
+
+/**
+ * Session token জীবিত আছে কিনা check করে।
+ */
+function adminVerifySession(body) {
+  return { status: 'success', valid: verifyAdmin(body) };
+}
+
+/**
+ * সব admin action-এর আগে এই function দিয়ে token verify হয়।
+ * Token ভুল বা মেয়াদ শেষ হলে false return করে।
+ */
+function verifyAdmin(body) {
+  const token = body.token || '';
+  if (!token) return false;
+
+  const stored = PropertiesService.getScriptProperties().getProperty('admin_session_token');
+  const expiry = PropertiesService.getScriptProperties().getProperty('admin_session_expiry');
+
+  return (stored === token) && (Date.now() < parseInt(expiry || '0'));
+}
+
 
 // ════════════════════════════════════════
 //  STUDENT AUTHENTICATION & PROFILE
@@ -236,8 +280,7 @@ function requestPasswordReset(body) {
 // ════════════════════════════════════════
 
 function adminGetStudents(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = getOrCreateSheet(ss, USERS_SHEET);
@@ -262,8 +305,7 @@ function adminGetStudents(body) {
 }
 
 function adminApproveProfile(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const id = String(body.id).trim();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -287,8 +329,7 @@ function adminApproveProfile(body) {
 }
 
 function adminRejectProfile(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const id = String(body.id).trim();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -305,8 +346,7 @@ function adminRejectProfile(body) {
 }
 
 function adminResetPassword(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const id = String(body.id).trim();
   const newPass = String(body.newPassword).trim();
@@ -325,8 +365,7 @@ function adminResetPassword(body) {
 }
 
 function adminDeleteStudent(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const id = String(body.id).trim();
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -360,8 +399,7 @@ function adminDeleteStudent(body) {
 // ════════════════════════════════════════
 
 function adminDeleteStudentResults(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const id = String(body.id || '').trim();
   if (!id) return { status: 'error', message: 'Student ID আবশ্যক' };
@@ -447,8 +485,7 @@ function getResults(body) {
 }
 
 function getAllResults(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(RESULTS_SHEET);
@@ -483,8 +520,7 @@ function getStudentResults(body) {
 // ════════════════════════════════════════
 
 function clearData(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const allSheets = [RESULTS_SHEET, STUDENTS_SHEET, LOG_SHEET]; // Does not touch USERS_SHEET
@@ -499,8 +535,7 @@ function clearData(body) {
 }
 
 function clearExamData(body) {
-  const auth = requireAdminToken(body);
-  if (!auth.authorized) return auth.error;
+  if (!verifyAdmin(body)) return { status: 'unauthorized', message: 'Unauthorized' };
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(RESULTS_SHEET);
