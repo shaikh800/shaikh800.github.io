@@ -2815,7 +2815,24 @@
             <button type="button" onclick="addCQGroup()" style="font-size:11px;padding:2px 8px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:5px;cursor:pointer;color:#374151;font-weight:600;">+ Add Group</button>
           </div>
           ${groups.length === 0 ? '<div style="font-size:11px;color:#94a3b8;text-align:center;padding:5px 0 2px;">No groups. Add to organize your CQs.</div>' : ''}
-          ${groups.map(g => `
+          ${groups.map(g => {
+            const memberBadges = state.cqs.length === 0
+              ? '<span style="font-size:10px;color:#94a3b8;font-style:italic;">কোনো CQ নেই</span>'
+              : state.cqs.map((c, cqIdx) => {
+                  const isMember = c.groupId === g.id;
+                  const otherGroup = !isMember && c.groupId
+                    ? (state.cqGroups || []).find(gr => gr.id === c.groupId)
+                    : null;
+                  const bg  = isMember ? '#1e293b' : otherGroup ? '#fef9c3' : '#f1f5f9';
+                  const clr = isMember ? '#fff'    : otherGroup ? '#854d0e' : '#64748b';
+                  const brd = isMember ? '#1e293b' : otherGroup ? '#fde047' : '#e2e8f0';
+                  const tip = otherGroup
+                    ? `"${esc2(otherGroup.name || 'অন্য group')}" এ আছে — ক্লিক করলে এই group এ সরে আসবে`
+                    : isMember ? 'সরাতে ক্লিক করো' : 'যোগ করতে ক্লিক করো';
+                  const prefix = isMember ? '✓ ' : otherGroup ? '⇄ ' : '';
+                  return `<button type="button" onclick="toggleCQMembership('${g.id}',${cqIdx})" title="${tip}" style="font-size:10px;padding:2px 8px;border-radius:10px;cursor:pointer;font-weight:700;border:1px solid ${brd};background:${bg};color:${clr};line-height:1.5;transition:all 0.15s;">${prefix}CQ ${bn(cqIdx + 1)}</button>`;
+                }).join('');
+            return `
             <div style="border:1px solid #e2e8f0;border-radius:6px;padding:6px 7px;margin-bottom:5px;background:#fff;">
               <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;margin-bottom:4px;">
                 <input type="text" data-type="cqgname" data-gid="${g.id}" value="${esc2(g.name)}" placeholder="Group Name (e.g. ক বিভাগ)" style="font-size:11px;padding:2px 5px;border:1px solid #cbd5e1;border-radius:4px;width:100%;box-sizing:border-box;">
@@ -2827,8 +2844,12 @@
                 <button type="button" onclick="deleteCQGroup('${g.id}')" style="font-size:12px;padding:0 6px;background:#fff;border:1px solid #fca5a5;border-radius:4px;color:#ef4444;cursor:pointer;font-weight:700;height:22px;line-height:22px;">✕</button>
               </div>
               <textarea data-type="cqgdesc" data-gid="${g.id}" placeholder="Description (optional)" style="font-size:11px;width:100%;padding:2px 5px;border:1px solid #cbd5e1;border-radius:4px;resize:vertical;min-height:32px;box-sizing:border-box;display:block;">${esc2(g.description)}</textarea>
-            </div>
-          `).join('')}
+              <div style="margin-top:6px;padding-top:5px;border-top:1px dashed #f1f5f9;">
+                <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.3px;">এই Group-এ CQ যোগ করো</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">${memberBadges}</div>
+              </div>
+            </div>`;
+          }).join('')}
         `;
         wrap.querySelectorAll("[data-type]").forEach(el => {
           const ev = el.tagName === "SELECT" ? "change" : "input";
@@ -2853,6 +2874,19 @@
             sel.value = curVal;
           });
         }
+        renderAll();
+        scheduleAutosave();
+      }
+
+      function toggleCQMembership(groupId, cqIdx) {
+        if (!state.cqs[cqIdx]) return;
+        if (state.cqs[cqIdx].groupId === groupId) {
+          state.cqs[cqIdx].groupId = '';
+        } else {
+          state.cqs[cqIdx].groupId = groupId;
+        }
+        renderCQGroupManager();
+        initEditors();
         renderAll();
         scheduleAutosave();
       }
@@ -3843,6 +3877,7 @@
           time: c.time || "২০ মিনিট",
           totalMarks: c.totalMarks || "১০",
           stimulus: c.stimulus || "",
+          stimAlign: c.stimAlign || "",
           groupId: c.groupId || "",
           parts: {
             ক: c.parts?.ক || "",
@@ -5152,7 +5187,7 @@ function generateOnlineExamHTML() {
   
   const draftExam = {
       title: state.examTitle || "Online Exam",
-      duration: state.durationLine ? parseInt(state.durationLine) || 30 : 30,
+      duration: parseFlexibleNumber(state.durationLine, 30),
       questions: quizData
   };
   
