@@ -2552,6 +2552,7 @@
           type: "normal", 
           statements: [],  
           stimulusText: "", 
+          stimulusGroup: null, 
         });
         syncNumbers();
         initEditors();
@@ -3708,6 +3709,7 @@
           type: q.type || "normal",
           statements: Array.isArray(q.statements) ? q.statements : [],
           stimulusText: q.stimulusText || "",
+          stimulusGroup: q.stimulusGroup ?? null,
         }));
 
         nextState.cqs = nextState.cqs.map((c) => ({
@@ -3715,7 +3717,6 @@
           time: c.time || "২০ মিনিট",
           totalMarks: c.totalMarks || "১০",
           stimulus: c.stimulus || "",
-          stimAlign: c.stimAlign || "",
           parts: {
             ক: c.parts?.ক || "",
             খ: c.parts?.খ || "",
@@ -4503,7 +4504,7 @@ function splitIntoQuestionBlocks(text) {
               }
 
               try {
-                const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+                const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
                 const parts = dataUrl.split(",");
 
                 if (parts.length < 2) {
@@ -4526,7 +4527,7 @@ function splitIntoQuestionBlocks(text) {
               }
             },
             "image/jpeg",
-            0.88
+            1.0
           );
         });
 
@@ -4638,7 +4639,7 @@ function splitIntoQuestionBlocks(text) {
         if (typeof html2canvas !== "function") {
           throw new Error("html2canvas লোড হয়নি। অনুগ্রহ করে ইন্টারনেট কানেকশন দেখুন বা ব্রাউজারটি রিলোড করুন।");
         }
-        await renderAllAndWait(false);
+        await renderAllAndWait();
         const pages = [...document.querySelectorAll(".page")];
         if (!pages.length) {
           throw new Error("কোনো পৃষ্ঠা পাওয়া যায়নি। PDF তৈরি করা যাচ্ছে না।");
@@ -4747,28 +4748,9 @@ function splitIntoQuestionBlocks(text) {
           setButtonLoading(btn, false);
         }
       }
-      a      async function sharePDFDirect(btnEl) {
-        const btn = btnEl || document.querySelector('[onclick*="sharePDFDirect"]');
-        setButtonLoading(btn, true, '⏳ Preparing…');
-        try {
-          const blob = await generatePdfBlob();
-          const fileName = (state.examTitle || "sheet").replace(/[\/:*?"<>|]+/g, " ").trim() + ".pdf";
-          const file = new File([blob], fileName, { type: "application/pdf" });
-          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: state.examTitle || "Question Sheet" });
-          } else {
-            await downloadBlob(blob, fileName);
-          }
-        } catch (err) {
-          if (err && err.name !== 'AbortError') {
-            console.error(err);
-            alert("Share করা যায়নি। ↓ Direct PDF বাটন ব্যবহার করুন।");
-          }
-        } finally {
-          setButtonLoading(btn, false);
-        }
+      async function sharePDFDirect(btnEl) {
+        alert("সঠিক লেআউট এবং সর্বোচ্চ কোয়ালিটি পেতে '↓ Direct PDF' বাটনে ক্লিক করে Save as PDF করুন এবং সেই ফাইলটি শেয়ার করুন।");
       }
-
       async function downloadAsImagesZipLike(btnEl) {
         const btn = btnEl || document.querySelector('[onclick*="downloadAsImagesZipLike"]');
         try {
@@ -5043,17 +5025,13 @@ function generateOnlineExamHTML() {
   
   const draftExam = {
       title: state.examTitle || "Online Exam",
-      duration: parseFlexibleNumber(state.durationLine, 30),
+      duration: state.durationLine ? parseInt(state.durationLine) || 30 : 30,
       questions: quizData
   };
-   try {
-    localStorage.setItem("draft_exam_data", JSON.stringify(draftExam));
-  } catch (err) {
-    alert("প্রশ্নগুলো save করা যায়নি। Browser storage full হতে পারে — Image-সহ প্রশ্ন থাকলে Image সরিয়ে আবার চেষ্টা করুন।");
-    return;
-  }
-  alert("প্রশ্নগুলো তৈরি হয়েছে! এখন পাসওয়ার্ড ও পারমিশন সেট করার জন্য কন্ট্রোল প্যানেলে নিয়ে যাওয়া হচ্ছে...");
-  window.location.href = "../exam_controller.html";
+  
+  localStorage.setItem("draft_exam_data", JSON.stringify(draftExam));
+  alert("প্রশ্নগুলো তৈরি হয়েছে! এখন পাসওয়ার্ড ও পারমিশন সেট করার জন্য কন্ট্রোল প্যানেলে নিয়ে যাওয়া হচ্ছে...");
+  window.location.href = "../exam_controller.html"; 
 }
     </script>
   <div id="cropperModal">
