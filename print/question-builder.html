@@ -511,6 +511,19 @@
         }
 
         .panel h1 { font-size: 18px; margin-bottom: 8px; }
+
+        /* Mobile: sticky bar adapts to 12px side padding */
+        .sticky-action-bar {
+          top: -14px;
+          margin: -14px -12px 14px -12px;
+          padding: 9px 12px;
+          grid-template-columns: 2fr 1fr 1fr 1.3fr;
+          gap: 5px;
+        }
+        .sticky-action-bar .sab-save,
+        .sticky-action-bar .sab-pdf { font-size: 11px; padding: 9px 5px; }
+        .sticky-action-bar .sab-icon { font-size: 13px; padding: 9px 4px; }
+
         .field label { font-size: 12px; }
         .field input, .field textarea, .field select { font-size: 14px; padding: 9px 10px; }
         button { padding: 11px 10px; font-size: 13px; min-height: 46px; }
@@ -557,6 +570,72 @@
       input:checked + .slider { background-color: #111827; }
       input:checked + .slider:before { transform: translateX(16px); }
       .guide-box { margin-bottom: 18px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; overflow: hidden; }
+
+      /* ── Sticky Action Bar ─────────────────────────────────── */
+      .sticky-action-bar {
+        position: sticky;
+        top: -24px;
+        margin: -24px -24px 16px -24px;
+        padding: 10px 24px;
+        background: #ffffff;
+        z-index: 50;
+        border-bottom: 2px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1.4fr;
+        gap: 6px;
+        align-items: center;
+      }
+      .sticky-action-bar .sab-save {
+        background: #1e293b; color: #fff; border: none;
+        border-radius: 7px; padding: 8px 6px;
+        font-size: 12px; font-weight: 700; cursor: pointer;
+        white-space: nowrap; transition: background 0.18s;
+        line-height: 1.2;
+      }
+      .sticky-action-bar .sab-save:hover { background: #0f172a; }
+      .sticky-action-bar .sab-icon {
+        background: #f1f5f9; color: #334155;
+        border: 1px solid #e2e8f0; border-radius: 7px;
+        padding: 8px 4px; font-size: 14px; font-weight: 700;
+        cursor: pointer; text-align: center; line-height: 1;
+        transition: background 0.15s;
+      }
+      .sticky-action-bar .sab-icon:hover { background: #e2e8f0; }
+      .sticky-action-bar .sab-pdf {
+        background: #eff6ff; color: #2563eb;
+        border: 1px solid #bfdbfe; border-radius: 7px;
+        padding: 8px 6px; font-size: 12px; font-weight: 700;
+        cursor: pointer; text-align: center; white-space: nowrap;
+        line-height: 1.2; transition: background 0.15s;
+      }
+      .sticky-action-bar .sab-pdf:hover { background: #dbeafe; }
+      /* Zone labels */
+      .zone-label {
+        font-size: 10px; font-weight: 700; letter-spacing: 0.6px;
+        color: #94a3b8; text-transform: uppercase; margin-bottom: 6px;
+        margin-top: 2px;
+      }
+      /* Zone 2 History: 2x2 grid */
+      .toolbar.history-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      /* Zone 5 Layout: presets + apply */
+      .toolbar.preset-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .toolbar.apply-row {
+        grid-template-columns: 1fr;
+        margin-bottom: 14px;
+      }
+      /* Zone dividers */
+      .zone-divider {
+        border: none; border-top: 1px dashed #e2e8f0;
+        margin: 10px 0 14px;
+      }
       .guide-box summary { padding: 10px 14px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #1e293b; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; }
       .guide-box summary::-webkit-details-marker { display: none; }
       .guide-box summary:after { content: "▼"; font-size: 10px; color: #64748b; }
@@ -645,6 +724,14 @@
         </button>
       </nav>
       <aside class="panel">
+        <!-- ── Sticky Action Bar (always visible) ── -->
+        <div class="sticky-action-bar">
+          <button type="button" class="sab-save" onclick="saveAndBack()">↩ Save &amp; Back</button>
+          <button type="button" class="sab-icon" onclick="undoState()" title="Undo">↶</button>
+          <button type="button" class="sab-icon" onclick="redoState()" title="Redo">↷</button>
+          <button type="button" class="sab-pdf" onclick="downloadPDFDirect(this)">↓ PDF</button>
+        </div>
+
         <h1>Question Builder</h1>
         <details class="guide-box">
            <summary>💡 Guidelines & Tips</summary>
@@ -685,54 +772,36 @@
           </div>
         </div>
 
-        <div class="toolbar three">
-          <button type="button" onclick="downloadPDFDirect(this)">
-            ↓ Direct PDF
-          </button>
-          <button type="button" class="secondary" onclick="sharePDFDirect(this)">
-            ↗ Share PDF
-          </button>
-          <button
-            type="button"
-            class="secondary"
-            onclick="downloadAsImagesZipLike(this)"
-          >
-            ▣ Page PNG
-          </button>
+        <!-- ── Zone 1: Navigation ── -->
+        <div class="zone-label">Navigation</div>
+        <div class="toolbar" style="margin-bottom: 8px;">
+          <button type="button" onclick="saveAndBack()">↩ Save &amp; Back to Form</button>
+          <button type="button" class="ghost" onclick="backToForm()">← Back Only</button>
         </div>
-        <div class="toolbar" style="margin-top: 10px;">
-          <button type="button" style="background:#10b981; color:white; width: 100%; border:none;" onclick="generateOnlineExamHTML()">
+
+        <!-- ── Zone 2: History (2×2 grid) ── -->
+        <div class="zone-label">History</div>
+        <div class="toolbar history-grid" style="margin-bottom: 14px;">
+          <button type="button" class="ghost" onclick="undoState()">↶ Undo</button>
+          <button type="button" class="ghost" onclick="redoState()">↷ Redo</button>
+          <button type="button" class="ghost" onclick="restoreDraft()">⟳ Restore Draft</button>
+          <button type="button" class="ghost" onclick="resetSample()">↺ Reset Sample</button>
+        </div>
+
+        <!-- ── Zone 3: Export ── -->
+        <div class="zone-label">Export</div>
+        <div class="toolbar three" style="margin-bottom: 8px;">
+          <button type="button" onclick="downloadPDFDirect(this)">↓ Direct PDF</button>
+          <button type="button" class="secondary" onclick="sharePDFDirect(this)">↗ Share PDF</button>
+          <button type="button" class="secondary" onclick="downloadAsImagesZipLike(this)">▣ Page PNG</button>
+        </div>
+        <div class="toolbar" style="margin-bottom: 18px;">
+          <button type="button" style="background:#10b981; color:white; border:none; grid-column: 1/-1;" onclick="generateOnlineExamHTML()">
             🌐 Make Online Exam (Auto Generate)
           </button>
         </div>
-        <div class="toolbar three">
-          <button type="button" class="ghost" onclick="resetSample()">
-            ↺ Reset Sample
-          </button>
-          <button type="button" class="ghost" onclick="restoreDraft()">
-            ⟳ Restore Draft
-          </button>
-          <div></div>
-        </div>
-        <div class="toolbar">
-          <button type="button" onclick="saveAndBack()">
-            ↩ Save &amp; Back to Form
-          </button>
-          <button type="button" class="ghost" onclick="backToForm()">
-            ← Back Only
-          </button>
-        </div>
-        <div class="toolbar three">
-          <button type="button" class="secondary" onclick="addQuestion()">
-            Add MCQ
-          </button>
-          <button type="button" class="secondary" onclick="trimEmptyQuestions()">
-            Trim Empty MCQ
-          </button>
-          <button type="button" class="danger" onclick="removeMCQPart()">
-            Remove MCQ Part
-          </button>
-        </div>
+
+        <hr class="zone-divider">
 
         <div class="builder-section" id="basicExamInfoSection">
           <h2 class="section-title">Basic Exam Info</h2>
@@ -1057,34 +1126,15 @@
             />
           </div>
         </div>
-        <div class="toolbar four">
-          <button
-            type="button"
-            class="secondary"
-            onclick="applyLayoutControls()"
-          >
-            Apply Layout
-          </button>
-          <button type="button" class="secondary" onclick="balancedBigger()">
-            Balanced Bigger
-          </button>
-          <button type="button" class="secondary" onclick="compactMode()">
-            Compact
-          </button>
-          <button type="button" class="secondary" onclick="comfortableMode()">
-            Comfortable
-          </button>
+        <!-- ── Zone 5: Layout Presets ── -->
+        <div class="zone-label" style="margin-top: 4px;">Layout Presets</div>
+        <div class="toolbar preset-grid">
+          <button type="button" class="secondary" onclick="balancedBigger()">Balanced Bigger</button>
+          <button type="button" class="secondary" onclick="compactMode()">Compact</button>
+          <button type="button" class="secondary" onclick="comfortableMode()">Comfortable</button>
         </div>
-        <div class="toolbar three">
-          <button type="button" class="ghost" onclick="undoState()">
-            ↶ Undo
-          </button>
-          <button type="button" class="ghost" onclick="redoState()">
-            ↷ Redo
-          </button>
-          <button type="button" class="ghost" onclick="resetSample()">
-            ↺ Reset Sample
-          </button>
+        <div class="toolbar apply-row">
+          <button type="button" class="secondary" onclick="applyLayoutControls()">⟳ Apply Layout</button>
         </div>
 
         <div class="status-box status-save" id="saveStatus">
@@ -1093,6 +1143,13 @@
         <div class="status-box" id="fitStatus">Ready</div>
 
         <div id="sectionTitlesWrap"></div>
+
+        <!-- ── Zone 6: Part Management (near editors) ── -->
+        <div id="mcqMgmtBar" class="toolbar three" style="display:none; margin-bottom: 8px;">
+          <button type="button" class="secondary" onclick="addQuestion()">+ Add MCQ</button>
+          <button type="button" class="secondary" onclick="trimEmptyQuestions()">Trim Empty</button>
+          <button type="button" class="danger" onclick="removeMCQPart()">✕ Remove Part</button>
+        </div>
         <div class="editor-group" id="mcqEditorList"></div>
         <div id="cqSectionMount"></div>
         <div class="editor-group" id="cqEditorList"></div>
@@ -2255,6 +2312,10 @@
         </div>
       </div>`
           : "";
+
+        // Show/hide Zone 6 MCQ management bar
+        const mcqMgmtBar = document.getElementById("mcqMgmtBar");
+        if (mcqMgmtBar) mcqMgmtBar.style.display = hasMcqSection ? "grid" : "none";
 
         cqEditorList.innerHTML = hasCqSection
           ? `
