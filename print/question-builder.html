@@ -4627,6 +4627,31 @@ function splitIntoQuestionBlocks(text) {
         await new Promise((r) => setTimeout(r, 150));
 
         const capture = createPageCaptureClone(pageEl);
+
+        // html2canvas object-fit:contain ঠিকমতো handle করে না → stretch হয়
+        // তাই capture করার আগে প্রতিটা img-এর সঠিক px size explicitly set করি
+        (function fixImagesForCapture(root) {
+          root.querySelectorAll('img').forEach(function(img) {
+            var nw = img.naturalWidth, nh = img.naturalHeight;
+            if (!nw || !nh) return;
+            var cs = window.getComputedStyle(img);
+            if (cs.objectFit !== 'contain') return;
+            var maxH = parseFloat(img.style.maxHeight) || parseFloat(cs.maxHeight) || Infinity;
+            var assignedW = img.offsetWidth || img.getBoundingClientRect().width || nw;
+            var aspect = nw / nh;
+            var finalW = assignedW;
+            var finalH = finalW / aspect;
+            if (isFinite(maxH) && finalH > maxH) {
+              finalH = maxH;
+              finalW = finalH * aspect;
+            }
+            img.style.width  = Math.round(finalW) + 'px';
+            img.style.height = Math.round(finalH) + 'px';
+            img.style.maxHeight = 'none';
+            img.style.objectFit = 'fill';
+          });
+        })(capture.clone);
+
         let canvas;
         try {
           canvas = await html2canvas(capture.clone, {
