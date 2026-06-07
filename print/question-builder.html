@@ -4310,6 +4310,22 @@ function splitIntoQuestionBlocks(text) {
           });
         }
 
+        // একই উদ্দীপক পরপর দুটো প্রশ্নে থাকলে, প্রথমটা রেখে বাকিগুলো থেকে সরিয়ে দাও
+        // origStims ব্যবহার করি যাতে dedup-এর পর সঠিকভাবে compare হয়
+        const origStims = result.map(function(q) { return q.stimulusText || ""; });
+        for (let i = 1; i < result.length; i++) {
+          if (
+            origStims[i] &&
+            origStims[i - 1] &&
+            origStims[i].trim() === origStims[i - 1].trim()
+          ) {
+            result[i].stimulusText = "";
+            result[i].type = (Array.isArray(result[i].statements) && result[i].statements.length >= 2)
+              ? "multistatement"
+              : "normal";
+          }
+        }
+
         return result;
       }
 
