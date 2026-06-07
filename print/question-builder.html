@@ -794,7 +794,7 @@
           </div>
           
           <div class="tiny-hint">
-            <i>i</i> Normal, বহুপদী (i/ii/iii statements সহ), এবং উদ্দীপকসহ MCQ — সব auto-detect হয়। উদ্দীপকের জন্য প্রশ্নের আগে নতুন লাইনে <b>উদ্দীপক: [টেক্সট]</b> লেখো।
+            <i>i</i> Normal, বহুপদী (i/ii/iii statements সহ), এবং উদ্দীপকসহ MCQ — সব auto-detect হয়। উদ্দীপকের জন্য প্রশ্নের আগে নতুন লাইনে <b>{উদ্দীপকের টেক্সট}</b> (তৃতীয় বন্ধনী) অথবা <b>উদ্দীপক: [টেক্সট]</b> লেখো।
           </div>
         </div>
         </div>
@@ -1347,8 +1347,9 @@
 (ঘ) i, ii ও iii
 উত্তর: খ
 
-【TYPE 3 — উদ্দীপকসহ MCQ (stimulus আছে)】
-উদ্দীপক: উদ্দীপকের সম্পূর্ণ টেক্সট এখানে লেখো
+
+【TYPE 3 — উদ্দীপকসহ MCQ — { } তৃতীয় বন্ধনী ব্যবহার করো】
+{উদ্দীপকের সম্পূর্ণ টেক্সট এখানে লেখো}
 ৩. এই উদ্দীপক সম্পর্কিত প্রশ্ন
 (ক) অপশন এক
 (খ) অপশন দুই
@@ -1356,7 +1357,7 @@
 (ঘ) অপশন চার
 উত্তর: ক
 
-উদ্দীপক: একই উদ্দীপক থেকে পরের প্রশ্নের আগেও লেখো
+{একই উদ্দীপক থেকে পরের প্রশ্নের আগেও লেখো}
 ৪. পরবর্তী উদ্দীপক-সম্পর্কিত প্রশ্ন
 (ক) অপশন এক
 (খ) অপশন দুই
@@ -1371,8 +1372,8 @@
 2. অপশন mark হবে ঠিক এভাবে: (ক) (খ) (গ) (ঘ) — প্রতিটি নতুন লাইনে।
 3. উত্তর লাইন হবে ঠিক এই format-এ: উত্তর: ক (অথবা খ/গ/ঘ) — নতুন লাইনে।
 4. বহুপদী statement গুলো হবে: (i) (ii) (iii) — নতুন লাইনে।
-5. উদ্দীপক থাকলে সেই প্রশ্নের ঠিক আগে নতুন লাইনে লেখো: উদ্দীপক: [টেক্সট]
-6. একই উদ্দীপক থেকে একাধিক প্রশ্ন থাকলে, প্রতিটি প্রশ্নের আগে আলাদাভাবে উদ্দীপক: লেখো।
+5. উদ্দীপক থাকলে সেই প্রশ্নের ঠিক আগে নতুন লাইনে লেখো: {উদ্দীপকের টেক্সট} (তৃতীয় বন্ধনীতে)
+6. একই উদ্দীপক থেকে একাধিক প্রশ্ন থাকলে, প্রতিটি প্রশ্নের আগে আলাদাভাবে {টেক্সট} লেখো।
 7. গণিত, পদার্থ, রসায়নের সমীকরণ LaTeX-এ লেখো: $সমীকরণ$
 8. ভগ্নাংশের জন্য সাধারণ slash (/) ব্যবহার না করে লেখো: $\\dfrac{লব}{হর}$
 9. প্রশ্নের মূল টেক্সট হুবহু বইয়ের মতো লেখো — নিজে থেকে কিছু যোগ বা বাদ দেবে না।
@@ -2815,24 +2816,7 @@
             <button type="button" onclick="addCQGroup()" style="font-size:11px;padding:2px 8px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:5px;cursor:pointer;color:#374151;font-weight:600;">+ Add Group</button>
           </div>
           ${groups.length === 0 ? '<div style="font-size:11px;color:#94a3b8;text-align:center;padding:5px 0 2px;">No groups. Add to organize your CQs.</div>' : ''}
-          ${groups.map(g => {
-            const memberBadges = state.cqs.length === 0
-              ? '<span style="font-size:10px;color:#94a3b8;font-style:italic;">কোনো CQ নেই</span>'
-              : state.cqs.map((c, cqIdx) => {
-                  const isMember = c.groupId === g.id;
-                  const otherGroup = !isMember && c.groupId
-                    ? (state.cqGroups || []).find(gr => gr.id === c.groupId)
-                    : null;
-                  const bg  = isMember ? '#1e293b' : otherGroup ? '#fef9c3' : '#f1f5f9';
-                  const clr = isMember ? '#fff'    : otherGroup ? '#854d0e' : '#64748b';
-                  const brd = isMember ? '#1e293b' : otherGroup ? '#fde047' : '#e2e8f0';
-                  const tip = otherGroup
-                    ? `"${esc2(otherGroup.name || 'অন্য group')}" এ আছে — ক্লিক করলে এই group এ সরে আসবে`
-                    : isMember ? 'সরাতে ক্লিক করো' : 'যোগ করতে ক্লিক করো';
-                  const prefix = isMember ? '✓ ' : otherGroup ? '⇄ ' : '';
-                  return `<button type="button" onclick="toggleCQMembership('${g.id}',${cqIdx})" title="${tip}" style="font-size:10px;padding:2px 8px;border-radius:10px;cursor:pointer;font-weight:700;border:1px solid ${brd};background:${bg};color:${clr};line-height:1.5;transition:all 0.15s;">${prefix}CQ ${bn(cqIdx + 1)}</button>`;
-                }).join('');
-            return `
+          ${groups.map(g => `
             <div style="border:1px solid #e2e8f0;border-radius:6px;padding:6px 7px;margin-bottom:5px;background:#fff;">
               <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;margin-bottom:4px;">
                 <input type="text" data-type="cqgname" data-gid="${g.id}" value="${esc2(g.name)}" placeholder="Group Name (e.g. ক বিভাগ)" style="font-size:11px;padding:2px 5px;border:1px solid #cbd5e1;border-radius:4px;width:100%;box-sizing:border-box;">
@@ -2844,12 +2828,8 @@
                 <button type="button" onclick="deleteCQGroup('${g.id}')" style="font-size:12px;padding:0 6px;background:#fff;border:1px solid #fca5a5;border-radius:4px;color:#ef4444;cursor:pointer;font-weight:700;height:22px;line-height:22px;">✕</button>
               </div>
               <textarea data-type="cqgdesc" data-gid="${g.id}" placeholder="Description (optional)" style="font-size:11px;width:100%;padding:2px 5px;border:1px solid #cbd5e1;border-radius:4px;resize:vertical;min-height:32px;box-sizing:border-box;display:block;">${esc2(g.description)}</textarea>
-              <div style="margin-top:6px;padding-top:5px;border-top:1px dashed #f1f5f9;">
-                <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.3px;">এই Group-এ CQ যোগ করো</div>
-                <div style="display:flex;flex-wrap:wrap;gap:4px;">${memberBadges}</div>
-              </div>
-            </div>`;
-          }).join('')}
+            </div>
+          `).join('')}
         `;
         wrap.querySelectorAll("[data-type]").forEach(el => {
           const ev = el.tagName === "SELECT" ? "change" : "input";
@@ -2874,19 +2854,6 @@
             sel.value = curVal;
           });
         }
-        renderAll();
-        scheduleAutosave();
-      }
-
-      function toggleCQMembership(groupId, cqIdx) {
-        if (!state.cqs[cqIdx]) return;
-        if (state.cqs[cqIdx].groupId === groupId) {
-          state.cqs[cqIdx].groupId = '';
-        } else {
-          state.cqs[cqIdx].groupId = groupId;
-        }
-        renderCQGroupManager();
-        initEditors();
         renderAll();
         scheduleAutosave();
       }
@@ -3877,7 +3844,6 @@
           time: c.time || "২০ মিনিট",
           totalMarks: c.totalMarks || "১০",
           stimulus: c.stimulus || "",
-          stimAlign: c.stimAlign || "",
           groupId: c.groupId || "",
           parts: {
             ক: c.parts?.ক || "",
@@ -4131,8 +4097,12 @@
         return normalizeAnswerToken(letterMatch ? letterMatch[0] : "");
       }
             function normalizeBulkQuestionText(text) {
-  return String(text || "")
-    .replace(/\r/g, "")
+  // { } তৃতীয় বন্ধনীর মধ্যে উদ্দীপক detect করে → "উদ্দীপক: ..." format-এ convert
+  let s = String(text || "").replace(/\r/g, "");
+  s = s.replace(/\{([^{}]+)\}/gs, function(_, content) {
+    return 'উদ্দীপক: ' + content.trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+  });
+  return s
     .replace(/([^\n\s])\s*(\(\s*(?:iii|ii|iv|vi|vii|viii|ix|xi|xii|i)\s*\))/gi, "$1\n$2")
     .replace(/([^\n\s])\s+((?:iii|ii|iv|vi|vii|viii|ix|xi|xii|i)\s*[).\]]\s+)/gi, "$1\n$2")
     .replace(/([^\n\s])\s*(\(\s*[ক-ঘA-D]\s*\))/gu, "$1\n$2")
@@ -4377,7 +4347,7 @@ function splitIntoQuestionBlocks(text) {
 (ঘ) i, ii ও iii
 উত্তর: গ
 
-উদ্দীপক: মধুর আমার মায়ের হাসি চাঁদের মুখে ঝরে, মাকে মনে পড়ে আমার মাকে মনে পড়ে।
+{মধুর আমার মায়ের হাসি চাঁদের মুখে ঝরে, মাকে মনে পড়ে আমার মাকে মনে পড়ে।}
 ৩. উদ্দীপকে কপোতাক্ষ নদ কবিতার সাদৃশ্যগত দিক কোনটি?
 (ক) জাতির স্মরণ
 (খ) মানসের ফেরার আকুতি
@@ -4385,6 +4355,7 @@ function splitIntoQuestionBlocks(text) {
 (ঘ) বঙ্গবাসীর প্রতি মমতা
 উত্তর: ঘ
 
+{মধুর আমার মায়ের হাসি চাঁদের মুখে ঝরে, মাকে মনে পড়ে আমার মাকে মনে পড়ে।}
 ৪. উদ্দীপকের মূলভাব কোনটি?
 (ক) স্বদেশপ্রেম
 (খ) মাতৃভক্তি
@@ -5187,7 +5158,7 @@ function generateOnlineExamHTML() {
   
   const draftExam = {
       title: state.examTitle || "Online Exam",
-      duration: parseFlexibleNumber(state.durationLine, 30),
+      duration: state.durationLine ? parseInt(state.durationLine) || 30 : 30,
       questions: quizData
   };
   
