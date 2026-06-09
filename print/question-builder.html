@@ -388,7 +388,11 @@
       .only-question-main { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
       .only-question-no { font-weight: var(--question-number-weight); white-space: nowrap; }
       .only-question-text { font-weight: 400; line-height: var(--body-line-height); flex: 1; overflow-wrap: anywhere; }
-      
+
+      /* MathJax inline math size — surrounding text-er sathe miliye rakha */
+      mjx-container { font-size: var(--math-scale, 0.88em); }
+      mjx-container[display="true"] { font-size: var(--math-display-scale, 1em); }
+
       hr.soft { border: none; border-top: 1px solid #dbe3ed; margin: 14px 0; }
 
       #cropperModal {
@@ -1059,6 +1063,17 @@
             />
           </div>
           <div class="field" style="margin-bottom: 0">
+            <label for="mathScaleControl">Math (LaTeX) Size %</label
+            ><input
+              id="mathScaleControl"
+              type="number"
+              min="70"
+              max="110"
+              step="1"
+              value="88"
+            />
+          </div>
+          <div class="field" style="margin-bottom: 0">
             <div class="toggle-wrapper"><label for="questionNumberBoldControl" class="toggle-text">Question Number Bold</label><label class="switch"><input type="checkbox" id="questionNumberBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
@@ -1223,6 +1238,7 @@
     questionNumberBold: false,
     questionImageWidth: 52,
     questionImageHeight: 120,
+    mathScale: 88,
     padTop: 0.5,
     padRight: 0.5,
     padBottom: 0.5,
@@ -1641,6 +1657,7 @@
       const questionFontControl = document.getElementById(
         "questionFontControl"
       );
+      const mathScaleControl = document.getElementById("mathScaleControl");
       const questionImageWidthControl = document.getElementById(
         "questionImageWidthControl"
       );
@@ -1689,6 +1706,7 @@
         questionNumberBoldControl,
         questionImageWidthControl,
         questionImageHeightControl,
+        mathScaleControl,
         padTopControl,
         padRightControl,
         padBottomControl,
@@ -2165,6 +2183,7 @@
         questionNumberBoldControl.checked = !!state.layout.questionNumberBold;
         questionImageWidthControl.value = state.layout.questionImageWidth ?? state.layout.cqImageWidth;
         questionImageHeightControl.value = state.layout.questionImageHeight ?? state.layout.cqImageHeight;
+        if (mathScaleControl) mathScaleControl.value = state.layout.mathScale ?? 88;
         padTopControl.value = state.layout.padTop;
         padRightControl.value = state.layout.padRight;
         padBottomControl.value = state.layout.padBottom;
@@ -2986,6 +3005,7 @@
         state.layout.questionFont = numberValueOr(state.layout.bodyFont, questionFontControl.value);
         state.layout.questionImageWidth = numberValueOr(52, questionImageWidthControl.value);
         state.layout.questionImageHeight = numberValueOr(120, questionImageHeightControl.value);
+        state.layout.mathScale = numberValueOr(88, mathScaleControl ? mathScaleControl.value : 88);
         state.layout.padTop = numberValueOr(0.42, padTopControl.value);
         state.layout.padRight = numberValueOr(0.42, padRightControl.value);
         state.layout.padBottom = numberValueOr(0.28, padBottomControl.value);
@@ -3115,6 +3135,7 @@
         root.setProperty("--question-font-size", (state.layout.questionFont ?? state.layout.bodyFont) + "px");
         root.setProperty("--cq-image-width", state.layout.cqImageWidth + "%");
         root.setProperty("--cq-image-height", state.layout.cqImageHeight + "px");
+        root.setProperty("--math-scale", (state.layout.mathScale ?? 88) + "%");
         root.setProperty("--pad-top", state.layout.padTop + "in");
         root.setProperty("--pad-right", state.layout.padRight + "in");
         root.setProperty("--pad-bottom", state.layout.padBottom + "in");
