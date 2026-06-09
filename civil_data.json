@@ -4,13 +4,14 @@
   "exams": [
     {
       "id": "ex_mq5a874kihl",
-      "date": "2026-06-08T14:07:21.789Z",
+      "date": "2026-06-09T12:46:05.500Z",
       "examData": {
         "title": "Model Test",
         "duration": "15 minutes",
         "password": "BIG714",
         "allowedIds": [
-          "101"
+          "101",
+          "102"
         ],
         "questions": [
           {
@@ -692,5 +693,5 @@
       "live": false
     }
   ],
-  "updated": "2026-06-08T14:07:22.298Z"
+  "updated": "2026-06-09T12:46:07.113Z"
 }
