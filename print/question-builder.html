@@ -3338,7 +3338,8 @@
         const _qd = state.questionSectionDesc || "";
         return `<div class="cq-section only-question-section"${
           compact ? ' style="margin-top:0;border-top:none;padding-top:0;"' : ""
-        }><div class="cq-title">QUESTION SECTION</div>${_qh ? `<div class="section-part-header">${formatText(_qh)}</div>` : ""}${_qd ? `<div class="section-part-desc">${formatText(_qd)}</div>` : ""}</div>`;
+        }>
+        ${_qh ? `<div class="section-part-header">${formatText(_qh)}</div>` : ""}${_qd ? `<div class="section-part-desc">${formatText(_qd)}</div>` : ""}</div>`;
       }
       function createOnlyQuestionPageMarkup(includeHeader = false) {
         includeHeader = includeHeader && allowPageHeader();
@@ -3460,7 +3461,8 @@
         const _cd = state.cqSectionDesc || "";
         return `<div class="cq-section"${
           compact ? ' style="margin-top:0;border-top:none;padding-top:0;"' : ""
-        }><div class="cq-title">CQ SECTION</div>${_ch ? `<div class="section-part-header">${formatText(_ch)}</div>` : ""}${_cd ? `<div class="section-part-desc">${formatText(_cd)}</div>` : ""}</div>`;
+        }>
+        ${_ch ? `<div class="section-part-header">${formatText(_ch)}</div>` : ""}${_cd ? `<div class="section-part-desc">${formatText(_cd)}</div>` : ""}</div>`;
       }
       function createCQPageMarkup(includeHeader = false) {
         includeHeader = includeHeader && allowPageHeader();
@@ -3559,7 +3561,6 @@
         ${renderPageTopDate()}
         ${includeHeader ? renderHeaderBlock() : ""}
         <div class="content-area">
-          <div class="page-section-title">MCQ SECTION</div>
           ${(state.mcqSectionHeader || "") ? `<div class="section-part-header">${formatText(state.mcqSectionHeader)}</div>` : ""}
           ${(state.mcqSectionDesc || "") ? `<div class="section-part-desc">${formatText(state.mcqSectionDesc)}</div>` : ""}
           <div class="mcq-columns">
