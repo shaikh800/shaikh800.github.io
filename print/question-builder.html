@@ -1453,6 +1453,7 @@
 10. Output-এ শুধু formatted MCQ থাকবে — কোনো ব্যাখ্যা, মন্তব্য, বা অতিরিক্ত লেখা নয়।
 11. প্রতিটি MCQ-এর মাঝে একটি ফাঁকা লাইন রাখো।
 12. ছবিতে উত্তর না থাকলে সবচেয়ে সম্ভাব্য সঠিক উত্তর দাও।
+13. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
 
 এখন ছবি দাও — আমি সব MCQ extract করে দেব।`;
         } else if (type === 'cq') {
@@ -1480,6 +1481,7 @@
 5. ভগ্নাংশ: $\\dfrac{লব}{হর}$
 6. হুবহু বইয়ের টেক্সট — কিছু যোগ/বাদ নয়।
 7. শুধু formatted CQ output — কোনো ব্যাখ্যা নয়।
+8. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
 
 এখন ছবি দাও — আমি সব CQ extract করে দেব।`;
         } else if (type === 'question') {
@@ -1501,6 +1503,7 @@
 3. ভগ্নাংশ: $\\dfrac{লব}{হর}$
 4. হুবহু বইয়ের টেক্সট — কোনো উত্তর বা ব্যাখ্যা নয়।
 5. শুধু formatted প্রশ্ন output করো।
+6. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
 
 এখন ছবি দাও — আমি সব প্রশ্ন extract করে দেব।`;
         }
@@ -1741,6 +1744,7 @@
         bodyFontControl.closest(".field"),
         bodyBoldControl.closest(".field"),
         lineHeightControl.closest(".field"),
+        mathScaleControl.closest(".field"),
       ].filter(Boolean);
       const uniformMcqNodes = [
         gapControl.closest(".field"),
@@ -3206,7 +3210,7 @@
         return `<div class="answer-cut"><span class="scissor">✂</span><span class="dotline"></span><span class="scissor">✂</span></div><div class="footer-title">ANSWER KEY</div><table class="answer-table"><tbody><tr>${cols}</tr><tr>${ans}</tr></tbody></table>`;
       }
       function renderCQItem(c, idx) {
-        const stimulusLine = String(c.stimulus || "").trim();
+        const stimulusLine = String(c.stimulus || "").trim().replace(/^(উদ্দীপক|stimulus)\s*[:।\-]\s*/i, "");
         const images = Array.isArray(c.images) ? c.images : [];
         const defaultWidth = state.layout.cqImageWidth;
         const defaultHeight = state.layout.cqImageHeight;
