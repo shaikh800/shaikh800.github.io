@@ -3333,13 +3333,12 @@
       </div>
     </div>`;
       }
-      function createOnlyQuestionSectionMarkup(compact = false) {
-        const _qh = state.questionSectionHeader || "";
-        const _qd = state.questionSectionDesc || "";
+      function createOnlyQuestionSectionMarkup(compact = false, showTitles = true) {
+        const _qh = showTitles ? (state.questionSectionHeader || "") : "";
+        const _qd = showTitles ? (state.questionSectionDesc || "") : "";
         return `<div class="cq-section only-question-section"${
           compact ? ' style="margin-top:0;border-top:none;padding-top:0;"' : ""
-        }>
-        ${_qh ? `<div class="section-part-header">${formatText(_qh)}</div>` : ""}${_qd ? `<div class="section-part-desc">${formatText(_qd)}</div>` : ""}</div>`;
+        }>${_qh ? `<div class="section-part-header">${formatText(_qh)}</div>` : ""}${_qd ? `<div class="section-part-desc">${formatText(_qd)}</div>` : ""}</div>`;
       }
       function createOnlyQuestionPageMarkup(includeHeader = false) {
         includeHeader = includeHeader && allowPageHeader();
@@ -3371,9 +3370,10 @@
 
         let section = pageEl.querySelector(".only-question-section");
         if (!section) {
+          const isFirstItem = (startIndex === 0); // প্রথম প্রশ্ন কিনা যাচাই
           footer.insertAdjacentHTML(
             "beforebegin",
-            createOnlyQuestionSectionMarkup(compact)
+            createOnlyQuestionSectionMarkup(compact, isFirstItem)
           );
           section = pageEl.querySelector(".only-question-section");
         }
@@ -3456,13 +3456,12 @@
             </div>
           </header>`;
       }
-      function createCQSectionMarkup(compact = false) {
-        const _ch = state.cqSectionHeader || "";
-        const _cd = state.cqSectionDesc || "";
+      function createCQSectionMarkup(compact = false, showTitles = true) {
+        const _ch = showTitles ? (state.cqSectionHeader || "") : "";
+        const _cd = showTitles ? (state.cqSectionDesc || "") : "";
         return `<div class="cq-section"${
           compact ? ' style="margin-top:0;border-top:none;padding-top:0;"' : ""
-        }>
-        ${_ch ? `<div class="section-part-header">${formatText(_ch)}</div>` : ""}${_cd ? `<div class="section-part-desc">${formatText(_cd)}</div>` : ""}</div>`;
+        }>${_ch ? `<div class="section-part-header">${formatText(_ch)}</div>` : ""}${_cd ? `<div class="section-part-desc">${formatText(_cd)}</div>` : ""}</div>`;
       }
       function createCQPageMarkup(includeHeader = false) {
         includeHeader = includeHeader && allowPageHeader();
@@ -3506,9 +3505,10 @@
 
         let cqSection = pageEl.querySelector(".cq-section");
         if (!cqSection) {
+          const isFirstItem = (startIndex === 0); // প্রথম প্রশ্ন কিনা যাচাই
           footer.insertAdjacentHTML(
             "beforebegin",
-            createCQSectionMarkup(compact)
+            createCQSectionMarkup(compact, isFirstItem)
           );
           cqSection = pageEl.querySelector(".cq-section");
         }
@@ -3556,13 +3556,14 @@
       }
       function createMcqPageMarkup(pageIndex) {
         const includeHeader = mcqPageHasHeader(pageIndex);
+        const showTitles = (pageIndex === 0); // শুধুমাত্র প্রথম পেজে টাইটেল দেখাবে
         return `
       <section class="page mcq-page ${includeHeader ? "" : "no-header-top"}">
         ${renderPageTopDate()}
         ${includeHeader ? renderHeaderBlock() : ""}
         <div class="content-area">
-          ${(state.mcqSectionHeader || "") ? `<div class="section-part-header">${formatText(state.mcqSectionHeader)}</div>` : ""}
-          ${(state.mcqSectionDesc || "") ? `<div class="section-part-desc">${formatText(state.mcqSectionDesc)}</div>` : ""}
+          ${(showTitles && state.mcqSectionHeader) ? `<div class="section-part-header">${formatText(state.mcqSectionHeader)}</div>` : ""}
+          ${(showTitles && state.mcqSectionDesc) ? `<div class="section-part-desc">${formatText(state.mcqSectionDesc)}</div>` : ""}
           <div class="mcq-columns">
             <div class="mcq-column mcq-column-left"></div>
             <div class="mcq-column mcq-column-right"></div>
