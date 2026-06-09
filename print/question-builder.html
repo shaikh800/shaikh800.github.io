@@ -4158,12 +4158,21 @@
         return normalizeAnswerToken(letterMatch ? letterMatch[0] : "");
       }
             function normalizeBulkQuestionText(text) {
-  // { } তৃতীয় বন্ধনীর মধ্যে উদ্দীপক detect করে → "উদ্দীপক: ..." format-এ convert
   let s = String(text || "").replace(/\r/g, "");
+
+  // LaTeX math ($...$, $$...$$) সাময়িক রক্ষা করো যাতে {..} replacement এ নষ্ট না হয়
+  const mathSlots = [];
+  s = s.replace(/\$\$[\s\S]*?\$\$|\$[^$\n]+?\$/g, function(m) {
+    mathSlots.push(m);
+    return '\x00MATH' + (mathSlots.length - 1) + '\x00';
+  });
+
+  // { } তৃতীয় বন্ধনীর মধ্যে উদ্দীপক detect করে → "উদ্দীপক: ..." format-এ convert
   s = s.replace(/\{([^{}]+)\}/gs, function(_, content) {
     return 'উদ্দীপক: ' + content.trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ');
   });
-  return s
+
+  s = s
     .replace(/([^\n\s])\s*(\(\s*(?:iii|ii|iv|vi|vii|viii|ix|xi|xii|i)\s*\))/gi, "$1\n$2")
     .replace(/([^\n\s])\s+((?:iii|ii|iv|vi|vii|viii|ix|xi|xii|i)\s*[).\]]\s+)/gi, "$1\n$2")
     .replace(/([^\n\s])\s*(\(\s*[ক-ঘA-D]\s*\))/gu, "$1\n$2")
@@ -4171,6 +4180,11 @@
     .replace(/([^\n])\s*(উত্তর)\s*[:：\-ঃ]\s*/giu, "$1\nউত্তর: ")
     .replace(/([^\n])\s*(answer|ans)\s*[:：\-ঃ]\s*/giu, "$1\nanswer: ")
     .replace(/([^\n])\s*(উদ্দীপক|stimulus)\s*[:：\-ঃ]\s*/giu, "$1\n$2: ");
+
+  // LaTeX math ফিরিয়ে দাও
+  s = s.replace(/\x00MATH(\d+)\x00/g, function(_, i) { return mathSlots[+i]; });
+
+  return s;
 }
 function splitIntoQuestionBlocks(text) {
   const clean = normalizeBulkQuestionText(text).trim();
