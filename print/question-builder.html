@@ -1089,6 +1089,9 @@
             <div class="toggle-wrapper"><label for="questionNumberBoldControl" class="toggle-text">Question Number Bold</label><label class="switch"><input type="checkbox" id="questionNumberBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
+            <div class="toggle-wrapper"><label for="questionShowNumberControl" class="toggle-text">Question Number দেখাও</label><label class="switch"><input type="checkbox" id="questionShowNumberControl"><span class="slider"></span></label></div>
+          </div>
+          <div class="field" style="margin-bottom: 0">
             <label for="questionImageWidthControl">Question Image Width %</label
             ><input
               id="questionImageWidthControl"
@@ -1249,6 +1252,7 @@
     questionFont: 11,
     questionFontLinked: true,
     questionNumberBold: false,
+    hideQuestionNumber: true,
     questionImageWidth: 52,
     questionImageHeight: 120,
     mathScale: 88,
@@ -1603,6 +1607,7 @@
       const questionNumberBoldControl = document.getElementById(
         "questionNumberBoldControl"
       );
+      const questionShowNumberControl = document.getElementById("questionShowNumberControl");
       const masterBoldTargets = [
         answerKeyBoldControl,
         answerNumBoldControl,
@@ -1786,6 +1791,7 @@
       const uniformQuestionNodes = [
         questionFontControl.closest(".field"),
         questionNumberBoldControl.closest(".field"),
+        questionShowNumberControl ? questionShowNumberControl.closest(".field") : null,
         questionImageWidthControl.closest(".field"),
         questionImageHeightControl.closest(".field"),
       ].filter(Boolean);
@@ -2207,6 +2213,7 @@
         cqImageHeightControl.value = state.layout.cqImageHeight;
         questionFontControl.value = state.layout.questionFont ?? state.layout.bodyFont;
         questionNumberBoldControl.checked = !!state.layout.questionNumberBold;
+        if (questionShowNumberControl) questionShowNumberControl.checked = state.layout.hideQuestionNumber !== true;
         questionImageWidthControl.value = state.layout.questionImageWidth ?? state.layout.cqImageWidth;
         questionImageHeightControl.value = state.layout.questionImageHeight ?? state.layout.cqImageHeight;
         if (mathScaleControl) mathScaleControl.value = state.layout.mathScale ?? 88;
@@ -3128,6 +3135,7 @@
         state.layout.optionBadgeBold = optionBadgeBoldControl.checked;
         state.layout.mcqBold = mcqBoldControl.checked;
         state.layout.questionNumberBold = questionNumberBoldControl.checked;
+        state.layout.hideQuestionNumber = questionShowNumberControl ? !questionShowNumberControl.checked : false;
         state.layout.mcqImageWidth = numberValueOr(42, mcqImageWidthControl.value);
         state.layout.mcqImageHeight = numberValueOr(95, mcqImageHeightControl.value);
         state.layout.optionMarkScale = numberValueOr(1, optionMarkScaleControl.value);
@@ -3400,9 +3408,7 @@
         })
         .join("")}
       <div class="cq-head">
-        <div class="only-question-main"><span class="only-question-no">${bn(
-          idx + 1
-        )}${questionStop()}</span><span class="only-question-text">${formatText(
+        <div class="only-question-main">${state.layout.hideQuestionNumber ? "" : `<span class="only-question-no">${bn(idx + 1)}${questionStop()}</span>`}<span class="only-question-text">${formatText(
           stimulusLine
         )}</span></div>
         ${subs.length === 0 ? `<div class="cq-meta">${bn(totalMark)} ${textByLang("নম্বর", "marks")}</div>` : `<div class="cq-meta">${bn(totalMark)} ${textByLang("নম্বর", "marks")}</div>`}
@@ -3411,7 +3417,7 @@
         `<div class="sub-question-item">
           <div class="sub-question-label">${subQLabel(si)}.</div>
           <div class="sub-question-text">${formatText(sq.text)}</div>
-          <div class="sub-question-mark">${bn(sq.mark || "1")} ${textByLang("নম্বর", "marks")}</div>
+          <div class="sub-question-mark">${bn(sq.mark || "1")}</div>
         </div>`).join("")}</div>` : ""}
     </div>`;
       }
