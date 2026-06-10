@@ -390,6 +390,11 @@
       .only-question-main { display: flex; align-items: baseline; gap: 5px; flex: 1; min-width: 0; }
       .only-question-no { font-weight: var(--question-number-weight); white-space: nowrap; }
       .only-question-text { font-weight: 400; line-height: var(--body-line-height); flex: 1; overflow-wrap: anywhere; }
+      .sub-question-list { margin-top: 3px; display: flex; flex-direction: column; gap: 2px; }
+      .sub-question-item { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-left: 14px; }
+      .sub-question-label { font-weight: 700; white-space: nowrap; min-width: 18px; }
+      .sub-question-text { flex: 1; overflow-wrap: anywhere; }
+      .sub-question-mark { white-space: nowrap; font-size: calc(var(--body-font-size) * 0.86); color: #111827; }
 
       /* MathJax inline math size — surrounding text-er sathe miliye rakha */
       mjx-container { font-size: var(--math-scale, 0.88em); }
@@ -2095,6 +2100,7 @@
       function isOnlyQuestionMeaningful(q) {
         return (
           String(q.text || "").trim() ||
+          (Array.isArray(q.subQuestions) && q.subQuestions.some(sq => String(sq.text || "").trim())) ||
           (Array.isArray(q.images) && q.images.some((img) => String(img?.src || "").trim()))
         );
       }
@@ -2137,7 +2143,7 @@
           0
         );
         const totalOnlyQuestionMarks = onlyQuestionList.reduce(
-          (sum, q) => sum + parseFlexibleNumber(q.mark, 1),
+          (sum, q) => sum + getOQComputedMarks(q),
           0
         );
         return {
@@ -2473,12 +2479,26 @@
               idx + 1
             )}</span><span class="summary-actions"><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveOnlyQuestion(${idx},-1)">▲</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveOnlyQuestion(${idx},1)">▼</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); deleteOnlyQuestion(${idx})">✕</button></span></span></summary>
             <div class="editor-grid">
-              <div class="field"><label>Question</label><textarea data-type="oqtext" data-index="${idx}">${esc(
+              <div class="field"><label>Question${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (Stem)" : ""}</label><textarea data-type="oqtext" data-index="${idx}">${esc(
               q.text || ""
             )}</textarea></div>
-              <div class="field"><label>Mark</label><input data-type="oqmark" data-index="${idx}" value="${esc(
+              ${(() => {
+                const subs = Array.isArray(q.subQuestions) ? q.subQuestions : [];
+                const subRows = subs.map((sq, si) =>
+                  `<div class="part-editor-row" style="align-items:flex-end;">
+                    <div class="field"><label>${subQLabel(si)}. Sub-question</label><textarea data-type="oqsubtext" data-index="${idx}" data-si="${si}">${esc(sq.text || "")}</textarea></div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                      <div class="field"><label>Mark</label><input data-type="oqsubmark" data-index="${idx}" data-si="${si}" value="${esc(sq.mark || "1")}" style="width:100%;"></div>
+                      <button type="button" class="icon-btn" style="align-self:flex-end;color:#ef4444;border-color:#fecaca;" onclick="deleteSubQuestion(${idx},${si})">✕ Remove</button>
+                    </div>
+                  </div>`
+                ).join("");
+                return subRows;
+              })()}
+              <button type="button" class="add-stmt-btn" onclick="addSubQuestion(${idx})">+ Sub-question যোগ করো</button>
+              <div class="field"><label>Mark${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (auto-computed)" : ""}</label><input data-type="oqmark" data-index="${idx}" value="${esc(
               q.mark || "1"
-            )}"></div>
+            )}" ${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? 'readonly style="background:#f1f5f9;color:#64748b;cursor:not-allowed;"' : ""}></div>
               ${renderImageControls(
                 "question",
                 idx,
@@ -2694,6 +2714,19 @@
           );
         else if (type === "oqtext") state.onlyQuestions[idx].text = el.value;
         else if (type === "oqmark") state.onlyQuestions[idx].mark = el.value;
+        else if (type === "oqsubtext") {
+          const si = Number(el.dataset.si);
+          if (!Array.isArray(state.onlyQuestions[idx].subQuestions)) state.onlyQuestions[idx].subQuestions = [];
+          if (!state.onlyQuestions[idx].subQuestions[si]) state.onlyQuestions[idx].subQuestions[si] = { text: "", mark: "1" };
+          state.onlyQuestions[idx].subQuestions[si].text = el.value;
+        }
+        else if (type === "oqsubmark") {
+          const si = Number(el.dataset.si);
+          if (!Array.isArray(state.onlyQuestions[idx].subQuestions)) state.onlyQuestions[idx].subQuestions = [];
+          if (!state.onlyQuestions[idx].subQuestions[si]) state.onlyQuestions[idx].subQuestions[si] = { text: "", mark: "1" };
+          state.onlyQuestions[idx].subQuestions[si].mark = el.value;
+          state.onlyQuestions[idx].mark = String(getOQComputedMarks(state.onlyQuestions[idx]));
+        }
         else if (type === "mcq-section-header") state.mcqSectionHeader = el.value;
         else if (type === "mcq-section-desc") state.mcqSectionDesc = el.value;
         else if (type === "cq-section-header") state.cqSectionHeader = el.value;
@@ -2839,6 +2872,7 @@
           text: "",
           mark: "1",
           images: [],
+          subQuestions: [],
         });
         initEditors();
         renderAll();
@@ -2863,6 +2897,38 @@
         lastFocusedSection = "onlyQuestionFlowSection";
         lastOpenedEditor = { type: "", index: -1 };
         state.onlyQuestions.splice(idx, 1);
+        initEditors();
+        renderAll();
+      }
+      const _subQLabels = ["ক","খ","গ","ঘ","ঙ","চ","ছ","জ","ঝ","ঞ"];
+      const _subQLabelsEn = ["a","b","c","d","e","f","g","h","i","j"];
+      function subQLabel(index) {
+        return isEnglishMode()
+          ? (_subQLabelsEn[index] || String.fromCharCode(97 + index))
+          : (_subQLabels[index] || String(index + 1));
+      }
+      function getOQComputedMarks(q) {
+        const subs = Array.isArray(q.subQuestions) ? q.subQuestions : [];
+        if (subs.length === 0) return parseFlexibleNumber(q.mark, 1);
+        const total = subs.reduce((sum, sq) => sum + parseFlexibleNumber(sq.mark, 1), 0);
+        return total > 0 ? total : parseFlexibleNumber(q.mark, 1);
+      }
+      function addSubQuestion(idx) {
+        keepSectionOpen("onlyQuestionFlowSection", "question", idx);
+        if (!Array.isArray(state.onlyQuestions[idx].subQuestions)) {
+          state.onlyQuestions[idx].subQuestions = [];
+        }
+        state.onlyQuestions[idx].subQuestions.push({ text: "", mark: "1" });
+        initEditors();
+        renderAll();
+      }
+      function deleteSubQuestion(idx, si) {
+        keepSectionOpen("onlyQuestionFlowSection", "question", idx);
+        if (!Array.isArray(state.onlyQuestions[idx]?.subQuestions)) return;
+        state.onlyQuestions[idx].subQuestions.splice(si, 1);
+        if (state.onlyQuestions[idx].subQuestions.length === 0) {
+          state.onlyQuestions[idx].mark = state.onlyQuestions[idx].mark || "1";
+        }
         initEditors();
         renderAll();
       }
@@ -3318,6 +3384,12 @@
         const images = Array.isArray(q.images) ? q.images : [];
         const defaultWidth = state.layout.questionImageWidth;
         const defaultHeight = state.layout.questionImageHeight;
+        const subs = Array.isArray(q.subQuestions)
+          ? q.subQuestions.filter(sq => String(sq.text || "").trim())
+          : [];
+        const totalMark = subs.length > 0
+          ? String(subs.reduce((s, sq) => s + parseFlexibleNumber(sq.mark, 1), 0))
+          : (q.mark || "1");
         return `
     <div class="cq-item only-question-item">
       ${images
@@ -3333,8 +3405,14 @@
         )}${questionStop()}</span><span class="only-question-text">${formatText(
           stimulusLine
         )}</span></div>
-        <div class="cq-meta">${bn(q.mark || "1")} ${textByLang("নম্বর", "marks")}</div>
+        ${subs.length === 0 ? `<div class="cq-meta">${bn(totalMark)} ${textByLang("নম্বর", "marks")}</div>` : `<div class="cq-meta">${bn(totalMark)} ${textByLang("নম্বর", "marks")}</div>`}
       </div>
+      ${subs.length > 0 ? `<div class="sub-question-list">${subs.map((sq, si) =>
+        `<div class="sub-question-item">
+          <div class="sub-question-label">${subQLabel(si)}.</div>
+          <div class="sub-question-text">${formatText(sq.text)}</div>
+          <div class="sub-question-mark">${bn(sq.mark || "1")} ${textByLang("নম্বর", "marks")}</div>
+        </div>`).join("")}</div>` : ""}
     </div>`;
       }
       function createOnlyQuestionSectionMarkup(compact = false, showTitles = true) {
