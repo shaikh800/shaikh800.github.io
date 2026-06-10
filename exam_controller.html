@@ -203,10 +203,15 @@ td{border:1px solid var(--line);padding:9px 12px;}
       <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="exam-pass" placeholder="e.g. fec123 (Optional)"></div>
       <div class="field">
   <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center; flex-wrap:wrap;">
+    <button type="button" onclick="selectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ সবাই</button>
+    <button type="button" onclick="deselectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ কেউ না</button>
+    <span style="font-size:11px; color:#64748b;">← কেউ না = সবার জন্য Open</span>
+  </div>
   <div id="builder-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
      <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
   </div>
-  <div style="font-size: 11px; color: var(--muted); margin-top: 5px;">* কাউকে সিলেক্ট না করলে পরীক্ষাটি সবার জন্য উন্মুক্ত (Public) থাকবে।</div>
+  <div style="font-size: 11px; color: #f59e0b; margin-top: 5px; background:#fffbeb; padding:5px 8px; border-radius:5px; border:1px solid #fde68a;">⚠️ পরে নতুন student add হলে তাকে দেখাতে <b>"কেউ না"</b> করে Save করুন (সবার জন্য Open হবে)।</div>
 </div>
     </div>
     <div id="questions-container"></div>
@@ -229,6 +234,11 @@ td{border:1px solid var(--line);padding:9px 12px;}
       <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="edit-pass" placeholder="Optional"></div>
       <div class="field">
   <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center; flex-wrap:wrap;">
+    <button type="button" onclick="selectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ সবাই</button>
+    <button type="button" onclick="deselectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ কেউ না</button>
+    <span style="font-size:11px; color:#64748b;">← কেউ না = সবার জন্য Open</span>
+  </div>
   <div id="edit-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
      <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
   </div>
@@ -449,6 +459,12 @@ function populateStudentCheckboxes(containerId, selectedIds = []) {
 function getSelectedStudents(containerId) {
   const checkboxes = document.querySelectorAll(`.student-cb-${containerId}:checked`);
   return Array.from(checkboxes).map(cb => cb.value);
+}
+function selectAllStudents(containerId) {
+  document.querySelectorAll(`.student-cb-${containerId}`).forEach(cb => cb.checked = true);
+}
+function deselectAllStudents(containerId) {
+  document.querySelectorAll(`.student-cb-${containerId}`).forEach(cb => cb.checked = false);
 }
 // ── Open Builder with pre-filled draft (question-builder.html থেকে) ──
 function _openBuilderWithDraft(draft){
@@ -784,26 +800,26 @@ const CTRL_SESSION_EXPIRY_KEY = 'shaikh_ctrl_expiry_v1';
 const CTRL_GH_TOKEN_KEY  = 'shaikh_gh_token_v1';       // admin_panel এর মতোই একই key
 const CTRL_GAS_URL_KEY   = 'shaikh_gas_url_v1';
 
-// Config helpers — sessionStorage ব্যবহার করে (browser বন্ধে expire)
+// Config helpers — localStorage ব্যবহার করে (device-এ persist হয়)
 function token(){
   const v = document.getElementById('gh-token').value.trim();
-  if(v) sessionStorage.setItem(CTRL_GH_TOKEN_KEY, v);
-  return v || sessionStorage.getItem(CTRL_GH_TOKEN_KEY) || '';
+  if(v) localStorage.setItem(CTRL_GH_TOKEN_KEY, v);
+  return v || localStorage.getItem(CTRL_GH_TOKEN_KEY) || '';
 }
 function gasUrl(){
   const v = document.getElementById('gas-url-hdr').value.trim();
-  if(v) sessionStorage.setItem(CTRL_GAS_URL_KEY, v);
-  return v || sessionStorage.getItem(CTRL_GAS_URL_KEY) || '';
+  if(v) localStorage.setItem(CTRL_GAS_URL_KEY, v);
+  return v || localStorage.getItem(CTRL_GAS_URL_KEY) || '';
 }
-// Session token — sessionStorage থেকে dynamic ভাবে আসে
+// Session token — localStorage থেকে আসে (expiry check সহ)
 function ctrlToken(){
-  return sessionStorage.getItem(CTRL_SESSION_TOKEN_KEY) || '';
+  return localStorage.getItem(CTRL_SESSION_TOKEN_KEY) || '';
 }
 
 // Saved values দিয়ে inputs ভরো
 function loadSavedInputs(){
-  const ghTok = sessionStorage.getItem(CTRL_GH_TOKEN_KEY);
-  const gasU  = sessionStorage.getItem(CTRL_GAS_URL_KEY);
+  const ghTok = localStorage.getItem(CTRL_GH_TOKEN_KEY);
+  const gasU  = localStorage.getItem(CTRL_GAS_URL_KEY);
   if(ghTok) document.getElementById('gh-token').value = ghTok;
   if(gasU)  document.getElementById('gas-url-hdr').value = gasU;
 }
@@ -831,9 +847,9 @@ async function gateUnlock() {
     const data = await res.json();
 
     if (data.status === 'success' && data.token) {
-      sessionStorage.setItem(CTRL_SESSION_TOKEN_KEY,  data.token);
-      sessionStorage.setItem(CTRL_SESSION_EXPIRY_KEY, String(data.expiry));
-      sessionStorage.setItem(CTRL_GAS_URL_KEY, url);
+      localStorage.setItem(CTRL_SESSION_TOKEN_KEY,  data.token);
+      localStorage.setItem(CTRL_SESSION_EXPIRY_KEY, String(data.expiry));
+      localStorage.setItem(CTRL_GAS_URL_KEY, url);
       document.getElementById('ctrl-gate').style.display = 'none';
       loadSavedInputs();
       syncAll();
@@ -852,26 +868,26 @@ async function gateUnlock() {
 }
 
 function ctrlLogout(){
-  sessionStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
-  sessionStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
-  sessionStorage.removeItem(CTRL_GH_TOKEN_KEY);
-  sessionStorage.removeItem(CTRL_GAS_URL_KEY);
+  // Session token clear — কিন্তু GH Token ও GAS URL রেখে দাও (পরের বার password দিলেই হবে)
+  localStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
+  localStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
   location.reload();
 }
 
 // ── Init ──
 window.onload=()=>{
-  const token  = sessionStorage.getItem(CTRL_SESSION_TOKEN_KEY);
-  const expiry = sessionStorage.getItem(CTRL_SESSION_EXPIRY_KEY);
+  const token  = localStorage.getItem(CTRL_SESSION_TOKEN_KEY);
+  const expiry = localStorage.getItem(CTRL_SESSION_EXPIRY_KEY);
   if(token && expiry && Date.now() < parseInt(expiry)){
     document.getElementById('ctrl-gate').style.display = 'none';
     loadSavedInputs();
     syncAll();
   } else {
-    // Expired বা নেই — gate দেখাও
-    sessionStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
-    sessionStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
+    // Expired বা নেই — session token clear, কিন্তু GH/GAS URL রাখো
+    localStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
+    localStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
     document.getElementById('ctrl-gate').style.display = 'flex';
+    loadSavedInputs(); // GH token ও GAS URL pre-fill করো
     document.getElementById('exam-list').innerHTML =
       `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;
     setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
