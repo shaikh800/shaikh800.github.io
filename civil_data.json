@@ -4,10 +4,10 @@
   "exams": [
     {
       "id": "ex_mqhufnz4hge",
-      "date": "2026-06-17T09:03:37.695Z",
+      "date": "2026-06-17T09:04:22.350Z",
       "examData": {
         "title": "BIGGAN",
-        "duration": "30 minutes",
+        "duration": "20 minutes",
         "password": "BIG100",
         "allowedIds": [
           "101",
@@ -1038,5 +1038,5 @@
       "live": false
     }
   ],
-  "updated": "2026-06-17T09:03:38.716Z"
+  "updated": "2026-06-17T09:04:23.341Z"
 }
