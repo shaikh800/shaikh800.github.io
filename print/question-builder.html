@@ -678,7 +678,7 @@
       .stimulus-image-block .stimulus-block-label { display: block; margin: 0 0 4px; }
       .stimulus-image-block .mcq-image { margin: 0; max-width: 100%; }
       .stimulus-group-wrap { margin-bottom: var(--mcq-gap); break-inside: avoid; page-break-inside: avoid; }
-      .stimulus-instruction { font-size: var(--mcq-font-size); font-style: italic; color: #333; margin-bottom: 3px; text-align: var(--stimulus-align, left); }
+      .stimulus-instruction { font-size: var(--mcq-font-size); font-style: italic; font-weight: 700; color: #333; margin-bottom: 3px; text-align: var(--stimulus-align, left); }
       .stmt-list { padding-left: 18px; margin: 2px 0 2px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
       .stmt-item { display: flex; gap: 4px; }
       .stmt-label { white-space: nowrap; font-weight: 400; min-width: 28px; }
@@ -3332,8 +3332,11 @@
         }).join("");
 
         const groupInstruction = (qtype === "stimulus" && stimTxt) ? stimulusGroupInstruction(q) : "";
+        const stimulusLabelHtml = groupInstruction
+          ? ""
+          : `<span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>`;
         const stimulusHtml = (qtype === "stimulus" && stimTxt)
-          ? `${groupInstruction ? `<div class="stimulus-instruction">${formatText(groupInstruction)}</div>` : ""}<div class="stimulus-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>${formatText(stimTxt)}</div>`
+          ? `${groupInstruction ? `<div class="stimulus-instruction">${formatText(groupInstruction)}</div>` : ""}<div class="stimulus-block">${stimulusLabelHtml}${formatText(stimTxt)}</div>`
           : "";
 
         const statementsHtml = (qtype === "multistatement" && stmts.length)
