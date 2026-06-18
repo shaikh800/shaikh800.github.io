@@ -5535,11 +5535,52 @@ function generateOnlineExamHTML() {
       alert("কোনো MCQ নেই! আগে MCQ যোগ করুন।");
       return;
   }
+
+  // ── Step 1: stimulusGroup map তৈরি করো ──
+  // state.questions এ dedup-এর পর 2য়+ প্রশ্নের stimulusText="" হয়ে যায়।
+  // এখানে প্রতিটা group এর আসল stimulus text আর question নম্বর recover করা হচ্ছে।
+  const stimGroupInfo = {};
+  mcqs.forEach((q, idx) => {
+    if (!q.stimulusGroup) return;
+    if (!stimGroupInfo[q.stimulusGroup]) {
+      stimGroupInfo[q.stimulusGroup] = { text: '', firstIdx: -1, nos: [] };
+    }
+    stimGroupInfo[q.stimulusGroup].nos.push(idx + 1);
+    if (q.stimulusText && stimGroupInfo[q.stimulusGroup].firstIdx === -1) {
+      stimGroupInfo[q.stimulusGroup].text = q.stimulusText;
+      stimGroupInfo[q.stimulusGroup].firstIdx = idx;
+    }
+  });
+
   const quizData = mcqs.map((q, index) => {
       let qText = q.text || "";
-      if (q.stimulusText) {
-          qText = `<div class='stim'>${q.stimulusText}</div>` + qText;
+
+      // ── Step 2: প্রতিটা প্রশ্নের জন্য stimulus resolve করো ──
+      let resolvedStim = q.stimulusText || '';
+      let isFirstInGroup = false;
+
+      if (q.stimulusGroup && stimGroupInfo[q.stimulusGroup]) {
+        const info = stimGroupInfo[q.stimulusGroup];
+        if (!resolvedStim) resolvedStim = info.text; // cleared stim recover
+        isFirstInGroup = (info.firstIdx === index);
+      } else if (q.stimulusText) {
+        isFirstInGroup = true; // standalone stimulus
       }
+
+      if (resolvedStim) {
+        // ── Step 3: group এর প্রথম প্রশ্নে instruction যোগ করো ──
+        let instrHtml = '';
+        if (isFirstInGroup && q.stimulusGroup && stimGroupInfo[q.stimulusGroup]) {
+          const nos = stimGroupInfo[q.stimulusGroup].nos;
+          if (nos.length >= 2) {
+            const formatted = nos.map(n => bn(n));
+            const joined = formatted.slice(0, -1).join(', ') + ' ও ' + formatted[formatted.length - 1];
+            instrHtml = `<div style="font-size:0.88em;font-style:italic;font-weight:600;color:#475569;margin-bottom:3px;">নিচের উদ্দীপকটি পড়ো এবং ${joined} নং প্রশ্নের উত্তর দাও।</div>`;
+          }
+        }
+        qText = instrHtml + `<div class='stim'>${resolvedStim}</div>` + qText;
+      }
+
       if (q.images && q.images.length > 0) {
           q.images.forEach(img => {
               qText += `<br><img src="${img.src}" style="max-width:80%; height:auto; margin-top:5px; object-fit:contain;">`;
