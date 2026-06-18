@@ -316,18 +316,17 @@
       .options-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--option-col-gap); row-gap: 2px; padding-left: 18px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
       .option-item { display: flex; align-items: center; gap: 5px; min-width: 0; }
       .option-mark { 
-        width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); 
-        height: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); 
-        min-width: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale)); 
+        --option-mark-size: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale));
+        width: var(--option-mark-size); 
+        height: var(--option-mark-size); 
+        min-width: var(--option-mark-size); 
+        line-height: var(--option-mark-size);
         border: 1px solid #111; 
         border-radius: 50%; 
-        display: inline-flex; 
-        align-items: center; 
-        justify-content: center; 
+        display: inline-block; 
+        text-align: center; 
         font-weight: var(--option-mark-weight); 
         font-size: calc(var(--mcq-font-size) * var(--option-mark-letter-scale, 0.88)); 
-        line-height: 1; 
-        padding-top: 0.12em; 
         flex-shrink: 0; 
       }
       .option-text { overflow-wrap: anywhere; flex: 1; }
