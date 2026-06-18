@@ -2090,6 +2090,29 @@
       function questionStop() {
         return isEnglishMode() ? "." : "।";
       }
+      function stimulusGroupNumbers(q) {
+        if (!q || !q.stimulusGroup) return [];
+        const list = Array.isArray(state.questions) ? state.questions : [];
+        return list
+          .filter((item) => item.stimulusGroup === q.stimulusGroup)
+          .map((item) => item.no);
+      }
+      function joinStimulusGroupNumbers(nums) {
+        const formatted = nums.map((n) => bn(n));
+        if (formatted.length <= 1) return formatted.join("");
+        const last = formatted[formatted.length - 1];
+        const rest = formatted.slice(0, -1).join(", ");
+        return rest + textByLang(" ও ", " and ") + last;
+      }
+      function stimulusGroupInstruction(q) {
+        const nums = stimulusGroupNumbers(q);
+        if (nums.length < 2) return "";
+        const numsText = joinStimulusGroupNumbers(nums);
+        return textByLang(
+          `নিচের উদ্দীপকটি পড়ো এবং ${numsText} নং প্রশ্নের উত্তর দাও।`,
+          `Read the following stimulus and answer questions ${numsText}.`
+        );
+      }
       function numberValueOr(fallback, value) {
         return value === "" || value === null || Number.isNaN(Number(value))
           ? fallback
@@ -3308,8 +3331,9 @@
           return `<div class="stimulus-block stimulus-image-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span><img class="mcq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain;" src="${img.src}"></div>`;
         }).join("");
 
+        const groupInstruction = (qtype === "stimulus" && stimTxt) ? stimulusGroupInstruction(q) : "";
         const stimulusHtml = (qtype === "stimulus" && stimTxt)
-          ? `<div class="stimulus-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>${formatText(stimTxt)}</div>`
+          ? `${groupInstruction ? `<div class="stimulus-instruction">${formatText(groupInstruction)}</div>` : ""}<div class="stimulus-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>${formatText(stimTxt)}</div>`
           : "";
 
         const statementsHtml = (qtype === "multistatement" && stmts.length)
@@ -4573,18 +4597,27 @@ function splitIntoQuestionBlocks(text) {
             type: finalType,
             statements: finalStatements,
             stimulusText: finalStim,
+            stimulusGroup: null,
           });
         }
 
         // একই উদ্দীপক পরপর দুটো প্রশ্নে থাকলে, প্রথমটা রেখে বাকিগুলো থেকে সরিয়ে দাও
         // origStims ব্যবহার করি যাতে dedup-এর পর সঠিকভাবে compare হয়
+        // একই সাথে stimulusGroup id বসিয়ে দিই, যাতে রেন্ডারের সময় "নিচের উদ্দীপকটি পড়ো এবং
+        // X ও Y নং প্রশ্নের উত্তর দাও" নির্দেশনা দেখানো যায়
         const origStims = result.map(function(q) { return q.stimulusText || ""; });
+        let stimGroupCounter = 0;
         for (let i = 1; i < result.length; i++) {
           if (
             origStims[i] &&
             origStims[i - 1] &&
             origStims[i].trim() === origStims[i - 1].trim()
           ) {
+            if (!result[i - 1].stimulusGroup) {
+              stimGroupCounter++;
+              result[i - 1].stimulusGroup = "sg" + stimGroupCounter;
+            }
+            result[i].stimulusGroup = result[i - 1].stimulusGroup;
             result[i].stimulusText = "";
             result[i].type = (Array.isArray(result[i].statements) && result[i].statements.length >= 2)
               ? "multistatement"
