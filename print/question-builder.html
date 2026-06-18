@@ -329,7 +329,8 @@
         font-size: calc(var(--mcq-font-size) * var(--option-mark-letter-scale, 0.88)); 
         flex-shrink: 0; 
       }
-      .option-mark-letter { display: inline-block; transform: translateY(-0.13em); }
+      .option-mark-letter { display: inline-block; }
+      .pdf-capture-mode .option-mark-letter { transform: translateY(-0.13em); }
       .option-text { overflow-wrap: anywhere; flex: 1; }
       
       .footer-box { margin-top: auto; padding-top: 6px; flex: 0 0 auto; }
@@ -4908,6 +4909,7 @@ function splitIntoQuestionBlocks(text) {
         stage.style.background = "#ffffff";
 
         const clone = pageEl.cloneNode(true);
+        clone.classList.add("pdf-capture-mode");
         clone.style.transform = "none";
         clone.style.transformOrigin = "top left";
         clone.style.margin = "0";
