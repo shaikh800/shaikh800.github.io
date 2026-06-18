@@ -936,13 +936,14 @@ async function resetPassword(id) {
 
 // ── Password Toggle ──
 let _pwVisible = false;
-function togglePw(pw) {
+let _currentModalPw = '';
+function togglePw() {
   const display = document.getElementById('pw-display');
   const icon    = document.getElementById('pw-eye-icon');
   if (!display || !icon) return;
   _pwVisible = !_pwVisible;
   if (_pwVisible) {
-    display.textContent = pw || '(সেট করা হয়নি)';
+    display.textContent = _currentModalPw || '(সেট করা হয়নি)';
     display.style.letterSpacing = '0';
     icon.className = 'fas fa-eye-slash';
   } else {
@@ -965,7 +966,7 @@ function openStudentModal(id) {
     <div><strong>মোবাইল</strong>${esc(String(s.mobile))}</div>
     <div><strong>পাসওয়ার্ড</strong>
       <span id="pw-display" style="font-family:monospace;letter-spacing:2px;">••••••••</span>
-      <button onclick="togglePw(${JSON.stringify(s.password||'')})"
+      <button onclick="togglePw()"
         id="pw-toggle-btn"
         style="margin-left:8px;background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;padding:0;"
         title="দেখুন / লুকান">
@@ -975,6 +976,8 @@ function openStudentModal(id) {
     <div><strong>স্কুল/কলেজ</strong>${esc(s.school||'সেট করা হয়নি')}</div>
     <div><strong>ক্লাস/বর্ষ</strong>${esc(s.studentClass||'সেট করা হয়নি')}</div>
   `;
+  _currentModalPw = s.password || '';
+  _pwVisible = false;
 
   const sResults = allResultsData.filter(r => String(r.id) === String(id));
   const wrap = document.getElementById('modal-stu-results');
@@ -1408,6 +1411,7 @@ function closeModal(id) {
   document.getElementById(id).style.display = 'none';
   if (id === 'modal-student') {
     _pwVisible = false;
+    _currentModalPw = '';
     const display = document.getElementById('pw-display');
     const icon    = document.getElementById('pw-eye-icon');
     if (display) { display.textContent = '••••••••'; display.style.letterSpacing = '2px'; }
