@@ -329,6 +329,7 @@
         font-size: calc(var(--mcq-font-size) * var(--option-mark-letter-scale, 0.88)); 
         flex-shrink: 0; 
       }
+      .option-mark-letter { display: inline-block; transform: translateY(-0.13em); }
       .option-text { overflow-wrap: anywhere; flex: 1; }
       
       .footer-box { margin-top: auto; padding-top: 6px; flex: 0 0 auto; }
@@ -3358,7 +3359,7 @@
           .map(
             (opt, i) => `
           <div class="option-item">
-            <div class="option-mark">${optionLabel(i)}</div>
+            <div class="option-mark"><span class="option-mark-letter">${optionLabel(i)}</span></div>
             <div class="option-text">${formatText(opt)}</div>
           </div>
         `
