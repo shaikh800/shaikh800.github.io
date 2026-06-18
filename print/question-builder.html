@@ -3390,26 +3390,40 @@
         const images = Array.isArray(c.images) ? c.images : [];
         const defaultWidth = state.layout.cqImageWidth;
         const defaultHeight = state.layout.cqImageHeight;
+        const hasImages = images.length > 0;
+
+        const imagesHtml = images
+          .map((img) => {
+            const width = numberValueOr(defaultWidth, img.width);
+            const height = numberValueOr(defaultHeight, img.height);
+            return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
+          })
+          .join("");
+
+        const numberSpan = `<span style="font-weight: var(--question-number-weight); margin-right: 5px; flex-shrink: 0;">${bn(idx + 1)}${questionStop()}</span>`;
+
+        const stimulusSpan = stimulusLine
+          ? `<span class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign}; display: block; width: 100%;` : ''}">${formatText(stimulusLine)}</span>`
+          : "";
+
+        // ছবি থাকলে: প্রশ্নের নম্বর ছবির লেভেলে বসবে (একই row-এ), উদ্দীপক টেক্সট ছবির নিচে আলাদাভাবে
+        // ছবি না থাকলে: আগের মতোই নম্বর + উদ্দীপক একসাথে এক লাইনে
+        const headRowInner = hasImages
+          ? `${numberSpan}<div style="flex: 1; min-width: 0;">${imagesHtml}</div>`
+          : `${numberSpan}${stimulusSpan}`;
+
         return `
     <div class="cq-item">
-      ${images
-        .map((img) => {
-          const width = numberValueOr(defaultWidth, img.width);
-          const height = numberValueOr(defaultHeight, img.height);
-          return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
-        })
-        .join("")}
-      <div class="cq-head" style="align-items: baseline;">
-        <div style="flex: 1; min-width: 0;">
-          <span style="font-weight: var(--question-number-weight); margin-right: 5px;">${bn(idx + 1)}${questionStop()}</span>
-          ${
-            stimulusLine
-              ? `<span class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign}; display: block; width: 100%;` : ''}">${formatText(stimulusLine)}</span>`
-              : ""
-          }
+      <div class="cq-head" style="align-items: ${hasImages ? "flex-start" : "baseline"};">
+        <div style="flex: 1; min-width: 0; display: flex; align-items: flex-start;">
+          ${headRowInner}
         </div>
         ${state.layout.showCqMeta !== false ? `<div class="cq-meta">${formatText(c.time || textByLang("২০ মিনিট", "20 minutes"))} | ${formatText(c.totalMarks || "১০")} ${textByLang("নম্বর", "marks")}</div>` : ""}
       </div>
+      ${hasImages && stimulusLine
+        ? `<div class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign};` : ''} margin-top: 2px;">${formatText(stimulusLine)}</div>`
+        : ""
+      }
       ${["ক", "খ", "গ", "ঘ"]
         .map((k, i) => {
           const text = c.parts?.[k];
