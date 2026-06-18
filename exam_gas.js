@@ -295,6 +295,7 @@ function adminGetStudents(body) {
       id: data[i][0],
       name: data[i][1],
       mobile: data[i][2],
+      password: data[i][3],
       school: data[i][4],
       studentClass: data[i][5],
       pendingUpdate: data[i][6] ? JSON.parse(data[i][6]) : null,
