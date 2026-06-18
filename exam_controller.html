@@ -9,12 +9,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</noscript>
 <style>
 :root{--blue:#2563eb;--blue-dark:#1d4ed8;--ink:#0f172a;--muted:#64748b;--surface:#fff;--soft:#f8fafc;--line:#e2e8f0;--r:10px;--rl:16px;--shadow:0 4px 16px rgba(15,23,42,.08);}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:#f1f5f9;font-family:'Noto Serif Bengali',sans-serif;color:var(--ink);min-height:100vh;}
+body{background:#f1f5f9;font-family:'Noto Serif Bengali','Nirmala UI','Hind Siliguri',Arial,sans-serif;color:var(--ink);min-height:100vh;}
 .wrap{max-width:960px;margin:0 auto;padding:20px;}
 
 /* Header */
