@@ -173,6 +173,26 @@
     .eb-new  { background: #dbeafe; color: #1e40af; }
     .eb-done { background: #dcfce7; color: #166534; }
 
+    /* ── EXAM SECTIONS ── */
+    .exams-section { margin-bottom: 24px; }
+    .exams-section-head {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .6px;
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--line);
+    }
+    .exams-section-head .sh-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .sh-dot-pending { background: #3b82f6; }
+    .sh-dot-done    { background: #22c55e; }
+    .sh-count {
+      margin-left: auto; background: var(--surface-soft);
+      border: 1px solid var(--line); border-radius: 100px;
+      font-size: 11px; padding: 1px 8px; color: var(--text);
+    }
+
     /* ── HISTORY TABLE ── */
     .h-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .h-table th {
@@ -412,7 +432,26 @@
           <i class="fas fa-circle-notch fa-spin"></i>
           পরীক্ষার তালিকা লোড হচ্ছে...
         </div>
-        <div id="exams-grid" class="exam-grid" style="display:none;"></div>
+        <div id="exams-container" style="display:none;">
+          <!-- Pending section -->
+          <div id="section-pending" class="exams-section" style="display:none;">
+            <div class="exams-section-head">
+              <span class="sh-dot sh-dot-pending"></span>
+              বাকি পরীক্ষা
+              <span class="sh-count" id="pending-count">0</span>
+            </div>
+            <div id="grid-pending" class="exam-grid"></div>
+          </div>
+          <!-- Completed section -->
+          <div id="section-done" class="exams-section" style="display:none;">
+            <div class="exams-section-head">
+              <span class="sh-dot sh-dot-done"></span>
+              সম্পন্ন পরীক্ষা
+              <span class="sh-count" id="done-count">0</span>
+            </div>
+            <div id="grid-done" class="exam-grid"></div>
+          </div>
+        </div>
         <div id="exams-empty" class="empty-st" style="display:none;">
           <i class="fas fa-folder-open"></i>
           <p>আপনার জন্য এই মুহূর্তে কোনো পরীক্ষা নেই।</p>
@@ -723,10 +762,15 @@ async function fetchDashboardData() {
 // ── Render Exams ──
 function renderExams() {
   hide('exams-loader');
-  const grid  = document.getElementById('exams-grid');
-  const empty = document.getElementById('exams-empty');
-  grid.innerHTML = '';
-  let count = 0;
+  const container   = document.getElementById('exams-container');
+  const empty       = document.getElementById('exams-empty');
+  const gridPending = document.getElementById('grid-pending');
+  const gridDone    = document.getElementById('grid-done');
+
+  gridPending.innerHTML = '';
+  gridDone.innerHTML    = '';
+
+  let pendingCount = 0, doneCount = 0;
 
   allExams.forEach(ex => {
     const allowed = ex.examData.allowedIds || [];
@@ -737,8 +781,8 @@ function renderExams() {
     // live === false হলে দেখাবে না
     if (ex.live === false) return;
 
-    count++;
-    const isDone   = myHistory.some(h => String(h.examId || h.ExamId || '') === String(ex.id)) || myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
+    const isDone   = myHistory.some(h => String(h.examId || h.ExamId || '') === String(ex.id)) ||
+                     myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
     const qCount   = ex.examData.questions ? ex.examData.questions.length : 0;
     const duration = ex.examData.duration || '30 minutes';
     const hasPass  = !!ex.examData.password;
@@ -749,36 +793,66 @@ function renderExams() {
       `&studentName=${enc(currentUser.name)}` +
       `&studentMobile=${enc(currentUser.mobile)}`;
 
-    const badge = isDone
-      ? `<span class="ekbadge eb-done"><i class="fas fa-check"></i> সম্পন্ন</span>`
-      : `<span class="ekbadge eb-new">নতুন</span>`;
+    const card = isDone
+      ? `<div class="exam-card">
+          <span class="ekbadge eb-done"><i class="fas fa-check"></i> সম্পন্ন</span>
+          <h3>${esc(ex.examData.title)}</h3>
+          <div class="exam-meta">
+            <span><i class="far fa-clock"></i> ${esc(duration)}</span>
+            <span><i class="fas fa-list-ol"></i> ${qCount} টি প্রশ্ন</span>
+            <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${hasPass ? 'প্রয়োজন' : 'নেই'}</span>
+          </div>
+          <a href="${base}&practice=1" class="btn secondary" style="width:100%;justify-content:center;">
+            <i class="fas fa-redo"></i> Practice Mode
+          </a>
+        </div>`
+      : `<div class="exam-card">
+          <span class="ekbadge eb-new">নতুন</span>
+          <h3>${esc(ex.examData.title)}</h3>
+          <div class="exam-meta">
+            <span><i class="far fa-clock"></i> ${esc(duration)}</span>
+            <span><i class="fas fa-list-ol"></i> ${qCount} টি প্রশ্ন</span>
+            <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${hasPass ? 'প্রয়োজন' : 'নেই'}</span>
+          </div>
+          <a href="${base}" class="btn primary" style="width:100%;justify-content:center;">
+            <i class="fas fa-play"></i> পরীক্ষা শুরু করুন
+          </a>
+        </div>`;
 
-    const btn = isDone
-      ? `<a href="${base}&practice=1" class="btn secondary" style="width:100%;justify-content:center;">
-           <i class="fas fa-redo"></i> Practice Mode
-         </a>`
-      : `<a href="${base}" class="btn primary" style="width:100%;justify-content:center;">
-           <i class="fas fa-play"></i> পরীক্ষা শুরু করুন
-         </a>`;
-
-    grid.innerHTML += `
-      <div class="exam-card">
-        ${badge}
-        <h3>${esc(ex.examData.title)}</h3>
-        <div class="exam-meta">
-          <span><i class="far fa-clock"></i> ${esc(duration)}</span>
-          <span><i class="fas fa-list-ol"></i> ${qCount} টি প্রশ্ন</span>
-          <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${hasPass ? 'প্রয়োজন' : 'নেই'}</span>
-        </div>
-        ${btn}
-      </div>`;
+    if (isDone) {
+      gridDone.innerHTML += card;
+      doneCount++;
+    } else {
+      gridPending.innerHTML += card;
+      pendingCount++;
+    }
   });
 
-  if (count > 0) {
-    grid.style.display = 'grid';
+  const total = pendingCount + doneCount;
+
+  if (total > 0) {
+    container.style.display = 'block';
     hide('exams-empty');
+
+    // Pending section
+    const secPending = document.getElementById('section-pending');
+    if (pendingCount > 0) {
+      document.getElementById('pending-count').textContent = pendingCount;
+      secPending.style.display = 'block';
+    } else {
+      secPending.style.display = 'none';
+    }
+
+    // Done section
+    const secDone = document.getElementById('section-done');
+    if (doneCount > 0) {
+      document.getElementById('done-count').textContent = doneCount;
+      secDone.style.display = 'block';
+    } else {
+      secDone.style.display = 'none';
+    }
   } else {
-    hide('exams-grid');
+    container.style.display = 'none';
     show('exams-empty');
   }
 }
