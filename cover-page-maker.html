@@ -472,6 +472,11 @@ h3 {
             <input type="text" id="in-from-name" list="name-list" placeholder="Your Name">
             <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
         </div>
+        <div class="sortable-item" data-id="reg">
+            <label>Registration No:</label>
+            <input type="text" id="in-reg" list="reg-list" placeholder="Reg. No">
+            <div class="move-controls"><button class="move-btn up">▲</button><button class="move-btn down">▼</button></div>
+        </div>
         <div class="sortable-item" data-id="year">
             <label>Year:</label>
             <input type="text" id="in-year" list="year-list" placeholder="3rd Year">
@@ -495,6 +500,7 @@ h3 {
     </div>
 
     <datalist id="name-list"></datalist>
+    <datalist id="reg-list"></datalist>
     <datalist id="sem-list"><option value="1st"><option value="2nd"></datalist>
     <datalist id="year-list"><option value="1st Year"><option value="2nd Year"><option value="3rd Year"><option value="4th Year"></datalist>
 
@@ -558,6 +564,7 @@ h3 {
                 <div class="col left" id="preview-student-info">
                     <div class="sub-header" id="sub-header-by">SUBMITTED BY</div>
                     <div class="info-text bold preview-item" id="row-name" data-id="name"><span id="out-from-name"></span></div>
+                    <div class="info-text preview-item" id="row-reg" data-id="reg">REGISTRATION NO: <span id="out-reg"></span></div>
                     <div class="info-text preview-item" id="row-year" data-id="year">YEAR: <span id="out-year"></span></div>
                     <div class="info-text preview-item" id="row-sem" data-id="sem">SEMESTER: <span id="out-sem"></span></div>
                     <div class="info-text preview-item" id="row-session" data-id="session">SESSION: <span id="out-session"></span></div>
@@ -665,53 +672,54 @@ const extraTeachers = [
 ];
 
 const studentData = [
-    { session: "2022-2023", name: "MD. SHAIKH ALAM" },
-    { session: "2022-2023", name: "PROTIK SAHA PIAL" },
-    { session: "2022-2023", name: "Md. Showrov Hossain" },
-    { session: "2022-2023", name: "Shoiab Hosen" },
-    { session: "2021-2022", name: "MASHUDUR RAHMAN" },
-    { session: "2022-2023", name: "Shazid Rownok Ayon" },
-    { session: "2022-2023", name: "MD.HASIB" },
-    { session: "2022-2023", name: "Sardar All-Fahat (Rabin)" },
-    { session: "2022-2023", name: "MD. Mubtasim Rahman Mitul" },
-    { session: "2022-2023", name: "TAHER AHMAD" },
-    { session: "2021-2022", name: "MD.SHARIF SARDAR" },
-    { session: "2022-2023", name: "Md Sihab" },
-    { session: "2021-2022", name: "Jannatul Hoque Akondo" },
-    { session: "2022-2023", name: "MD. TANVIR AHMED" },
-    { session: "2022-2023", name: "MD. MINHAZUR RAHMAN" },
-    { session: "2022-2023", name: "AZIZUL HAKIM MIRAZ" },
-    { session: "2020-2021", name: "NOWFEL HOSSAIN" },
-    { session: "2022-2023", name: "Md.Rakib Munshi" },
-    { session: "2021-2022", name: "Samrat Fakir" },
-    { session: "2022-2023", name: "Mst.Zermoon Nisa" },
-    { session: "2022-2023", name: "Maniruzzaman" },
-    { session: "2022-2023", name: "Md Nurmohammad Shanto" },
-    { session: "2022-2023", name: "Shuvashis Chakma" },
-    { session: "2021-2022", name: "MD. SAKIB FARDOUS" },
-    { session: "2021-2022", name: "S. M. Rafat Uddin" },
-    { session: "2022-2023", name: "SHADMAN SHAKIB SHIRSHO" },
-    { session: "2022-2023", name: "MOHAMMAD TAMJED HASAN" },
-    { session: "2022-2023", name: "MD. Mahfuzur Rahman" },
-    { session: "2022-2023", name: "Md. Saiful Islam" },
-    { session: "2022-2023", name: "Mahathir Mohammad" },
-    { session: "2022-2023", name: "Md Marjabin Islam Mafi" },
-    { session: "2022-2023", name: "Ali Asgar Talukder" },
-    { session: "2022-2023", name: "Abdullah Al Mamun" },
-    { session: "2021-2022", name: "Shariful Islam Siam" },
-    { session: "2022-2023", name: "Md.Nazmul Haq Bhuiya" },
-    { session: "2022-2023", name: "MD. AFIF ALL ABIR" },
-    { session: "2022-2023", name: "Md.Naimur Rahman" },
-    { session: "2021-2022", name: "MEHERAN MAHTHIR SROBON" },
-    { session: "2022-2023", name: "Raduan Ahammad Shuvo" },
-    { session: "2022-2023", name: "Talha Hamim Antor" },
-    { session: "2022-2023", name: "Md.Abu bokor" },
-    { session: "2022-2023", name: "MD.MIFTAUL JANNAT TASIN" }
+    { reg: "2022754800", session: "2022-2023", name: "MD. SHAIKH ALAM" },
+    { reg: "2022354778", session: "2022-2023", name: "PROTIK SAHA PIAL" },
+    { reg: "2022854782", session: "2022-2023", name: "Md. Showrov Hossain" },
+    { reg: "2022954772", session: "2022-2023", name: "Shoiab Hosen" },
+    { reg: "878", session: "2021-2022", name: "MASHUDUR RAHMAN" },
+    { reg: "2022954808", session: "2022-2023", name: "Shazid Rownok Ayon" },
+    { reg: "2022554785", session: "2022-2023", name: "MD.HASIB" },
+    { reg: "2022154798", session: "2022-2023", name: "Sardar All-Fahat (Rabin)" },
+    { reg: "2022854773", session: "2022-2023", name: "MD. Mubtasim Rahman Mitul" },
+    { reg: "2022054780", session: "2022-2023", name: "TAHER AHMAD" },
+    { reg: "883", session: "2021-2022", name: "MD.SHARIF SARDAR" },
+    { reg: "2022054799", session: "2022-2023", name: "Md Sihab" },
+    { reg: "860", session: "2021-2022", name: "Jannatul Hoque Akondo" },
+    { reg: "2022454803", session: "2022-2023", name: "MD. TANVIR AHMED" },
+    { reg: "2022954781", session: "2022-2023", name: "MD. MINHAZUR RAHMAN" },
+    { reg: "2022554776", session: "2022-2023", name: "AZIZUL HAKIM MIRAZ" },
+    { reg: "1040", session: "2020-2021", name: "NOWFEL HOSSAIN" },
+    { reg: "2022354813", session: "2022-2023", name: "Md.Rakib Munshi" },
+    { reg: "881", session: "2021-2022", name: "Samrat Fakir" },
+    { reg: "2022154815", session: "2022-2023", name: "Mst.Zermoon Nisa" },
+    { reg: "2022454786", session: "2022-2023", name: "Maniruzzaman" },
+    { reg: "2022654793", session: "2022-2023", name: "Md Nurmohammad Shanto" },
+    { reg: "2022454821", session: "2022-2023", name: "Shuvashis Chakma" },
+    { reg: "866", session: "2021-2022", name: "MD. SAKIB FARDOUS" },
+    { reg: "862", session: "2021-2022", name: "S. M. Rafat Uddin" },
+    { reg: "2022154789", session: "2022-2023", name: "SHADMAN SHAKIB SHIRSHO" },
+    { reg: "2022554811", session: "2022-2023", name: "MOHAMMAD TAMJED HASAN" },
+    { reg: "2022254779", session: "2022-2023", name: "MD. Mahfuzur Rahman" },
+    { reg: "2022754774", session: "2022-2023", name: "Md. Saiful Islam" },
+    { reg: "2022054807", session: "2022-2023", name: "Mahathir Mohammad" },
+    { reg: "2022354804", session: "2022-2023", name: "Md Marjabin Islam Mafi" },
+    { reg: "2022454768", session: "2022-2023", name: "Ali Asgar Talukder" },
+    { reg: "2022754783", session: "2022-2023", name: "Abdullah Al Mamun" },
+    { reg: "886", session: "2021-2022", name: "Shariful Islam Siam" },
+    { reg: "2022254814", session: "2022-2023", name: "Md.Nazmul Haq Bhuiya" },
+    { reg: "2022654775", session: "2022-2023", name: "MD. AFIF ALL ABIR" },
+    { reg: "2022054816", session: "2022-2023", name: "Md.Naimur Rahman" },
+    { reg: "889", session: "2021-2022", name: "MEHERAN MAHTHIR SROBON" },
+    { reg: "2022154770", session: "2022-2023", name: "Raduan Ahammad Shuvo" },
+    { reg: "2022554802", session: "2022-2023", name: "Talha Hamim Antor" },
+    { reg: "2022254797", session: "2022-2023", name: "Md.Abu bokor" },
+    { reg: "2022354796", session: "2022-2023", name: "MD.MIFTAUL JANNAT TASIN" }
 ];
 
 const cCodeL = document.getElementById('course-code-list');
 const cNameL = document.getElementById('course-name-list');
 const nList = document.getElementById('name-list');
+const rList = document.getElementById('reg-list');
 const tList = document.getElementById('teacher-list');
 
 courseData.forEach(c => {
@@ -722,6 +730,7 @@ courseData.forEach(c => {
 extraTeachers.forEach(t => { tList.innerHTML += `<option value="${t.name}">`; });
 studentData.forEach(s => {
     nList.innerHTML += `<option value="${s.name}">`;
+    if (s.reg) rList.innerHTML += `<option value="${s.reg}">`;
 });
 
 const caseToggle = document.getElementById('case-toggle');
@@ -776,6 +785,7 @@ syncUp('in-topic', 'out-topic'); syncVisibility('in-topic', 'row-topic');
 syncUp('in-course-name', 'out-course-name'); syncVisibility('in-course-name', 'row-course-name');
 syncUp('in-course-no', 'out-course-no'); syncVisibility('in-course-no', 'row-course-no');
 syncUp('in-from-name', 'out-from-name'); syncVisibility('in-from-name', 'row-name');
+syncUp('in-reg', 'out-reg'); syncVisibility('in-reg', 'row-reg');
 syncUp('in-session', 'out-session'); syncVisibility('in-session', 'row-session');
 syncSuper('in-sem', 'out-sem'); syncVisibility('in-sem', 'row-sem');
 syncSuper('in-year', 'out-year'); syncVisibility('in-year', 'row-year');
@@ -794,8 +804,49 @@ document.getElementById('in-date-exp').addEventListener('input', function() {
     else { document.getElementById('out-date-exp').textContent = ''; }
 });
 
-const fillStudent = (m) => { if(!m) return; document.getElementById('in-from-name').value = m.name; document.getElementById('in-session').value = m.session; document.getElementById('in-year').value = "3rd Year"; document.getElementById('in-batch').value = "10th"; document.getElementById('in-sem').value = "1st"; ['in-from-name','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id))); };
-document.getElementById('in-from-name').addEventListener('change', function() { fillStudent(studentData.find(s => s.name.toLowerCase() === this.value.toLowerCase())); });
+let isFillingStudent = false;
+const fillStudent = (m) => {
+    if(!m) return;
+    isFillingStudent = true;
+    document.getElementById('in-from-name').value = m.name;
+    document.getElementById('in-reg').value = m.reg || '';
+    document.getElementById('in-session').value = m.session;
+    document.getElementById('in-year').value = "3rd Year";
+    document.getElementById('in-batch').value = "10th";
+    document.getElementById('in-sem').value = "1st";
+    ['in-from-name','in-reg','in-session','in-year','in-batch','in-sem'].forEach(id => trigger(document.getElementById(id)));
+    isFillingStudent = false;
+};
+
+function findStudentByName(name) {
+    const clean = name.trim().toLowerCase();
+    if (!clean) return undefined;
+    return studentData.find(s => s.name.trim().toLowerCase() === clean);
+}
+function findStudentByReg(reg) {
+    const clean = reg.trim();
+    if (!clean) return undefined;
+    return studentData.find(s => s.reg && s.reg.trim() === clean);
+}
+
+// 'input' fires the match immediately while typing or right after picking a
+// datalist suggestion, so Reg No fills in without needing the field to blur.
+// isFillingStudent guards against the synthetic 'input' events dispatched by
+// trigger() during an autofill from re-triggering this same lookup.
+document.getElementById('in-from-name').addEventListener('input', function() {
+    if (isFillingStudent) return;
+    fillStudent(findStudentByName(this.value));
+});
+document.getElementById('in-from-name').addEventListener('change', function() {
+    fillStudent(findStudentByName(this.value));
+});
+document.getElementById('in-reg').addEventListener('input', function() {
+    if (isFillingStudent) return;
+    fillStudent(findStudentByReg(this.value));
+});
+document.getElementById('in-reg').addEventListener('change', function() {
+    fillStudent(findStudentByReg(this.value));
+});
 
 const fillCourse = (m) => { if(!m) return; document.getElementById('in-course-name').value = m.name; document.getElementById('in-course-no').value = m.code; document.getElementById('in-to-name').value = m.teacher; document.getElementById('in-to-desig').value = m.desig; ['in-course-name','in-course-no','in-to-name','in-to-desig'].forEach(id => trigger(document.getElementById(id))); };
 document.getElementById('in-course-no').addEventListener('change', function() { fillCourse(courseData.find(c => c.code.toLowerCase() === this.value.toLowerCase())); });
