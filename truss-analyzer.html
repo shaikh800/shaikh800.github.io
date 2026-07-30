@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>FEC Truss Analyzer | Interactive Structural Solver</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<!-- MathJax for rendering equations in the Exam Report (Polyfill removed for security/stability) -->
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root{
+    --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --bg:#1e293b; --bg-2:#ffffff; --grid-line:rgba(255,255,255,.07);
+    --panel-bg:#ffffff; --soft-bg:#f8fafc; --border:#e2e8f0; --ink:#111827;
+    --muted:#64748b; --ink-dim:#93a8c4; --cyan:#3b82f6; --amber:#fbbf24;
+    --tension:#fb7185; --compression:#38bdf8; --zero:#7f93ad; --danger:#f87171;
+    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+  *{box-sizing:border-box;}
+  ::-webkit-scrollbar { width: 6px; height:6px; }
+  ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--ui-font);}
+  #app{display:flex;flex-direction:column;height:100vh;}
+
+  header#topbar{
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:12px 18px;background:var(--bg-2);border-bottom:1px solid var(--border);
+    box-shadow:var(--shadow-sm);
+  }
+  .brand{display:flex;align-items:center;gap:10px;margin-right:6px;}
+  .brand-mark{font-size:26px;color:var(--cyan);line-height:1;}
+  .brand-text h1{font-size:16px;margin:0;letter-spacing:.02em;font-weight:800;color:var(--ink);}
+  .brand-text p{margin:0;font-size:11px;color:var(--muted);font-weight:600;}
+
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:6px;border:1px solid var(--border);}
+  .back-link:hover{color:var(--cyan);border-color:var(--cyan);}
+
+  .toolbar{display:flex;gap:6px;flex-wrap:wrap;}
+  .actions{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;}
+
+  button, .file-label{
+    font-family:var(--ui-font);
+    font-size:12.5px;font-weight:600;letter-spacing:.01em;
+    padding:8px 12px;border-radius:6px;border:1px solid var(--border);
+    background:transparent;color:var(--ink);cursor:pointer;
+    transition:background .12s ease, border-color .12s ease, color .12s ease;
+    white-space:nowrap;
+  }
+  button:hover, .file-label:hover{border-color:var(--cyan);color:var(--cyan);}
+  button:focus-visible, .file-label:focus-within{outline:2px solid var(--cyan);outline-offset:1px;}
+  button.tool.active{background:var(--cyan);border-color:var(--cyan);color:#fff;}
+  button.primary{background:var(--cyan);border-color:var(--cyan);color:#fff;}
+  button.primary:hover{color:#fff;filter:brightness(1.08);}
+  button.ghost{color:var(--muted);}
+  button.danger{border-color:var(--danger);color:var(--danger);}
+  button.danger:hover{background:var(--danger);color:#fff;}
+  button.small{padding:6px 10px;font-size:12px;}
+  .file-label{display:inline-flex;align-items:center;color:var(--muted);}
+
+  main{display:flex;flex:1;min-height:0;flex-direction:row;}
+  
+  aside#sidePanel{
+    width:300px;flex-shrink:0;background:var(--panel-bg);
+    border-right:1px solid var(--border);box-shadow:2px 0 15px rgba(0,0,0,.05);
+    overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;
+    z-index: 10;
+  }
+
+  .canvas-wrap{flex:1;position:relative;display:flex;flex-direction:column;min-width:0; overflow:hidden;}
+  #canvas{flex:1;width:100%;height:100%;touch-action:none;display:block;}
+  #gridRect{cursor:default;}
+
+  .hint{
+    position:absolute;top:10px;left:12px;
+    font-family:var(--ui-font);font-weight:500;font-size:11.5px;color:var(--ink-dim);
+    background:rgba(15,23,42,.85);border:1px solid var(--border);border-radius:6px;
+    padding:6px 10px;max-width:340px;pointer-events:none;
+  }
+  #coordTracker {
+    position: absolute; bottom: 42px; right: 12px;
+    font-family: var(--ui-font); font-weight:600; font-size: 11.5px; color: var(--cyan);
+    background: rgba(15,23,42,.85); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 8px; pointer-events: none;
+  }
+  .titleblock{
+    display:flex;justify-content:space-between;gap:10px;
+    font-family:var(--ui-font);font-weight:600;font-size:10.5px;color:var(--muted);
+    border-top:1px solid var(--border);padding:6px 14px;letter-spacing:.06em;
+    background:var(--bg-2); z-index:10;
+  }
+
+  .panel-section{border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:#fff;}
+  .panel-section h3{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--cyan);font-weight:800;}
+  .panel-section p{margin:4px 0;font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .panel-section label{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:8px;font-family:var(--ui-font);}
+  .panel-section input[type=number]{
+    font-family:var(--ui-font);background:var(--soft-bg);border:1px solid #cbd5e1;
+    color:var(--ink);border-radius:6px;padding:7px 9px;font-size:13px;width:100%;
+    transition:all .2s;
+  }
+  .panel-section input[type=number]:focus-visible{outline:none;border-color:var(--ink);background:#fff;}
+  .row{display:flex;gap:8px;margin-top:4px;}
+  .row > label {flex:1;}
+  .hidden{display:none !important;}
+  .muted{color:var(--muted);font-size:12px;}
+  .readout{font-family:var(--ui-font);font-weight:700;color:var(--ink);font-size:13px;margin-top:8px !important;}
+
+  .results-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+  .result-row{
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+    font-family:var(--ui-font);font-weight:600;font-size:12px;padding:6px 8px;border-radius:6px;
+    background:var(--soft-bg);border:1px solid var(--border);
+  }
+  .swatch{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);font-weight:600;font-family:var(--ui-font);margin-top:6px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--bg-2);border:1px solid var(--cyan);color:var(--ink);
+    padding:10px 16px;border-radius:8px;font-size:13px;font-family:var(--ui-font);font-weight:600;
+    box-shadow:0 10px 25px -5px rgba(0,0,0,.15), 0 8px 10px -6px rgba(0,0,0,.1);z-index:100;
+  }
+  .toast.error{border-color:var(--danger);color:#b91c1c;}
+
+  /* Exam Report Modal */
+  #examOverlay {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(11,29,51,0.9); z-index: 200;
+    display:flex; flex-direction:column; align-items:center; padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .exam-modal-header {
+    width: 100%; max-width: 210mm; display:flex; justify-content:space-between; margin-bottom: 20px;
+  }
+  
+  #examReportWrap {
+    width: 210mm; 
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  .a4-page {
+    width: 210mm; min-height: 297mm; /* A4 dimensions */
+    background: #fff; color: #000;
+    padding: 0.25in; /* Strict .25 margin applied */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    box-sizing: border-box;
+    font-family: 'Times New Roman', Times, serif; font-size: 14px; line-height: 1.5;
+  }
+  
+  /* Print PDF Styles */
+  @page { size: A4; margin: 0.25in; } /* strict margin for standard PDF prints */
+  
+  @media print {
+    body { background: #fff; margin: 0; padding: 0; }
+    #app, #toast, .exam-modal-header { display: none !important; }
+    #examOverlay { 
+      position: absolute; top:0; left:0; width:100%; height:auto; 
+      background: transparent; padding: 0; overflow: visible; display: block;
+    }
+    #examReportWrap { width: 100%; gap: 0; }
+    .a4-page {
+      box-shadow: none; width: 100%; min-height: auto;
+      page-break-after: always; padding: 0; /* Padding is handled by @page margin */
+    }
+    .a4-page:last-child { page-break-after: avoid; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+
+  /* Academic Report Typography */
+  .a4-page h1 { text-align: center; font-size: 22px; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
+  .a4-page h2 { font-size: 16px; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 4px; color: #000;}
+  .a4-page p { margin: 5px 0 12px 0; }
+  .a4-page table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+  .a4-page th, .a4-page td { border: 1px solid #444; padding: 8px 12px; text-align: left; }
+  .a4-page th { background-color: #f0f0f0; font-weight: bold; }
+  
+  .report-highlight { font-weight: bold; background: #e6f7ff; padding: 5px; display: inline-block; border-left: 3px solid #007bff; margin: 10px 0;}
+  .report-tension { color: #d32f2f; font-weight: bold; }
+  .report-comp { color: #1976d2; font-weight: bold; }
+  
+  .diagram-container {
+    width: 100%; border: 1px solid #000; background: #fdfdfd; margin-bottom: 20px;
+    display: flex; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box;
+  }
+  .diagram-container svg { width: 100%; height: auto; max-height: 400px; }
+
+  @media (max-width: 860px){
+    main{flex-direction:column;}
+    aside#sidePanel{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:42vh;}
+    .actions{margin-left:0;}
+  }
+
+  svg text{user-select:none;}
+  .node-circle{cursor:pointer;}
+  .member-line{cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="brand">
+      <img src="favicon.svg" alt="Logo" style="width:30px;height:30px;border-radius:8px;">
+      <div class="brand-text">
+        <h1>Truss Analyzer</h1>
+        <p>FEC Civil · build · pin · solve</p>
+      </div>
+    </div>
+    <a class="back-link" href="civil.html">← Civil</a>
+    <div class="toolbar" id="toolbar">
+      <button data-mode="select" class="tool active">Select / Move</button>
+      <button data-mode="joint" class="tool">+ Joint</button>
+      <button data-mode="member" class="tool">+ Member</button>
+      <button data-mode="support" class="tool">Support</button>
+      <button data-mode="load" class="tool">Load</button>
+      <button data-mode="delete" class="tool">Delete</button>
+    </div>
+    <div class="actions">
+      <button id="solveBtn" class="primary">Solve ▸</button>
+      <button id="examBtn" class="primary" style="background:var(--amber); border-color:var(--amber); color:#3a2400;">📄 Exam Report</button>
+      <button id="clearBtn" class="ghost">Clear</button>
+      <button id="saveBtn" class="ghost">Save</button>
+      <label class="ghost file-label">Load<input type="file" id="loadFile" accept="application/json" hidden></label>
+    </div>
+  </header>
+
+  <main>
+    <aside id="sidePanel">
+      <section id="modeHelp" class="panel-section">
+        <h3>View Options</h3>
+        <p id="modeHelpText" style="margin-bottom:10px;"></p>
+        <p style="font-size:11px; margin-top:0; color:var(--amber)"><i>Tip: Scroll to Zoom. Middle-click to Pan. Press '.' to Fit.</i></p>
+        <label style="flex-direction:row;align-items:center;gap:6px;">
+          <input type="checkbox" id="snapToggle" checked style="width:14px;height:14px;">
+          <span>Snap to grid</span>
+        </label>
+        <label style="flex-direction:row;align-items:center;gap:6px;">
+          <input type="checkbox" id="showLabelsToggle" checked style="width:14px;height:14px;">
+          <span style="color:var(--cyan)">Show labels (J1, M1)</span>
+        </label>
+        <label style="flex-direction:row;align-items:center;gap:6px;">
+          <input type="checkbox" id="showDimsToggle" checked style="width:14px;height:14px;">
+          <span style="color:var(--cyan)">Show structural dimensions</span>
+        </label>
+        <label style="flex-direction:row;align-items:center;gap:6px; margin-bottom:0;">
+          <input type="checkbox" id="showAnglesToggle" checked style="width:14px;height:14px;">
+          <span style="color:var(--cyan)">Show interior angles</span>
+        </label>
+      </section>
+
+      <section id="nodeEditor" class="panel-section hidden">
+        <h3 id="nodeEditorTitle">Joint</h3>
+        <div class="row">
+          <label>X-Pos<input type="number" id="editNodeX" step="any"></label>
+          <label>Y-Pos<input type="number" id="editNodeY" step="any"></label>
+        </div>
+        <button id="applyNodeEdit" class="primary small" style="margin-top:8px; width:100%">Update Joint</button>
+
+        <h3 style="margin-top:14px; padding-top:10px; border-top:1px solid var(--border);">Add Joint (Length &amp; Angle)</h3>
+        <p style="margin-top:0;">Creates a new joint + member from <span id="addFromLabel">this joint</span>, at exact length/angle.</p>
+        <div class="row">
+          <label>Length<input type="number" id="addFromLen" step="any" min="0.01" placeholder="e.g. 2"></label>
+          <label>Angle (°)<input type="number" id="addFromAng" step="any" placeholder="e.g. 60"></label>
+        </div>
+        <button id="addJointFromNode" class="primary small" style="margin-top:8px; width:100%; background:var(--amber); border-color:var(--amber); color:#3a2400;">+ Add Joint →</button>
+        <p style="font-size:10.5px; margin-top:8px;">Angle is measured counter-clockwise from → (right): 0°=right, 90°=up, 180°=left, 270°/-90°=down. After adding, the new joint is auto-selected so you can keep chaining.</p>
+      </section>
+
+      <section id="loadForm" class="panel-section hidden">
+        <h3>Apply load — <span id="loadNodeLabel"></span></h3>
+        <div class="row">
+          <label>Fx (→)<input type="number" id="loadFx" step="any" value="0"></label>
+          <label>Fy (↓)<input type="number" id="loadFy" step="any" value="0"></label>
+        </div>
+        <div class="row" style="margin-top:8px"><button id="applyLoad" class="primary small">Apply</button><button id="cancelLoad" class="ghost small">Cancel</button></div>
+      </section>
+
+      <section id="memberInfo" class="panel-section hidden">
+        <h3 id="memberInfoTitle">Member</h3>
+        <label style="flex-direction:row;align-items:center;gap:6px; color:var(--amber); font-weight:600;">
+          <input type="checkbox" id="memReportToggle" style="width:14px;height:14px;"> Include in Exam Report
+        </label>
+        <label style="margin-top:8px">Area (default 1)<input type="number" id="memberArea" step="any" min="0.01" value="1"></label>
+        <div class="row">
+          <label>Length (L)<input type="number" id="memberLen" step="any" min="0.01"></label>
+          <label>Angle (°)<input type="number" id="memberAng" step="any"></label>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="applyMemEdit" class="primary small">Update Member</button>
+          <button id="deleteMemberBtn" class="danger small">Delete</button>
+        </div>
+        <p id="memberForceReadout" class="readout"></p>
+      </section>
+
+      <section class="panel-section">
+        <h3>Global stiffness E×A</h3>
+        <label>Used for members with area = 1<input type="number" id="globalEA" value="1000" min="1" step="any"></label>
+      </section>
+
+      <section id="resultsSection" class="panel-section">
+        <h3>Member forces</h3>
+        <div id="resultsList" class="results-list"><p class="muted">Run Solve to see results.</p></div>
+        <div class="legend">
+          <span><i style="background:var(--tension)"></i>Tension</span>
+          <span><i style="background:var(--compression)"></i>Compression</span>
+          <span><i style="background:var(--zero)"></i>≈ zero</span>
+        </div>
+      </section>
+
+      <section id="reactionsSection" class="panel-section">
+        <h3>Support reactions</h3>
+        <div id="reactionsList" class="results-list"><p class="muted">—</p></div>
+      </section>
+    </aside>
+
+    <div class="canvas-wrap">
+      <svg id="canvas" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="var(--grid-line)" stroke-width="1"/>
+          </pattern>
+          <marker id="arrowHead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--amber)"/>
+          </marker>
+        </defs>
+        <rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" id="gridRect"/>
+        
+        <g id="dimsLayer"></g>
+        <g id="membersLayer"></g>
+        <g id="anglesLayer"></g>
+        <g id="supportsLayer"></g>
+        <g id="loadsLayer"></g>
+        <g id="nodesLayer"></g>
+        <g id="labelsLayer"></g>
+      </svg>
+      <div class="hint" id="modeHint"></div>
+      <div id="coordTracker">X: 0, Y: 0</div>
+      <div class="titleblock">
+        <span>TRUSS-01</span>
+        <span id="statCheck">m=0 r=0 j=0</span>
+        <span>1 GRID SQUARE = 1 UNIT</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Exam Report Modal -->
+<div id="examOverlay" class="hidden">
+  <div class="exam-modal-header">
+    <button id="closeExamBtn" class="ghost" style="color:#fff; border-color:#fff; font-size:14px; background:rgba(0,0,0,0.5)">← Back to Editor</button>
+    <button id="downloadPdfBtn" class="primary" style="font-size:14px;">⬇ Download PDF (A4)</button>
+  </div>
+  <div id="examReportWrap">
+    <!-- Pages will be dynamically injected here -->
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- state ----------
+  const state = {
+    nodes: [
+      {id:1, x:300, y:400, support:'pin',    fx:0, fy:0,  ux:0,uy:0,rx:0,ry:0},
+      {id:2, x:700, y:400, support:'roller', fx:0, fy:0,  ux:0,uy:0,rx:0,ry:0},
+      {id:3, x:500, y:200, support:'none',   fx:0, fy:80, ux:0,uy:0,rx:0,ry:0}
+    ],
+    members: [
+      {id:1, n1:1, n2:2, area:1, force:null, inReport:true},
+      {id:2, n1:1, n2:3, area:1, force:null, inReport:true},
+      {id:3, n1:2, n2:3, area:1, force:null, inReport:true}
+    ],
+    mode:'select',
+    nodeSeq:4, memberSeq:4,
+    memberFirst:null, draggingNodeId:null, selectedNodeId:null, selectedMemberId:null, pendingLoadNodeId:null,
+    snap:true, showLabels:true, showDims:true, showAngles:true, solved:false,
+    
+    camX: 0, camY: 0, camZoom: 1,
+    isPanning: false, panStartX: 0, panStartY: 0, camXStart: 0, camYStart: 0
+  };
+
+  const GRID = 20;
+  const NODE_R = 7;
+  const VIEW_W = 1000;
+  const VIEW_H = 620;
+
+  // ---------- DOM refs ----------
+  const svg = document.getElementById('canvas');
+  const dimsLayer = document.getElementById('dimsLayer');
+  const membersLayer = document.getElementById('membersLayer');
+  const anglesLayer = document.getElementById('anglesLayer');
+  const supportsLayer = document.getElementById('supportsLayer');
+  const loadsLayer = document.getElementById('loadsLayer');
+  const nodesLayer = document.getElementById('nodesLayer');
+  const labelsLayer = document.getElementById('labelsLayer');
+  
+  const statCheck = document.getElementById('statCheck');
+  const coordTracker = document.getElementById('coordTracker');
+  
+  const snapToggle = document.getElementById('snapToggle');
+  const showLabelsToggle = document.getElementById('showLabelsToggle');
+  const showDimsToggle = document.getElementById('showDimsToggle');
+  const showAnglesToggle = document.getElementById('showAnglesToggle');
+
+  const nodeEditor = document.getElementById('nodeEditor');
+  const editNodeX = document.getElementById('editNodeX');
+  const editNodeY = document.getElementById('editNodeY');
+
+  const loadForm = document.getElementById('loadForm');
+  const loadFx = document.getElementById('loadFx');
+  const loadFy = document.getElementById('loadFy');
+
+  const memberInfo = document.getElementById('memberInfo');
+  const memReportToggle = document.getElementById('memReportToggle');
+  const memberArea = document.getElementById('memberArea');
+  const memberLen = document.getElementById('memberLen');
+  const memberAng = document.getElementById('memberAng');
+  const memberForceReadout = document.getElementById('memberForceReadout');
+
+  const globalEA = document.getElementById('globalEA');
+  const resultsList = document.getElementById('resultsList');
+  const reactionsList = document.getElementById('reactionsList');
+  const toastEl = document.getElementById('toast');
+  const modeHint = document.getElementById('modeHint');
+  const modeHelpText = document.getElementById('modeHelpText');
+
+  const examOverlay = document.getElementById('examOverlay');
+  const examReportWrap = document.getElementById('examReportWrap');
+
+  const MODE_HELP = {
+    select:  'Drag a joint to move it. Click a joint or member to edit values.',
+    joint:   'Click anywhere on the grid to place a new joint.',
+    member:  'Click a starting joint, then an ending joint, to connect them.',
+    support: 'Click a joint to cycle support: Free → Pin → Roller → Fixed → Free.',
+    load:    'Click a joint to set an external load (Fx, Fy) applied there.',
+    delete:  'Click a joint or member to remove it.'
+  };
+  const CURSORS = {select:'default', joint:'crosshair', member:'crosshair', support:'pointer', load:'pointer', delete:'not-allowed'};
+
+  // ---------- helpers ----------
+  function getNode(id){ return state.nodes.find(n => n.id===id); }
+  function getMember(id){ return state.members.find(m => m.id===id); }
+  function snapVal(v){ return Math.round(v/GRID)*GRID; }
+
+  function updateViewBox() {
+    svg.setAttribute('viewBox', `${state.camX} ${state.camY} ${VIEW_W/state.camZoom} ${VIEW_H/state.camZoom}`);
+    const pat = document.getElementById('grid');
+    pat.setAttribute('x', -state.camX % GRID);
+    pat.setAttribute('y', -state.camY % GRID);
+  }
+
+  function svgPoint(evt){
+    const pt = svg.createSVGPoint(); pt.x = evt.clientX; pt.y = evt.clientY;
+    const ctm = svg.getScreenCTM(); if(!ctm) return {x:0,y:0};
+    return pt.matrixTransform(ctm.inverse());
+  }
+
+  function polarToCartesian(cx, cy, r, angleInMathRad) {
+    return { x: cx + (r * Math.cos(angleInMathRad)), y: cy - (r * Math.sin(angleInMathRad)) };
+  }
+
+  function toast(msg, isError){
+    toastEl.textContent = msg; toastEl.classList.remove('hidden'); toastEl.classList.toggle('error', !!isError);
+    clearTimeout(toastEl._t); toastEl._t = setTimeout(() => toastEl.classList.add('hidden'), 3200);
+  }
+
+  function el(ns, tag, attrs){
+    const e = document.createElementNS(ns, tag);
+    for(const k in attrs){ e.setAttribute(k, attrs[k]); } return e;
+  }
+  const SVGNS = 'http://www.w3.org/2000/svg';
+
+  // ---------- Viewport controls ----------
+  svg.addEventListener('wheel', e => {
+    e.preventDefault(); const ptBefore = svgPoint(e);
+    if (e.deltaY < 0) state.camZoom *= 1.15; else state.camZoom /= 1.15;
+    state.camZoom = Math.max(0.1, Math.min(state.camZoom, 15)); updateViewBox();
+    const ptAfter = svgPoint(e); state.camX += (ptBefore.x - ptAfter.x); state.camY += (ptBefore.y - ptAfter.y); updateViewBox();
+  }, {passive: false});
+
+  svg.addEventListener('pointerdown', e => {
+    if (e.button === 1) {
+      e.preventDefault(); state.isPanning = true; state.panStartX = e.clientX; state.panStartY = e.clientY;
+      state.camXStart = state.camX; state.camYStart = state.camY; svg.style.cursor = 'grabbing'; e.target.setPointerCapture(e.pointerId);
+    } else if (e.button === 0 && state.mode === 'joint') {
+      const p = svgPoint(e);
+      addNode(p.x, p.y);
+    }
+  });
+
+  svg.addEventListener('pointermove', e => {
+    if (state.isPanning) {
+      const dx = e.clientX - state.panStartX, dy = e.clientY - state.panStartY;
+      state.camX = state.camXStart - dx * ((VIEW_W / state.camZoom) / svg.clientWidth);
+      state.camY = state.camYStart - dy * ((VIEW_H / state.camZoom) / svg.clientHeight);
+      updateViewBox(); return;
+    }
+    const p = svgPoint(e); coordTracker.textContent = `X: ${p.x.toFixed(0)}, Y: ${p.y.toFixed(0)}`;
+    if(state.draggingNodeId!=null){
+      const node = getNode(state.draggingNodeId);
+      if(node) { node.x = state.snap ? snapVal(p.x) : p.x; node.y = state.snap ? snapVal(p.y) : p.y; invalidate(); render(); }
+    }
+  });
+
+  svg.addEventListener('pointerup', e => {
+    if (state.isPanning) { state.isPanning = false; svg.style.cursor = CURSORS[state.mode]; e.target.releasePointerCapture(e.pointerId); }
+    state.draggingNodeId = null;
+  });
+
+  function frameAll() {
+    if(state.nodes.length === 0) { state.camX = 0; state.camY = 0; state.camZoom = 1; } 
+    else {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      state.nodes.forEach(n => { minX = Math.min(minX, n.x); minY = Math.min(minY, n.y); maxX = Math.max(maxX, n.x); maxY = Math.max(maxY, n.y); });
+      const pad = 120; minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+      const w = maxX - minX, h = maxY - minY;
+      state.camZoom = Math.min(VIEW_W / (w || VIEW_W), VIEW_H / (h || VIEW_H));
+      state.camX = minX - (VIEW_W/state.camZoom - w)/2; state.camY = minY - (VIEW_H/state.camZoom - h)/2;
+    }
+    updateViewBox();
+  }
+
+  window.addEventListener('keydown', e => {
+    if(e.target.tagName === 'INPUT') return;
+    if(e.key==='Escape'){ state.memberFirst=null; hideLoadForm(); state.selectedMemberId=null; state.selectedNodeId=null; render(); }
+    if (e.code === 'NumpadDecimal' || e.key === '.') { e.preventDefault(); frameAll(); }
+  });
+
+  // ---------- mutation actions ----------
+  function invalidate(){ state.solved = false; }
+  function addNode(x,y){ state.nodes.push({id:state.nodeSeq++, x:state.snap?snapVal(x):x, y:state.snap?snapVal(y):y, support:'none', fx:0, fy:0, ux:0,uy:0,rx:0,ry:0}); invalidate(); render(); }
+  function addMember(n1,n2){
+    if(n1===n2) return;
+    if(state.members.some(m => (m.n1===n1 && m.n2===n2) || (m.n1===n2 && m.n2===n1))){ toast('Exists.', true); return; }
+    state.members.push({id:state.memberSeq++, n1:n1, n2:n2, area:1, force:null, inReport:true}); invalidate(); render();
+  }
+  function deleteNode(id){
+    state.nodes = state.nodes.filter(n => n.id!==id); state.members = state.members.filter(m => m.n1!==id && m.n2!==id);
+    if(state.memberFirst===id) state.memberFirst=null; if(state.selectedNodeId===id) state.selectedNodeId = null;
+    if(state.selectedMemberId && !state.members.some(m => m.id === state.selectedMemberId)) state.selectedMemberId = null;
+    invalidate(); render();
+  }
+  function deleteMember(id){ state.members = state.members.filter(m => m.id!==id); if(state.selectedMemberId===id) state.selectedMemberId=null; invalidate(); render(); }
+  function cycleSupport(node){ const order = ['none','pin','roller','fixed']; node.support = order[(order.indexOf(node.support)+1) % order.length]; invalidate(); render(); }
+
+  // ---------- solver ----------
+  function solveTruss(){
+    const nodes = state.nodes, n = nodes.length;
+    if(n < 2) return {error:true, message:'Add at least two joints and a member.'};
+    if(state.members.length === 0) return {error:true, message:'Add at least one member.'};
+
+    const idx = {}; nodes.forEach((nd,i) => idx[nd.id]=i);
+    const dof = 2*n, K = Array.from({length:dof}, () => new Array(dof).fill(0)), F = new Array(dof).fill(0);
+    nodes.forEach((nd,i) => { F[2*i] += nd.fx||0; F[2*i+1] += nd.fy||0; });
+
+    const EA0 = parseFloat(globalEA.value) || 1000;
+    state.members.forEach(m => {
+      const i = idx[m.n1], j = idx[m.n2], ni = nodes[i], nj = nodes[j], dx = nj.x - ni.x, dy = nj.y - ni.y, L = Math.sqrt(dx*dx + dy*dy);
+      if(L < 1e-6){ m._skip = true; return; } m._skip = false;
+      const c = dx/L, s = dy/L, k = (EA0 * (m.area || 1)) / L;
+      const ke = [[c*c, c*s, -c*c, -c*s], [c*s, s*s, -c*s, -s*s], [-c*c, -c*s, c*c, c*s], [-c*s, -s*s, c*s, s*s]];
+      const dofs = [2*i, 2*i+1, 2*j, 2*j+1];
+      for(let a=0;a<4;a++) for(let b=0;b<4;b++) K[dofs[a]][dofs[b]] += ke[a][b]*k;
+      m._c=c; m._s=s; m._L=L; m._k=k;
+    });
+
+    const fixed = new Set();
+    nodes.forEach((nd,i) => {
+      if(nd.support==='pin' || nd.support==='fixed'){ fixed.add(2*i); fixed.add(2*i+1); }
+      else if(nd.support==='roller') fixed.add(2*i+1);
+    });
+
+    if(fixed.size < 3) return {error:true, message:'Structure is under-constrained. Add supports before solving.'};
+
+    const freeDofs = []; for(let d=0; d<dof; d++) if(!fixed.has(d)) freeDofs.push(d);
+    const nf = freeDofs.length, Kff = Array.from({length:nf}, () => new Array(nf).fill(0)), Ff = new Array(nf).fill(0);
+    for(let a=0;a<nf;a++){ Ff[a] = F[freeDofs[a]]; for(let b=0;b<nf;b++) Kff[a][b] = K[freeDofs[a]][freeDofs[b]]; }
+
+    let uf;
+    try{
+      const M = Kff.map(r => r.slice()), x = Ff.slice();
+      for(let c=0; c<nf; c++){
+        let mr = c, mv = Math.abs(M[c][c]);
+        for(let r=c+1; r<nf; r++) if(Math.abs(M[r][c]) > mv) { mv = Math.abs(M[r][c]); mr = r; }
+        if(mv < 1e-9) throw new Error('singular');
+        if(mr !== c){ const tR=M[c]; M[c]=M[mr]; M[mr]=tR; const tX=x[c]; x[c]=x[mr]; x[mr]=tX; }
+        const p = M[c][c];
+        for(let r=c+1; r<nf; r++){ const f = M[r][c]/p; if(f===0) continue; for(let k=c; k<nf; k++) M[r][k] -= f*M[c][k]; x[r] -= f*x[c]; }
+      }
+      uf = new Array(nf).fill(0);
+      for(let r=nf-1; r>=0; r--){ let s = x[r]; for(let c=r+1; c<nf; c++) s -= M[r][c]*uf[c]; uf[r] = s / M[r][r]; }
+    }catch(e){ return {error:true, message:'Structure is unstable (Mechanism).'}; }
+
+    const u = new Array(dof).fill(0); freeDofs.forEach((d,i) => u[d]=uf[i]);
+    const R = new Array(dof).fill(0); for(let a=0; a<dof; a++){ let sum=0; for(let b=0;b<dof;b++) sum += K[a][b]*u[b]; R[a] = sum - F[a]; }
+
+    nodes.forEach((nd,i) => { nd.ux=u[2*i]; nd.uy=u[2*i+1]; nd.rx = fixed.has(2*i) ? R[2*i] : 0; nd.ry = fixed.has(2*i+1) ? R[2*i+1] : 0; });
+    state.members.forEach(m => { if(m._skip){ m.force = 0; return; } const i = idx[m.n1], j = idx[m.n2]; m.force = m._k * (m._c*(u[2*j]-u[2*i]) + m._s*(u[2*j+1]-u[2*i+1])); });
+    return {error:false};
+  }
+
+  // ---------- rendering ----------
+  function clear(g){ while(g.firstChild) g.removeChild(g.firstChild); }
+  function forceColor(force){ if(force==null) return 'var(--ink-dim)'; if(Math.abs(force) < 0.05) return 'var(--zero)'; return force > 0 ? 'var(--tension)' : 'var(--compression)'; }
+
+  function renderDimensions(){
+    clear(dimsLayer);
+    if(!state.showDims || state.nodes.length < 2) return;
+    
+    let xs = [...new Set(state.nodes.map(n => Math.round(n.x)))].sort((a,b)=>a-b);
+    let ys = [...new Set(state.nodes.map(n => Math.round(n.y)))].sort((a,b)=>a-b);
+    let max_y = Math.max(...ys), min_x = Math.min(...xs);
+
+    // X dimensions (bottom)
+    const yOff = max_y + 60;
+    dimsLayer.appendChild(el(SVGNS, 'line', {x1:xs[0], y1:yOff, x2:xs[xs.length-1], y2:yOff, stroke:'rgba(59,130,246,0.4)', 'stroke-width':1.5}));
+    for(let i=0; i<xs.length; i++){
+      dimsLayer.appendChild(el(SVGNS, 'line', {x1:xs[i], y1:yOff-8, x2:xs[i], y2:yOff+8, stroke:'rgba(59,130,246,0.6)', 'stroke-width':1.5}));
+      if(i < xs.length-1){
+        let mid = (xs[i] + xs[i+1])/2, dist = Math.abs(xs[i+1] - xs[i]);
+        let t = el(SVGNS, 'text', {x:mid, y:yOff+16, 'text-anchor':'middle', 'font-size':'11px', 'font-family':"'Inter',sans-serif", fill:'rgba(59,130,246,0.8)'});
+        t.textContent = dist; dimsLayer.appendChild(t);
+      }
+    }
+
+    // Y dimensions (left)
+    const xOff = min_x - 60;
+    dimsLayer.appendChild(el(SVGNS, 'line', {x1:xOff, y1:ys[0], x2:xOff, y2:ys[ys.length-1], stroke:'rgba(59,130,246,0.4)', 'stroke-width':1.5}));
+    for(let i=0; i<ys.length; i++){
+      dimsLayer.appendChild(el(SVGNS, 'line', {x1:xOff-8, y1:ys[i], x2:xOff+8, y2:ys[i], stroke:'rgba(59,130,246,0.6)', 'stroke-width':1.5}));
+      if(i < ys.length-1){
+        let mid = (ys[i] + ys[i+1])/2, dist = Math.abs(ys[i+1] - ys[i]);
+        let t = el(SVGNS, 'text', {x:xOff-12, y:mid, 'text-anchor':'end', 'dominant-baseline':'middle', 'font-size':'11px', 'font-family':"'Inter',sans-serif", fill:'rgba(59,130,246,0.8)'});
+        t.textContent = dist; dimsLayer.appendChild(t);
+      }
+    }
+  }
+
+  function renderMembers(){
+    clear(membersLayer); let maxAbs = 0.0001;
+    if(state.solved){ state.members.forEach(m => { if(m.force!=null) maxAbs = Math.max(maxAbs, Math.abs(m.force)); }); }
+    state.members.forEach(m => {
+      const a = getNode(m.n1), b = getNode(m.n2); if(!a || !b) return;
+      const selected = state.selectedMemberId === m.id;
+      let stroke = 'rgba(231,237,246,0.55)', width = 4;
+      if(state.solved && m.force!=null){ stroke = forceColor(m.force); width = 3 + 3*Math.min(1, Math.abs(m.force)/maxAbs); }
+      
+      const line = el(SVGNS,'line',{ x1:a.x, y1:a.y, x2:b.x, y2:b.y, stroke: selected ? 'var(--amber)' : stroke, 'stroke-width': selected ? Math.max(width, 5) : width, 'stroke-linecap':'round', class:'member-line' });
+      line.addEventListener('pointerdown', e => onMemberPointerDown(e, m)); membersLayer.appendChild(line);
+
+      if(!state.showLabels) return;
+      const mx = (a.x+b.x)/2, my=(a.y+b.y)/2, dx=b.x-a.x, dy=b.y-a.y, L=Math.sqrt(dx*dx+dy*dy)||1;
+      let labelText = 'M'+m.id + (state.solved && m.force!=null ? ' F:'+Math.abs(m.force).toFixed(1) : '');
+      const text = el(SVGNS,'text',{ x: mx-dy/L*18, y: my+dx/L*18, 'text-anchor':'middle', 'dominant-baseline':'middle', 'font-family':"'Inter',sans-serif", 'font-size':'10.5', fill: state.solved ? forceColor(m.force) : 'var(--ink-dim)', stroke: 'var(--bg)', 'stroke-width': '4', 'paint-order': 'stroke fill', 'stroke-linejoin': 'round' });
+      text.textContent = labelText; labelsLayer.appendChild(text);
+    });
+  }
+
+  function renderAngles(){
+    clear(anglesLayer); if(!state.showAngles) return;
+    state.nodes.forEach(nd => {
+      let c = []; state.members.forEach(m => { if(m.n1===nd.id) c.push({id:m.id, o:getNode(m.n2)}); if(m.n2===nd.id) c.push({id:m.id, o:getNode(m.n1)}); });
+      if(c.length < 2) return;
+      let mA = c.map(k => { let a = Math.atan2(-(k.o.y - nd.y), k.o.x - nd.x); return a < 0 ? a + 2*Math.PI : a; }).sort((a,b)=>a-b);
+      for(let i=0; i<mA.length; i++) {
+        let a1 = mA[i], a2 = mA[(i+1)%mA.length], diff = a2 - a1; if(diff < 0) diff += 2*Math.PI;
+        if(mA.length === 2 && diff > Math.PI) { diff = 2*Math.PI - diff; let t = a1; a1 = a2; a2 = t; }
+        if(mA.length > 2 && diff > Math.PI) continue;
+        let r = 24, sp = polarToCartesian(nd.x, nd.y, r, a1), ep = polarToCartesian(nd.x, nd.y, r, a1 + diff);
+        anglesLayer.appendChild(el(SVGNS, 'path', { d: `M ${sp.x} ${sp.y} A ${r} ${r} 0 ${diff>Math.PI?"1":"0"} 0 ${ep.x} ${ep.y}`, fill: 'none', stroke: 'var(--ink-dim)', 'stroke-width': 1.2, 'stroke-dasharray': '2,2' }));
+        let midA = a1 + diff/2, tr = r + 14, text = el(SVGNS, 'text', { x: nd.x + tr*Math.cos(midA), y: nd.y - tr*Math.sin(midA), 'text-anchor':'middle', 'dominant-baseline':'middle', 'font-family':"'Inter',sans-serif", 'font-size':'9.5', fill:'var(--cyan)', stroke:'var(--bg)', 'stroke-width':3, 'paint-order':'stroke fill' });
+        text.textContent = (diff*180/Math.PI).toFixed(1) + '°'; anglesLayer.appendChild(text);
+      }
+    });
+  }
+
+  function renderSupports(){
+    clear(supportsLayer);
+    state.nodes.forEach(nd => {
+      if(nd.support==='none') return;
+      const g = el(SVGNS,'g',{transform:`translate(${nd.x},${nd.y})`});
+      if(nd.support==='fixed'){
+        g.appendChild(el(SVGNS, 'line', {x1:-15, y1:10, x2:15, y2:10, stroke:'var(--cyan)', 'stroke-width':2}));
+        g.appendChild(el(SVGNS,'path',{d:'M -15,10 L -11,16 M -7,10 L -3,16 M 1,10 L 5,16 M 9,10 L 13,16', stroke:'var(--cyan)', 'stroke-width':1.5, fill:'none'}));
+      } else {
+        g.appendChild(el(SVGNS,'path',{d:'M -11,20 L 11,20 L 0,2 Z', fill:'none', stroke:'var(--cyan)', 'stroke-width':1.6, 'stroke-linejoin':'round'}));
+        if(nd.support==='pin'){ g.appendChild(el(SVGNS,'path',{d:'M -15,20 L 15,20 M -15,20 L -11,26 M -7,20 L -11,26 M -1,20 L -5,26 M 5,20 L 1,26 M 11,20 L 7,26 M 15,20 L 11,26', stroke:'var(--cyan)', 'stroke-width':1.2, fill:'none'})); } 
+        else if(nd.support==='roller') {
+          const w = el(SVGNS,'g',{}); [-6,0,6].forEach(ox => w.appendChild(el(SVGNS,'circle',{cx:ox, cy:23, r:2.4, fill:'none', stroke:'var(--cyan)', 'stroke-width':1.2}))); g.appendChild(w);
+          g.appendChild(el(SVGNS,'path',{d:'M -15,27 L 15,27 M -15,27 L -11,33 M -7,27 L -11,33 M -1,27 L -5,33 M 5,27 L 1,33 M 11,27 L 7,33 M 15,27 L 11,33', stroke:'var(--cyan)', 'stroke-width':1.2, fill:'none'}));
+        }
+      } supportsLayer.appendChild(g);
+    });
+  }
+
+  function renderLoads(){
+    clear(loadsLayer);
+    state.nodes.forEach(nd => {
+      const fx = nd.fx||0, fy = nd.fy||0; if(fx===0 && fy===0) return;
+      const mag = Math.sqrt(fx*fx+fy*fy) || 1, dirx = fx/mag, diry = fy/mag, sR = NODE_R+3, l = 42;
+      const x1 = nd.x - dirx*sR, y1 = nd.y - diry*sR, x2 = nd.x - dirx*(sR+l), y2 = nd.y - diry*(sR+l);
+      loadsLayer.appendChild(el(SVGNS,'line',{x1:x2,y1:y2,x2:x1,y2:y1, stroke:'var(--amber)', 'stroke-width':2.4, 'marker-end':'url(#arrowHead)'}));
+      if(!state.showLabels) return;
+      const t = el(SVGNS,'text',{ x:x2-dirx*14, y:y2-diry*14, 'text-anchor':'middle','dominant-baseline':'middle', 'font-family':"'Inter',sans-serif", 'font-size':'10.5', fill:'var(--amber)', stroke:'var(--bg)', 'stroke-width': '4', 'paint-order':'stroke fill', 'stroke-linejoin':'round' });
+      t.textContent = `(${fx}, ${fy})`; loadsLayer.appendChild(t);
+    });
+  }
+
+  function renderNodes(){
+    clear(nodesLayer);
+    state.nodes.forEach(nd => {
+      const iD = state.mode==='member' && state.memberFirst===nd.id, iS = state.mode==='select' && state.selectedNodeId===nd.id;
+      const c = el(SVGNS,'circle',{ cx:nd.x, cy:nd.y, r: (iD||iS)?NODE_R+2:NODE_R, fill: iD?'var(--amber)':'var(--bg-2)', stroke: (iD||iS)?'var(--amber)':'var(--ink)', 'stroke-width':1.6, class:'node-circle' });
+      c.addEventListener('pointerdown', e => onNodePointerDown(e, nd)); nodesLayer.appendChild(c);
+      if(!state.showLabels) return;
+      const t = el(SVGNS,'text',{ x:nd.x+13, y:nd.y-13, 'font-family':"'Inter',sans-serif", 'font-size':'10.5', fill: iS?'var(--cyan)':'var(--ink-dim)', stroke:'var(--bg)', 'stroke-width': '4', 'paint-order':'stroke fill', 'stroke-linejoin':'round' });
+      t.textContent = 'J'+nd.id; labelsLayer.appendChild(t);
+    });
+  }
+
+  function updateStatCheck(){
+    const j = state.nodes.length, m = state.members.length; let r = 0;
+    state.nodes.forEach(nd => { if(nd.support==='pin' || nd.support==='fixed') r+=2; else if(nd.support==='roller') r+=1; });
+    statCheck.textContent = `m=${m} r=${r} j=${j} → ` + ((m+r < 2*j) ? 'mechanism' : (m+r === 2*j ? 'determinate' : 'indeterminate'));
+  }
+
+  function renderResults(){
+    if(!state.solved){ resultsList.innerHTML = '<p class="muted">Run Solve to see results.</p>'; reactionsList.innerHTML = '<p class="muted">—</p>'; return; }
+    resultsList.innerHTML = state.members.length===0 ? '<p class="muted">No members yet.</p>' : '';
+    state.members.forEach(m => {
+      const lbl = Math.abs(m.force)<0.05 ? '≈0' : (m.force>0 ? 'Tension' : 'Compression');
+      const row = document.createElement('div'); row.className = 'result-row';
+      row.innerHTML = `<span><span class="swatch" style="background:${forceColor(m.force)}"></span> M${m.id}</span><span>${Math.abs(m.force).toFixed(2)} &middot; ${lbl}</span>`; resultsList.appendChild(row);
+    });
+    const supported = state.nodes.filter(n => n.support!=='none'); reactionsList.innerHTML = supported.length===0 ? '<p class="muted">No supports.</p>' : '';
+    supported.forEach(nd => {
+      const row = document.createElement('div'); row.className='result-row';
+      row.innerHTML = `<span>J${nd.id} (${nd.support})</span><span>Rx ${nd.rx.toFixed(2)}, Ry ${nd.ry.toFixed(2)}</span>`; reactionsList.appendChild(row);
+    });
+  }
+
+  function renderInfoPanels(){
+    if(state.mode==='select' && state.selectedNodeId!=null){
+      const nd = getNode(state.selectedNodeId);
+      if(nd){ nodeEditorTitle.textContent='Joint J'+nd.id; editNodeX.value=nd.x.toFixed(2); editNodeY.value=nd.y.toFixed(2); document.getElementById('addFromLabel').textContent='J'+nd.id; nodeEditor.classList.remove('hidden'); }
+    } else { nodeEditor.classList.add('hidden'); }
+
+    if(state.mode==='select' && state.selectedMemberId!=null){
+      const m = getMember(state.selectedMemberId);
+      if(m){
+        memberInfoTitle.textContent='Member M'+m.id+' (J'+m.n1+' – J'+m.n2+')'; memberArea.value=m.area;
+        memReportToggle.checked = !!m.inReport;
+        const n1=getNode(m.n1), n2=getNode(m.n2), dx=n2.x-n1.x, dy=-(n2.y-n1.y), L=Math.sqrt(dx*dx+dy*dy);
+        let A = Math.atan2(dy, dx)*180/Math.PI; if(A<0) A+=360;
+        memberLen.value=L.toFixed(2); memberAng.value=A.toFixed(1);
+        memberForceReadout.textContent=state.solved&&m.force!=null ? 'Force: '+Math.abs(m.force).toFixed(2)+' ('+(Math.abs(m.force)<0.05?'≈0':(m.force>0?'Tension':'Compression'))+')' : 'Not solved yet.';
+        memberInfo.classList.remove('hidden');
+      }
+    } else { memberInfo.classList.add('hidden'); }
+  }
+
+  function render(){
+    clear(labelsLayer); renderDimensions(); renderAngles(); renderMembers(); renderSupports(); renderLoads(); renderNodes();
+    updateStatCheck(); renderResults(); renderInfoPanels(); updateViewBox();
+  }
+
+  // ---------- Interaction ----------
+  function onNodePointerDown(e, node){
+    if(e.button === 1) return; e.stopPropagation();
+    if(state.mode==='select'){ state.selectedNodeId = node.id; state.selectedMemberId = null; state.draggingNodeId = node.id; try{ e.target.setPointerCapture(e.pointerId); }catch(err){} render(); }
+    else if(state.mode==='member'){ if(state.memberFirst===null) state.memberFirst=node.id; else if(state.memberFirst===node.id) state.memberFirst=null; else{ addMember(state.memberFirst, node.id); state.memberFirst=null; } render(); }
+    else if(state.mode==='support') cycleSupport(node); else if(state.mode==='load') openLoadForm(node); else if(state.mode==='delete') deleteNode(node.id);
+  }
+  function onMemberPointerDown(e, member){
+    if(e.button === 1) return; e.stopPropagation();
+    if(state.mode==='select'){ state.selectedMemberId = member.id; state.selectedNodeId = null; render(); }
+    else if(state.mode==='delete') deleteMember(member.id);
+  }
+  
+  document.getElementById('toolbar').addEventListener('click', e => {
+    const btn = e.target.closest('.tool'); if(!btn) return;
+    state.mode = btn.dataset.mode; state.memberFirst = null;
+    document.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.mode===state.mode));
+    modeHelpText.textContent = MODE_HELP[state.mode]; modeHint.textContent = MODE_HELP[state.mode];
+    svg.style.cursor = CURSORS[state.mode]; hideLoadForm();
+    if(state.mode!=='select'){ state.selectedMemberId=null; state.selectedNodeId=null; } render();
+  });
+
+  function hideLoadForm(){ loadForm.classList.add('hidden'); state.pendingLoadNodeId=null; }
+  function openLoadForm(node){ state.pendingLoadNodeId = node.id; document.getElementById('loadNodeLabel').textContent = 'J'+node.id; loadFx.value = node.fx||0; loadFy.value = node.fy||0; loadForm.classList.remove('hidden'); }
+  document.getElementById('applyLoad').addEventListener('click', () => { const node = getNode(state.pendingLoadNodeId); if(node){ node.fx = parseFloat(loadFx.value)||0; node.fy = parseFloat(loadFy.value)||0; invalidate(); } hideLoadForm(); render(); });
+  document.getElementById('cancelLoad').addEventListener('click', hideLoadForm);
+  document.getElementById('applyNodeEdit').addEventListener('click', () => { const nd = getNode(state.selectedNodeId); if(nd){ nd.x = parseFloat(editNodeX.value); nd.y = parseFloat(editNodeY.value); invalidate(); render(); } });
+  document.getElementById('addJointFromNode').addEventListener('click', () => {
+    const base = getNode(state.selectedNodeId); if(!base) return;
+    const L = parseFloat(document.getElementById('addFromLen').value);
+    const Adeg = parseFloat(document.getElementById('addFromAng').value);
+    if(isNaN(L) || L <= 0 || isNaN(Adeg)) { toast('Enter a valid length (>0) and angle.', true); return; }
+    const rad = Adeg * Math.PI / 180;
+    const nx = base.x + L * Math.cos(rad), ny = base.y - L * Math.sin(rad);
+    const newId = state.nodeSeq++;
+    state.nodes.push({id:newId, x:nx, y:ny, support:'none', fx:0, fy:0, ux:0,uy:0,rx:0,ry:0});
+    state.members.push({id:state.memberSeq++, n1:base.id, n2:newId, area:1, force:null, inReport:true});
+    state.selectedNodeId = newId; state.selectedMemberId = null;
+    invalidate(); render(); toast('Joint J'+newId+' added.');
+  });
+  document.getElementById('applyMemEdit').addEventListener('click', () => {
+    const m = getMember(state.selectedMemberId); if(!m) return;
+    m.area = Math.max(0.01, parseFloat(memberArea.value)||1);
+    const n1 = getNode(m.n1), n2 = getNode(m.n2);
+    if(n1 && n2){
+      const L = parseFloat(memberLen.value), Adeg = parseFloat(memberAng.value);
+      if(!isNaN(L) && L > 0 && !isNaN(Adeg)){
+        const rad = Adeg * Math.PI/180;
+        n2.x = n1.x + L*Math.cos(rad);
+        n2.y = n1.y - L*Math.sin(rad);
+      } else { toast('Enter a valid length (>0) and angle.', true); }
+    }
+    invalidate(); render();
+  });
+  document.getElementById('deleteMemberBtn').addEventListener('click', () => { if(state.selectedMemberId!=null) deleteMember(state.selectedMemberId); });
+  
+  memReportToggle.addEventListener('change', () => { const m = getMember(state.selectedMemberId); if(m) m.inReport = memReportToggle.checked; });
+  snapToggle.addEventListener('change', () => state.snap = snapToggle.checked);
+  showLabelsToggle.addEventListener('change', () => { state.showLabels = showLabelsToggle.checked; render(); });
+  showDimsToggle.addEventListener('change', () => { state.showDims = showDimsToggle.checked; render(); });
+  showAnglesToggle.addEventListener('change', () => { state.showAngles = showAnglesToggle.checked; render(); });
+
+  document.getElementById('solveBtn').addEventListener('click', () => {
+    const res = solveTruss();
+    if(res.error){ state.solved = false; toast(res.message, true); render(); return; }
+    state.solved = true; render(); toast(res.warning ? res.warning : 'Solved.');
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if(!confirm('Clear the entire model? This cannot be undone.')) return;
+    state.nodes = []; state.members = []; state.nodeSeq = 1; state.memberSeq = 1; state.selectedMemberId = null; state.selectedNodeId = null; state.memberFirst = null; invalidate(); render();
+  });
+
+  // ---------- Exam Report Generator (A4 Pages + MathJax) ----------
+  document.getElementById('examBtn').addEventListener('click', () => {
+    if(!state.solved) { toast('Please run "Solve" first before generating the report.', true); return; }
+    generateExamReport();
+    examOverlay.classList.remove('hidden');
+  });
+  document.getElementById('closeExamBtn').addEventListener('click', () => examOverlay.classList.add('hidden'));
+  document.getElementById('downloadPdfBtn').addEventListener('click', () => window.print());
+
+  function generateExamReport() {
+    examReportWrap.innerHTML = '';
+    const j = state.nodes.length, m = state.members.length; let r = 0;
+    state.nodes.forEach(nd => { if(nd.support==='pin' || nd.support==='fixed') r+=2; else if(nd.support==='roller') r+=1; });
+    const detCheck = m + r - 2*j;
+
+    let page1 = `<div class="a4-page">`;
+    page1 += `<h1>Structural Analysis Report</h1>`;
+    
+    // Copy the canvas SVG for the report
+    const svgClone = svg.cloneNode(true);
+    svgClone.removeAttribute('id');
+    svgClone.style.background = 'white';
+    svgClone.querySelector('#gridRect').setAttribute('fill', 'none'); // remove background grid in PDF
+    page1 += `<h2>Structural Diagram</h2><div class="diagram-container">${svgClone.outerHTML}</div>`;
+
+    page1 += `<h2>1. Stability & Determinacy Check</h2>`;
+    page1 += `<p>Using the equilibrium equation: $$m + r = 2j$$</p>`;
+    page1 += `<p>Where joints ($j$) = ${j}, members ($m$) = ${m}, and reactions ($r$) = ${r}.<br>`;
+    page1 += `$$LHS = ${m} + ${r} = ${m+r}, \\quad RHS = 2 \\times ${j} = ${2*j}$$</p>`;
+    if(detCheck === 0) page1 += `<p class="report-highlight">The structure is Statically Determinate and Stable.</p>`;
+    else if(detCheck > 0) page1 += `<p class="report-highlight">The structure is Statically Indeterminate to degree ${detCheck}.</p>`;
+    else page1 += `<p class="report-highlight" style="color:red">The structure is Unstable (Mechanism).</p>`;
+
+    page1 += `<h2>2. Support Reactions Calculation</h2>`;
+    page1 += `<p>Applying global equilibrium equations: $$ \\sum F_x = 0, \\quad \\sum F_y = 0, \\quad \\sum M = 0 $$</p>`;
+    page1 += `<table><thead><tr><th>Support Joint</th><th>R<sub>x</sub> (Horizontal)</th><th>R<sub>y</sub> (Vertical)</th></tr></thead><tbody>`;
+    state.nodes.forEach(nd => {
+      if(nd.support !== 'none') {
+        page1 += `<tr><td>J${nd.id} (${nd.support})</td><td>${Math.abs(nd.rx) < 0.001 ? '0.00' : nd.rx.toFixed(2)}</td><td>${Math.abs(nd.ry) < 0.001 ? '0.00' : nd.ry.toFixed(2)}</td></tr>`;
+      }
+    });
+    page1 += `</tbody></table></div>`;
+    examReportWrap.insertAdjacentHTML('beforeend', page1);
+
+    // PAGE 2: Method of Joints
+    let page2 = `<div class="a4-page">`;
+    page2 += `<h2>3. Internal Forces (Method of Joints)</h2>`;
+    page2 += `<p>Evaluating nodal equilibrium for selected members.</p>`;
+    
+    // Only process members selected by user
+    const selectedMemIds = new Set(state.members.filter(mem => mem.inReport).map(mem => mem.id));
+    
+    state.nodes.forEach(nd => {
+      let activeMems = state.members.filter(mem => (mem.n1 === nd.id || mem.n2 === nd.id) && selectedMemIds.has(mem.id));
+      if(activeMems.length === 0) return;
+      
+      page2 += `<h3>Joint J${nd.id} Equilibrium</h3>`;
+      let fxEq = `\\sum F_x = 0 \\implies `, fyEq = `\\sum F_y = 0 \\implies `;
+      let fxTerms = [], fyTerms = [];
+
+      if(Math.abs(nd.fx) > 0.001) fxTerms.push(nd.fx.toFixed(2));
+      if(Math.abs(nd.rx) > 0.001) fxTerms.push(nd.rx.toFixed(2));
+      if(Math.abs(nd.fy) > 0.001) fyTerms.push(nd.fy.toFixed(2));
+      if(Math.abs(nd.ry) > 0.001) fyTerms.push(nd.ry.toFixed(2));
+
+      activeMems.forEach(mem => {
+        let isN1 = (mem.n1 === nd.id);
+        let otherNode = isN1 ? getNode(mem.n2) : getNode(mem.n1);
+        let dx = otherNode.x - nd.x, dy = -(otherNode.y - nd.y); // math coordinate
+        let angle = Math.atan2(dy, dx);
+        let cosA = Math.cos(angle), sinA = Math.sin(angle);
+        
+        let forceVar = `F_{M${mem.id}}`;
+        if(Math.abs(cosA) > 0.01) fxTerms.push(`${cosA.toFixed(3)} ${forceVar}`);
+        if(Math.abs(sinA) > 0.01) fyTerms.push(`${sinA.toFixed(3)} ${forceVar}`);
+      });
+
+      if(fxTerms.length > 0) fxEq += fxTerms.join(' + ') + ` = 0`; else fxEq += `0 = 0`;
+      if(fyTerms.length > 0) fyEq += fyTerms.join(' + ') + ` = 0`; else fyEq += `0 = 0`;
+
+      page2 += `<p>$$ ${fxEq} $$</p><p>$$ ${fyEq} $$</p>`;
+    });
+    page2 += `</div>`;
+    examReportWrap.insertAdjacentHTML('beforeend', page2);
+
+    // PAGE 3: Summary and Sectional Concept
+    let page3 = `<div class="a4-page">`;
+    page3 += `<h2>4. Validation via Method of Sections</h2>`;
+    page3 += `<p>To verify the internal forces for specific members, a virtual cut (section) can be passed through the member, separating the truss into two distinct free-body diagrams. By taking the moment about the intersection of the remaining cut members ($$ \\sum M = 0 $$), the target member's force can be isolated.</p>`;
+    
+    page3 += `<h2>5. Final Results Summary</h2>`;
+    page3 += `<table><thead><tr><th>Member</th><th>Force (Magnitude)</th><th>Status (Tension/Compression)</th></tr></thead><tbody>`;
+    state.members.forEach(mem => {
+      if(!mem.inReport) return;
+      let forceVal = mem.force, status = '-', cls = '';
+      if(Math.abs(forceVal) < 0.005) { forceVal = 0; status = 'Zero Force'; }
+      else if(forceVal > 0) { status = 'Tension (T)'; cls = 'report-tension'; }
+      else { status = 'Compression (C)'; cls = 'report-comp'; }
+      page3 += `<tr><td>M${mem.id}</td><td class="${cls}">${Math.abs(forceVal).toFixed(2)}</td><td class="${cls}">${status}</td></tr>`;
+    });
+    page3 += `</tbody></table>`;
+    page3 += `<p style="margin-top:40px; font-size:11px; color:#666; text-align:center;">Generated by Interactive Truss Analyzer Tool</p>`;
+    page3 += `</div>`;
+    examReportWrap.insertAdjacentHTML('beforeend', page3);
+
+    // Trigger MathJax render
+    if(window.MathJax) { MathJax.typesetPromise([examReportWrap]).catch(err => console.log(err)); }
+  }
+
+  // Load/Save init...
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const data = { nodes: state.nodes.map(n => ({id:n.id,x:n.x,y:n.y,support:n.support,fx:n.fx,fy:n.fy})), members: state.members.map(m => ({id:m.id,n1:m.n1,n2:m.n2,area:m.area})), globalEA: parseFloat(globalEA.value)||1000 };
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'})); a.download = 'truss-model.json'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  });
+  document.getElementById('loadFile').addEventListener('change', e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        if(!Array.isArray(data.nodes) || !Array.isArray(data.members)) throw new Error('bad shape');
+        state.nodes = data.nodes.map(n => ({id:n.id, x:n.x, y:n.y, support:n.support||'none', fx:n.fx||0, fy:n.fy||0, ux:0,uy:0,rx:0,ry:0}));
+        state.members = data.members.map(m => ({id:m.id, n1:m.n1, n2:m.n2, area:m.area||1, force:null, inReport:true}));
+        state.nodeSeq = (state.nodes.reduce((a,n) => Math.max(a,n.id), 0)) + 1; state.memberSeq = (state.members.reduce((a,m) => Math.max(a,m.id), 0)) + 1;
+        if(data.globalEA) globalEA.value = data.globalEA;
+        state.selectedMemberId = null; state.selectedNodeId = null; state.solved = false; frameAll(); render(); toast('Model loaded.');
+      }catch(err){ toast('Could not read that file.', true); }
+    };
+    reader.readAsText(file); e.target.value = '';
+  });
+
+  state.mode = 'select'; modeHint.textContent = MODE_HELP[state.mode]; modeHelpText.textContent = MODE_HELP[state.mode]; svg.style.cursor = CURSORS[state.mode];
+  updateViewBox(); frameAll(); render();
+})();
+</script>
+</body>
+</html>
