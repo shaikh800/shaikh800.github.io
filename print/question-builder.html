@@ -314,6 +314,7 @@
       .mcq-image-wrap { padding-left: 18px; margin: 4px 0 2px; }
       .mcq-image { display: block; width: auto; object-fit: contain; border: 1px solid #bbb; }
       .options-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--option-col-gap); row-gap: 2px; padding-left: 18px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
+      .options-grid.stack-options { grid-template-columns: 1fr; }
       .option-item { display: flex; align-items: center; gap: 5px; min-width: 0; }
       .option-mark { 
         --option-mark-size: calc(var(--mcq-font-size) * 1.55 * var(--option-mark-scale));
@@ -3832,6 +3833,25 @@
         return !!content && content.scrollHeight > content.clientHeight + 1;
       }
 
+      function adjustLongOptionLayouts() {
+        document.querySelectorAll(".options-grid").forEach((grid) => {
+          grid.classList.remove("stack-options");
+          let needsStack = false;
+          grid.querySelectorAll(".option-text").forEach((textEl) => {
+            const availableWidth = textEl.clientWidth;
+            if (!availableWidth) return;
+            textEl.querySelectorAll("mjx-container > svg").forEach((svg) => {
+              const prevMax = svg.style.maxWidth;
+              svg.style.maxWidth = "none";
+              const naturalWidth = svg.getBoundingClientRect().width;
+              svg.style.maxWidth = prevMax;
+              if (naturalWidth > availableWidth + 1) needsStack = true;
+            });
+          });
+          if (needsStack) grid.classList.add("stack-options");
+        });
+      }
+
       function renderFixedMcqPages(allMcq) {
         const chunks = [];
         for (let i = 0; i < allMcq.length; i += 30) {
@@ -4115,7 +4135,9 @@
         scheduleAutosave();
         if (window.MathJax && MathJax.typesetPromise) {
           MathJax.typesetClear();
-          MathJax.typesetPromise().catch((e) => console.warn("MathJax:", e));
+          MathJax.typesetPromise()
+            .then(() => adjustLongOptionLayouts())
+            .catch((e) => console.warn("MathJax:", e));
         }
       }
       function normalizeImportedState(parsed) {
@@ -5162,6 +5184,7 @@ function splitIntoQuestionBlocks(text) {
           }
           if (MathJax.typesetClear) MathJax.typesetClear();
           if (MathJax.typesetPromise) await MathJax.typesetPromise();
+          adjustLongOptionLayouts();
         } catch (err) {
           console.warn("MathJax wait failed:", err);
         }
