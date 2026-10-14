@@ -297,9 +297,9 @@
           <div class="g-sub">Md. Shaikh Alam — full control</div>
         </div>
         <div class="gate-opt" id="gateOptMember">
-          <i class="fab fa-google"></i>
+          <i class="fas fa-user"></i>
           <div class="g-name">Member</div>
-          <div class="g-sub">Sign in with Google — view &amp; upload what's shared</div>
+          <div class="g-sub">Log in or sign up with your name &amp; email</div>
         </div>
       </div>
 
@@ -308,6 +308,16 @@
         <div class="gate-err" id="gateErr"></div>
         <button class="btn primary" style="width:100%;justify-content:center;" id="gateEnterBtn"><i class="fas fa-unlock"></i> Enter</button>
         <button class="gate-back" id="gateBackBtn">← Back</button>
+      </div>
+
+      <div class="gate-pw-step" id="gateMemberForm">
+        <input type="text" id="memberName" placeholder="Your name" autocomplete="name">
+        <input type="email" id="memberEmail" placeholder="Your email" autocomplete="email">
+        <input type="password" id="memberPass" placeholder="Choose a password" autocomplete="new-password">
+        <div class="gate-err" id="memberFormErr"></div>
+        <button class="btn primary" style="width:100%;justify-content:center;" id="memberFormBtn"><i class="fas fa-right-to-bracket"></i> Continue</button>
+        <button class="gate-back" id="memberFormBackBtn">← Back</button>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">New here? Just fill this in once — the admin will approve your email and you're in, on any device.</p>
       </div>
 
       <div class="gate-checking" id="gateChecking">
@@ -869,25 +879,26 @@
       return role === 'admin' || role === 'member';
     }
 
-    /* ── Gate: Member sign-in flow (verifies against the member list, remembers you after) ── */
-    async function startMemberSignIn() {
-      showGateChecking('Opening Google sign-in…');
-      const ready = await waitForTokenClient();
-      if (!ready) { showGateDenied("Google sign-in didn't load — check your connection and try again."); return; }
-      _uploadTokenClient.callback = async (resp) => {
-        if (resp.error) { showGateOptions(); return; }
-        const token = resp.access_token;
-        let info = {};
-        try { info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(r => r.json()); } catch (e) {}
-        const email = (info.email || '').toLowerCase();
-        if (!email) { showGateDenied("Couldn't read an email from that Google account — try again."); return; }
-        showGateChecking('Checking access…');
-        await fetchFromGitHub(); // make sure we have the freshest member list before deciding
-        currentUser = { name: info.name || email, email, picture: info.picture || '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
-        saveMemberProfile({ email, name: currentUser.name, picture: currentUser.picture });
-        enterAs(isMemberEmail(email) ? 'member' : 'pending');
-      };
-      _uploadTokenClient.requestAccessToken({ prompt: 'select_account' });
+    /* ── Gate: simple name + email + password sign-in (no Google needed to get past the gate) ── */
+    async function sha256Hex(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function submitMemberForm() {
+      const name = document.getElementById('memberName').value.trim();
+      const email = document.getElementById('memberEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('memberPass').value;
+      const errEl = document.getElementById('memberFormErr');
+      errEl.textContent = '';
+      if (!name) { errEl.textContent = 'Enter your name.'; return; }
+      if (!email || !email.includes('@')) { errEl.textContent = 'Enter a valid email.'; return; }
+      if (!pass || pass.length < 4) { errEl.textContent = 'Password must be at least 4 characters.'; return; }
+      showGateChecking('Checking access…');
+      const passwordHash = await sha256Hex(email + ':' + pass);
+      await fetchFromGitHub(); // make sure we have the freshest member list before deciding
+      currentUser = { name, email, picture: '', token: null, expiry: 0 };
+      saveMemberProfile({ email, name, picture: '', passwordHash });
+      enterAs(isMemberEmail(email) ? 'member' : 'pending');
     }
     async function trySilentReauth() {
       const ready = await waitForTokenClient();
@@ -1157,13 +1168,16 @@
     function showGateOptions() {
       document.getElementById('gateOptions').classList.remove('hidden');
       document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateMemberForm').classList.remove('open');
       document.getElementById('gateChecking').classList.remove('show');
       document.getElementById('gateDenied').classList.remove('show');
       document.getElementById('gateErr').textContent = '';
+      document.getElementById('memberFormErr').textContent = '';
     }
     function showGateChecking(msg) {
       document.getElementById('gateOptions').classList.add('hidden');
       document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateMemberForm').classList.remove('open');
       document.getElementById('gateDenied').classList.remove('show');
       document.getElementById('gateChecking').classList.add('show');
       document.getElementById('gateCheckingText').textContent = msg || 'Checking…';
@@ -1171,6 +1185,7 @@
     function showGateDenied(msg) {
       document.getElementById('gateOptions').classList.add('hidden');
       document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateMemberForm').classList.remove('open');
       document.getElementById('gateChecking').classList.remove('show');
       document.getElementById('gateDenied').classList.add('show');
       document.getElementById('gateDeniedText').innerHTML = msg;
@@ -1180,9 +1195,22 @@
       document.getElementById('gatePwStep').classList.add('open');
       setTimeout(() => document.getElementById('gatePw').focus(), 150);
     });
-    document.getElementById('gateOptMember').addEventListener('click', startMemberSignIn);
+    document.getElementById('gateOptMember').addEventListener('click', () => {
+      document.getElementById('gateOptions').classList.add('hidden');
+      document.getElementById('gateMemberForm').classList.add('open');
+      // returning visitor on this device — prefill so they don't retype
+      const cached = loadMemberProfile();
+      if (cached) {
+        document.getElementById('memberName').value = cached.name || '';
+        document.getElementById('memberEmail').value = cached.email || '';
+      }
+      setTimeout(() => document.getElementById('memberName').focus(), 150);
+    });
     document.getElementById('gateBackBtn').addEventListener('click', showGateOptions);
     document.getElementById('gateDeniedBackBtn').addEventListener('click', showGateOptions);
+    document.getElementById('memberFormBackBtn').addEventListener('click', showGateOptions);
+    document.getElementById('memberFormBtn').addEventListener('click', submitMemberForm);
+    document.getElementById('memberPass').addEventListener('keydown', e => { if (e.key === 'Enter') submitMemberForm(); });
     async function attemptAdminLogin() {
       const pw = document.getElementById('gatePw').value;
       const err = document.getElementById('gateErr');
