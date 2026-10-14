@@ -26,7 +26,7 @@
     /* ── profile card responsive override ──
        site.css hides it at 900px, keep it visible until 700px */
     @media (min-width: 700px) and (max-width: 900px) {
-      .profile-card { display: none; }
+      .profile-card { display: block; }
     }
   </style>
 </head>
@@ -35,7 +35,7 @@
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
-        <img src="assets/images/shaikh.png" alt="Shaikh">
+        <img src="favicon.svg" alt="Logo" style="width:38px;height:38px;border-radius:10px;">
         <span>Md. Shaikh<small>Portfolio and tools</small></span>
       </a>
       <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
@@ -45,7 +45,8 @@
         <a href="index.html"    data-page="index.html"><i class="fas fa-house"></i> Home</a>
         <a href="civil.html"   data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
         <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
-        <a class="nav-cta" href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
+        <a href="academy.html" data-page="academy.html"><i class="fas fa-graduation-cap"></i> Academy</a>
+        <a href="research.html" data-page="research.html"><i class="fas fa-flask"></i> Research</a>
       </nav>
     </div>
   </header>
@@ -65,7 +66,7 @@
         <div class="civil-quick-strip" style="margin-bottom:28px;">
           <a class="civil-quick-link" href="cover-page-maker.html"><i class="fas fa-file-lines"></i> Cover Page</a>
           <a class="civil-quick-link" href="lab-index.html"><i class="fas fa-table-list"></i> Lab Index</a>
-          <a class="civil-quick-link" href="print/mcq-builder.html"><i class="fas fa-list-check"></i> MCQ Builder</a>
+          <a class="civil-quick-link" href="print/question-builder.html"><i class="fas fa-list-check"></i> Question Builder</a>
           <a class="civil-quick-link" href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
         </div>
 
@@ -111,7 +112,7 @@
           <div class="hero-tools">
             <span class="civil-tool-chip"><i class="fas fa-file-lines"></i> Cover Page</span>
             <span class="civil-tool-chip"><i class="fas fa-table-list"></i> Lab Index</span>
-            <span class="civil-tool-chip"><i class="fas fa-list-check"></i> MCQ Builder</span>
+            <span class="civil-tool-chip"><i class="fas fa-list-check"></i> Question Builder</span>
             <span class="civil-tool-chip"><i class="fas fa-book-open"></i> Semester Files</span>
           </div>
           <span class="card-meta" style="margin-top:18px;">Open civil section →</span>
@@ -187,9 +188,13 @@
       <i class="fas fa-cube"></i>
       <span>3D</span>
     </a>
-    <a href="print/index.html" class="mobile-tab">
-      <i class="fas fa-print"></i>
-      <span>CTRL-P</span>
+    <a href="academy.html" class="mobile-tab">
+      <i class="fas fa-graduation-cap"></i>
+      <span>Academy</span>
+    </a>
+    <a href="research.html" class="mobile-tab">
+      <i class="fas fa-flask"></i>
+      <span>Research</span>
     </a>
   </nav>
 

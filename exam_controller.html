@@ -2,254 +2,899 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Exam Controller</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<!-- Resource Hints for Performance -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</noscript>
 <style>
-:root{--blue:#2563eb;--blue-dark:#1d4ed8;--ink:#0f172a;--muted:#64748b;--surface:#ffffff;--surface-soft:#f8fafc;--line:#e2e8f0;--radius:10px;--radius-lg:16px;--shadow:0 4px 16px rgba(15,23,42,0.07);}
-*{box-sizing:border-box;}
-body{background:#f1f5f9;font-family:'Noto Serif Bengali',sans-serif;margin:0;padding:20px;color:var(--ink);}
-.container{max-width:900px;margin:0 auto;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid var(--line);}
-.header h1{margin:0;font-size:24px;color:var(--ink);}
-.panel{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:20px;border:1px solid var(--line);}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);font-weight:bold;cursor:pointer;border:none;font-size:14px;transition:0.2s;}
-.btn-primary{background:var(--blue);color:#fff;}
-.btn-primary:hover{background:var(--blue-dark);}
-.btn-danger{background:#ef4444;color:#fff;}
-.btn-secondary{background:var(--surface-soft);color:var(--ink);border:1px solid var(--line);}
-.input-f{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);margin-bottom:12px;font-family:inherit;}
-.input-f:focus{border-color:var(--blue);outline:none;background:var(--surface);}
-label{font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-bottom:4px;display:block;}
-.exam-card{display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--surface-soft);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;transition:0.2s;}
+:root{--blue:#2563eb;--blue-dark:#1d4ed8;--ink:#0f172a;--muted:#64748b;--surface:#fff;--soft:#f8fafc;--line:#e2e8f0;--r:10px;--rl:16px;--shadow:0 4px 16px rgba(15,23,42,.08);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#f1f5f9;font-family:'Noto Serif Bengali','Nirmala UI','Hind Siliguri',Arial,sans-serif;color:var(--ink);min-height:100vh;}
+.wrap{max-width:960px;margin:0 auto;padding:20px;}
+
+/* Header */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--surface);border-bottom:2px solid var(--line);margin-bottom:24px;border-radius:var(--rl);box-shadow:var(--shadow);}
+.hdr h1{font-size:20px;display:flex;align-items:center;gap:10px;}
+.token-row{display:flex;gap:8px;align-items:center;}
+
+/* Panels */
+.panel{background:var(--surface);border-radius:var(--rl);box-shadow:var(--shadow);padding:22px;margin-bottom:18px;border:1px solid var(--line);}
+.panel-title{font-size:15px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--ink);}
+.panel-title .ico{width:28px;height:28px;border-radius:8px;background:rgba(37,99,235,.1);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:13px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--r);font-weight:700;cursor:pointer;border:none;font-size:13px;transition:.15s;font-family:inherit;}
+.btn:hover{opacity:.88;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-red{background:#ef4444;color:#fff;}
+.btn-orange{background:#f97316;color:#fff;}
+.btn-gray{background:var(--soft);color:var(--ink);border:1px solid var(--line);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Inputs */
+.inp{width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:var(--r);background:var(--soft);font-family:inherit;font-size:13px;color:var(--ink);}
+.inp:focus{border-color:var(--blue);outline:none;background:#fff;}
+.lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px;}
+.field{margin-bottom:13px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
+
+/* Exam cards */
+.exam-card{border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;transition:.15s;}
 .exam-card:hover{border-color:var(--blue);}
-.exam-info h3{margin:0 0 4px;font-size:16px;}
-.exam-info p{margin:0;font-size:13px;color:var(--muted);}
-.exam-actions{display:flex;gap:8px;}
-#builder-section{display:none;}
-.q-block{background:var(--surface-soft);padding:16px;border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px;position:relative;}
-.q-block h4{margin:0 0 12px;font-size:14px;color:var(--blue);}
-.remove-q-btn{position:absolute;top:16px;right:16px;color:#ef4444;cursor:pointer;background:none;border:none;font-size:14px;}
-.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:50px;font-size:14px;display:none;z-index:1000;box-shadow:var(--shadow);}
-#loader{text-align:center;padding:40px;color:var(--muted);}
+.exam-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;background:var(--soft);}
+.exam-head:hover{background:#f1f5f9;}
+.exam-head h3{margin:0 0 3px;font-size:15px;}
+.exam-head p{margin:0;font-size:12px;color:var(--muted);}
+.exam-actions{display:flex;gap:7px;flex-shrink:0;}
+.exam-detail{display:none;padding:16px;border-top:1px solid var(--line);background:#fff;}
+.exam-detail.open{display:block;}
+
+/* Table */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--soft);color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;padding:9px 12px;border:1px solid var(--line);text-align:left;}
+td{border:1px solid var(--line);padding:9px 12px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-green{background:#dcfce7;color:#166534;}
+.badge-red{background:#fee2e2;color:#991b1b;}
+.badge-gray{background:#f1f5f9;color:#475569;}
+
+/* Search bar */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;}
+.search-bar .inp{margin:0;}
+
+/* Danger zone */
+.danger-zone{border:1px solid #fecaca;border-radius:var(--rl);padding:20px;background:#fff5f5;}
+.danger-title{color:#dc2626;font-weight:800;font-size:14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.danger-btns{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* Stats */
+.stat-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.stat-box{flex:1;min-width:80px;background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;text-align:center;}
+.stat-box .val{font-size:22px;font-weight:900;color:var(--blue);}
+.stat-box .lbl2{font-size:11px;color:var(--muted);font-weight:700;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 22px;border-radius:50px;font-size:13px;display:none;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.2);white-space:nowrap;}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;justify-content:center;align-items:center;z-index:8888;padding:16px;backdrop-filter:blur(3px);}
+.modal-box{background:#fff;border-radius:var(--rl);padding:28px;width:100%;max-width:420px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.2);}
+.modal-box h3{margin-bottom:10px;}
+.modal-box p{color:var(--muted);font-size:14px;margin-bottom:22px;line-height:1.6;}
+.modal-btns{display:flex;gap:10px;}
+
+/* q-block in builder */
+.q-block{background:var(--soft);padding:16px;border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;position:relative;}
+.q-block h4{margin-bottom:12px;font-size:13px;color:var(--blue);}
+.rmv-q{position:absolute;top:14px;right:14px;color:#ef4444;cursor:pointer;background:none;border:none;font-size:14px;}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
+
+@media(max-width:700px){.grid-2,.grid-3{grid-template-columns:1fr;}.hdr{flex-direction:column;gap:12px;align-items:flex-start;}.token-row{width:100%;flex-direction:column;gap:8px;}.token-row .inp{width:100% !important;}.token-row .btn{width:100%;justify-content:center;}.danger-btns{flex-direction:column;}}
+/* ── Password Gate ── */
+#ctrl-gate{position:fixed;inset:0;background:rgba(241,245,249,0.96);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;}
+.gate-box{background:#fff;border:1px solid var(--line);border-radius:20px;padding:36px 32px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(15,23,42,.12);}
+.gate-logo{width:60px;height:60px;margin:0 auto 18px;border-radius:16px;overflow:hidden;}
+.gate-box h2{color:var(--ink);font-size:22px;margin-bottom:6px;}
+.gate-box p{color:var(--muted);font-size:14px;margin-bottom:24px;}
+.gate-inp{width:100%;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-size:15px;font-family:inherit;margin-bottom:12px;text-align:center;letter-spacing:2px;}
+.gate-inp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.18);background:#fff;}
+.gate-btn{width:100%;padding:12px;border-radius:10px;background:var(--blue);color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.gate-btn:hover{background:var(--blue-dark);}
+.gate-err{color:#ef4444;font-size:13px;margin-top:8px;min-height:20px;}
+.gate-hint{color:var(--muted);font-size:12px;margin-top:16px;line-height:1.5;}
+
+/* ── Exam Controller Mobile ── */
+@media(max-width:700px){
+  .wrap{padding:12px;}
+  .hdr h1{font-size:16px;}
+  .btn{font-size:13px;}
+  .btn-sm{font-size:11px;padding:5px 10px;}
+  .panel{padding:16px;}
+  .panel-title{font-size:13px;}
+  .exam-head h3{font-size:13px;}
+  .exam-head p{font-size:11px;}
+  .stat-box .val{font-size:18px;}
+  .stat-row{gap:8px;}
+  /* Gate box */
+  .gate-box{padding:28px 20px;}
+  .gate-box h2{font-size:18px;}
+}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1><i class="fas fa-file-signature"></i> Exam Controller</h1>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <input type="password" id="gh-token" class="input-f" style="margin:0;width:200px;padding:8px 12px;" placeholder="GitHub Token" autocomplete="off">
-      <button class="btn btn-secondary" onclick="loadExamsFromGitHub()"><i class="fas fa-sync"></i> Sync</button>
+
+<div id="ctrl-gate">
+  <div class="gate-box">
+    <div class="gate-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="60" height="60">
+        <rect width="512" height="512" rx="100" fill="#2563eb"/>
+        <path d="M 360 140 L 152 140 L 152 256 L 360 256 L 360 372 L 152 372" fill="none" stroke="#fff" stroke-width="64" stroke-linejoin="miter" stroke-linecap="square"/>
+        <path d="M 360 140 L 360 180" fill="none" stroke="#10b981" stroke-width="64" stroke-linecap="square"/>
+        <path d="M 152 372 L 152 332" fill="none" stroke="#10b981" stroke-width="64" stroke-linecap="square"/>
+      </svg>
+    </div>
+    <h2>Exam Controller</h2>
+    <p>Admin password দিয়ে প্রবেশ করুন</p>
+    <input type="password" id="gate-pw-input" class="gate-inp" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter') gateUnlock()" autocomplete="off">
+    <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> প্রবেশ করুন</button>
+    <div class="gate-err" id="gate-err"></div>
+    <div class="gate-hint">🔒 এই পেজটি admin-only। URL শেয়ার করবেন না।</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="hdr">
+    <div style="display:flex;align-items:center;gap:14px;">
+        <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:12px;display:flex;align-items:center;gap:5px;" title="সাইটে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
+        <h1><i class="fas fa-chalkboard-teacher" style="color:var(--blue)"></i> Exam Controller</h1>
+      </div>
+    <div class="token-row">
+      <input type="password" id="gh-token" class="inp" style="width:170px;" placeholder="GitHub Token" autocomplete="off">
+      <input type="text" id="gas-url-hdr" class="inp" style="width:200px;" placeholder="Google Script URL" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
+      <input type="password" id="gas-admin-token" class="inp" style="width:150px;" placeholder="GAS Admin Token" autocomplete="off">
+      <button class="btn btn-blue" onclick="syncAll()"><i class="fas fa-sync"></i> Sync</button>
+      <button class="btn btn-gray" onclick="ctrlLogout()" title="এই device থেকে logout"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </div>
-  <div id="loader"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Loading data...</p></div>
-  <div id="dashboard-section" style="display:none;">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 style="margin:0;font-size:18px;">Manage Exams</h2>
-        <button class="btn btn-primary" onclick="openBuilder()"><i class="fas fa-plus"></i> Create New</button>
-      </div>
-      <div id="exam-list"></div>
+
+  <div style="text-align:center; padding: 15px; color: var(--muted); font-size: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--rl); margin-bottom: 20px;">
+    💡 <b>Note:</b> Results, Stats, এবং Danger Zone এখন <a href="admin_panel.html" style="color: var(--blue); font-weight: bold; text-decoration: none;">Admin Panel</a>-এ শিফট করা হয়েছে।
+  </div>
+
+  <div class="panel" id="dashboard-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-list"></i></div> Exam তালিকা</div>
+      <button class="btn btn-blue" onclick="openBuilder()"><i class="fas fa-plus"></i> নতুন Exam</button>
+    </div>
+
+    <div class="search-bar">
+      <input class="inp" id="exam-code-search" placeholder="Exam Code দিয়ে খুঁজুন (e.g. ex_abc123)..." onkeydown="if(event.key==='Enter')searchExam()">
+      <button class="btn btn-gray" onclick="searchExam()"><i class="fas fa-search"></i></button>
+    </div>
+
+    <div id="loader-inner" style="text-align:center;padding:30px;color:var(--muted);display:none;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+    <div id="exam-list"></div>
+  </div>
+
+  <div class="panel" id="builder-panel" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-edit"></i></div> নতুন Exam তৈরি</div>
+      <button class="btn btn-gray" onclick="closeBuilder()"><i class="fas fa-arrow-left"></i> Back</button>
+    </div>
+    <!-- Draft Banner: question-builder থেকে এলে দেখা যাবে -->
+    <div id="draft-banner" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;color:#166534;align-items:center;gap:8px;">
+      <i class="fas fa-file-import"></i>
+      <span>Question Builder থেকে প্রশ্নগুলো লোড হয়েছে। Password ও Student permission সেট করে <b>Save &amp; Publish</b> করুন।</span>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label class="lbl">Exam Title</label><input class="inp" id="exam-title" placeholder="Model Test 1"></div>
+      <div class="field"><label class="lbl">Duration (Minutes)</label><input type="number" class="inp" id="exam-duration" placeholder="30" value="30"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="exam-pass" placeholder="e.g. fec123 (Optional)"></div>
+      <div class="field">
+  <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center; flex-wrap:wrap;">
+    <button type="button" onclick="selectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ সবাই</button>
+    <button type="button" onclick="deselectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ কেউ না</button>
+    <span style="font-size:11px; color:#64748b;">← কেউ না = সবার জন্য Open</span>
+  </div>
+  <div id="builder-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
+     <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
+  </div>
+  <div style="font-size: 11px; color: #f59e0b; margin-top: 5px; background:#fffbeb; padding:5px 8px; border-radius:5px; border:1px solid #fde68a;">⚠️ পরে নতুন student add হলে তাকে দেখাতে <b>"কেউ না"</b> করে Save করুন (সবার জন্য Open হবে)।</div>
+</div>
+    </div>
+    <div id="questions-container"></div>
+    <button class="btn btn-gray" style="width:100%;justify-content:center;margin-bottom:16px;border-style:dashed;" onclick="addQ()"><i class="fas fa-plus"></i> প্রশ্ন যোগ করুন</button>
+    <div style="display:flex;justify-content:flex-end;">
+      <button class="btn btn-blue" onclick="saveExam()"><i class="fas fa-cloud-upload-alt"></i> Save & Publish</button>
     </div>
   </div>
-  <div id="builder-section">
-    <div class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 style="margin:0;font-size:18px;">Exam Builder</h2>
-        <button class="btn btn-secondary" onclick="closeBuilder()"><i class="fas fa-arrow-left"></i> Back</button>
-      </div>
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
-        <div><label>Exam Title</label><input type="text" id="exam-title" class="input-f" placeholder="Model Test 1"></div>
-        <div><label>Duration (Minutes)</label><input type="number" id="exam-duration" class="input-f" placeholder="30"></div>
-      </div>
-      <div id="questions-container" style="margin-top:20px;"></div>
-      <button class="btn btn-secondary" style="width:100%;justify-content:center;margin-bottom:20px;border-style:dashed;" onclick="addQuestionBlock()"><i class="fas fa-plus"></i> Add Question</button>
-      <div style="display:flex;justify-content:flex-end;">
-        <button class="btn btn-primary" onclick="saveExam()"><i class="fas fa-cloud-upload-alt"></i> Save & Publish</button>
-      </div>
+
+  <div class="panel" id="edit-panel" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-pen"></i></div> Exam Edit করুন</div>
+      <button class="btn btn-gray" onclick="closeEdit()"><i class="fas fa-arrow-left"></i> Back</button>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label class="lbl">Exam Title</label><input class="inp" id="edit-title" placeholder="Model Test 1"></div>
+      <div class="field"><label class="lbl">Duration (Minutes)</label><input type="number" class="inp" id="edit-duration" placeholder="30"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="edit-pass" placeholder="Optional"></div>
+      <div class="field">
+  <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center; flex-wrap:wrap;">
+    <button type="button" onclick="selectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ সবাই</button>
+    <button type="button" onclick="deselectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ কেউ না</button>
+    <span style="font-size:11px; color:#64748b;">← কেউ না = সবার জন্য Open</span>
+  </div>
+  <div id="edit-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
+     <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
+  </div>
+</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 10px;">
+      <div class="panel-title" style="margin:0;font-size:13px;"><i class="fas fa-list-ol" style="color:var(--blue);margin-right:6px;"></i>প্রশ্নসমূহ</div>
+      <button class="btn btn-gray btn-sm" onclick="addEditQ()"><i class="fas fa-plus"></i> প্রশ্ন যোগ</button>
+    </div>
+    <div id="edit-questions-container"></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+      <button class="btn btn-gray" onclick="closeEdit()">বাতিল</button>
+      <button class="btn btn-blue" onclick="saveEdit()"><i class="fas fa-cloud-upload-alt"></i> Save Changes</button>
+    </div>
+  </div>
+
+  
+
+</div>
+
+<div class="modal" id="confirm-modal">
+  <div class="modal-box">
+    <div style="font-size:40px;margin-bottom:12px;">⚠️</div>
+    <h3 id="modal-title">নিশ্চিত করুন</h3>
+    <p id="modal-msg">আপনি কি নিশ্চিত?</p>
+    <div class="modal-btns">
+      <button class="btn btn-gray" style="flex:1;" onclick="closeModal()">বাতিল</button>
+      <button class="btn btn-red" style="flex:1;" id="modal-confirm-btn" onclick="">হ্যাঁ, মুছুন</button>
     </div>
   </div>
 </div>
-<div class="toast" id="toast">Message</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const GITHUB_OWNER='shaikh800';
-const GITHUB_REPO='shaikh800.github.io';
-const GITHUB_FILE='civil_data.json';
-const GITHUB_BRANCH='main';
-let fullGithubData={semesters:{},notices:[],exams:[],updated:""};
-let questionCount=0;
-function showToast(msg){
+const OWNER='shaikh800', REPO='shaikh800.github.io', FILE='civil_data.json', BRANCH='main';
+let fullData={semesters:{},notices:[],exams:[],updated:''};
+let qCount=0;
+let globalStudents=[]; // GAS থেকে আনা students
+let allResults=[]; // stats admin_panel-এ — এখানে শুধু compat-এর জন্য
+
+// Stats admin_panel.html-এ শিফট হয়েছে, এখানে stub
+function updateStats(){}
+
+// ── Utils ──
+function toast(msg, dur=3000){
   const t=document.getElementById('toast');
-  t.innerText=msg;
-  t.style.display='block';
-  setTimeout(()=>t.style.display='none',3000);
+  t.innerText=msg; t.style.display='block';
+  setTimeout(()=>t.style.display='none', dur);
 }
-function generateId(){
-  return Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-}
-async function loadExamsFromGitHub(){
-  document.getElementById('loader').style.display='block';
-  document.getElementById('dashboard-section').style.display='none';
-  document.getElementById('builder-section').style.display='none';
-  const token=document.getElementById('gh-token').value.trim();
-  if(token) sessionStorage.setItem('civil_gh_token',token);
-  const url=`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`;
+function genId(){ return 'ex_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+// ── Sync / Load ──
+async function syncAll(){
+  document.getElementById('loader-inner').style.display='block';
+  document.getElementById('exam-list').innerHTML='';
   try{
-    const res=await fetch(url);
-    if(res.ok){
-      const data=await res.json();
-      fullGithubData={semesters:data.semesters||{},notices:data.notices||[],exams:data.exams||[],updated:data.updated||""};
-      renderExamList();
-      showToast("Data loaded!");
-    }else{
-      showToast("Failed to fetch.");
+    const tok = token();
+    let res;
+    // 🚀 FIX: Bypass GitHub CDN Cache using REST API to prevent old deleted data from appearing
+    if(tok){
+      res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}?ref=${BRANCH}&_=${Date.now()}`, {
+        headers: {
+          'Authorization': `token ${tok}`,
+          'Accept': 'application/vnd.github.v3.raw'
+        },
+        cache: 'no-store'
+      });
+    } else {
+      res = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FILE}?_=${Date.now()}`);
     }
-  }catch(e){
-    showToast("Network error.");
+
+    if(res.ok){ 
+      fullData=await res.json(); 
+      fullData.exams=fullData.exams||[]; 
+    }
+  }catch(e){ toast('GitHub load failed'); }
+
+  // GAS থেকে Student List আনো
+  const url=gasUrl();
+  if(url){
+    try{
+      const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'adminGetStudents',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
+      const d=await r.json();
+      if(d.status === 'success') {
+          globalStudents = d.students || [];
+      }
+    }catch(e){ globalStudents=[]; }
   }
-  document.getElementById('loader').style.display='none';
-  document.getElementById('dashboard-section').style.display='block';
+
+  document.getElementById('loader-inner').style.display='none';
+  renderList(fullData.exams);
+
+  // ── Draft Detection: question-builder থেকে এলে auto-open ──
+  const rawDraft = localStorage.getItem('draft_exam_data');
+  if(rawDraft){
+    try{
+      const draft = JSON.parse(rawDraft);
+      localStorage.removeItem('draft_exam_data');
+      _openBuilderWithDraft(draft);
+    }catch(e){ localStorage.removeItem('draft_exam_data'); }
+  }
 }
-function renderExamList(){
+
+// ── Render Exam List ──
+// ── Render Exam List ──
+function renderList(exams){
   const list=document.getElementById('exam-list');
-  if(fullGithubData.exams.length===0){
-    list.innerHTML=`<p style="text-align:center;color:#64748b;">No exams found.</p>`;
+  if(!exams||exams.length===0){
+    list.innerHTML=`<p style="text-align:center;color:var(--muted);padding:20px;">কোনো Exam নেই।</p>`;
     return;
   }
-  list.innerHTML=fullGithubData.exams.map(ex=>`
-    <div class="exam-card">
-      <div class="exam-info">
-        <h3>${ex.examData.title}</h3>
-        <p><i class="far fa-clock"></i> ${ex.examData.duration} | <i class="fas fa-list-ol"></i> ${ex.examData.questions.length} Qs | ID: ${ex.id}</p>
+  list.innerHTML=exams.map(ex=>{
+    const dateStr=ex.date ? new Date(ex.date).toLocaleDateString('bn-BD') : '';
+    // লাইভ স্ট্যাটাস চেক (ডিফল্টভাবে true)
+    const isLive = ex.live !== false; 
+    const liveBadge = isLive 
+        ? `<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; margin-left:8px;">🟢 Live</span>`
+        : `<span style="background:#fee2e2; color:#991b1b; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; margin-left:8px;">🔴 Paused</span>`;
+
+    return `
+    <div class="exam-card" id="card-${ex.id}">
+      <div class="exam-head" style="cursor:default;">
+        <div>
+          <h3 style="display:flex; align-items:center;">${ex.examData.title} ${liveBadge}</h3>
+          <p style="margin-top:6px;">
+            <i class="far fa-clock"></i> ${ex.examData.duration} &nbsp;|&nbsp;
+            <i class="fas fa-list-ol"></i> ${ex.examData.questions.length} প্রশ্ন &nbsp;|&nbsp;
+            <i class="fas fa-code"></i> <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;font-size:11px;">${ex.id}</code>
+            ${dateStr?`&nbsp;|&nbsp;<i class="far fa-calendar"></i> ${dateStr}`:''}
+          </p>
+        </div>
+        <div class="exam-actions">
+          <button class="btn btn-sm ${isLive ? 'btn-orange' : 'btn-blue'}" onclick="toggleLiveStatus('${ex.id}')">
+             <i class="fas ${isLive ? 'fa-pause' : 'fa-play'}"></i> ${isLive ? 'Pause' : 'Live'}
+          </button>
+          <button class="btn btn-gray btn-sm" onclick="copyLink('${ex.id}')"><i class="fas fa-link"></i> Link</button>
+          <button class="btn btn-sm" style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;" onclick="openEdit('${ex.id}')"><i class="fas fa-pen"></i> Edit</button>
+          <button class="btn btn-red btn-sm" onclick="deleteExam('${ex.id}')"><i class="fas fa-trash"></i></button>
+        </div>
       </div>
-      <div class="exam-actions">
-        <button class="btn btn-secondary" onclick="copyLink('${ex.id}')"><i class="fas fa-link"></i> Copy</button>
-        <button class="btn btn-danger" onclick="deleteExam('${ex.id}')"><i class="fas fa-trash"></i></button>
-      </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
+
+// ── Toggle Live Status ──
+async function toggleLiveStatus(id) {
+  const tok = token(); 
+  if(!tok) return toast('GitHub Token দিন!');
+  
+  const exIdx = fullData.exams.findIndex(e => e.id === id);
+  if (exIdx === -1) return;
+
+  // স্ট্যাটাস পরিবর্তন করা হচ্ছে
+  const currentStatus = fullData.exams[exIdx].live !== false;
+  fullData.exams[exIdx].live = !currentStatus;
+
+  toast('Status Update হচ্ছে...', 2000);
+  const ok = await pushGitHub(tok, `Toggle live status for exam ${id}`);
+  if(ok) {
+    toast(fullData.exams[exIdx].live ? 'Exam Live করা হয়েছে! 🟢' : 'Exam Pause করা হয়েছে! 🔴');
+  }
+}
+
+
+
+function toggleDetail(id){
+  const d=document.getElementById(`detail-${id}`);
+  d.classList.toggle('open');
+}
+
+// ── Search by exam code ──
+function searchExam(){
+  const code=document.getElementById('exam-code-search').value.trim();
+  if(!code){ renderList(fullData.exams); return; }
+  const found=fullData.exams.filter(e=>e.id===code||e.examData.title.toLowerCase().includes(code.toLowerCase()));
+  if(found.length===0){
+    document.getElementById('exam-list').innerHTML=`<p style="color:#dc2626;text-align:center;padding:20px;">কোনো Exam পাওয়া যায়নি: "${code}"</p>`;
+  } else {
+    renderList(found);
+    // Auto-expand if single result
+    if(found.length===1) setTimeout(()=>document.getElementById(`detail-${found[0].id}`)?.classList.add('open'),50);
+  }
+}
+
+// Refresh a single exam's results from GAS
+// refreshExamResults: results এখন admin_panel.html-এ — এখানে শুধু redirect করে
+function refreshExamResults(examId){
+  toast('Results দেখতে Admin Panel ব্যবহার করুন।', 4000);
+}
+
+// ── Copy Link ──
 function copyLink(id){
   const link=`https://mdshaikh.me/print/model_test.html?examId=${id}`;
-  navigator.clipboard.writeText(link);
-  showToast("Link copied!");
+  navigator.clipboard.writeText(link).then(()=>toast('Link copied!'));
 }
+function populateStudentCheckboxes(containerId, selectedIds = []) {
+  const container = document.getElementById(containerId);
+  if (!globalStudents || globalStudents.length === 0) {
+     container.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">কোনো স্টুডেন্ট পাওয়া যায়নি। Sync করুন বা Admin Panel থেকে স্টুডেন্ট অ্যাড করুন।</div>';
+     return;
+  }
+  
+  let html = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px;">`;
+  globalStudents.forEach(s => {
+      const isChecked = selectedIds.includes(String(s.id)) ? 'checked' : '';
+      html += `
+        <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; background:#f1f5f9; padding:6px 10px; border-radius:6px; border:1px solid var(--line);">
+           <input type="checkbox" class="student-cb-${containerId}" value="${s.id}" ${isChecked}>
+           <span style="font-weight:600; color:var(--ink);">${s.name} <small style="color:var(--muted); display:block; font-weight:normal;">ID: ${s.id}</small></span>
+        </label>
+      `;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function getSelectedStudents(containerId) {
+  const checkboxes = document.querySelectorAll(`.student-cb-${containerId}:checked`);
+  return Array.from(checkboxes).map(cb => cb.value);
+}
+function selectAllStudents(containerId) {
+  document.querySelectorAll(`.student-cb-${containerId}`).forEach(cb => cb.checked = true);
+}
+function deselectAllStudents(containerId) {
+  document.querySelectorAll(`.student-cb-${containerId}`).forEach(cb => cb.checked = false);
+}
+// ── Open Builder with pre-filled draft (question-builder.html থেকে) ──
+function _openBuilderWithDraft(draft){
+  document.getElementById('dashboard-panel').style.display='none';
+  document.getElementById('builder-panel').style.display='block';
+  document.getElementById('exam-title').value = draft.title||'';
+  document.getElementById('exam-duration').value = draft.duration||'30';
+  document.getElementById('exam-pass').value='';
+  populateStudentCheckboxes('builder-student-list',[]);
+  document.getElementById('questions-container').innerHTML='';
+  qCount=0;
+  const qs = draft.questions||[];
+  if(qs.length>0){
+    qs.forEach(q=>addQPrefilled(q));
+    // Show the green banner
+    const banner = document.getElementById('draft-banner');
+    if(banner) banner.style.display='flex';
+    toast(`✅ ${qs.length}টি প্রশ্ন লোড হয়েছে! Password ও Student permission সেট করে Publish করুন।`,6000);
+  } else {
+    addQ();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Add a pre-filled question block ──
+function addQPrefilled(q){
+  qCount++;
+  const c=document.getElementById('questions-container');
+  const d=document.createElement('div');
+  d.className='q-block'; d.id=`qb-${qCount}`;
+  const _e=str=>String(str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const opts=q.opts||['','','',''];
+  const ans=parseInt(q.ans)||0;
+  d.innerHTML=`
+    <h4>প্রশ্ন ${qCount}</h4>
+    <button class="rmv-q" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp q-txt" value="${_e(q.q||'')}" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="opts-grid">
+      <input class="inp opt-0" value="${_e(opts[0]||'')}" placeholder="Option A (0)">
+      <input class="inp opt-1" value="${_e(opts[1]||'')}" placeholder="Option B (1)">
+      <input class="inp opt-2" value="${_e(opts[2]||'')}" placeholder="Option C (2)">
+      <input class="inp opt-3" value="${_e(opts[3]||'')}" placeholder="Option D (3)">
+    </div>
+    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+    <select class="inp correct-ans">
+      <option value="0" ${ans===0?'selected':''}>Option A (0)</option>
+      <option value="1" ${ans===1?'selected':''}>Option B (1)</option>
+      <option value="2" ${ans===2?'selected':''}>Option C (2)</option>
+      <option value="3" ${ans===3?'selected':''}>Option D (3)</option>
+    </select></div>
+  `;
+  c.appendChild(d);
+}
+
+// ── Builder ──
 function openBuilder(){
-  document.getElementById('dashboard-section').style.display='none';
-  document.getElementById('builder-section').style.display='block';
+  document.getElementById('dashboard-panel').style.display='none';
+  document.getElementById('builder-panel').style.display='block';
   document.getElementById('exam-title').value='';
   document.getElementById('exam-duration').value='30';
+  document.getElementById('exam-pass').value='';
+  populateStudentCheckboxes('builder-student-list', []);
   document.getElementById('questions-container').innerHTML='';
-  questionCount=0;
-  addQuestionBlock();
+  qCount=0; addQ();
 }
 function closeBuilder(){
-  document.getElementById('builder-section').style.display='none';
-  document.getElementById('dashboard-section').style.display='block';
+  document.getElementById('builder-panel').style.display='none';
+  document.getElementById('dashboard-panel').style.display='block';
+  const banner = document.getElementById('draft-banner');
+  if(banner) banner.style.display='none';
 }
-function addQuestionBlock(){
-  questionCount++;
-  const container=document.getElementById('questions-container');
-  const div=document.createElement('div');
-  div.className='q-block';
-  div.id=`q-block-${questionCount}`;
-  div.innerHTML=`
-    <h4>Question ${questionCount}</h4>
-    <button class="remove-q-btn" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
-    <label>Question Text</label>
-    <input type="text" class="input-f q-title" placeholder="Type question...">
-    <label>Options</label>
-    <div class="options-grid">
-      <input type="text" class="input-f opt-0" placeholder="Option A (0)">
-      <input type="text" class="input-f opt-1" placeholder="Option B (1)">
-      <input type="text" class="input-f opt-2" placeholder="Option C (2)">
-      <input type="text" class="input-f opt-3" placeholder="Option D (3)">
+function addQ(){
+  qCount++;
+  const c=document.getElementById('questions-container');
+  const d=document.createElement('div');
+  d.className='q-block'; d.id=`qb-${qCount}`;
+  d.innerHTML=`
+    <h4>প্রশ্ন ${qCount}</h4>
+    <button class="rmv-q" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp q-txt" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="opts-grid">
+      <input class="inp opt-0" placeholder="Option A (0)">
+      <input class="inp opt-1" placeholder="Option B (1)">
+      <input class="inp opt-2" placeholder="Option C (2)">
+      <input class="inp opt-3" placeholder="Option D (3)">
     </div>
-    <label>Correct Answer Index</label>
-    <select class="input-f correct-ans">
-      <option value="0">Option A (0)</option>
-      <option value="1">Option B (1)</option>
-      <option value="2">Option C (2)</option>
-      <option value="3">Option D (3)</option>
-    </select>
+    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+    <select class="inp correct-ans">
+      <option value="0">Option A (0)</option><option value="1">Option B (1)</option>
+      <option value="2">Option C (2)</option><option value="3">Option D (3)</option>
+    </select></div>
   `;
-  container.appendChild(div);
+  c.appendChild(d);
 }
+
 async function saveExam(){
-  const token=document.getElementById('gh-token').value.trim()||sessionStorage.getItem('civil_gh_token');
-  if(!token) return showToast("Token required!");
+  const tok=token(); if(!tok){return toast('GitHub Token দিন!');}
   const title=document.getElementById('exam-title').value.trim();
-  const duration=document.getElementById('exam-duration').value.trim();
-  if(!title) return showToast("Title required!");
-  const qBlocks=document.querySelectorAll('.q-block');
-  const questions=[];
-  let valid=true;
-  qBlocks.forEach(block=>{
-    const qText=block.querySelector('.q-title').value.trim();
-    const o0=block.querySelector('.opt-0').value.trim();
-    const o1=block.querySelector('.opt-1').value.trim();
-    const o2=block.querySelector('.opt-2').value.trim();
-    const o3=block.querySelector('.opt-3').value.trim();
-    const ans=parseInt(block.querySelector('.correct-ans').value);
-    if(!qText||!o0||!o1||!o2||!o3) valid=false;
-    questions.push({q:qText,opts:[o0,o1,o2,o3],ans:ans});
+  const dur=document.getElementById('exam-duration').value.trim();
+  const pass=document.getElementById('exam-pass').value.trim();
+  const allowedIds = getSelectedStudents('builder-student-list');
+  if(!title) return toast('Title দিন!');
+
+  const qBlocks=document.querySelectorAll('#questions-container .q-block');
+  let questions=[]; let valid=true;
+  qBlocks.forEach(b=>{
+    const q=b.querySelector('.q-txt').value.trim();
+    const opts=[0,1,2,3].map(i=>b.querySelector(`.opt-${i}`).value.trim());
+    const ans=parseInt(b.querySelector('.correct-ans').value);
+    if(!q||opts.some(o=>!o)) valid=false;
+    questions.push({q,opts,ans,stmts:null});
   });
-  if(!valid) return showToast("Fill all options!");
-  const newExam={id:generateId(),date:new Date().toISOString(),examData:{title:title,duration:duration+" minutes",questions:questions}};
-  fullGithubData.exams.unshift(newExam);
-  await pushToGitHub(token);
+  if(!valid) return toast('সব option পূরণ করুন!');
+  if(questions.length===0) return toast('কমপক্ষে ১টি প্রশ্ন লাগবে!');
+
+  const newExam={id:genId(),date:new Date().toISOString(),examData:{title,duration:dur+' minutes',password:pass,allowedIds,questions}};
+  fullData.exams.unshift(newExam);
+  await pushGitHub(tok,'New exam added from builder');
   closeBuilder();
+  toast('Exam publish হয়েছে! ✅');
 }
-async function deleteExam(id){
-  if(!confirm("Delete?")) return;
-  const token=document.getElementById('gh-token').value.trim()||sessionStorage.getItem('civil_gh_token');
-  if(!token) return showToast("Token required!");
-  fullGithubData.exams=fullGithubData.exams.filter(ex=>ex.id!==id);
-  await pushToGitHub(token);
+
+// ── Delete Exam ──
+function deleteExam(id){
+  confirmAction('delete', 'এই Exam মুছে ফেলবেন?', async () => {
+    const tok=token(); if(!tok) return toast('Token দিন!');
+    fullData.exams=fullData.exams.filter(e=>e.id!==id);
+    await pushGitHub(tok,'Delete exam');
+    toast('Exam মুছে ফেলা হয়েছে।');
+  });
 }
-async function pushToGitHub(token){
-  const btn=document.querySelector('.btn-primary');
-  const originalText=btn.innerHTML;
-  btn.innerHTML=`<i class="fas fa-spinner fa-spin"></i> Saving...`;
-  btn.disabled=true;
-  fullGithubData.updated=new Date().toISOString();
+
+// ── GitHub Push ──
+async function pushGitHub(tok, msg='Update'){
   try{
-    const apiUrl=`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+    const api=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
     let sha=null;
-    const g=await fetch(apiUrl,{headers:{'Authorization':`token ${token}`,'Accept':'application/vnd.github.v3+json'}});
-    if(g.ok){
-      const j=await g.json();
-      sha=j.sha;
-    }
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(fullGithubData,null,2))));
-    const put=await fetch(apiUrl,{
-      method:'PUT',
-      headers:{'Authorization':`token ${token}`,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
-      body:JSON.stringify({message:'Update exams via Controller',content,...(sha?{sha}:{})})
-    });
-    if(put.ok){
-      showToast("Synced!");
-      renderExamList();
-    }else{
-      showToast("Push failed.");
-    }
-  }catch(e){
-    showToast("Network error.");
-  }
-  btn.innerHTML=originalText;
-  btn.disabled=false;
+    const g=await fetch(api,{headers:{'Authorization':`token ${tok}`}});
+    if(g.ok){ const j=await g.json(); sha=j.sha; }
+    fullData.updated=new Date().toISOString();
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(fullData,null,2))));
+    const r=await fetch(api,{method:'PUT',headers:{'Authorization':`token ${tok}`,'Content-Type':'application/json'},
+      body:JSON.stringify({message:msg,content,...(sha?{sha}:{})})});
+    if(r.ok){ renderList(fullData.exams); updateStats(); return true; }
+    else{ toast('GitHub push failed! ❌'); return false; }
+  }catch(e){ toast('Network error!'); return false; }
 }
+
+// ── Danger Zone ──
+let pendingAction=null;
+function confirmAction(type, msg, fn){
+  pendingAction=fn;
+  document.getElementById('modal-msg').innerText=msg;
+  document.getElementById('modal-confirm-btn').onclick=()=>{ closeModal(); fn(); };
+  document.getElementById('confirm-modal').style.display='flex';
+}
+function closeModal(){ document.getElementById('confirm-modal').style.display='none'; pendingAction=null; }
+
+async function clearGitHub(){
+  const tok=token(); if(!tok) return toast('Token দিন!');
+  toast('GitHub clearing...', 5000);
+  fullData.exams=[];
+  const ok=await pushGitHub(tok,'Clear all exams');
+  if(ok) toast('GitHub-এর সব Exam মুছে ফেলা হয়েছে! ✅');
+}
+
+async function clearGAS(){
+  const url=gasUrl(); if(!url) return toast('GAS URL দিন!');
+  toast('GAS clearing...', 5000);
+  try{
+    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
+    const d=await r.json();
+    if(d.status==='success'){ allResults=[]; updateStats(); toast('Google Sheet সব data মুছে ফেলা হয়েছে! ✅'); }
+    else if(d.status==='unauthorized'){ toast('⏱️ Session শেষ! আবার login করুন।'); setTimeout(()=>location.reload(),1500); }
+    else toast('GAS error: '+(d.message||'failed'));
+  }catch(e){ toast('GAS connection failed!'); }
+}
+
+async function clearAll(){
+  toast('সব মুছছি... ⏳', 8000);
+  await clearGitHub();
+  const gasOk = await clearGASsilent();
+  if(gasOk) toast('GitHub + GAS — সব ডেটা মুছে ফেলা হয়েছে! 🧹');
+  else toast('GitHub মুছেছে ✅ কিন্তু GAS token ভুল — GAS মোছা হয়নি ❌');
+}
+
+async function clearGASsilent(){
+  const url=gasUrl(); if(!url){ toast('GAS URL দিন!'); return false; }
+  try{
+    const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
+    const d=await r.json();
+    if(d.status==='success'){ allResults=[]; updateStats(); return true; }
+    return false;
+  }catch(e){ return false; }
+}
+
+// ── Edit Exam ──
+let editingExamId = null;
+let editQCount = 0;
+
+function openEdit(id) {
+  const ex = fullData.exams.find(e => e.id === id);
+  if (!ex) return toast('Exam পাওয়া যায়নি!');
+  editingExamId = id;
+
+  document.getElementById('dashboard-panel').style.display = 'none';
+  document.getElementById('edit-panel').style.display = 'block';
+
+  // Fill in current values
+  document.getElementById('edit-title').value = ex.examData.title || '';
+  const durStr = ex.examData.duration || '30 minutes';
+  document.getElementById('edit-duration').value = parseInt(durStr) || 30;
+  document.getElementById('edit-pass').value = ex.examData.password || '';
+  populateStudentCheckboxes('edit-student-list', ex.examData.allowedIds || []);
+
+  // Render existing questions
+  const container = document.getElementById('edit-questions-container');
+  container.innerHTML = '';
+  editQCount = 0;
+  (ex.examData.questions || []).forEach(q => addEditQ(q));
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeEdit() {
+  editingExamId = null;
+  document.getElementById('edit-panel').style.display = 'none';
+  document.getElementById('dashboard-panel').style.display = 'block';
+}
+
+function addEditQ(prefill) {
+  editQCount++;
+  const c = document.getElementById('edit-questions-container');
+  const d = document.createElement('div');
+  d.className = 'q-block';
+  d.id = `eqb-${editQCount}`;
+  const qTxt = prefill ? prefill.q : '';
+  const opts = prefill ? prefill.opts : ['', '', '', ''];
+  const ans = prefill ? prefill.ans : 0;
+  d.innerHTML = `
+    <h4 style="display:flex;justify-content:space-between;align-items:center;">
+      <span>প্রশ্ন ${editQCount}</span>
+      <button class="rmv-q" onclick="this.closest('.q-block').remove(); renumberEditQ();" title="মুছুন"><i class="fas fa-times"></i></button>
+    </h4>
+    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp eq-txt" value="${escHtml(qTxt)}" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="opts-grid">
+      <input class="inp eopt-0" value="${escHtml(opts[0]||'')}" placeholder="Option A">
+      <input class="inp eopt-1" value="${escHtml(opts[1]||'')}" placeholder="Option B">
+      <input class="inp eopt-2" value="${escHtml(opts[2]||'')}" placeholder="Option C">
+      <input class="inp eopt-3" value="${escHtml(opts[3]||'')}" placeholder="Option D">
+    </div>
+    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+      <select class="inp ecorrect-ans">
+        <option value="0" ${ans===0?'selected':''}>Option A (0)</option>
+        <option value="1" ${ans===1?'selected':''}>Option B (1)</option>
+        <option value="2" ${ans===2?'selected':''}>Option C (2)</option>
+        <option value="3" ${ans===3?'selected':''}>Option D (3)</option>
+      </select>
+    </div>
+  `;
+  c.appendChild(d);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renumberEditQ() {
+  document.querySelectorAll('#edit-questions-container .q-block h4 span').forEach((s, i) => {
+    s.textContent = 'প্রশ্ন ' + (i + 1);
+  });
+}
+
+async function saveEdit() {
+  const tok = token();
+  if (!tok) return toast('GitHub Token দিন!');
+  if (!editingExamId) return;
+
+  const exIdx = fullData.exams.findIndex(e => e.id === editingExamId);
+  if (exIdx === -1) return toast('Exam খুঁজে পাওয়া যায়নি!');
+
+  const title = document.getElementById('edit-title').value.trim();
+  const dur = document.getElementById('edit-duration').value.trim();
+  const pass = document.getElementById('edit-pass').value.trim();
+  const allowedIds = getSelectedStudents('edit-student-list');
+
+  if (!title) return toast('Title দিন!');
+
+  // Collect questions
+  const qBlocks = document.querySelectorAll('#edit-questions-container .q-block');
+  let questions = [];
+  let valid = true;
+  qBlocks.forEach(b => {
+    const q = b.querySelector('.eq-txt').value.trim();
+    const opts = [0,1,2,3].map(i => b.querySelector(`.eopt-${i}`).value.trim());
+    const ans = parseInt(b.querySelector('.ecorrect-ans').value);
+    if (!q || opts.some(o => !o)) valid = false;
+    questions.push({ q, opts, ans, stmts: null });
+  });
+  if (!valid) return toast('সব option পূরণ করুন!');
+  if (questions.length === 0) return toast('কমপক্ষে ১টি প্রশ্ন লাগবে!');
+
+  // Update exam
+  fullData.exams[exIdx].examData = {
+    ...fullData.exams[exIdx].examData,
+    title,
+    duration: dur + ' minutes',
+    password: pass,
+    allowedIds,
+    questions
+  };
+  fullData.exams[exIdx].date = new Date().toISOString();
+
+  const saveBtn = document.querySelector('#edit-panel .btn-blue');
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  const ok = await pushGitHub(tok, 'Edit exam: ' + title);
+  saveBtn.disabled = false;
+  saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save Changes';
+
+  if (ok) {
+    toast('✅ Exam আপডেট হয়েছে!');
+    closeEdit();
+  }
+}
+
+// ── Controller Gate — session-based (GAS auth) ──
+// ⚠️ CTRL_GATE_PW hardcode সম্পূর্ণ সরানো হয়েছে — GAS Script Properties-এ থাকে
+const CTRL_SESSION_TOKEN_KEY  = 'shaikh_ctrl_token_v1';
+const CTRL_SESSION_EXPIRY_KEY = 'shaikh_ctrl_expiry_v1';
+const CTRL_GH_TOKEN_KEY  = 'shaikh_gh_token_v1';       // admin_panel এর মতোই একই key
+const CTRL_GAS_URL_KEY   = 'shaikh_gas_url_v1';
+
+// Config helpers — localStorage ব্যবহার করে (device-এ persist হয়)
+function token(){
+  const v = document.getElementById('gh-token').value.trim();
+  if(v) localStorage.setItem(CTRL_GH_TOKEN_KEY, v);
+  return v || localStorage.getItem(CTRL_GH_TOKEN_KEY) || '';
+}
+function gasUrl(){
+  const v = document.getElementById('gas-url-hdr').value.trim();
+  if(v) localStorage.setItem(CTRL_GAS_URL_KEY, v);
+  return v || localStorage.getItem(CTRL_GAS_URL_KEY) || '';
+}
+// Session token — localStorage থেকে আসে (expiry check সহ)
+function ctrlToken(){
+  return localStorage.getItem(CTRL_SESSION_TOKEN_KEY) || '';
+}
+
+// Saved values দিয়ে inputs ভরো
+function loadSavedInputs(){
+  const ghTok = localStorage.getItem(CTRL_GH_TOKEN_KEY);
+  const gasU  = localStorage.getItem(CTRL_GAS_URL_KEY);
+  if(ghTok) document.getElementById('gh-token').value = ghTok;
+  if(gasU)  document.getElementById('gas-url-hdr').value = gasU;
+}
+
+async function gateUnlock() {
+  const pw  = document.getElementById('gate-pw-input').value.trim();
+  const errEl = document.getElementById('gate-err');
+  const btn = document.querySelector('.gate-btn');
+
+  if (!pw) { errEl.textContent = '❌ পাসওয়ার্ড দিন!'; return; }
+
+  const url = document.getElementById('gas-url-hdr').value.trim();
+  if (!url) { errEl.textContent = '❌ GAS URL সেট করুন (Header-এ)!'; return; }
+
+  btn.disabled  = true;
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> যাচাই হচ্ছে...';
+  errEl.textContent = '';
+
+  try {
+    const res  = await fetch(url, {
+      method:  'POST',
+      body:    JSON.stringify({ action: 'adminLogin', password: pw }),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    const data = await res.json();
+
+    if (data.status === 'success' && data.token) {
+      localStorage.setItem(CTRL_SESSION_TOKEN_KEY,  data.token);
+      localStorage.setItem(CTRL_SESSION_EXPIRY_KEY, String(data.expiry));
+      localStorage.setItem(CTRL_GAS_URL_KEY, url);
+      document.getElementById('ctrl-gate').style.display = 'none';
+      loadSavedInputs();
+      syncAll();
+    } else {
+      errEl.textContent = '❌ ' + (data.message || 'ভুল পাসওয়ার্ড!');
+      document.getElementById('gate-pw-input').value = '';
+      document.getElementById('gate-pw-input').focus();
+      setTimeout(() => { errEl.textContent = ''; }, 3000);
+    }
+  } catch(e) {
+    errEl.textContent = '❌ সার্ভারে সংযোগ হচ্ছে না।';
+  }
+
+  btn.disabled  = false;
+  btn.innerHTML = '<i class="fas fa-unlock"></i> প্রবেশ করুন';
+}
+
+function ctrlLogout(){
+  // Session token clear — কিন্তু GH Token ও GAS URL রেখে দাও (পরের বার password দিলেই হবে)
+  localStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
+  localStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
+  location.reload();
+}
+
+// ── Init ──
 window.onload=()=>{
-  const savedToken=sessionStorage.getItem('civil_gh_token');
-  if(savedToken){
-    document.getElementById('gh-token').value=savedToken;
-    loadExamsFromGitHub();
-  }else{
-    document.getElementById('dashboard-section').style.display='block';
-    document.getElementById('loader').style.display='none';
+  const token  = localStorage.getItem(CTRL_SESSION_TOKEN_KEY);
+  const expiry = localStorage.getItem(CTRL_SESSION_EXPIRY_KEY);
+  if(token && expiry && Date.now() < parseInt(expiry)){
+    document.getElementById('ctrl-gate').style.display = 'none';
+    loadSavedInputs();
+    syncAll();
+  } else {
+    // Expired বা নেই — session token clear, কিন্তু GH/GAS URL রাখো
+    localStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
+    localStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
+    document.getElementById('ctrl-gate').style.display = 'flex';
+    loadSavedInputs(); // GH token ও GAS URL pre-fill করো
+    document.getElementById('exam-list').innerHTML =
+      `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;
+    setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
   }
 };
 </script>

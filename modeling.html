@@ -173,7 +173,7 @@
     .form-group input, .form-group textarea, .form-group select {
       width:100%; padding:10px 14px; border:1px solid var(--line);
       border-radius:var(--radius); background:var(--surface-soft); color:var(--ink);
-      font-size:14px; font-family:inherit; transition:border-color 0.2s; -webkit-appearance:none;
+      font-size:14px; font-family:inherit; transition:border-color 0.2s; appearance:none; -webkit-appearance:none;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       outline:none; border-color:var(--blue); background:var(--surface);
@@ -231,7 +231,7 @@
   <header class="site-header">
     <div class="nav-shell">
       <a class="brand" href="index.html" aria-label="Md. Shaikh home">
-        <img src="assets/images/shaikh.png" alt="Shaikh">
+        <img src="favicon.svg" alt="Logo" style="width:38px;height:38px;border-radius:10px;">
         <span>Md. Shaikh<small>Portfolio and tools</small></span>
       </a>
       <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
@@ -241,7 +241,8 @@
         <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
         <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
         <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
-        <a class="nav-cta" href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
+        <a href="academy.html" data-page="academy.html"><i class="fas fa-graduation-cap"></i> Academy</a>
+        <a href="research.html" data-page="research.html"><i class="fas fa-flask"></i> Research</a>
       </nav>
     </div>
   </header>
@@ -286,6 +287,9 @@
             <i class="fas fa-file-import"></i> Import
             <input type="file" id="import-file" accept=".json" style="display:none;">
           </label>
+          <button class="btn secondary sm admin-actions" id="clear-data-btn" title="এই device-এর locally-saved data মুছে ফেলুন">
+            <i class="fas fa-trash-can"></i> Clear Device Data
+          </button>
           <button class="btn primary sm admin-actions" id="add-work-btn">
             <i class="fas fa-plus"></i> Add Project
           </button>
@@ -348,8 +352,11 @@
     <a href="modeling.html" class="mobile-tab active">
       <i class="fas fa-cube"></i><span>3D</span>
     </a>
-    <a href="print/index.html" class="mobile-tab">
-      <i class="fas fa-print"></i><span>CTRL-P</span>
+    <a href="academy.html" class="mobile-tab">
+      <i class="fas fa-graduation-cap"></i><span>Academy</span>
+    </a>
+    <a href="research.html" class="mobile-tab">
+      <i class="fas fa-flask"></i><span>Research</span>
     </a>
   </nav>
 
@@ -418,7 +425,7 @@
               <input type="file" id="w-img-file" accept="image/*">
             </div>
           </div>
-          <div class="thumb-preview" id="thumb-preview"><img id="thumb-preview-img" src="" alt=""></div>
+          <div class="thumb-preview" id="thumb-preview"><img id="thumb-preview-img" src="" alt="Thumbnail preview"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -465,7 +472,7 @@
         <button class="modal-close" data-close="modal-img"><i class="fas fa-times"></i></button>
       </div>
       <div class="modal-body" style="padding:12px;">
-        <img id="img-view-src" src="" alt="" style="width:100%;border-radius:var(--radius);display:block;">
+        <img id="img-view-src" src="" alt="Full image preview" style="width:100%;border-radius:var(--radius);display:block;">
         <p id="img-view-desc" style="margin:12px 0 0;color:var(--muted);font-size:13px;text-align:center;"></p>
       </div>
     </div>
@@ -477,7 +484,7 @@
   (() => {
     /* ── CONFIG ── */
     const ADMIN_PW_KEY = 'civil_admin_pw'; // shared with civil page
-    const DEFAULT_PW   = 'fec2024';
+    const DEFAULT_PW   = '';
     const STORE_KEY    = 'modeling_works';
     const DB_NAME = 'modelingDB'; const DB_VER = 1; const STORE = 'thumbs';
 
@@ -544,8 +551,8 @@
 
     /* ── SEED DATA (shown when localStorage is empty) ── */
     const SEED_WORKS = [
-      { id:'seed1', title:'Blender Project', desc:'Detailed 3D project made in Blender.', cat:'Render', tool:'Blender 4.2', link:'', img:'assets/images/image_8d6685.jpg', imgSrc:'url' },
-      { id:'seed2', title:'New Post', desc:'Another detailed work.', cat:'Render', tool:'Blender 4.2', link:'', img:'assets/images/image_8d0160.jpg', imgSrc:'url' }
+      { id:'seed1', title:'Blender Project', desc:'Detailed 3D project made in Blender.', cat:'Render', tool:'Blender 4.2', link:'', img:'', imgSrc:'none' },
+      { id:'seed2', title:'New Post', desc:'Another detailed work.', cat:'Render', tool:'Blender 4.2', link:'', img:'', imgSrc:'none' }
     ];
 
     /* ── INDEXEDDB FOR THUMBNAILS ── */
@@ -907,6 +914,13 @@
     }
 
     /* ── EXPORT / IMPORT (JSON backup) ── */
+    document.getElementById('clear-data-btn').addEventListener('click', () => {
+      if (!confirm('এই device-এর locally-saved সব project data মুছে যাবে — default 2টি seed project দেখাবে। Continue?')) return;
+      localStorage.removeItem(STORE_KEY);
+      renderWorks();
+      toast('Device data cleared ✓', 'success');
+    });
+
     document.getElementById('export-btn').addEventListener('click', () => {
       const data = { works: loadWorks(), exported: new Date().toISOString() };
       const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});

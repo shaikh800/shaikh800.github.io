@@ -79,6 +79,7 @@ body::after {
 .reveal-grid.is-visible > *:nth-child(1) { transition-delay: 0.00s; }
 .reveal-grid.is-visible > *:nth-child(2) { transition-delay: 0.10s; }
 .reveal-grid.is-visible > *:nth-child(3) { transition-delay: 0.20s; }
+.reveal-grid.is-visible > *:nth-child(4) { transition-delay: 0.30s; }
 .reveal-grid.is-visible > * { opacity: 1; transform: translateY(0); }
 
 /* ─── HEADER ─────────────────────────────────────────────── */
@@ -213,7 +214,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   position: relative; min-height: 240px; display: flex; flex-direction: column;
   padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg);
   background: var(--surface); color: inherit; text-decoration: none;
-  box-shadow: var(--shadow); transition: all 0.25s var(--ease-spring);
+  box-shadow: var(--shadow); transition: all 0.25s var(--ease-spring); overflow: hidden;
 }
 .project-card:hover { transform: translateY(-4px); border-color: rgba(37, 99, 235, 0.4); box-shadow: var(--shadow-lg); }
 .project-card.featured { grid-column: span 2; color: #fff; background: var(--ink); border: none; }
@@ -228,6 +229,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 .project-card.featured .card-icon { color: #fff; background: rgba(255, 255, 255, 0.15); }
 .project-card h3 { margin-bottom: 10px; font-size: 20px; letter-spacing: -0.01em; }
 .project-card p { margin-bottom: 20px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+.project-card:has(.card-thumb) p { padding-right: 115px; }
 .card-meta { margin-top: auto; color: var(--blue); font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; transition: gap 0.2s ease; }
 .project-card:hover .card-meta { gap: 8px; }
 .project-card.featured .card-meta { color: #fff; }
@@ -270,7 +272,18 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 
 /* ─── MOBILE RESPONSIVENESS ──────────────────────────────── */
 @media (max-width: 900px) {
-  .nav-shell { min-height: 60px; }
+  body {
+    background-image: none;
+  }
+  body::after {
+    display: none;
+  }
+  .nav-shell {
+    min-height: 60px;
+    gap: 14px;
+    padding: 12px 0;
+  }
+  .brand small { display: none; }
   .nav-toggle { display: inline-flex; align-items: center; justify-content: center; }
   
   .site-nav {
@@ -281,7 +294,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   }
   .site-nav.is-open { display: flex; }
   
-  .intro { min-height: auto; padding: 40px 0; display: block; }
+  .intro { min-height: auto; padding: 36px 0; display: block; }
   .intro-content { max-width: 100%; text-align: center; margin: 0 auto; }
   .intro-content .eyebrow { justify-content: center; }
   .actions { justify-content: center; }
@@ -302,6 +315,9 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   .actions { flex-direction: column; }
   .btn { width: 100%; }
   .footer-shell { flex-direction: column; text-align: center; }
+  .eyebrow { justify-content: center; }
+  .lead { font-size: 15px; }
+  .contact-links a { flex: 1 1 100%; }
 }
 
 /* ── MOBILE BOTTOM TAB BAR (GLOBAL) ── */
@@ -324,12 +340,12 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 .mobile-tab.active { color: #38bdf8; }
 
 @media (max-width: 900px) {
-  body { padding-bottom: 56px; } /* ট্যাবারের জন্য নিচে জায়গা রাখা */
+  body.has-mobile-tabbar { padding-bottom: 56px; } /* ট্যাবারের জন্য নিচে জায়গা রাখা */
   .mobile-tabbar { display: grid; }
   
-  /* মোবাইল ভিউতে উপরের মেনু হাইড করা */
-  .nav-toggle { display: none !important; }
-  .site-nav   { display: none !important; }
+  /* মোবাইল ভিউতে উপরের মেনু হাইড করা শুধুমাত্র যখন ট্যাববার থাকে */
+  body.has-mobile-tabbar .nav-toggle { display: none !important; }
+  body.has-mobile-tabbar .site-nav   { display: none !important; }
   
   /* অ্যাডমিন বাটনটি ট্যাবারের উপরে তুলে দেওয়া */
   .admin-fab { bottom: 80px !important; }
@@ -398,11 +414,47 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 
 @media (max-width: 900px) {
   .civil-hero-card { grid-column: span 1; }
-  .sem-tabs-sticky { margin: 0 -16px; padding: 0 16px; top: 56px; }
+  .sem-tabs-sticky { margin: 0 -16px; padding: 0 16px; top: 60px; }
 }
 @media (max-width: 640px) {
   .quick-tools-bar { grid-template-columns: 1fr; gap: 8px; }
   .quick-tool-card { flex-direction: row; align-items: center; padding: 14px 16px; }
   .quick-tool-card .qt-text { flex: 1; }
   .quick-tool-card .qt-arrow { display: none; }
+}
+
+/* ─── MOBILE UI IMPROVEMENTS ──────────────────────────────── */
+
+/* Reduce motion on mobile for snappier feel + better battery */
+@media (max-width: 600px) {
+  * { animation-duration: 0.15s !important; transition-duration: 0.1s !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* Larger touch targets on mobile */
+@media (max-width: 600px) {
+  .btn { min-height: 48px; font-size: 15px; }
+  .civil-quick-link { padding: 11px 16px; font-size: 14px; }
+  .fact { padding: 14px 12px; }
+  .mobile-tab { padding: 6px 4px; }
+
+  /* Card grid spacing */
+  .section { padding: 40px 0; }
+  h1 { font-size: clamp(32px, 9vw, 42px); }
+
+  /* Contact strip stacking */
+  .contact-links a { min-height: 44px; font-size: 14px; padding: 0 18px; flex: 1 1 calc(50% - 5px); justify-content: center; }
+}
+
+/* ─── MOBILE TABBAR: ensure active color is visible ─────── */
+.mobile-tab.active, .mobile-tab[aria-current="page"] { color: #38bdf8; }
+.mobile-tab i { transition: transform 0.15s; }
+.mobile-tab.active i { transform: scale(1.15); }
+
+/* ─── SCROLLBAR HIDE FOR MOBILE ─────────────────────────── */
+@media (max-width: 900px) {
+  .civil-quick-strip { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap; padding-bottom: 4px; }
+  .civil-quick-strip::-webkit-scrollbar { display: none; }
+  .hero-tools { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; scrollbar-width: none; }
+  .hero-tools::-webkit-scrollbar { display: none; }
 }
