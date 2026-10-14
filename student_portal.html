@@ -791,7 +791,7 @@ function renderExams() {
     const hasPass  = !!ex.examData.password;
 
     // Student info URL params হিসেবে পাঠানো — localStorage নয়
-    const base = `print/model_test.html?examId=${ex.id}` +
+    const base = `model_test.html?examId=${ex.id}` +
       `&studentId=${enc(currentUser.id)}` +
       `&studentName=${enc(currentUser.name)}` +
       `&studentMobile=${enc(currentUser.mobile)}`;

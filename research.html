@@ -93,6 +93,23 @@
       .row-actions { justify-content: flex-start; margin-top: 4px; }
     }
 
+    /* ── DRIVE EMBED (the real Google Drive folder, shown as itself) ── */
+    .drive-view-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
+    .drive-view-toggle .btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    #driveFrameWrap, #driveFrame { width: 100%; }
+    #driveFrame { height: 72vh; min-height: 420px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+    .drive-empty {
+      text-align: center; padding: 60px 20px; color: var(--muted); background: var(--surface);
+      border: 1px dashed var(--line); border-radius: var(--radius-lg);
+    }
+    .drive-empty i { font-size: 30px; color: #0f9d58; margin-bottom: 12px; display: block; }
+    .drive-empty p { margin: 4px 0; font-size: 13.5px; }
+    .drive-empty-admin { font-size: 12.5px !important; }
+    .drive-hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin: -4px 0 16px; }
+    .gh-sync-details { margin-bottom: 18px; }
+    .gh-sync-details summary { cursor: pointer; font-size: 11.5px; color: var(--muted); font-weight: 600; user-select: none; }
+    .gh-sync-details input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+
     /* ── NOTICE BOARD ── */
     .notices-grid { display: grid; gap: 10px; }
     .notice-card {
@@ -243,31 +260,34 @@
 
     <section class="section">
       <div class="research-tabs">
-        <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files <span class="count" id="fileCount">—</span></button>
+        <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
         <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access</button>
       </div>
 
-      <!-- ══ FILES PANEL ══ -->
+      <!-- ══ FILES PANEL — the real connected Google Drive folder, shown as Drive itself ══ -->
       <div class="r-panel" id="panel-files">
         <div class="r-toolbar">
           <div>
             <h2>Shared Files</h2>
-            <p>Organized the same way they sit in the shared Google Drive folder.</p>
+            <p>This is the actual Google Drive folder — same files, same view, always up to date.</p>
           </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn secondary sm admin-only-inline"><i class="fas fa-folder-plus"></i> New Folder</button>
-            <button class="btn primary sm admin-only-inline"><i class="fas fa-upload"></i> Upload</button>
+          <div class="drive-view-toggle" id="driveViewToggle" style="display:none;">
+            <button class="btn secondary sm" id="driveViewList"><i class="fas fa-list"></i> List</button>
+            <button class="btn secondary sm" id="driveViewGrid"><i class="fas fa-grip"></i> Grid</button>
+            <a class="btn secondary sm" id="driveOpenLink" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Open in Drive</a>
           </div>
         </div>
-        <div class="breadcrumb" id="breadcrumb"></div>
-        <div class="folder-grid" id="folderGrid"></div>
-        <table class="file-table" id="fileTable">
-          <thead>
-            <tr><th>Name</th><th>Owner</th><th>Modified</th><th>Size</th><th></th></tr>
-          </thead>
-          <tbody id="fileTableBody"></tbody>
-        </table>
+
+        <div id="driveEmpty" class="drive-empty">
+          <i class="fab fa-google-drive"></i>
+          <p id="driveEmptyText">No Drive folder connected yet — check back soon.</p>
+          <p class="drive-empty-admin admin-only-inline">Go to <b>Drive &amp; Access</b> to connect one.</p>
+        </div>
+
+        <div id="driveFrameWrap" style="display:none;">
+          <iframe id="driveFrame" loading="lazy" title="Shared Google Drive folder"></iframe>
+        </div>
       </div>
 
       <!-- ══ NOTICES PANEL ══ -->
@@ -299,20 +319,37 @@
           <button class="btn primary sm" onclick="saveDriveLink()"><i class="fas fa-check"></i> Save</button>
         </div>
         <div class="drive-status" id="driveStatus"><span class="dot"></span><span id="driveStatusText">No folder connected yet</span></div>
+        <p class="drive-hint">In the real Drive folder's own Share settings, set it to <b>"Anyone with the link — Viewer"</b> (or add each person's Google account directly) — that's what actually controls who can open it. The list below is just your own record of who you've given access to.</p>
 
-        <table class="member-table">
-          <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th></th></tr></thead>
-          <tbody id="memberTableBody"></tbody>
-        </table>
-        <div class="card" style="padding:16px;">
-          <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Add a member</div>
-          <div class="invite-row">
-            <input type="email" id="inviteEmail" placeholder="friend@gmail.com">
-            <select id="inviteRole" style="max-width:150px;">
-              <option value="view">View only</option>
-              <option value="download">Can download</option>
-            </select>
-            <button class="btn primary sm" onclick="inviteMember()"><i class="fas fa-paper-plane"></i> Add</button>
+        <details class="gh-sync-details">
+          <summary><i class="fas fa-code-branch" style="margin-right:6px;"></i>GitHub Sync Token (optional — makes your changes here visible to everyone, not just this browser)</summary>
+          <div class="form-group" style="margin-top:10px;">
+            <input type="password" id="research-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+            <p style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4;">Same token you use on the Civil page — GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read &amp; Write</b>.</p>
+          </div>
+        </details>
+
+        <div id="memberSection" style="margin-top:18px;">
+          <div id="memberLocked" class="drive-empty" style="padding:24px 20px;">
+            <i class="fas fa-lock"></i>
+            <p>Connect a Drive folder above first — then pick who can see it.</p>
+          </div>
+          <div id="memberUnlocked" style="display:none;">
+            <table class="member-table">
+              <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th></th></tr></thead>
+              <tbody id="memberTableBody"></tbody>
+            </table>
+            <div class="card" style="padding:16px;">
+              <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Add a member</div>
+              <div class="invite-row">
+                <input type="email" id="inviteEmail" placeholder="friend@gmail.com">
+                <select id="inviteRole" style="max-width:150px;">
+                  <option value="view">View only</option>
+                  <option value="download">Can download</option>
+                </select>
+                <button class="btn primary sm" onclick="inviteMember()"><i class="fas fa-paper-plane"></i> Add</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -340,50 +377,26 @@
   <script src="assets/site.js"></script>
   <script src="assets/site-auth.js"></script>
   <script>
-    /* ═══════════════ DEMO DATA (resets on reload) ═══════════════ */
+    /* ═══════════════ SHARED STATE — synced via GitHub, same pattern as the Civil page ═══════════════ */
     let role = null; // 'admin' | 'member' — set by the gate
 
-    const FOLDERS = [
-      { id: 'papers',  name: 'Papers',        count: 3, updated: 'Oct 12' },
-      { id: 'data',    name: 'Datasets',      count: 2, updated: 'Oct 9'  },
-      { id: 'slides',  name: 'Presentations', count: 1, updated: 'Oct 2'  },
-      { id: 'shared',  name: 'Shared with me', count: 2, updated: 'Oct 13' },
-    ];
+    const GITHUB_OWNER  = 'shaikh800';
+    const GITHUB_REPO   = 'shaikh800.github.io';
+    const GITHUB_FILE   = 'research_data.json';
+    const GITHUB_BRANCH = 'main';
+    const CACHE_KEY     = 'research_data_cache_v1';
 
-    const FILES = {
-      papers: [
-        { name: 'Soil Mechanics - Shear Strength.pdf', type: 'pdf', owner: 'You', modified: 'Oct 12', size: '2.1 MB' },
-        { name: 'Geotechnical Case Study.pdf', type: 'pdf', owner: 'Rafiq', modified: 'Oct 10', size: '3.4 MB' },
-        { name: 'CE 605 Review Notes.pdf', type: 'pdf', owner: 'You', modified: 'Oct 6', size: '850 KB' },
-      ],
-      data: [
-        { name: 'Borehole Logs 2026.xlsx', type: 'sheet', owner: 'You', modified: 'Oct 9', size: '410 KB' },
-        { name: 'Lab Test Results.csv', type: 'sheet', owner: 'Tania', modified: 'Oct 8', size: '92 KB' },
-      ],
-      slides: [
-        { name: 'Thesis Proposal Draft.pptx', type: 'slide', owner: 'You', modified: 'Oct 2', size: '5.8 MB' },
-      ],
-      shared: [
-        { name: 'Transport Engg Survey Data.xlsx', type: 'sheet', owner: 'Rafiq', modified: 'Oct 13', size: '1.2 MB' },
-        { name: 'Reference List.pdf', type: 'pdf', owner: 'Tania', modified: 'Oct 11', size: '140 KB' },
-      ],
-    };
-
-    const ICONS = { pdf: 'fa-file-pdf ft-icon pdf', sheet: 'fa-file-excel ft-icon sheet', slide: 'fa-file-powerpoint ft-icon slide' };
+    let driveLinkSaved = '';
+    let driveId = '';
+    let driveView = 'list';
 
     let notices = [
-      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Upload what you have, and check here before messaging me directly.', date: 'Oct 13' },
-      { id: 2, type: 'warning', title: 'Upload thesis data by Nov 5', text: 'Drop your section of the borehole data into Datasets before the 5th.', date: 'Oct 12' },
+      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Check the Drive folder for shared papers and data, and this board for updates.', date: 'Oct 13' },
     ];
 
     let members = [
       { id: 1, name: 'Md. Shaikh Alam (You)', initials: 'MS', role: 'admin', view: true, download: true },
-      { id: 2, name: 'Rafiq Hasan', initials: 'RH', role: 'member', view: true, download: true },
-      { id: 3, name: 'Tania Islam', initials: 'TI', role: 'member', view: true, download: false },
     ];
-
-    let driveLinkSaved = '';
-    let currentFolder = null;
 
     function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
@@ -398,47 +411,73 @@
       });
     });
 
-    /* ── File browser ── */
-    function renderBreadcrumb() {
-      const bc = document.getElementById('breadcrumb');
-      if (!currentFolder) { bc.innerHTML = '<i class="fab fa-google-drive" style="color:#0f9d58;"></i>&nbsp; <span class="current">Research Drive</span>'; return; }
-      const f = FOLDERS.find(x => x.id === currentFolder);
-      bc.innerHTML = `<i class="fab fa-google-drive" style="color:#0f9d58;"></i>&nbsp; <a onclick="openFolder(null)">Research Drive</a> <i class="fas fa-chevron-right"></i> <span class="current">${esc(f.name)}</span>`;
+    /* ── GitHub shared storage (config only — the files themselves live in Drive) ── */
+    function applyData(data) {
+      if (data.driveLink) { driveLinkSaved = data.driveLink; driveId = data.driveId || parseDriveFolderId(data.driveLink); }
+      if (Array.isArray(data.members) && data.members.length) members = data.members;
+      if (Array.isArray(data.notices)) notices = data.notices;
     }
-    function openFolder(id) {
-      currentFolder = id;
-      renderBreadcrumb();
-      document.getElementById('folderGrid').style.display = id ? 'none' : 'grid';
-      renderFileTable();
+    async function fetchFromGitHub() {
+      try {
+        const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        applyData(data);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        return true;
+      } catch { return false; }
     }
-    function renderFolderGrid() {
-      const grid = document.getElementById('folderGrid');
-      grid.innerHTML = FOLDERS.map(f => `
-        <div class="folder-card" onclick="openFolder('${f.id}')">
-          <i class="fas fa-folder"></i>
-          <div class="f-meta"><span class="f-name">${esc(f.name)}</span><span class="f-sub">${f.count} file${f.count===1?'':'s'} · ${f.updated}</span></div>
-        </div>`).join('');
+    function loadFromCache() {
+      try { const d = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (d) applyData(d); } catch {}
     }
-    function renderFileTable() {
-      const list = currentFolder ? FILES[currentFolder] : Object.values(FILES).flat();
-      const body = document.getElementById('fileTableBody');
-      body.innerHTML = list.map(f => `
-        <tr>
-          <td><div class="file-name-cell"><i class="fas ${ICONS[f.type]}"></i><span class="fn">${esc(f.name)}</span></div></td>
-          <td class="muted-cell">${esc(f.owner)}</td>
-          <td class="muted-cell">${f.modified}</td>
-          <td class="muted-cell">${f.size}</td>
-          <td>
-            <div class="row-actions">
-              <button class="icon-action" title="View"><i class="fas fa-eye"></i></button>
-              <button class="icon-action" title="Download"><i class="fas fa-download"></i></button>
-              <button class="icon-action admin-only-inline" title="Rename"><i class="fas fa-pen"></i></button>
-              <button class="icon-action admin-only-inline danger" title="Delete"><i class="fas fa-trash"></i></button>
-            </div>
-          </td>
-        </tr>`).join('');
-      document.getElementById('fileCount').textContent = Object.values(FILES).flat().length;
+    async function pushToGitHub() {
+      const data = { driveLink: driveLinkSaved, driveId, members, notices, updated: new Date().toISOString() };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      const token = sessionStorage.getItem('civil_gh_token');
+      if (!token) return false;
+      try {
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+        let sha = null;
+        try {
+          const g = await fetch(apiUrl, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } });
+          if (g.ok) { const j = await g.json(); sha = j.sha; }
+        } catch {}
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+        const put = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+          body: JSON.stringify({ message: 'Update research hub data', content, ...(sha ? { sha } : {}) })
+        });
+        return put.ok;
+      } catch { return false; }
     }
+
+    /* ── Drive embed — shows the real Drive folder, same as Drive itself ── */
+    function parseDriveFolderId(input) {
+      input = (input || '').trim();
+      let m = input.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
+      if (m) return m[1];
+      m = input.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+      if (m) return m[1];
+      if (/^[a-zA-Z0-9_-]{10,}$/.test(input)) return input;
+      return '';
+    }
+    function renderDriveFrame() {
+      const empty = document.getElementById('driveEmpty');
+      const wrap  = document.getElementById('driveFrameWrap');
+      const toggle = document.getElementById('driveViewToggle');
+      if (!driveId) {
+        empty.style.display = 'block'; wrap.style.display = 'none'; toggle.style.display = 'none';
+        return;
+      }
+      empty.style.display = 'none'; wrap.style.display = 'block'; toggle.style.display = 'flex';
+      document.getElementById('driveFrame').src = `https://drive.google.com/embeddedfolderview?id=${driveId}#${driveView}`;
+      document.getElementById('driveOpenLink').href = `https://drive.google.com/drive/folders/${driveId}`;
+      document.getElementById('driveViewList').classList.toggle('active', driveView === 'list');
+      document.getElementById('driveViewGrid').classList.toggle('active', driveView === 'grid');
+    }
+    document.getElementById('driveViewList').addEventListener('click', () => { driveView = 'list'; renderDriveFrame(); });
+    document.getElementById('driveViewGrid').addEventListener('click', () => { driveView = 'grid'; renderDriveFrame(); });
 
     /* ── Notices ── */
     function renderNotices() {
@@ -456,7 +495,7 @@
         : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">No notices yet.</div>';
       document.getElementById('noticeCount').textContent = notices.length;
     }
-    function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); }
+    function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); pushToGitHub(); }
     function saveNotice() {
       const title = document.getElementById('noticeTitle').value.trim();
       const text = document.getElementById('noticeText').value.trim();
@@ -467,16 +506,31 @@
       document.getElementById('noticeText').value = '';
       closeModal('modalNotice');
       renderNotices();
+      pushToGitHub();
     }
 
     /* ── Drive & Access ── */
-    function saveDriveLink() {
+    function renderDriveStatus() {
+      const status = document.getElementById('driveStatus');
+      const text = document.getElementById('driveStatusText');
+      status.classList.toggle('connected', !!driveId);
+      text.textContent = driveId ? 'Connected — everyone sees this folder now' : 'No folder connected yet';
+      document.getElementById('memberLocked').style.display = driveId ? 'none' : 'block';
+      document.getElementById('memberUnlocked').style.display = driveId ? 'block' : 'none';
+      const linkInput = document.getElementById('driveLink');
+      if (driveLinkSaved && !linkInput.value) linkInput.value = driveLinkSaved;
+    }
+    async function saveDriveLink() {
       const val = document.getElementById('driveLink').value.trim();
       if (!val) return;
-      driveLinkSaved = val;
-      const status = document.getElementById('driveStatus');
-      status.classList.add('connected');
-      document.getElementById('driveStatusText').textContent = 'Connected (demo) — ' + val;
+      const id = parseDriveFolderId(val);
+      if (!id) { document.getElementById('driveStatusText').textContent = "Couldn't read a folder ID from that link."; return; }
+      driveLinkSaved = val; driveId = id;
+      renderDriveStatus(); renderDriveFrame(); renderMembers();
+      const synced = await pushToGitHub();
+      document.getElementById('driveStatusText').textContent = synced
+        ? 'Connected & synced — everyone sees this folder now ✓'
+        : 'Connected (this browser only — add a GitHub token above to sync for everyone)';
     }
     function renderMembers() {
       const body = document.getElementById('memberTableBody');
@@ -489,8 +543,8 @@
           <td>${m.role === 'admin' ? '' : `<button class="icon-action danger" onclick="removeMember(${m.id})"><i class="fas fa-user-slash"></i></button>`}</td>
         </tr>`).join('');
     }
-    function toggleMember(id, field) { const m = members.find(x => x.id === id); m[field] = !m[field]; renderMembers(); }
-    function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); }
+    function toggleMember(id, field) { const m = members.find(x => x.id === id); m[field] = !m[field]; renderMembers(); pushToGitHub(); }
+    function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); pushToGitHub(); }
     function inviteMember() {
       const email = document.getElementById('inviteEmail').value.trim();
       if (!email) return;
@@ -498,6 +552,7 @@
       members.push({ id: Date.now(), name: email, initials: email.slice(0,2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
       document.getElementById('inviteEmail').value = '';
       renderMembers();
+      pushToGitHub();
     }
 
     /* ── Entry gate ── */
@@ -538,9 +593,15 @@
       if (role !== 'admin') {
         document.getElementById('panel-access').hidden = true;
         document.querySelector('.r-tab[data-tab="files"]').click();
+      } else {
+        const savedToken = sessionStorage.getItem('civil_gh_token');
+        if (savedToken) document.getElementById('research-gh-token').value = savedToken;
       }
-      renderFileTable(); renderNotices(); renderMembers();
+      renderDriveFrame(); renderDriveStatus(); renderNotices(); renderMembers();
     }
+    document.getElementById('research-gh-token').addEventListener('input', e => {
+      sessionStorage.setItem('civil_gh_token', e.target.value.trim());
+    });
     document.getElementById('switchViewBtn').addEventListener('click', () => {
       if (role === 'admin') siteAdminLogout();
       role = null;
@@ -558,11 +619,11 @@
     });
 
     /* ── init ── */
-    renderBreadcrumb();
-    renderFolderGrid();
-    renderFileTable();
-    renderNotices();
-    renderMembers();
+    loadFromCache();           // instant paint from last-known data
+    renderDriveFrame(); renderDriveStatus(); renderNotices(); renderMembers();
+    fetchFromGitHub().then(() => {
+      renderDriveFrame(); renderDriveStatus(); renderNotices(); renderMembers();
+    });
     if (siteIsAdmin()) { enterAs('admin'); } // already logged in elsewhere on the site this tab
   </script>
 

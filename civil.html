@@ -413,22 +413,11 @@
           <button class="btn secondary sm admin-only" id="clear-data-btn" title="এই device-এর locally-saved data মুছে ফেলুন">
             <i class="fas fa-trash-can"></i> Clear Device Data
           </button>
-          <button class="btn primary sm admin-only" id="add-notice-btn"><i class="fas fa-plus"></i> Add Notice</button>
         </div>
       </div>
+      <p class="lead" style="font-size:13px;margin:-10px 0 16px;">Live exam &amp; routine notices for the DU-affiliated engineering colleges — Civil only, updates on its own.</p>
 
-      <div class="sem-tabs-wrap" style="margin-bottom:18px;">
-        <div class="sem-tabs">
-          <button class="sem-tab active" id="notice-tab-general"><i class="fas fa-thumbtack"></i> General</button>
-          <button class="sem-tab" id="notice-tab-exam"><i class="fas fa-calendar-check"></i> Exam Schedule</button>
-        </div>
-      </div>
-
-      <div id="notice-panel-general">
-        <div id="notices-container"></div>
-      </div>
-
-      <div id="notice-panel-exam" style="display:none;">
+      <div id="notice-panel-exam">
         <div class="ex-counts">
           <div class="ex-count"><div class="n" id="exCNew">0</div><div class="l">New</div></div>
           <div class="ex-count"><div class="n" id="exCOngoing">0</div><div class="l">Ongoing</div></div>
@@ -574,7 +563,6 @@
     <section class="contact-strip reveal">
       <div><h2>Need one of these tools?</h2><p>Open the tool directly or contact me.</p></div>
       <div class="contact-links">
-        <a href="print/index.html"><i class="fas fa-print"></i> CTRL-P</a>
         <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
         <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
       </div>
@@ -633,30 +621,6 @@
       <div class="modal-body" style="padding:16px;">
         <div class="img-viewer-wrap"><img id="img-view" src="" alt="Preview image"></div>
         <p id="img-desc" style="margin:12px 0 0;color:var(--muted);font-size:13px;text-align:center;"></p>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-notice">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3><i class="fas fa-bell" style="color:var(--blue);margin-right:8px;"></i>Add Notice</h3>
-        <button class="modal-close" data-close="modal-notice"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group"><label>Title</label><input type="text" id="n-title" placeholder="Notice title..."></div>
-        <div class="form-group"><label>Text</label><textarea id="n-text" placeholder="Notice details..."></textarea></div>
-        <div class="form-group"><label>Type</label>
-          <select id="n-type">
-            <option value="info">ℹ️ Info</option>
-            <option value="warning">⚠️ Warning</option>
-            <option value="urgent">🔴 Urgent</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-notice">Cancel</button>
-        <button class="btn primary sm" id="save-notice-btn"><i class="fas fa-check"></i> Save</button>
       </div>
     </div>
   </div>
@@ -969,7 +933,7 @@
     document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) closeModal(ov.id); }));
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        ['modal-image','modal-notice','modal-resource','modal-admin','modal-confirm','modal-edit']
+        ['modal-image','modal-resource','modal-admin','modal-confirm','modal-edit']
           .forEach(id => { if(document.getElementById(id).classList.contains('open')) closeModal(id); });
         closePdfViewer();
       }
@@ -1146,55 +1110,11 @@
       else { box.style.display='none'; }
     });
 
-    /* ── Notice render ─────────────────────── */
-    function renderNotices() {
-      const notices = loadNotices();
-      const c = document.getElementById('notices-container');
-      if (!notices.length) {
-        c.innerHTML = `<div class="notices-empty"><i class="fas fa-bell-slash"></i><p>No notices yet.</p></div>`;
-        return;
-      }
-      const icons = { info:'fa-info-circle', warning:'fa-triangle-exclamation', urgent:'fa-circle-exclamation' };
-      c.innerHTML = `<div class="notices-grid">${notices.map(n => `
-        <div class="notice-card ${n.type}">
-          <div class="n-icon"><i class="fas ${icons[n.type]||'fa-info-circle'}"></i></div>
-          <div class="n-body">
-            <div class="n-title">${esc(n.title)}</div>
-            <div class="n-text">${esc(n.text)}</div>
-            <div class="n-date"><i class="far fa-calendar-alt"></i> ${n.date}</div>
-          </div>
-          <button class="n-delete admin-only" data-id="${n.id}"><i class="fas fa-trash-alt"></i></button>
-        </div>`).join('')}</div>`;
-      c.querySelectorAll('.n-delete').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          showConfirm('Delete this notice?', () => {
-            saveNotices(loadNotices().filter(n => n.id !== btn.dataset.id));
-            renderNotices(); toast('Notice deleted', 'info');
-          });
-        });
-      });
-    }
-
     document.getElementById('clear-data-btn').addEventListener('click', () => {
-      if (!confirm('এই device-এর locally-saved সব data (notices + semester resources) মুছে যাবে — default data দেখাবে। Continue?')) return;
+      if (!confirm('এই device-এর locally-saved সব data (semester resources + pasted notices) মুছে যাবে — default data দেখাবে। Continue?')) return;
       localStorage.removeItem(STORE_KEY);
       localStorage.removeItem(NOTICE_KEY);
       location.reload();
-    });
-
-    document.getElementById('add-notice-btn').addEventListener('click', () => {
-      ['n-title','n-text'].forEach(id => document.getElementById(id).value='');
-      document.getElementById('n-type').value = 'info';
-      openModal('modal-notice');
-      setTimeout(() => document.getElementById('n-title').focus(), 300);
-    });
-    document.getElementById('save-notice-btn').addEventListener('click', () => {
-      const title = document.getElementById('n-title').value.trim();
-      if (!title) { toast('Title দাও', 'error'); return; }
-      const notices = loadNotices();
-      notices.unshift({ id:uid(), title, text:document.getElementById('n-text').value.trim(), type:document.getElementById('n-type').value, date:new Date().toLocaleDateString('en-BD',{day:'2-digit',month:'short',year:'numeric'}) });
-      saveNotices(notices); renderNotices(); closeModal('modal-notice'); toast('Notice added ✓', 'success');
     });
 
     /* ════════════════════════════════════════════════════════
@@ -1437,22 +1357,9 @@
       document.getElementById('exSampleBtn').addEventListener('click', exLoadSample);
       document.getElementById('exClearBtn').addEventListener('click', exClearAll);
 
-      /* Tabs: General ⇄ Exam Schedule */
-      document.getElementById('notice-tab-general').addEventListener('click', () => {
-        document.getElementById('notice-tab-general').classList.add('active');
-        document.getElementById('notice-tab-exam').classList.remove('active');
-        document.getElementById('notice-panel-general').style.display = '';
-        document.getElementById('notice-panel-exam').style.display = 'none';
-      });
-      document.getElementById('notice-tab-exam').addEventListener('click', () => {
-        document.getElementById('notice-tab-exam').classList.add('active');
-        document.getElementById('notice-tab-general').classList.remove('active');
-        document.getElementById('notice-panel-exam').style.display = '';
-        document.getElementById('notice-panel-general').style.display = 'none';
-      });
-
       exLoadSettings(); exLoadStored(); exRender();
       exRefresh(false); // quietly fetch the live feed for every visitor on page load
+      if ((document.getElementById('exProxyUrl').value||'').trim()) exTogglePoll(); // auto-update on its own, no click needed
     })();
 
     /* ── Semester panels ───────────────────── */
@@ -1901,15 +1808,10 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
     document.querySelectorAll('[id^="sem-grid-"]').forEach(g => {
       g.innerHTML = '<div class="gh-loading"><i class="fas fa-circle-notch"></i>Loading resources...</div>';
     });
-    document.getElementById('notices-container').innerHTML =
-      '<div class="gh-loading" style="padding:20px;"><i class="fas fa-circle-notch"></i>Loading...</div>';
-
     fetchFromGitHub().then(ok => {
       if (!ok) console.warn('GitHub fetch failed — using local cache.');
-      renderNotices();
       renderAllSems();
     }).catch(() => {
-      renderNotices();
       renderAllSems();
     });
   })();

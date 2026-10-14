@@ -436,7 +436,7 @@ function refreshExamResults(examId){
 
 // ── Copy Link ──
 function copyLink(id){
-  const link=`https://mdshaikh.me/print/model_test.html?examId=${id}`;
+  const link=`https://mdshaikh.me/model_test.html?examId=${id}`;
   navigator.clipboard.writeText(link).then(()=>toast('Link copied!'));
 }
 function populateStudentCheckboxes(containerId, selectedIds = []) {
