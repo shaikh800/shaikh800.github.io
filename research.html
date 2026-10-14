@@ -4,11 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Research | Md. Shaikh Alam</title>
-  <meta name="description" content="Research hub: organized shared files and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
+  <meta name="description" content="Research hub: browse shared files, upload your own papers or 3D work, and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/site.css">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Research Hub | Md. Shaikh Alam">
+  <meta property="og:description" content="Research hub: browse shared files, upload your own papers or 3D work, and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
+  <meta property="og:image" content="https://mdshaikh.me/assets/images/shaikh.png">
+  <meta property="og:url" content="https://mdshaikh.me/research.html">
+  <meta name="twitter:card" content="summary">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* ══════════════ RESEARCH PAGE — built on top of site.css tokens ══════════════ */
 
@@ -47,13 +57,26 @@
     .admin-only-inline { display: none !important; }
     body.admin-mode .admin-only-inline { display: inline-flex !important; }
 
-    /* ── FILE BROWSER ── */
+    /* ── Shared form look (same pattern as the Civil page) ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px;
+      font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink);
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--blue); }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .form-row .form-group { flex: 1; min-width: 160px; }
+
+    /* ── FILE BROWSER (real Drive data, rendered as our own page — never leaves the site) ── */
     .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; }
     .breadcrumb a, .breadcrumb span.current { color: var(--ink); font-weight: 600; cursor: pointer; }
     .breadcrumb a:hover { color: var(--blue); }
     .breadcrumb i { font-size: 10px; opacity: .5; }
 
     .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 18px; }
+    .folder-grid:empty { display: none; margin: 0; }
     .folder-card {
       background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
       padding: 14px; cursor: pointer; transition: .15s; display: flex; align-items: center; gap: 10px;
@@ -62,9 +85,9 @@
     .folder-card i { font-size: 20px; color: #f4b400; flex-shrink: 0; }
     .folder-card .f-meta { min-width: 0; }
     .folder-card .f-name { font-weight: 700; font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .folder-card .f-sub { font-size: 11px; color: var(--muted); }
 
     .file-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .file-table:empty { display: none; }
     .file-table th {
       text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
       font-weight: 700; padding: 10px 14px; background: var(--surface-soft); border-bottom: 1px solid var(--line);
@@ -80,7 +103,7 @@
     .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
     .icon-action {
       width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
-      color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12.5px;
+      color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12.5px; text-decoration: none;
     }
     .icon-action:hover { color: var(--blue); border-color: var(--blue); }
     .icon-action.danger:hover { color: #ef4444; border-color: #ef4444; }
@@ -93,11 +116,7 @@
       .row-actions { justify-content: flex-start; margin-top: 4px; }
     }
 
-    /* ── DRIVE EMBED (the real Google Drive folder, shown as itself) ── */
-    .drive-view-toggle { display: flex; gap: 8px; flex-wrap: wrap; }
-    .drive-view-toggle .btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-    #driveFrameWrap, #driveFrame { width: 100%; }
-    #driveFrame { height: 72vh; min-height: 420px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+    .drive-loading { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
     .drive-empty {
       text-align: center; padding: 60px 20px; color: var(--muted); background: var(--surface);
       border: 1px dashed var(--line); border-radius: var(--radius-lg);
@@ -108,7 +127,36 @@
     .drive-hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin: -4px 0 16px; }
     .gh-sync-details { margin-bottom: 18px; }
     .gh-sync-details summary { cursor: pointer; font-size: 11.5px; color: var(--muted); font-weight: 600; user-select: none; }
+    .gh-sync-details > div { margin-top: 10px; }
     .gh-sync-details input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    .gh-sync-details ol { margin: 8px 0 0 18px; padding: 0; font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+    /* ── TEAM UPLOADS ── */
+    .signin-row { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-lg); padding: 30px 20px; margin-bottom: 20px; text-align: center; }
+    .signin-row i { font-size: 26px; color: var(--blue); }
+    .signin-row p { color: var(--muted); font-size: 13px; max-width: 420px; }
+    .user-chip { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; }
+    .user-chip img { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+    .user-chip .tu-name { font-weight: 700; font-size: 13.5px; }
+    .user-chip .tu-email { font-size: 12px; color: var(--muted); }
+    .user-chip > div:nth-child(2) { flex: 1; min-width: 0; }
+    .denied-box { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius); padding: 16px; font-size: 13px; color: var(--ink); margin-bottom: 18px; }
+    .denied-box b { color: #b45309; }
+
+    .upload-form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 24px; }
+    .upload-status { font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+    .upload-status.ok { color: #0f9d58; }
+    .upload-status.err { color: #ef4444; }
+
+    .uploads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 14px; }
+    .upload-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .upload-cat { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); }
+    .upload-card h4 { margin: 0; font-size: 14.5px; line-height: 1.35; }
+    .upload-meta { font-size: 12px; color: var(--muted); }
+    .vis-badge { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 100px; width: fit-content; }
+    .vis-badge.public { background: rgba(16,185,129,0.12); color: #0f9d58; }
+    .vis-badge.private { background: var(--surface-soft); color: var(--muted); }
+    .upload-actions { display: flex; gap: 8px; margin-top: 6px; align-items: center; }
 
     /* ── NOTICE BOARD ── */
     .notices-grid { display: grid; gap: 10px; }
@@ -218,7 +266,7 @@
         <div class="gate-opt" id="gateOptMember">
           <i class="fas fa-user"></i>
           <div class="g-name">Member</div>
-          <div class="g-sub">View &amp; download what's shared</div>
+          <div class="g-sub">View, download &amp; upload what's shared</div>
         </div>
       </div>
 
@@ -254,29 +302,26 @@
 
     <section class="page-title reveal">
       <h1>Research Hub</h1>
-      <p class="lead">Organized shared files and notices for me and collaborators — kept on Google Drive.</p>
+      <p class="lead">Browse shared files, upload your own papers or 3D work, and catch notices — all kept on Google Drive.</p>
       <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
     </section>
 
     <section class="section">
       <div class="research-tabs">
         <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
+        <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
         <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access</button>
       </div>
 
-      <!-- ══ FILES PANEL — the real connected Google Drive folder, shown as Drive itself ══ -->
+      <!-- ══ FILES PANEL — the real connected Google Drive folder, browsed on this page ══ -->
       <div class="r-panel" id="panel-files">
         <div class="r-toolbar">
           <div>
             <h2>Shared Files</h2>
-            <p>This is the actual Google Drive folder — same files, same view, always up to date.</p>
+            <p>Browse the connected Drive folder right here — nothing jumps to a new tab.</p>
           </div>
-          <div class="drive-view-toggle" id="driveViewToggle" style="display:none;">
-            <button class="btn secondary sm" id="driveViewList"><i class="fas fa-list"></i> List</button>
-            <button class="btn secondary sm" id="driveViewGrid"><i class="fas fa-grip"></i> Grid</button>
-            <a class="btn secondary sm" id="driveOpenLink" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Open in Drive</a>
-          </div>
+          <a class="btn secondary sm" id="driveOpenLink" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-up-right-from-square"></i> Open in Drive</a>
         </div>
 
         <div id="driveEmpty" class="drive-empty">
@@ -285,9 +330,74 @@
           <p class="drive-empty-admin admin-only-inline">Go to <b>Drive &amp; Access</b> to connect one.</p>
         </div>
 
-        <div id="driveFrameWrap" style="display:none;">
-          <iframe id="driveFrame" loading="lazy" title="Shared Google Drive folder"></iframe>
+        <div id="driveBrowser" style="display:none;">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <div class="drive-loading" id="driveLoading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
+          <div class="folder-grid" id="folderGrid"></div>
+          <table class="file-table" id="fileTable">
+            <thead><tr><th>Name</th><th>Modified</th><th>Size</th><th></th></tr></thead>
+            <tbody id="fileTableBody"></tbody>
+          </table>
+          <div class="empty-state" id="driveFolderEmpty" style="display:none;text-align:center;padding:30px;color:var(--muted);">This folder is empty.</div>
         </div>
+      </div>
+
+      <!-- ══ TEAM UPLOADS PANEL ══ -->
+      <div class="r-panel" id="panel-uploads" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>Team Uploads</h2>
+            <p>Sign in with Google to upload your own research paper or 3D work, under your own account.</p>
+          </div>
+        </div>
+
+        <div class="signin-row" id="teamSignin">
+          <i class="fab fa-google"></i>
+          <p>Sign in with Google to upload something, or to see your own private uploads. Only people the admin has added as a member can upload.</p>
+          <button class="btn primary sm" id="googleSigninBtn"><i class="fab fa-google"></i> Sign in with Google</button>
+        </div>
+
+        <div class="user-chip" id="teamUserChip" style="display:none;"></div>
+
+        <div class="denied-box" id="teamDenied" style="display:none;">
+          You're signed in, but the admin hasn't added this Google account as a member yet. Ask the admin to add your email under <b>Drive &amp; Access → Add a member</b>, then sign in again.
+        </div>
+
+        <div class="upload-form" id="teamUploadForm" style="display:none;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:12px;">Upload something new</div>
+          <div class="form-group">
+            <label>File</label>
+            <input type="file" id="upFile">
+          </div>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="upTitle" placeholder="e.g. Soil Mechanics Lab Paper">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="upCategory">
+                <option value="Research Paper">Research Paper</option>
+                <option value="3D Artwork">3D Artwork</option>
+                <option value="Dataset">Dataset</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Visibility</label>
+              <select id="upVisibility">
+                <option value="private">Private — only me &amp; admin</option>
+                <option value="public">Public — everyone can see</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn primary sm" id="upSubmitBtn"><i class="fas fa-cloud-arrow-up"></i> Upload</button>
+          <div class="upload-status" id="uploadStatus"></div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">This goes into your own Google Drive, in a "Research Hub Uploads" folder — not the admin's Drive. You stay the owner, and can delete it any time from here or from Drive.</p>
+        </div>
+
+        <div style="font-weight:700;font-size:14px;margin:18px 0 10px;">Shared uploads</div>
+        <div class="uploads-grid" id="uploadsGrid"></div>
       </div>
 
       <!-- ══ NOTICES PANEL ══ -->
@@ -307,7 +417,7 @@
         <div class="r-toolbar">
           <div>
             <h2>Drive &amp; Access</h2>
-            <p>Pick the Drive folder this hub reads from, and who's allowed to see it.</p>
+            <p>Pick the Drive folder this hub reads from, and who's allowed to see and upload.</p>
           </div>
         </div>
 
@@ -316,14 +426,32 @@
             <label>Google Drive folder link</label>
             <input type="text" id="driveLink" placeholder="https://drive.google.com/drive/folders/...">
           </div>
-          <button class="btn primary sm" onclick="saveDriveLink()"><i class="fas fa-check"></i> Save</button>
+        </div>
+        <div class="drive-connect">
+          <div class="field">
+            <label>Google API key (lets this page browse the folder itself)</label>
+            <input type="text" id="apiKeyInput" placeholder="AIzaSy...">
+          </div>
+          <button class="btn primary sm" onclick="saveDriveSettings()"><i class="fas fa-check"></i> Save</button>
         </div>
         <div class="drive-status" id="driveStatus"><span class="dot"></span><span id="driveStatusText">No folder connected yet</span></div>
-        <p class="drive-hint">In the real Drive folder's own Share settings, set it to <b>"Anyone with the link — Viewer"</b> (or add each person's Google account directly) — that's what actually controls who can open it. The list below is just your own record of who you've given access to.</p>
+        <p class="drive-hint">In the real Drive folder's own Share settings, set it to <b>"Anyone with the link — Viewer"</b> — that's what actually controls who can open it. The member list below is just your own record of who you've given access to.</p>
+
+        <details class="gh-sync-details">
+          <summary><i class="fas fa-key" style="margin-right:6px;"></i>How to get the API key (free, 2 minutes)</summary>
+          <div>
+            <ol>
+              <li>Open <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Cloud Console → Drive API</a> (same project your Drive upload button already uses) and click <b>Enable</b>.</li>
+              <li>Go to <b>APIs &amp; Services → Credentials → Create Credentials → API key</b>.</li>
+              <li>Click the new key → <b>Restrict key</b>: under "API restrictions" pick <b>Google Drive API</b> only; under "Application restrictions" pick <b>Websites</b> and add <code>mdshaikh.me/*</code>.</li>
+              <li>Copy the key and paste it above, then Save.</li>
+            </ol>
+          </div>
+        </details>
 
         <details class="gh-sync-details">
           <summary><i class="fas fa-code-branch" style="margin-right:6px;"></i>GitHub Sync Token (optional — makes your changes here visible to everyone, not just this browser)</summary>
-          <div class="form-group" style="margin-top:10px;">
+          <div>
             <input type="password" id="research-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
             <p style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4;">Same token you use on the Civil page — GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read &amp; Write</b>.</p>
           </div>
@@ -341,6 +469,7 @@
             </table>
             <div class="card" style="padding:16px;">
               <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Add a member</div>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Use the exact Gmail address they'll sign in with — that's also what lets them upload under Team Uploads.</p>
               <div class="invite-row">
                 <input type="email" id="inviteEmail" placeholder="friend@gmail.com">
                 <select id="inviteRole" style="max-width:150px;">
@@ -355,7 +484,7 @@
       </div>
     </section>
 
-    <p class="proto-footnote">Prototype — files, notices and members here are demo data until a Drive folder is actually connected.</p>
+    <p class="proto-footnote">Files live on Google Drive and uploads live on each person's own Drive — this page just organizes and links to them.</p>
 
   </main>
 
@@ -386,17 +515,25 @@
     const GITHUB_BRANCH = 'main';
     const CACHE_KEY     = 'research_data_cache_v1';
 
+    const GDRIVE_CLIENT_ID    = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
+    const GDRIVE_UPLOAD_SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+
     let driveLinkSaved = '';
     let driveId = '';
-    let driveView = 'list';
+    let apiKeySaved = '';
+    let folderStack = []; // [{id,name}] — browsing history within the connected folder
 
     let notices = [
-      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Check the Drive folder for shared papers and data, and this board for updates.', date: 'Oct 13' },
+      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Browse the Drive folder for shared papers and data, upload your own work under Team Uploads, and check this board for updates.', date: 'Oct 13' },
     ];
 
     let members = [
-      { id: 1, name: 'Md. Shaikh Alam (You)', initials: 'MS', role: 'admin', view: true, download: true },
+      { id: 1, name: 'Md. Shaikh Alam (You)', email: 'md.shaikh.alam.007@gmail.com', initials: 'MS', role: 'admin', view: true, download: true },
     ];
+
+    let uploads = [];
+
+    let currentUser = null; // { name, email, picture, token, expiry } — set by Google sign-in, Team Uploads only
 
     function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
@@ -411,11 +548,13 @@
       });
     });
 
-    /* ── GitHub shared storage (config only — the files themselves live in Drive) ── */
+    /* ── GitHub shared storage (config + catalog — the files themselves live in Drive) ── */
     function applyData(data) {
       if (data.driveLink) { driveLinkSaved = data.driveLink; driveId = data.driveId || parseDriveFolderId(data.driveLink); }
+      if (data.apiKey) apiKeySaved = data.apiKey;
       if (Array.isArray(data.members) && data.members.length) members = data.members;
       if (Array.isArray(data.notices)) notices = data.notices;
+      if (Array.isArray(data.uploads)) uploads = data.uploads;
     }
     async function fetchFromGitHub() {
       try {
@@ -431,7 +570,7 @@
       try { const d = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (d) applyData(d); } catch {}
     }
     async function pushToGitHub() {
-      const data = { driveLink: driveLinkSaved, driveId, members, notices, updated: new Date().toISOString() };
+      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, updated: new Date().toISOString() };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       const token = sessionStorage.getItem('civil_gh_token');
       if (!token) return false;
@@ -452,7 +591,7 @@
       } catch { return false; }
     }
 
-    /* ── Drive embed — shows the real Drive folder, same as Drive itself ── */
+    /* ── Drive browser — real Drive data, rendered as our own page (no iframe, no new tab) ── */
     function parseDriveFolderId(input) {
       input = (input || '').trim();
       let m = input.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
@@ -462,22 +601,261 @@
       if (/^[a-zA-Z0-9_-]{10,}$/.test(input)) return input;
       return '';
     }
-    function renderDriveFrame() {
+    function fileIconClass(mime) {
+      mime = mime || '';
+      if (mime.includes('folder')) return 'fa-folder';
+      if (mime.includes('pdf')) return 'fa-file-pdf ft-icon pdf';
+      if (mime.includes('spreadsheet') || mime.includes('excel') || mime.includes('csv')) return 'fa-file-excel ft-icon sheet';
+      if (mime.includes('presentation') || mime.includes('powerpoint')) return 'fa-file-powerpoint ft-icon slide';
+      if (mime.includes('image')) return 'fa-file-image';
+      if (mime.includes('document') || mime.includes('word')) return 'fa-file-word';
+      if (mime.includes('zip') || mime.includes('compressed')) return 'fa-file-zipper';
+      return 'fa-file';
+    }
+    function fmtSize(bytes) {
+      if (!bytes) return '—';
+      bytes = Number(bytes);
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+    async function driveListFolder(folderId) {
+      const key = (apiKeySaved || '').trim();
+      if (!key) throw new Error('no-api-key');
+      const q = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+      const fields = encodeURIComponent('files(id,name,mimeType,webViewLink,webContentLink,modifiedTime,size)');
+      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=folder,name&pageSize=200&key=${key}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || 'drive-error');
+      return data.files || [];
+    }
+    function renderBreadcrumb() {
+      const bc = document.getElementById('breadcrumb');
+      bc.innerHTML = folderStack.map((f, i) => {
+        const isLast = i === folderStack.length - 1;
+        const prefix = i === 0 ? '<i class="fab fa-google-drive" style="color:#0f9d58;"></i>&nbsp; ' : '<i class="fas fa-chevron-right"></i> ';
+        return prefix + (isLast ? `<span class="current">${esc(f.name)}</span>` : `<a onclick="jumpToFolder(${i})">${esc(f.name)}</a>`);
+      }).join(' ');
+    }
+    function jumpToFolder(i) { folderStack = folderStack.slice(0, i + 1); loadCurrentFolder(); }
+    function openSubfolder(id, name) { folderStack.push({ id, name }); loadCurrentFolder(); }
+    async function loadCurrentFolder() {
+      renderBreadcrumb();
+      const current = folderStack[folderStack.length - 1];
+      const openLink = document.getElementById('driveOpenLink');
+      openLink.href = `https://drive.google.com/drive/folders/${current.id}`;
+      openLink.style.display = '';
+      document.getElementById('driveLoading').style.display = 'block';
+      document.getElementById('folderGrid').innerHTML = '';
+      document.getElementById('fileTableBody').innerHTML = '';
+      document.getElementById('driveFolderEmpty').style.display = 'none';
+      try {
+        const items = await driveListFolder(current.id);
+        document.getElementById('driveLoading').style.display = 'none';
+        const folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+        const files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+        document.getElementById('folderGrid').innerHTML = folders.map(f => `
+          <div class="folder-card" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
+            <i class="fas ${fileIconClass(f.mimeType)}"></i>
+            <div class="f-meta"><span class="f-name">${esc(f.name)}</span></div>
+          </div>`).join('');
+        document.getElementById('fileTableBody').innerHTML = files.map(f => `
+          <tr>
+            <td><div class="file-name-cell"><i class="fas ${fileIconClass(f.mimeType)}"></i><span class="fn">${esc(f.name)}</span></div></td>
+            <td class="muted-cell">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
+            <td class="muted-cell">${fmtSize(f.size)}</td>
+            <td><div class="row-actions">
+              ${f.webViewLink ? `<a class="icon-action" title="Open" href="${f.webViewLink}" target="_blank" rel="noopener"><i class="fas fa-eye"></i></a>` : ''}
+              ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
+            </div></td>
+          </tr>`).join('');
+        if (!folders.length && !files.length) document.getElementById('driveFolderEmpty').style.display = 'block';
+        else document.getElementById('driveFolderEmpty').style.display = 'none';
+      } catch (e) {
+        document.getElementById('driveLoading').style.display = 'none';
+        document.getElementById('driveFolderEmpty').style.display = 'block';
+        document.getElementById('driveFolderEmpty').textContent = "Couldn't load this folder — check the API key, and make sure the Drive folder is shared as \"Anyone with the link.\"";
+      }
+    }
+    function renderDriveBrowser() {
       const empty = document.getElementById('driveEmpty');
-      const wrap  = document.getElementById('driveFrameWrap');
-      const toggle = document.getElementById('driveViewToggle');
-      if (!driveId) {
-        empty.style.display = 'block'; wrap.style.display = 'none'; toggle.style.display = 'none';
+      const browser = document.getElementById('driveBrowser');
+      const openLink = document.getElementById('driveOpenLink');
+      if (!driveId || !(apiKeySaved || '').trim()) {
+        empty.style.display = 'block'; browser.style.display = 'none'; openLink.style.display = 'none';
+        document.getElementById('driveEmptyText').textContent = driveId
+          ? 'Drive folder connected, but it needs an API key to browse here — admin can add one in Drive & Access.'
+          : 'No Drive folder connected yet — check back soon.';
         return;
       }
-      empty.style.display = 'none'; wrap.style.display = 'block'; toggle.style.display = 'flex';
-      document.getElementById('driveFrame').src = `https://drive.google.com/embeddedfolderview?id=${driveId}#${driveView}`;
-      document.getElementById('driveOpenLink').href = `https://drive.google.com/drive/folders/${driveId}`;
-      document.getElementById('driveViewList').classList.toggle('active', driveView === 'list');
-      document.getElementById('driveViewGrid').classList.toggle('active', driveView === 'grid');
+      empty.style.display = 'none'; browser.style.display = 'block';
+      folderStack = [{ id: driveId, name: 'Shared Files' }];
+      loadCurrentFolder();
     }
-    document.getElementById('driveViewList').addEventListener('click', () => { driveView = 'list'; renderDriveFrame(); });
-    document.getElementById('driveViewGrid').addEventListener('click', () => { driveView = 'grid'; renderDriveFrame(); });
+
+    /* ── Google sign-in (Team Uploads only) ── */
+    let _uploadTokenClient = null;
+    function initUploadAuth() {
+      if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
+      _uploadTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: GDRIVE_UPLOAD_SCOPE,
+        callback: () => {}
+      });
+    }
+    window.addEventListener('load', () => setTimeout(initUploadAuth, 1200));
+
+    function signInWithGoogle() {
+      if (!_uploadTokenClient) { alert("Google sign-in is still loading — give it a second and try again."); return; }
+      _uploadTokenClient.callback = async (resp) => {
+        if (resp.error) return;
+        const token = resp.access_token;
+        try {
+          const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(r => r.json());
+          currentUser = { name: info.name || info.email, email: (info.email || '').toLowerCase(), picture: info.picture || '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+        } catch (e) {
+          currentUser = { name: 'Signed in', email: '', picture: '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+        }
+        renderTeamTab();
+      };
+      _uploadTokenClient.requestAccessToken({ prompt: currentUser ? '' : 'consent' });
+    }
+    function signOutGoogle() {
+      if (currentUser && currentUser.token && window.google && window.google.accounts) {
+        try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
+      }
+      currentUser = null;
+      renderTeamTab();
+    }
+    function isAuthorizedUploader() {
+      if (role === 'admin') return true;
+      if (!currentUser || !currentUser.email) return false;
+      return members.some(m => (m.email || m.name || '').toLowerCase() === currentUser.email);
+    }
+
+    /* ── Drive upload helpers (uploader's own Drive, drive.file scope only) ── */
+    async function driveApiCall(method, endpoint, body, token, isUpload) {
+      const base = isUpload ? 'https://www.googleapis.com/upload/drive/v3' : 'https://www.googleapis.com/drive/v3';
+      const res = await fetch(base + endpoint, {
+        method,
+        headers: { Authorization: 'Bearer ' + token, ...(body && !isUpload ? { 'Content-Type': 'application/json' } : {}) },
+        body: body ? (isUpload ? body : JSON.stringify(body)) : undefined
+      });
+      return res.json();
+    }
+    async function findOrCreateFolder(name, parentId, token) {
+      const safeName = name.replace(/'/g, "\\'");
+      const q = `name='${safeName}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
+      const list = await driveApiCall('GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, null, token);
+      if (list.files && list.files.length) return list.files[0].id;
+      const folder = await driveApiCall('POST', '/files', { name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] }, token);
+      return folder.id;
+    }
+    function setUploadStatus(msg, cls) {
+      const el = document.getElementById('uploadStatus');
+      el.textContent = msg; el.className = 'upload-status' + (cls ? ' ' + cls : '');
+    }
+    async function submitUpload() {
+      if (!isAuthorizedUploader()) return;
+      const fileInput = document.getElementById('upFile');
+      const file = fileInput.files[0];
+      const title = document.getElementById('upTitle').value.trim();
+      const category = document.getElementById('upCategory').value;
+      const visibility = document.getElementById('upVisibility').value;
+      if (!file) { setUploadStatus('Choose a file first.', 'err'); return; }
+      if (!title) { setUploadStatus('Give it a title.', 'err'); return; }
+      if (!currentUser || Date.now() > currentUser.expiry - 5000) {
+        setUploadStatus('Your sign-in expired — click Sign in with Google again, then retry.', 'err');
+        return;
+      }
+      setUploadStatus('Uploading to your Drive…', '');
+      try {
+        const token = currentUser.token;
+        let parentId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
+        parentId = await findOrCreateFolder(category, parentId, token);
+        const meta = JSON.stringify({ name: file.name, parents: [parentId] });
+        const boundary = '-------research_upload_boundary';
+        const bodyStart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`;
+        const bodyEnd = `\r\n--${boundary}--`;
+        const bodyBlob = new Blob([bodyStart, file, bodyEnd]);
+        const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+          body: bodyBlob
+        });
+        const uploaded = await uploadRes.json();
+        if (!uploaded.id) throw new Error((uploaded.error && uploaded.error.message) || 'Upload failed.');
+        if (visibility === 'public') {
+          await driveApiCall('POST', `/files/${uploaded.id}/permissions`, { role: 'reader', type: 'anyone' }, token);
+        }
+        uploads.unshift({
+          id: uploaded.id, title, category, visibility,
+          uploaderName: currentUser.name, uploaderEmail: currentUser.email,
+          link: `https://drive.google.com/file/d/${uploaded.id}/view`,
+          date: new Date().toISOString()
+        });
+        fileInput.value = ''; document.getElementById('upTitle').value = '';
+        setUploadStatus('Uploaded ✓', 'ok');
+        renderUploads();
+        await pushToGitHub();
+      } catch (e) {
+        setUploadStatus('Upload failed: ' + (e.message || 'try again'), 'err');
+      }
+    }
+    async function removeUpload(id) {
+      const u = uploads.find(x => x.id === id);
+      if (!u) return;
+      const isOwner = currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase();
+      if (isOwner && currentUser.token) {
+        try { await driveApiCall('DELETE', `/files/${id}`, null, currentUser.token); } catch (e) {}
+      }
+      uploads = uploads.filter(x => x.id !== id);
+      renderUploads();
+      pushToGitHub();
+    }
+    function visibleUploads() {
+      return uploads.filter(u => u.visibility === 'public' || role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase()));
+    }
+    function renderUploads() {
+      const grid = document.getElementById('uploadsGrid');
+      const list = visibleUploads();
+      grid.innerHTML = list.length ? list.map(u => {
+        const canRemove = role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase());
+        return `
+        <div class="upload-card">
+          <div class="upload-cat">${esc(u.category)}</div>
+          <h4>${esc(u.title)}</h4>
+          <div class="upload-meta">${esc(u.uploaderName || 'Unknown')} · ${new Date(u.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+          <span class="vis-badge ${u.visibility}">${u.visibility === 'public' ? 'Public' : 'Private'}</span>
+          <div class="upload-actions">
+            <a class="btn secondary sm" href="${esc(u.link)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Open</a>
+            ${canRemove ? `<button class="icon-action danger" title="Remove" onclick="removeUpload('${esc(u.id)}')"><i class="fas fa-trash"></i></button>` : ''}
+          </div>
+        </div>`;
+      }).join('') : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);grid-column:1/-1;">Nothing uploaded yet.</div>';
+    }
+    function renderTeamTab() {
+      const signinArea = document.getElementById('teamSignin');
+      const chip = document.getElementById('teamUserChip');
+      const formArea = document.getElementById('teamUploadForm');
+      const deniedArea = document.getElementById('teamDenied');
+      if (!currentUser) {
+        signinArea.style.display = 'flex'; chip.style.display = 'none';
+        formArea.style.display = 'none'; deniedArea.style.display = 'none';
+      } else {
+        signinArea.style.display = 'none';
+        chip.style.display = 'flex';
+        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
+          <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
+          <button class="btn secondary sm" onclick="signOutGoogle()">Sign out</button>`;
+        if (isAuthorizedUploader()) { formArea.style.display = 'block'; deniedArea.style.display = 'none'; }
+        else { formArea.style.display = 'none'; deniedArea.style.display = 'block'; }
+      }
+      renderUploads();
+    }
+    document.getElementById('googleSigninBtn').addEventListener('click', signInWithGoogle);
+    document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
 
     /* ── Notices ── */
     function renderNotices() {
@@ -519,14 +897,17 @@
       document.getElementById('memberUnlocked').style.display = driveId ? 'block' : 'none';
       const linkInput = document.getElementById('driveLink');
       if (driveLinkSaved && !linkInput.value) linkInput.value = driveLinkSaved;
+      const keyInput = document.getElementById('apiKeyInput');
+      if (apiKeySaved && !keyInput.value) keyInput.value = apiKeySaved;
     }
-    async function saveDriveLink() {
+    async function saveDriveSettings() {
       const val = document.getElementById('driveLink').value.trim();
+      const key = document.getElementById('apiKeyInput').value.trim();
       if (!val) return;
       const id = parseDriveFolderId(val);
       if (!id) { document.getElementById('driveStatusText').textContent = "Couldn't read a folder ID from that link."; return; }
-      driveLinkSaved = val; driveId = id;
-      renderDriveStatus(); renderDriveFrame(); renderMembers();
+      driveLinkSaved = val; driveId = id; apiKeySaved = key;
+      renderDriveStatus(); renderDriveBrowser(); renderMembers();
       const synced = await pushToGitHub();
       document.getElementById('driveStatusText').textContent = synced
         ? 'Connected & synced — everyone sees this folder now ✓'
@@ -549,7 +930,7 @@
       const email = document.getElementById('inviteEmail').value.trim();
       if (!email) return;
       const access = document.getElementById('inviteRole').value;
-      members.push({ id: Date.now(), name: email, initials: email.slice(0,2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
+      members.push({ id: Date.now(), name: email, email: email.toLowerCase(), initials: email.slice(0, 2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
       document.getElementById('inviteEmail').value = '';
       renderMembers();
       pushToGitHub();
@@ -597,7 +978,7 @@
         const savedToken = sessionStorage.getItem('civil_gh_token');
         if (savedToken) document.getElementById('research-gh-token').value = savedToken;
       }
-      renderDriveFrame(); renderDriveStatus(); renderNotices(); renderMembers();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab();
     }
     document.getElementById('research-gh-token').addEventListener('input', e => {
       sessionStorage.setItem('civil_gh_token', e.target.value.trim());
@@ -620,9 +1001,9 @@
 
     /* ── init ── */
     loadFromCache();           // instant paint from last-known data
-    renderDriveFrame(); renderDriveStatus(); renderNotices(); renderMembers();
+    renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab();
     fetchFromGitHub().then(() => {
-      renderDriveFrame(); renderDriveStatus(); renderNotices(); renderMembers();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab();
     });
     if (siteIsAdmin()) { enterAs('admin'); } // already logged in elsewhere on the site this tab
   </script>
