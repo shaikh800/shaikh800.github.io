@@ -705,6 +705,7 @@
   </div>
 
   <script src="assets/site.js"></script>
+  <script src="assets/site-auth.js"></script>
   <script>
   (() => {
     /* ════════════════════════════════════════
@@ -712,8 +713,6 @@
     ════════════════════════════════════════ */
     const GDRIVE_CLIENT_ID = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
     const GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.file';
-    const ADMIN_PW_KEY     = 'civil_admin_pw';
-    const DEFAULT_PW       = '';
     const STORE_KEY        = 'civil_semesters';
     const NOTICE_KEY       = 'civil_notices';
     const DB_NAME = 'civilDB2'; const DB_VER = 1; const ISTORE = 'files';
@@ -859,8 +858,8 @@
       }
     });
 
-    /* ── Admin mode ────────────────────────── */
-    let adminMode = sessionStorage.getItem('civil_admin') === '1';
+    /* ── Admin mode — shared, server-checked session (assets/site-auth.js) ── */
+    let adminMode = siteIsAdmin();
     function applyAdmin() {
       document.body.classList.toggle('admin-mode', adminMode);
       const fab = document.getElementById('admin-fab');
@@ -870,21 +869,27 @@
     applyAdmin();
 
     document.getElementById('admin-fab').addEventListener('click', () => {
-      if (adminMode) { adminMode = false; sessionStorage.removeItem('civil_admin'); applyAdmin(); toast('Admin mode off', 'info'); return; }
+      if (adminMode) { adminMode = false; siteAdminLogout(); applyAdmin(); toast('Admin mode off', 'info'); return; }
       document.getElementById('admin-pass').value = '';
       document.getElementById('admin-error').style.display = 'none';
       openModal('modal-admin');
       setTimeout(() => document.getElementById('admin-pass').focus(), 300);
     });
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
-      const pw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
-      if (document.getElementById('admin-pass').value === pw) {
-        adminMode = true; sessionStorage.setItem('civil_admin','1');
+    document.getElementById('admin-login-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('admin-login-btn');
+      const pw = document.getElementById('admin-pass').value;
+      if (!pw) { document.getElementById('admin-error').textContent = 'Enter the admin password.'; document.getElementById('admin-error').style.display = 'block'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking...';
+      const result = await siteAdminLogin(pw);
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock';
+      if (result.ok) {
+        adminMode = true;
         const ghToken = document.getElementById('admin-gh-token').value.trim();
         if (ghToken) sessionStorage.setItem('civil_gh_token', ghToken);
         applyAdmin(); closeModal('modal-admin');
         toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
       } else {
+        document.getElementById('admin-error').textContent = result.message;
         document.getElementById('admin-error').style.display = 'block';
         document.getElementById('admin-pass').select();
       }

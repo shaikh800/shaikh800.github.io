@@ -329,15 +329,22 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   background: var(--ink);
   border-top: 1px solid rgba(255,255,255,0.08);
   z-index: 9999;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
 .mobile-tab {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; color: #94a3b8; font-size: 11px; font-weight: 700;
-  text-decoration: none; transition: color 0.2s; letter-spacing: 0.3px;
+  gap: 2px; color: #94a3b8; font-size: 10px; font-weight: 700;
+  text-decoration: none; transition: color 0.2s; letter-spacing: 0.2px;
+  min-width: 0; padding: 0 2px;
 }
-.mobile-tab i { font-size: 18px; line-height: 1; }
+.mobile-tab span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.mobile-tab i { font-size: 16px; line-height: 1; }
 .mobile-tab.active { color: #38bdf8; }
+
+@media (max-width: 360px) {
+  .mobile-tab { font-size: 9px; }
+  .mobile-tab i { font-size: 15px; }
+}
 
 @media (max-width: 900px) {
   body.has-mobile-tabbar { padding-bottom: 56px; } /* ট্যাবারের জন্য নিচে জায়গা রাখা */

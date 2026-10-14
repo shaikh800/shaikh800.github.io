@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Research | Md. Shaikh Alam</title>
-  <meta name="description" content="Research hub: organized shared files, notice board and team chat for Md. Shaikh Alam and collaborators, backed by Google Drive.">
+  <meta name="description" content="Research hub: organized shared files and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,24 +12,19 @@
   <style>
     /* ══════════════ RESEARCH PAGE — built on top of site.css tokens ══════════════ */
 
-    .page-title { padding-bottom: 30px; }
-    .page-title h1 { font-size: clamp(32px, 5vw, 54px); margin-bottom: 10px; }
-
-    .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
-    .drive-badge, .role-badge, .proto-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 6px 13px; border-radius: 100px; font-size: 12px; font-weight: 700;
-      border: 1px solid var(--line); background: var(--surface);
+    .page-title { padding-bottom: 24px; }
+    .page-title h1 { font-size: clamp(30px, 5vw, 48px); margin-bottom: 8px; }
+    .page-title .lead { margin-bottom: 0; }
+    .switch-view {
+      font-size: 12.5px; font-weight: 700; color: var(--muted); background: none; border: none;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
     }
-    .drive-badge { color: #0f9d58; border-color: rgba(15,157,88,0.25); background: rgba(15,157,88,0.08); }
-    .role-badge.admin { color: var(--blue); border-color: rgba(37,99,235,0.25); background: rgba(37,99,235,0.08); }
-    .role-badge.member { color: var(--muted); }
-    .proto-badge { color: #b45309; border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+    .switch-view:hover { color: var(--blue); }
 
     /* ── Tabs ── */
     .research-tabs {
       display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;
-      border-bottom: 1px solid var(--line); padding-bottom: 0;
+      border-bottom: 1px solid var(--line);
     }
     .r-tab {
       font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted);
@@ -47,7 +42,7 @@
 
     /* ── Toolbar shared by panels ── */
     .r-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-    .r-toolbar h2 { margin: 0; font-size: clamp(20px,3vw,26px); }
+    .r-toolbar h2 { margin: 0; font-size: clamp(19px,3vw,24px); }
     .r-toolbar p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
     .admin-only-inline { display: none !important; }
     body.admin-mode .admin-only-inline { display: inline-flex !important; }
@@ -58,16 +53,16 @@
     .breadcrumb a:hover { color: var(--blue); }
     .breadcrumb i { font-size: 10px; opacity: .5; }
 
-    .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; margin-bottom: 20px; }
+    .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 18px; }
     .folder-card {
       background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 16px; cursor: pointer; transition: .15s; display: flex; align-items: center; gap: 12px;
+      padding: 14px; cursor: pointer; transition: .15s; display: flex; align-items: center; gap: 10px;
     }
-    .folder-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-1px); }
-    .folder-card i { font-size: 22px; color: #f4b400; }
+    .folder-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
+    .folder-card i { font-size: 20px; color: #f4b400; flex-shrink: 0; }
     .folder-card .f-meta { min-width: 0; }
-    .folder-card .f-name { font-weight: 700; font-size: 13.5px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .folder-card .f-sub { font-size: 11.5px; color: var(--muted); }
+    .folder-card .f-name { font-weight: 700; font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .folder-card .f-sub { font-size: 11px; color: var(--muted); }
 
     .file-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
     .file-table th {
@@ -80,7 +75,7 @@
     .file-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .file-name-cell i { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; }
     .file-name-cell .fn { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .ft-icon.pdf { color: #ea4335; } .ft-icon.sheet { color: #0f9d58; } .ft-icon.doc { color: #4285f4; } .ft-icon.slide { color: #f4b400; }
+    .ft-icon.pdf { color: #ea4335; } .ft-icon.sheet { color: #0f9d58; } .ft-icon.slide { color: #f4b400; }
     .muted-cell { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
     .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
     .icon-action {
@@ -98,108 +93,126 @@
       .row-actions { justify-content: flex-start; margin-top: 4px; }
     }
 
-    /* ── NOTICE BOARD (same language as civil.html's notice board) ── */
-    .notices-grid { display: grid; gap: 12px; }
+    /* ── NOTICE BOARD ── */
+    .notices-grid { display: grid; gap: 10px; }
     .notice-card {
       display: flex; gap: 12px; align-items: flex-start; background: var(--surface);
       border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: var(--radius);
-      padding: 14px 16px; position: relative;
+      padding: 13px 15px; position: relative;
     }
     .notice-card.info { border-left-color: var(--blue); }
     .notice-card.warning { border-left-color: #f59e0b; }
     .notice-card.urgent { border-left-color: #ef4444; }
-    .notice-card .n-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .notice-card .n-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; flex-shrink: 0; }
     .notice-card.info .n-icon { background: rgba(37,99,235,0.1); color: var(--blue); }
     .notice-card.warning .n-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
     .notice-card.urgent .n-icon { background: rgba(239,68,68,0.1); color: #ef4444; }
-    .notice-card .n-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
-    .notice-card .n-text { color: var(--muted); font-size: 13px; line-height: 1.6; }
-    .notice-card .n-meta { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .notice-card .n-title { font-weight: 700; font-size: 13.5px; margin-bottom: 2px; }
+    .notice-card .n-text { color: var(--muted); font-size: 12.5px; line-height: 1.55; }
+    .notice-card .n-meta { font-size: 11px; color: var(--muted); margin-top: 5px; }
     .notice-card .n-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--muted); cursor: pointer; opacity: 0; font-size: 13px; }
     .notice-card:hover .n-delete { opacity: .7; }
     .notice-card .n-delete:hover { color: #ef4444; opacity: 1; }
 
-    /* ── CHAT ── */
-    .chat-shell {
-      display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 0;
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
-      overflow: hidden; height: 560px; box-shadow: var(--shadow);
+    /* ── DRIVE & ACCESS (admin only) ── */
+    .drive-connect {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px;
     }
-    .chat-people { border-right: 1px solid var(--line); background: var(--surface-soft); overflow-y: auto; padding: 10px; }
-    .chat-people h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 6px 8px 10px; }
-    .chat-person { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: default; }
-    .chat-person:hover { background: var(--surface); }
-    .chat-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-    .chat-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; margin-left: auto; flex-shrink: 0; }
-    .chat-main { display: flex; flex-direction: column; min-width: 0; }
-    .chat-head { padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .msg { display: flex; gap: 10px; max-width: 80%; }
-    .msg.mine { align-self: flex-end; flex-direction: row-reverse; }
-    .msg .chat-avatar { width: 26px; height: 26px; font-size: 11px; }
-    .msg-bubble { background: var(--surface-soft); border-radius: 12px; padding: 9px 13px; font-size: 13.5px; line-height: 1.5; }
-    .msg.mine .msg-bubble { background: var(--blue); color: #fff; }
-    .msg-name { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
-    .msg.mine .msg-name { text-align: right; }
-    .msg-time { font-size: 10px; color: var(--muted); margin-top: 3px; }
-    .msg.mine .msg-time { color: rgba(255,255,255,0.75); }
-    .chat-compose { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
-    .chat-compose input { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
-    .chat-compose input:focus { outline: none; border-color: var(--blue); }
-    .chat-send { background: var(--blue); color: #fff; border: none; border-radius: 10px; width: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .chat-send:hover { background: var(--blue-dark); }
+    .drive-connect .field { flex: 1; min-width: 220px; }
+    .drive-connect label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+    .drive-connect input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    .drive-status { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin-bottom: 20px; }
+    .drive-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); flex-shrink: 0; }
+    .drive-status.connected .dot { background: #0f9d58; }
+    .drive-status.connected { color: #0f9d58; }
 
-    @media (max-width: 700px) {
-      .chat-shell { grid-template-columns: 1fr; height: 520px; }
-      .chat-people { display: none; }
-    }
-
-    /* ── MEMBERS & ACCESS ── */
     .member-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
     .member-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; padding: 10px 14px; background: var(--surface-soft); border-bottom: 1px solid var(--line); }
     .member-table td { padding: 11px 14px; font-size: 13.5px; border-bottom: 1px solid var(--line); }
     .member-table tr:last-child td { border-bottom: none; }
     .member-who { display: flex; align-items: center; gap: 10px; }
+    .chat-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
     .role-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
     .role-pill.admin { background: rgba(37,99,235,0.1); color: var(--blue); }
     .role-pill.member { background: var(--surface-soft); color: var(--muted); }
-    .toggle { position: relative; width: 38px; height: 22px; border-radius: 100px; background: var(--line); cursor: pointer; flex-shrink: 0; transition: .15s; display: inline-block; }
-    .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle { position: relative; width: 36px; height: 21px; border-radius: 100px; background: var(--line); cursor: pointer; flex-shrink: 0; transition: .15s; display: inline-block; }
+    .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
     .toggle.on { background: #10b981; }
-    .toggle.on::after { left: 18px; }
+    .toggle.on::after { left: 17px; }
     .invite-row { display: flex; gap: 8px; flex-wrap: wrap; }
     .invite-row input { flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: inherit; background: var(--surface); color: var(--ink); }
-
-    /* ── ADMIN FAB + MODAL (same pattern as civil.html) ── */
-    .admin-fab {
-      position: fixed; bottom: 24px; right: 24px; z-index: 500;
-      width: 52px; height: 52px; border-radius: 50%; background: var(--ink); color: #fff;
-      border: none; box-shadow: var(--shadow-lg); cursor: pointer; font-size: 18px;
-      display: flex; align-items: center; justify-content: center; transition: .15s;
+    @media (max-width: 640px) {
+      .member-table thead { display: none; }
+      .member-table tr { display: grid; grid-template-columns: 1fr 1fr; padding: 10px 14px; gap: 6px; }
+      .member-table td { border-bottom: none; padding: 2px 0; }
+      .member-table tr:not(:last-child) { border-bottom: 1px solid var(--line); }
     }
-    .admin-fab:hover { transform: scale(1.08); }
-    .admin-fab.active { background: var(--blue); }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
-    .modal-overlay.open { display: flex; }
-    .modal-box { background: var(--surface); border-radius: var(--radius-lg); max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--line); }
-    .modal-head h3 { margin: 0; font-size: 16px; }
-    .modal-body { padding: 18px; }
-    .modal-body input, .modal-body textarea, .modal-body select { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit; background: var(--surface); color: var(--ink); margin-bottom: 10px; }
-    .modal-body textarea { min-height: 80px; resize: vertical; }
-    .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--line); }
-    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; }
-    .hint-small { font-size: 11.5px; color: var(--muted); margin-top: -4px; margin-bottom: 10px; }
-    .field-err { color: #ef4444; font-size: 12.5px; display: none; margin-top: -4px; margin-bottom: 8px; }
 
-    /* ── PROTOTYPE NOTE CARD ── */
-    .proto-note { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius-lg); padding: 20px 22px; }
-    .proto-note h3 { margin: 0 0 10px; font-size: 16px; display: flex; align-items: center; gap: 8px; color: #92400e; }
-    .proto-note ul { margin: 0; padding-left: 20px; color: var(--ink); font-size: 13.5px; line-height: 1.8; }
-    .proto-note li strong { color: #92400e; }
+    /* ── FOOTNOTE ── */
+    .proto-footnote { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+    /* ══════════════ ENTRY GATE ══════════════ */
+    #roleGate {
+      position: fixed; inset: 0; z-index: 2000; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .gate-card { max-width: 480px; width: 100%; text-align: center; }
+    .gate-card h1 { font-size: clamp(26px,5vw,34px); margin-bottom: 6px; }
+    .gate-card p.sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    .gate-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .gate-options { grid-template-columns: 1fr; } }
+    .gate-opt {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+      padding: 24px 16px; cursor: pointer; transition: .15s; text-align: center;
+    }
+    .gate-opt:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-2px); }
+    .gate-opt i { font-size: 26px; color: var(--blue); margin-bottom: 10px; display: block; }
+    .gate-opt .g-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .gate-opt .g-sub { font-size: 12px; color: var(--muted); }
+
+    .gate-pw-step { display: none; max-width: 340px; width: 100%; margin: 0 auto; text-align: left; }
+    .gate-pw-step.open { display: block; }
+    .gate-options.hidden { display: none; }
+    .gate-pw-step input {
+      width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-size: 15px;
+      font-family: inherit; background: var(--surface); color: var(--ink); margin-bottom: 10px; text-align: center; letter-spacing: 1px;
+    }
+    .gate-pw-step input:focus { outline: none; border-color: var(--blue); }
+    .gate-err { color: #ef4444; font-size: 12.5px; min-height: 18px; margin-bottom: 6px; text-align: center; }
+    .gate-back { display: block; text-align: center; font-size: 12.5px; color: var(--muted); background: none; border: none; cursor: pointer; margin-top: 12px; width: 100%; }
+    .gate-back:hover { color: var(--blue); }
   </style>
 </head>
 <body>
+
+  <!-- ══════════════ ENTRY GATE — shown first, every visit ══════════════ -->
+  <div id="roleGate">
+    <div class="gate-card">
+      <i class="fab fa-google-drive" style="font-size:30px;color:#0f9d58;margin-bottom:14px;display:block;"></i>
+      <h1>Research Hub</h1>
+      <p class="sub">Quick check before you go in — who's opening this?</p>
+
+      <div class="gate-options" id="gateOptions">
+        <div class="gate-opt" id="gateOptAdmin">
+          <i class="fas fa-user-shield"></i>
+          <div class="g-name">Admin</div>
+          <div class="g-sub">Md. Shaikh Alam — full control</div>
+        </div>
+        <div class="gate-opt" id="gateOptMember">
+          <i class="fas fa-user"></i>
+          <div class="g-name">Member</div>
+          <div class="g-sub">View &amp; download what's shared</div>
+        </div>
+      </div>
+
+      <div class="gate-pw-step" id="gatePwStep">
+        <input type="password" id="gatePw" placeholder="Admin password" autocomplete="current-password">
+        <div class="gate-err" id="gateErr"></div>
+        <button class="btn primary" style="width:100%;justify-content:center;" id="gateEnterBtn"><i class="fas fa-unlock"></i> Enter</button>
+        <button class="gate-back" id="gateBackBtn">← Back</button>
+      </div>
+    </div>
+  </div>
 
   <header class="site-header">
     <div class="nav-shell">
@@ -223,22 +236,16 @@
   <main class="page">
 
     <section class="page-title reveal">
-      <p class="eyebrow">Shared workspace · Rough prototype</p>
       <h1>Research Hub</h1>
-      <p class="lead">A private space for me and collaborators to keep organized files, notices and chat in one place — everything backed by Google Drive, nothing scattered across apps.</p>
-      <div class="badge-row">
-        <span class="drive-badge"><i class="fab fa-google-drive"></i> Data backed by Google Drive</span>
-        <span class="role-badge admin" id="roleBadge"><i class="fas fa-lock-open"></i> Admin mode</span>
-        <span class="proto-badge"><i class="fas fa-flask"></i> Rough draft — not wired to real Drive yet</span>
-      </div>
+      <p class="lead">Organized shared files and notices for me and collaborators — kept on Google Drive.</p>
+      <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
     </section>
 
     <section class="section">
       <div class="research-tabs">
         <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files <span class="count" id="fileCount">—</span></button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
-        <button class="r-tab" data-tab="chat"><i class="fas fa-comments"></i> Chat</button>
-        <button class="r-tab admin-only" data-tab="members"><i class="fas fa-users-gear"></i> Members &amp; Access</button>
+        <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access</button>
       </div>
 
       <!-- ══ FILES PANEL ══ -->
@@ -268,81 +275,50 @@
         <div class="r-toolbar">
           <div>
             <h2>Notice Board</h2>
-            <p>Pinned updates for everyone with access — assignments, deadlines, meeting notes.</p>
+            <p>Pinned updates for everyone with access.</p>
           </div>
           <button class="btn primary sm admin-only-inline" id="addNoticeBtn"><i class="fas fa-plus"></i> Add Notice</button>
         </div>
         <div class="notices-grid" id="noticesGrid"></div>
       </div>
 
-      <!-- ══ CHAT PANEL ══ -->
-      <div class="r-panel" id="panel-chat" hidden>
+      <!-- ══ DRIVE & ACCESS PANEL (admin only) ══ -->
+      <div class="r-panel admin-only" id="panel-access" hidden>
         <div class="r-toolbar">
           <div>
-            <h2>Chat</h2>
-            <p>Quick back-and-forth with the group. Demo only — not yet saved to Drive.</p>
+            <h2>Drive &amp; Access</h2>
+            <p>Pick the Drive folder this hub reads from, and who's allowed to see it.</p>
           </div>
         </div>
-        <div class="chat-shell">
-          <div class="chat-people">
-            <h4>Members</h4>
-            <div class="chat-person"><span class="chat-avatar">MS</span> You <span class="chat-dot"></span></div>
-            <div class="chat-person"><span class="chat-avatar" style="background:#10b981;">RH</span> Rafiq <span class="chat-dot"></span></div>
-            <div class="chat-person"><span class="chat-avatar" style="background:#f59e0b;">TI</span> Tania <span class="chat-dot" style="background:var(--line);"></span></div>
-          </div>
-          <div class="chat-main">
-            <div class="chat-head">
-              <span><i class="fas fa-users" style="color:var(--muted);margin-right:6px;"></i>Research Group · 3 members</span>
-              <span style="font-size:11px;"><i class="fab fa-google-drive" style="color:#0f9d58;"></i> log will save to Drive</span>
-            </div>
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-compose">
-              <input type="text" id="chatInput" placeholder="Message the group..." onkeydown="if(event.key==='Enter') sendChat();">
-              <button class="chat-send" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ══ MEMBERS PANEL (admin only) ══ -->
-      <div class="r-panel admin-only" id="panel-members" hidden>
-        <div class="r-toolbar">
-          <div>
-            <h2>Members &amp; Access</h2>
-            <p>You control who sees what. Everyone else only gets what you switch on for them.</p>
+        <div class="drive-connect">
+          <div class="field">
+            <label>Google Drive folder link</label>
+            <input type="text" id="driveLink" placeholder="https://drive.google.com/drive/folders/...">
           </div>
+          <button class="btn primary sm" onclick="saveDriveLink()"><i class="fas fa-check"></i> Save</button>
         </div>
+        <div class="drive-status" id="driveStatus"><span class="dot"></span><span id="driveStatusText">No folder connected yet</span></div>
+
         <table class="member-table">
-          <thead><tr><th>Member</th><th>Role</th><th>Can view files</th><th>Can download</th><th></th></tr></thead>
+          <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th></th></tr></thead>
           <tbody id="memberTableBody"></tbody>
         </table>
         <div class="card" style="padding:16px;">
-          <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Invite someone new</div>
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Add a member</div>
           <div class="invite-row">
             <input type="email" id="inviteEmail" placeholder="friend@gmail.com">
             <select id="inviteRole" style="max-width:150px;">
               <option value="view">View only</option>
               <option value="download">Can download</option>
             </select>
-            <button class="btn primary sm" onclick="inviteMember()"><i class="fas fa-paper-plane"></i> Invite</button>
+            <button class="btn primary sm" onclick="inviteMember()"><i class="fas fa-paper-plane"></i> Add</button>
           </div>
-          <div class="hint-small" style="margin-top:8px;">Demo button — wiring this to real Google Drive sharing (add as viewer/commenter on the Drive folder) is one of the decisions below.</div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="proto-note">
-        <h3><i class="fas fa-flask"></i> What's real vs. what's mocked in this draft</h3>
-        <ul>
-          <li><strong>Mocked:</strong> all files, folders, notices, chat messages and the member list below are placeholder data, stored only in this page's memory — reload and it resets.</li>
-          <li><strong>Mocked:</strong> the Admin / Member switch (the dark button, bottom-right) just flips a demo flag. It is not a real login yet.</li>
-          <li><strong>Would be real:</strong> file browser → backed by an actual Google Drive folder via the Drive API, same OAuth approach your Civil section already uses for resource uploads.</li>
-          <li><strong>Would be real:</strong> notices + chat → saved through a small Google Apps Script endpoint (same pattern as your Academy admin panel / exam controller) that reads and writes a file inside that Drive folder, so everything still lives in Drive, not a database.</li>
-          <li><strong>Would be real:</strong> Admin control → only you hold the real admin password (checked on the server, like admin_panel.html already does — not the weaker local check civil.html currently uses, see the bug notes). Friends get view or download rights per-person from the Members panel.</li>
-        </ul>
-      </div>
-    </section>
+    <p class="proto-footnote">Prototype — files, notices and members here are demo data until a Drive folder is actually connected.</p>
 
   </main>
 
@@ -361,48 +337,11 @@
     <a href="research.html" class="mobile-tab active"><i class="fas fa-flask"></i><span>Research</span></a>
   </nav>
 
-  <button class="admin-fab active" id="adminFab" title="Toggle admin / member view">
-    <i class="fas fa-lock-open" id="adminFabIcon"></i>
-  </button>
-
-  <!-- Admin login modal -->
-  <div class="modal-overlay" id="modalAdmin">
-    <div class="modal-box">
-      <div class="modal-head"><h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Switch to Member view</h3><button class="modal-close" onclick="closeModal('modalAdmin')"><i class="fas fa-times"></i></button></div>
-      <div class="modal-body">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">This just previews what a friend with view/download access would see. Real admin login (server-checked) is one of the next-step decisions.</p>
-      </div>
-      <div class="modal-foot">
-        <button class="btn secondary sm" onclick="closeModal('modalAdmin')">Cancel</button>
-        <button class="btn primary sm" onclick="setRole('member')">Preview as Member</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add notice modal -->
-  <div class="modal-overlay" id="modalNotice">
-    <div class="modal-box">
-      <div class="modal-head"><h3><i class="fas fa-bell" style="color:var(--blue);margin-right:8px;"></i>Add Notice</h3><button class="modal-close" onclick="closeModal('modalNotice')"><i class="fas fa-times"></i></button></div>
-      <div class="modal-body">
-        <input type="text" id="noticeTitle" placeholder="Notice title...">
-        <textarea id="noticeText" placeholder="Details..."></textarea>
-        <select id="noticeType">
-          <option value="info">Info</option>
-          <option value="warning">Warning</option>
-          <option value="urgent">Urgent</option>
-        </select>
-      </div>
-      <div class="modal-foot">
-        <button class="btn secondary sm" onclick="closeModal('modalNotice')">Cancel</button>
-        <button class="btn primary sm" onclick="saveNotice()"><i class="fas fa-check"></i> Save</button>
-      </div>
-    </div>
-  </div>
-
   <script src="assets/site.js"></script>
+  <script src="assets/site-auth.js"></script>
   <script>
-    /* ═══════════════ DEMO STATE (resets on reload — see proto-note on the page) ═══════════════ */
-    let role = 'admin'; // 'admin' | 'member'
+    /* ═══════════════ DEMO DATA (resets on reload) ═══════════════ */
+    let role = null; // 'admin' | 'member' — set by the gate
 
     const FOLDERS = [
       { id: 'papers',  name: 'Papers',        count: 3, updated: 'Oct 12' },
@@ -430,11 +369,11 @@
       ],
     };
 
-    const ICONS = { pdf: 'fa-file-pdf ft-icon pdf', sheet: 'fa-file-excel ft-icon sheet', slide: 'fa-file-powerpoint ft-icon slide', doc: 'fa-file-word ft-icon doc' };
+    const ICONS = { pdf: 'fa-file-pdf ft-icon pdf', sheet: 'fa-file-excel ft-icon sheet', slide: 'fa-file-powerpoint ft-icon slide' };
 
     let notices = [
-      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'This is a shared space — upload what you have, and check here before messaging me directly.', date: 'Oct 13' },
-      { id: 2, type: 'warning', title: 'Upload thesis data by Nov 5', text: 'Please drop your section of the borehole data into Datasets before the 5th so I can merge it.', date: 'Oct 12' },
+      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Upload what you have, and check here before messaging me directly.', date: 'Oct 13' },
+      { id: 2, type: 'warning', title: 'Upload thesis data by Nov 5', text: 'Drop your section of the borehole data into Datasets before the 5th.', date: 'Oct 12' },
     ];
 
     let members = [
@@ -443,12 +382,7 @@
       { id: 3, name: 'Tania Islam', initials: 'TI', role: 'member', view: true, download: false },
     ];
 
-    let chatLog = [
-      { from: 'Rafiq', mine: false, text: 'Uploaded the survey data to Shared with me.', time: '9:40 AM' },
-      { from: 'You', mine: true, text: 'Got it, checking now. Thanks!', time: '9:42 AM' },
-      { from: 'Tania', mine: false, text: 'Can I get download access to the Papers folder?', time: '10:05 AM' },
-    ];
-
+    let driveLinkSaved = '';
     let currentFolder = null;
 
     function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -471,23 +405,20 @@
       const f = FOLDERS.find(x => x.id === currentFolder);
       bc.innerHTML = `<i class="fab fa-google-drive" style="color:#0f9d58;"></i>&nbsp; <a onclick="openFolder(null)">Research Drive</a> <i class="fas fa-chevron-right"></i> <span class="current">${esc(f.name)}</span>`;
     }
-
     function openFolder(id) {
       currentFolder = id;
       renderBreadcrumb();
       document.getElementById('folderGrid').style.display = id ? 'none' : 'grid';
       renderFileTable();
     }
-
     function renderFolderGrid() {
       const grid = document.getElementById('folderGrid');
       grid.innerHTML = FOLDERS.map(f => `
         <div class="folder-card" onclick="openFolder('${f.id}')">
           <i class="fas fa-folder"></i>
-          <div class="f-meta"><span class="f-name">${esc(f.name)}</span><span class="f-sub">${f.count} file${f.count === 1 ? '' : 's'} · ${f.updated}</span></div>
+          <div class="f-meta"><span class="f-name">${esc(f.name)}</span><span class="f-sub">${f.count} file${f.count===1?'':'s'} · ${f.updated}</span></div>
         </div>`).join('');
     }
-
     function renderFileTable() {
       const list = currentFolder ? FILES[currentFolder] : Object.values(FILES).flat();
       const body = document.getElementById('fileTableBody');
@@ -512,9 +443,7 @@
     /* ── Notices ── */
     function renderNotices() {
       const grid = document.getElementById('noticesGrid');
-      if (!notices.length) { grid.innerHTML = '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">No notices yet.</div>'; }
-      else {
-        grid.innerHTML = notices.map(n => `
+      grid.innerHTML = notices.length ? notices.map(n => `
           <div class="notice-card ${n.type}">
             <div class="n-icon"><i class="fas ${n.type === 'urgent' ? 'fa-triangle-exclamation' : n.type === 'warning' ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i></div>
             <div style="flex:1;min-width:0;">
@@ -523,8 +452,8 @@
               <div class="n-meta">${n.date}</div>
             </div>
             <button class="n-delete admin-only-inline" onclick="deleteNotice(${n.id})"><i class="fas fa-trash"></i></button>
-          </div>`).join('');
-      }
+          </div>`).join('')
+        : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">No notices yet.</div>';
       document.getElementById('noticeCount').textContent = notices.length;
     }
     function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); }
@@ -539,38 +468,21 @@
       closeModal('modalNotice');
       renderNotices();
     }
-    document.getElementById('addNoticeBtn').addEventListener('click', () => openModal('modalNotice'));
 
-    /* ── Chat ── */
-    function renderChat() {
-      const wrap = document.getElementById('chatMessages');
-      const initialsFor = n => n === 'You' ? 'MS' : n.slice(0,2).toUpperCase();
-      wrap.innerHTML = chatLog.map(m => `
-        <div class="msg ${m.mine ? 'mine' : ''}">
-          <span class="chat-avatar" style="${m.mine ? '' : 'background:#10b981;'}">${initialsFor(m.from)}</span>
-          <div>
-            <div class="msg-name">${m.mine ? 'You' : esc(m.from)}</div>
-            <div class="msg-bubble">${esc(m.text)}</div>
-            <div class="msg-time">${m.time}</div>
-          </div>
-        </div>`).join('');
-      wrap.scrollTop = wrap.scrollHeight;
-    }
-    function sendChat() {
-      const input = document.getElementById('chatInput');
-      const val = input.value.trim();
+    /* ── Drive & Access ── */
+    function saveDriveLink() {
+      const val = document.getElementById('driveLink').value.trim();
       if (!val) return;
-      chatLog.push({ from: 'You', mine: true, text: val, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-      input.value = '';
-      renderChat();
+      driveLinkSaved = val;
+      const status = document.getElementById('driveStatus');
+      status.classList.add('connected');
+      document.getElementById('driveStatusText').textContent = 'Connected (demo) — ' + val;
     }
-
-    /* ── Members ── */
     function renderMembers() {
       const body = document.getElementById('memberTableBody');
       body.innerHTML = members.map(m => `
         <tr>
-          <td><div class="member-who"><span class="chat-avatar" style="width:28px;height:28px;font-size:11px;${m.role==='admin'?'':'background:#10b981;'}">${m.initials}</span> ${esc(m.name)}</div></td>
+          <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${m.initials}</span> ${esc(m.name)}</div></td>
           <td><span class="role-pill ${m.role}">${m.role === 'admin' ? 'Admin' : 'Member'}</span></td>
           <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.view ? 'on' : ''}" onclick="toggleMember(${m.id},'view')"></span>`}</td>
           <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.download ? 'on' : ''}" onclick="toggleMember(${m.id},'download')"></span>`}</td>
@@ -586,51 +498,101 @@
       members.push({ id: Date.now(), name: email, initials: email.slice(0,2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
       document.getElementById('inviteEmail').value = '';
       renderMembers();
-      toast('Invite demo only — real invites would share the Drive folder with this email.');
     }
 
-    /* ── Admin / Member role switch (demo flag only) ── */
+    /* ── Entry gate ── */
+    const gateEl = document.getElementById('roleGate');
+    document.getElementById('gateOptAdmin').addEventListener('click', () => {
+      document.getElementById('gateOptions').classList.add('hidden');
+      document.getElementById('gatePwStep').classList.add('open');
+      setTimeout(() => document.getElementById('gatePw').focus(), 150);
+    });
+    document.getElementById('gateOptMember').addEventListener('click', () => enterAs('member'));
+    document.getElementById('gateBackBtn').addEventListener('click', () => {
+      document.getElementById('gateOptions').classList.remove('hidden');
+      document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateErr').textContent = '';
+    });
+    async function attemptAdminLogin() {
+      const pw = document.getElementById('gatePw').value;
+      const err = document.getElementById('gateErr');
+      const btn = document.getElementById('gateEnterBtn');
+      if (!pw) { err.textContent = 'Enter the admin password.'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking...';
+      const result = await siteAdminLogin(pw);
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock"></i> Enter';
+      if (result.ok) { enterAs('admin'); }
+      else { err.textContent = result.message; document.getElementById('gatePw').select(); }
+    }
+    document.getElementById('gateEnterBtn').addEventListener('click', attemptAdminLogin);
+    document.getElementById('gatePw').addEventListener('keydown', e => { if (e.key === 'Enter') attemptAdminLogin(); });
+
+    function enterAs(r) {
+      role = r;
+      gateEl.style.display = 'none';
+      applyRole();
+    }
     function applyRole() {
       document.body.classList.toggle('admin-mode', role === 'admin');
-      const fab = document.getElementById('adminFab');
-      fab.classList.toggle('active', role === 'admin');
-      document.getElementById('adminFabIcon').className = role === 'admin' ? 'fas fa-lock-open' : 'fas fa-lock';
-      const badge = document.getElementById('roleBadge');
-      badge.className = 'role-badge ' + role;
-      badge.innerHTML = role === 'admin' ? '<i class="fas fa-lock-open"></i> Admin mode' : '<i class="fas fa-eye"></i> Member view (preview)';
-      renderFileTable(); renderNotices(); renderMembers();
+      document.getElementById('switchViewLabel').textContent = role === 'admin' ? 'Viewing as Admin · switch?' : 'Viewing as Member · switch?';
       if (role !== 'admin') {
-        document.querySelectorAll('.r-tab.admin-only').forEach(t => t.classList.remove('active'));
-        if (!document.getElementById('panel-files').hidden === false) {} // no-op guard
-        document.getElementById('panel-members').hidden = true;
+        document.getElementById('panel-access').hidden = true;
         document.querySelector('.r-tab[data-tab="files"]').click();
       }
+      renderFileTable(); renderNotices(); renderMembers();
     }
-    function setRole(r) { role = r; applyRole(); closeModal('modalAdmin'); }
-    document.getElementById('adminFab').addEventListener('click', () => {
-      if (role === 'admin') { openModal('modalAdmin'); }
-      else { setRole('admin'); }
+    document.getElementById('switchViewBtn').addEventListener('click', () => {
+      if (role === 'admin') siteAdminLogout();
+      role = null;
+      document.getElementById('gateOptions').classList.remove('hidden');
+      document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gatePw').value = '';
+      gateEl.style.display = 'flex';
     });
 
+    /* Add-notice modal wiring (modal markup added lazily via JS to keep page HTML short) */
     function openModal(id) { document.getElementById(id).classList.add('open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-    let toastTimer;
-    function toast(msg) {
-      let t = document.getElementById('r-toast');
-      if (!t) { t = document.createElement('div'); t.id = 'r-toast'; t.style.cssText = 'position:fixed;bottom:90px;right:24px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:600;box-shadow:var(--shadow-lg);max-width:280px;'; document.body.appendChild(t); }
-      t.textContent = msg; t.style.opacity = '1';
-      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.opacity = '0', 3200);
-    }
+    document.addEventListener('click', e => {
+      if (e.target.id === 'addNoticeBtn' || e.target.closest('#addNoticeBtn')) openModal('modalNotice');
+    });
 
     /* ── init ── */
     renderBreadcrumb();
     renderFolderGrid();
     renderFileTable();
     renderNotices();
-    renderChat();
     renderMembers();
-    applyRole();
+    if (siteIsAdmin()) { enterAs('admin'); } // already logged in elsewhere on the site this tab
   </script>
+
+  <!-- Add notice modal -->
+  <div class="modal-overlay" id="modalNotice">
+    <div class="modal-box">
+      <div class="modal-head"><h3><i class="fas fa-bell" style="color:var(--blue);margin-right:8px;"></i>Add Notice</h3><button class="modal-close" onclick="closeModal('modalNotice')"><i class="fas fa-times"></i></button></div>
+      <div class="modal-body">
+        <input type="text" id="noticeTitle" placeholder="Notice title..." style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);margin-bottom:10px;">
+        <textarea id="noticeText" placeholder="Details..." style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);margin-bottom:10px;"></textarea>
+        <select id="noticeType" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);">
+          <option value="info">Info</option>
+          <option value="warning">Warning</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
+        <button class="btn secondary sm" onclick="closeModal('modalNotice')">Cancel</button>
+        <button class="btn primary sm" onclick="saveNotice()"><i class="fas fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--surface); border-radius: var(--radius-lg); max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 16px; }
+    .modal-body { padding: 18px; }
+    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; }
+  </style>
 </body>
 </html>
