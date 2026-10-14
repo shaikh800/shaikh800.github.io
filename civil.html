@@ -62,6 +62,14 @@
     .notices-empty { text-align:center; padding:40px 20px; color:var(--muted); border:2px dashed var(--line); border-radius:var(--radius); }
     .notices-empty i { font-size:32px; display:block; margin-bottom:10px; opacity:0.4; }
 
+    /* ── Pagination (shared pattern) ── */
+    .pager { display:flex; align-items:center; justify-content:center; gap:6px; margin-top:16px; flex-wrap:wrap; }
+    .pager button { min-width:34px; height:34px; padding:0 10px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+    .pager button:hover:not(:disabled) { border-color:var(--blue); color:var(--blue); }
+    .pager button.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+    .pager button:disabled { opacity:.4; cursor:default; }
+    .pager .pg-gap { color:var(--muted); font-size:13px; padding:0 2px; }
+
     /* ── EXAM SCHEDULE TRACKER (within Notice Board) ─────── */
     .ex-counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:14px; }
     .ex-count { background:var(--surface); padding:10px 12px; text-align:center; min-width:0; }
@@ -475,6 +483,7 @@
         </div>
 
         <div id="exList"></div>
+        <div id="exPager" class="pager"></div>
 
         <details class="ex-advanced admin-only">
           <summary><i class="fas fa-sliders" style="margin-right:6px;"></i>Advanced: feed source &amp; manual entry</summary>
@@ -1136,6 +1145,27 @@
       const EX_DEFAULT_BASE  = 'https://bk.eco.du.ac.bd/get-notice-file/';
       const EX_SET_KEY = 'civil_ex_settings_v1', EX_API_KEY = 'civil_ex_api_v1', EX_PASTE_KEY = 'civil_ex_paste_v1', EX_DAY = 86400000;
       let exApiItems = [], exPasteItems = [], exNotified = {}, exPollTimer = null;
+      let exPage = 1; const EX_PAGE_SIZE = 6;
+      function pagerRange(current, total) {
+        const delta = 1; const range = [];
+        for (let i = 1; i <= total; i++) { if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) range.push(i); }
+        const withDots = []; let prev = 0;
+        for (const i of range) { if (prev && i - prev > 1) withDots.push('…'); withDots.push(i); prev = i; }
+        return withDots;
+      }
+      function renderPager(containerId, current, total, onPage) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        if (total <= 1) { el.innerHTML = ''; return; }
+        const pages = pagerRange(current, total);
+        el.innerHTML = `<button ${current===1?'disabled':''} data-pg="prev"><i class="fas fa-chevron-left"></i></button>` +
+          pages.map(p => p === '…' ? `<span class="pg-gap">…</span>` : `<button class="${p===current?'active':''}" data-pg="${p}">${p}</button>`).join('') +
+          `<button ${current===total?'disabled':''} data-pg="next"><i class="fas fa-chevron-right"></i></button>`;
+        el.querySelectorAll('button[data-pg]').forEach(b => b.addEventListener('click', () => {
+          const v = b.dataset.pg;
+          onPage(v === 'prev' ? Math.max(1, current - 1) : v === 'next' ? Math.min(total, current + 1) : parseInt(v, 10));
+        }));
+      }
 
       function exToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
       function exFmtDate(d) { return d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'; }
@@ -1262,7 +1292,7 @@
         const wrap = document.getElementById('exList');
         const fs = document.getElementById('exFStatus').value, fy = document.getElementById('exFYear').value, fsrc = document.getElementById('exFSource').value;
         let arr = exAllItems().filter(n => (fs==='all'||n.status===fs) && (fy==='all'||String(n.year)===fy) && (fsrc==='all'||n.source===fsrc));
-        if (!arr.length) { wrap.innerHTML = `<div class="notices-empty"><i class="fas fa-calendar-xmark"></i><p>${exAllItems().length ? 'No notices match these filters.' : 'No exam notices loaded yet — click Refresh now.'}</p></div>`; return; }
+        if (!arr.length) { wrap.innerHTML = `<div class="notices-empty"><i class="fas fa-calendar-xmark"></i><p>${exAllItems().length ? 'No notices match these filters.' : 'No exam notices loaded yet — click Refresh now.'}</p></div>`; document.getElementById('exPager').innerHTML = ''; return; }
         const order = {ongoing:0, upcoming:1, new:2, earlier:3, tba:4, past:5};
         arr.sort((a,b) => {
           const od = order[a.status]-order[b.status]; if (od) return od;
@@ -1271,7 +1301,10 @@
           if (a.status==='upcoming'||a.status==='ongoing') return ad-bd;
           return bd-ad;
         });
-        wrap.innerHTML = `<div class="notices-grid">${arr.map(n => {
+        const exTotalPages = Math.max(1, Math.ceil(arr.length / EX_PAGE_SIZE));
+        if (exPage > exTotalPages) exPage = exTotalPages;
+        const pageArr = arr.slice((exPage-1)*EX_PAGE_SIZE, exPage*EX_PAGE_SIZE);
+        wrap.innerHTML = `<div class="notices-grid">${pageArr.map(n => {
           const chips = [];
           if (n.year) chips.push(exChipHTML('Year '+n.year));
           if (n.sem) chips.push(exChipHTML('Sem '+n.sem));
@@ -1288,6 +1321,7 @@
               <div class="ex-when">${exWhenHtml(n)}</div>
             </div>`;
         }).join('')}</div>`;
+        renderPager('exPager', exPage, exTotalPages, p => { exPage = p; exRender(); });
       }
       function exParseFromTextarea() {
         const t = document.getElementById('exPasteText').value;
@@ -1356,9 +1390,9 @@
 
       document.getElementById('exProxyUrl') && document.getElementById('exProxyUrl').addEventListener('input', exSaveSettings);
       document.getElementById('exPdfBase')  && document.getElementById('exPdfBase').addEventListener('input', exSaveSettings);
-      document.getElementById('exFStatus').addEventListener('change', exRender);
-      document.getElementById('exFYear').addEventListener('change', exRender);
-      document.getElementById('exFSource').addEventListener('change', exRender);
+      document.getElementById('exFStatus').addEventListener('change', () => { exPage = 1; exRender(); });
+      document.getElementById('exFYear').addEventListener('change', () => { exPage = 1; exRender(); });
+      document.getElementById('exFSource').addEventListener('change', () => { exPage = 1; exRender(); });
       document.getElementById('exRefreshBtn').addEventListener('click', () => exRefresh(true));
       document.getElementById('exPollBtn').addEventListener('click', exTogglePoll);
       document.getElementById('exAlertBtn').addEventListener('click', exEnableAlerts);

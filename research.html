@@ -216,6 +216,38 @@
     /* ── FOOTNOTE ── */
     .proto-footnote { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
 
+    /* ── Pagination (shared pattern with Civil page) ── */
+    .pager { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 16px; flex-wrap: wrap; }
+    .pager button { min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .pager button:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+    .pager button.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .pager button:disabled { opacity: .4; cursor: default; }
+    .pager .pg-gap { color: var(--muted); font-size: 13px; padding: 0 2px; }
+
+    /* ── Gemini subscription tracker ── */
+    .gem-dot { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-soft); color: var(--muted); font-size: 11px; }
+    .gem-dot.on { background: rgba(16,185,129,0.15); color: #0f9d58; }
+    .gem-dot.clickable { cursor: pointer; }
+    .gem-dot.clickable:hover { outline: 2px solid var(--blue); outline-offset: 1px; }
+    .gemini-table th:first-child, .gemini-table td:first-child { white-space: nowrap; position: sticky; left: 0; background: var(--surface); }
+    .gemini-table th { white-space: nowrap; }
+    /* keep this one a real scrollable table on phones instead of the stacked member-table layout */
+    @media (max-width: 640px) {
+      .gemini-table.member-table { min-width: 560px; }
+      .gemini-table.member-table thead { display: table-header-group; }
+      .gemini-table.member-table tr { display: table-row; padding: 0; gap: 0; }
+      .gemini-table.member-table td { border-bottom: 1px solid var(--line); padding: 11px 14px; }
+    }
+
+    /* ── Gate: checking / denied states ── */
+    .gate-checking { display: none; padding: 20px 0; }
+    .gate-checking.show { display: block; }
+    .gate-checking i { font-size: 22px; color: var(--blue); margin-bottom: 10px; display: block; }
+    .gate-checking p { color: var(--muted); font-size: 13.5px; }
+    .gate-denied { display: none; max-width: 360px; margin: 0 auto; text-align: left; }
+    .gate-denied.show { display: block; }
+    .gate-denied .gd-box { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: var(--ink); margin-bottom: 12px; }
+
     /* ══════════════ ENTRY GATE ══════════════ */
     #roleGate {
       position: fixed; inset: 0; z-index: 2000; background: var(--bg);
@@ -264,9 +296,9 @@
           <div class="g-sub">Md. Shaikh Alam — full control</div>
         </div>
         <div class="gate-opt" id="gateOptMember">
-          <i class="fas fa-user"></i>
+          <i class="fab fa-google"></i>
           <div class="g-name">Member</div>
-          <div class="g-sub">View, download &amp; upload what's shared</div>
+          <div class="g-sub">Sign in with Google — view &amp; upload what's shared</div>
         </div>
       </div>
 
@@ -275,6 +307,16 @@
         <div class="gate-err" id="gateErr"></div>
         <button class="btn primary" style="width:100%;justify-content:center;" id="gateEnterBtn"><i class="fas fa-unlock"></i> Enter</button>
         <button class="gate-back" id="gateBackBtn">← Back</button>
+      </div>
+
+      <div class="gate-checking" id="gateChecking">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p id="gateCheckingText">Checking…</p>
+      </div>
+
+      <div class="gate-denied" id="gateDenied">
+        <div class="gd-box" id="gateDeniedText"></div>
+        <button class="btn secondary" style="width:100%;justify-content:center;" id="gateDeniedBackBtn"><i class="fas fa-rotate-left"></i> Try again</button>
       </div>
     </div>
   </div>
@@ -311,6 +353,7 @@
         <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
         <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
+        <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini</button>
         <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access</button>
       </div>
 
@@ -353,14 +396,15 @@
 
         <div class="signin-row" id="teamSignin">
           <i class="fab fa-google"></i>
-          <p>Sign in with Google to upload something, or to see your own private uploads. Only people the admin has added as a member can upload.</p>
+          <p>Admin: sign in with your own Google account here to upload under your personal Drive too (separate from the admin password you used to get in).</p>
           <button class="btn primary sm" id="googleSigninBtn"><i class="fab fa-google"></i> Sign in with Google</button>
         </div>
 
         <div class="user-chip" id="teamUserChip" style="display:none;"></div>
 
-        <div class="denied-box" id="teamDenied" style="display:none;">
-          You're signed in, but the admin hasn't added this Google account as a member yet. Ask the admin to add your email under <b>Drive &amp; Access → Add a member</b>, then sign in again.
+        <div class="denied-box" id="teamReconnect" style="display:none;">
+          Your Google sign-in needs a quick refresh before you can upload again.
+          <div style="margin-top:10px;"><button class="btn primary sm" id="teamReconnectBtn"><i class="fab fa-google"></i> Reconnect Google</button></div>
         </div>
 
         <div class="upload-form" id="teamUploadForm" style="display:none;">
@@ -410,6 +454,24 @@
           <button class="btn primary sm admin-only-inline" id="addNoticeBtn"><i class="fas fa-plus"></i> Add Notice</button>
         </div>
         <div class="notices-grid" id="noticesGrid"></div>
+        <div class="pager" id="noticesPager"></div>
+      </div>
+
+      <!-- ══ GEMINI SUBSCRIPTION TRACKER PANEL ══ -->
+      <div class="r-panel" id="panel-gemini" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>Gemini Subscription</h2>
+            <p>Who's paid their share of the shared Gemini subscription, month by month.</p>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="member-table gemini-table" id="geminiTable">
+            <thead><tr id="geminiTableHead"></tr></thead>
+            <tbody id="geminiTableBody"></tbody>
+          </table>
+        </div>
+        <p class="drive-hint admin-only-inline" style="margin-top:10px;">Click a circle to mark that month paid or unpaid for that person.</p>
       </div>
 
       <!-- ══ DRIVE & ACCESS PANEL (admin only) ══ -->
@@ -453,6 +515,7 @@
           <summary><i class="fas fa-code-branch" style="margin-right:6px;"></i>GitHub Sync Token (optional — makes your changes here visible to everyone, not just this browser)</summary>
           <div>
             <input type="password" id="research-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+            <div id="ghTokenStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;"></div>
             <p style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4;">Same token you use on the Civil page — GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read &amp; Write</b>.</p>
           </div>
         </details>
@@ -532,10 +595,43 @@
     ];
 
     let uploads = [];
+    let geminiPayments = {}; // { "<email>": { "2026-10": true, ... } }
 
-    let currentUser = null; // { name, email, picture, token, expiry } — set by Google sign-in, Team Uploads only
+    let currentUser = null; // { name, email, picture, token, expiry } — set by Google sign-in
+
+    const MEMBER_PROFILE_KEY = 'research_member_profile_v1';
+    function saveMemberProfile(p) { try { localStorage.setItem(MEMBER_PROFILE_KEY, JSON.stringify(p)); } catch (e) {} }
+    function loadMemberProfile() { try { return JSON.parse(localStorage.getItem(MEMBER_PROFILE_KEY) || 'null'); } catch (e) { return null; } }
+    function clearMemberProfile() { try { localStorage.removeItem(MEMBER_PROFILE_KEY); } catch (e) {} }
+    function isMemberEmail(email) {
+      if (!email) return false;
+      email = email.toLowerCase();
+      return members.some(m => (m.email || '').toLowerCase() === email);
+    }
 
     function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    /* ── Pagination (shared util) ── */
+    function pagerRange(current, total) {
+      const delta = 1; const range = [];
+      for (let i = 1; i <= total; i++) { if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) range.push(i); }
+      const withDots = []; let prev = 0;
+      for (const i of range) { if (prev && i - prev > 1) withDots.push('…'); withDots.push(i); prev = i; }
+      return withDots;
+    }
+    function renderPager(containerId, current, total, onPage) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      if (total <= 1) { el.innerHTML = ''; return; }
+      const pages = pagerRange(current, total);
+      el.innerHTML = `<button ${current===1?'disabled':''} data-pg="prev"><i class="fas fa-chevron-left"></i></button>` +
+        pages.map(p => p === '…' ? `<span class="pg-gap">…</span>` : `<button class="${p===current?'active':''}" data-pg="${p}">${p}</button>`).join('') +
+        `<button ${current===total?'disabled':''} data-pg="next"><i class="fas fa-chevron-right"></i></button>`;
+      el.querySelectorAll('button[data-pg]').forEach(b => b.addEventListener('click', () => {
+        const v = b.dataset.pg;
+        onPage(v === 'prev' ? Math.max(1, current - 1) : v === 'next' ? Math.min(total, current + 1) : parseInt(v, 10));
+      }));
+    }
 
     /* ── Tabs ── */
     document.querySelectorAll('.r-tab').forEach(btn => {
@@ -555,6 +651,7 @@
       if (Array.isArray(data.members) && data.members.length) members = data.members;
       if (Array.isArray(data.notices)) notices = data.notices;
       if (Array.isArray(data.uploads)) uploads = data.uploads;
+      if (data.geminiPayments) geminiPayments = data.geminiPayments;
     }
     async function fetchFromGitHub() {
       try {
@@ -570,25 +667,25 @@
       try { const d = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (d) applyData(d); } catch {}
     }
     async function pushToGitHub() {
-      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, updated: new Date().toISOString() };
+      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, updated: new Date().toISOString() };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       const token = sessionStorage.getItem('civil_gh_token');
-      if (!token) return false;
+      if (!token) return { ok: false, reason: 'no-token' };
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
         let sha = null;
-        try {
-          const g = await fetch(apiUrl, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } });
-          if (g.ok) { const j = await g.json(); sha = j.sha; }
-        } catch {}
+        const g = await fetch(apiUrl, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } });
+        if (g.status === 401) return { ok: false, reason: 'bad-token' };
+        if (g.ok) { const j = await g.json(); sha = j.sha; }
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
         const put = await fetch(apiUrl, {
           method: 'PUT',
           headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
           body: JSON.stringify({ message: 'Update research hub data', content, ...(sha ? { sha } : {}) })
         });
-        return put.ok;
-      } catch { return false; }
+        if (put.status === 401 || put.status === 403) return { ok: false, reason: 'bad-token' };
+        return { ok: put.ok, reason: put.ok ? null : 'push-failed' };
+      } catch (e) { return { ok: false, reason: 'network' }; }
     }
 
     /* ── Drive browser — real Drive data, rendered as our own page (no iframe, no new tab) ── */
@@ -694,20 +791,34 @@
       loadCurrentFolder();
     }
 
-    /* ── Google sign-in (Team Uploads only) ── */
+    /* ── Google sign-in (used for gate entry as a Member, and for Team Uploads) ── */
     let _uploadTokenClient = null;
     function initUploadAuth() {
-      if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
+      if (_uploadTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
       _uploadTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GDRIVE_CLIENT_ID,
         scope: GDRIVE_UPLOAD_SCOPE,
         callback: () => {}
       });
     }
-    window.addEventListener('load', () => setTimeout(initUploadAuth, 1200));
+    window.addEventListener('load', initUploadAuth);
+    function waitForTokenClient(timeoutMs) {
+      timeoutMs = timeoutMs || 8000;
+      return new Promise(resolve => {
+        const start = Date.now();
+        (function poll() {
+          if (_uploadTokenClient) return resolve(true);
+          initUploadAuth();
+          if (_uploadTokenClient) return resolve(true);
+          if (Date.now() - start > timeoutMs) return resolve(false);
+          setTimeout(poll, 150);
+        })();
+      });
+    }
 
-    function signInWithGoogle() {
-      if (!_uploadTokenClient) { alert("Google sign-in is still loading — give it a second and try again."); return; }
+    async function signInWithGoogle() {
+      const ready = await waitForTokenClient();
+      if (!ready) { alert("Google sign-in didn't load — check your connection and try again."); return; }
       _uploadTokenClient.callback = async (resp) => {
         if (resp.error) return;
         const token = resp.access_token;
@@ -717,6 +828,7 @@
         } catch (e) {
           currentUser = { name: 'Signed in', email: '', picture: '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
         }
+        if (role === 'member') saveMemberProfile({ email: currentUser.email, name: currentUser.name, picture: currentUser.picture });
         renderTeamTab();
       };
       _uploadTokenClient.requestAccessToken({ prompt: currentUser ? '' : 'consent' });
@@ -725,13 +837,55 @@
       if (currentUser && currentUser.token && window.google && window.google.accounts) {
         try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
       }
+      if (role === 'member') {
+        currentUser = null;
+        clearMemberProfile();
+        role = null;
+        showGateOptions();
+        gateEl.style.display = 'flex';
+        return;
+      }
       currentUser = null;
       renderTeamTab();
     }
     function isAuthorizedUploader() {
-      if (role === 'admin') return true;
-      if (!currentUser || !currentUser.email) return false;
-      return members.some(m => (m.email || m.name || '').toLowerCase() === currentUser.email);
+      // Membership was already verified at the gate — admin and member both qualify.
+      return role === 'admin' || role === 'member';
+    }
+
+    /* ── Gate: Member sign-in flow (verifies against the member list, remembers you after) ── */
+    async function startMemberSignIn() {
+      showGateChecking('Opening Google sign-in…');
+      const ready = await waitForTokenClient();
+      if (!ready) { showGateDenied("Google sign-in didn't load — check your connection and try again."); return; }
+      _uploadTokenClient.callback = async (resp) => {
+        if (resp.error) { showGateOptions(); return; }
+        const token = resp.access_token;
+        let info = {};
+        try { info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(r => r.json()); } catch (e) {}
+        const email = (info.email || '').toLowerCase();
+        showGateChecking('Checking access…');
+        await fetchFromGitHub(); // make sure we have the freshest member list before deciding
+        if (!email || !isMemberEmail(email)) {
+          showGateDenied(`${esc(info.email || 'This Google account')} isn't on the member list yet. Ask the admin to add it, then try again.`);
+          return;
+        }
+        currentUser = { name: info.name || email, email, picture: info.picture || '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+        saveMemberProfile({ email, name: currentUser.name, picture: currentUser.picture });
+        enterAs('member');
+      };
+      _uploadTokenClient.requestAccessToken({ prompt: 'select_account' });
+    }
+    async function trySilentReauth() {
+      const ready = await waitForTokenClient();
+      if (!ready || !currentUser) return;
+      _uploadTokenClient.callback = (resp) => {
+        if (resp.error) return; // fine — they can still browse; uploading will ask them to reconnect
+        currentUser.token = resp.access_token;
+        currentUser.expiry = Date.now() + (resp.expires_in - 60) * 1000;
+        renderTeamTab();
+      };
+      try { _uploadTokenClient.requestAccessToken({ prompt: '' }); } catch (e) {}
     }
 
     /* ── Drive upload helpers (uploader's own Drive, drive.file scope only) ── */
@@ -839,28 +993,35 @@
       const signinArea = document.getElementById('teamSignin');
       const chip = document.getElementById('teamUserChip');
       const formArea = document.getElementById('teamUploadForm');
-      const deniedArea = document.getElementById('teamDenied');
+      const reconnectArea = document.getElementById('teamReconnect');
       if (!currentUser) {
         signinArea.style.display = 'flex'; chip.style.display = 'none';
-        formArea.style.display = 'none'; deniedArea.style.display = 'none';
+        formArea.style.display = 'none'; reconnectArea.style.display = 'none';
       } else {
         signinArea.style.display = 'none';
         chip.style.display = 'flex';
         chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
           <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
-          <button class="btn secondary sm" onclick="signOutGoogle()">Sign out</button>`;
-        if (isAuthorizedUploader()) { formArea.style.display = 'block'; deniedArea.style.display = 'none'; }
-        else { formArea.style.display = 'none'; deniedArea.style.display = 'block'; }
+          ${role === 'member' ? '' : `<button class="btn secondary sm" onclick="signOutGoogle()">Sign out</button>`}`;
+        const tokenFresh = currentUser.token && Date.now() < currentUser.expiry - 5000;
+        if (tokenFresh) { formArea.style.display = 'block'; reconnectArea.style.display = 'none'; }
+        else { formArea.style.display = 'none'; reconnectArea.style.display = 'block'; }
       }
       renderUploads();
     }
     document.getElementById('googleSigninBtn').addEventListener('click', signInWithGoogle);
+    document.getElementById('teamReconnectBtn').addEventListener('click', signInWithGoogle);
     document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
 
     /* ── Notices ── */
+    let noticePage = 1;
+    const NOTICE_PAGE_SIZE = 5;
     function renderNotices() {
       const grid = document.getElementById('noticesGrid');
-      grid.innerHTML = notices.length ? notices.map(n => `
+      const totalPages = Math.max(1, Math.ceil(notices.length / NOTICE_PAGE_SIZE));
+      if (noticePage > totalPages) noticePage = totalPages;
+      const pageItems = notices.slice((noticePage - 1) * NOTICE_PAGE_SIZE, noticePage * NOTICE_PAGE_SIZE);
+      grid.innerHTML = pageItems.length ? pageItems.map(n => `
           <div class="notice-card ${n.type}">
             <div class="n-icon"><i class="fas ${n.type === 'urgent' ? 'fa-triangle-exclamation' : n.type === 'warning' ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i></div>
             <div style="flex:1;min-width:0;">
@@ -872,6 +1033,7 @@
           </div>`).join('')
         : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">No notices yet.</div>';
       document.getElementById('noticeCount').textContent = notices.length;
+      renderPager('noticesPager', noticePage, totalPages, p => { noticePage = p; renderNotices(); });
     }
     function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); pushToGitHub(); }
     function saveNotice() {
@@ -883,8 +1045,46 @@
       document.getElementById('noticeTitle').value = '';
       document.getElementById('noticeText').value = '';
       closeModal('modalNotice');
+      noticePage = 1;
       renderNotices();
       pushToGitHub();
+    }
+
+    /* ── Gemini subscription tracker ── */
+    function geminiMonthKeys(n) {
+      const out = [];
+      const base = new Date(); base.setDate(1);
+      for (let i = n - 1; i >= 0; i--) {
+        const dt = new Date(base.getFullYear(), base.getMonth() - i, 1);
+        out.push({ key: dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'), label: dt.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) });
+      }
+      return out;
+    }
+    function toggleGeminiPaid(email, key) {
+      if (role !== 'admin') return;
+      if (!geminiPayments[email]) geminiPayments[email] = {};
+      geminiPayments[email][key] = !geminiPayments[email][key];
+      renderGeminiTab();
+      pushToGitHub();
+    }
+    function renderGeminiTab() {
+      const months = geminiMonthKeys(6);
+      const head = document.getElementById('geminiTableHead');
+      if (!head) return;
+      head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('');
+      const body = document.getElementById('geminiTableBody');
+      body.innerHTML = members.map(m => {
+        const email = (m.email || '').toLowerCase();
+        const row = geminiPayments[email] || {};
+        const clickable = role === 'admin';
+        return `<tr>
+          <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
+          ${months.map(mo => {
+            const paid = !!row[mo.key];
+            return `<td style="text-align:center;"><span class="gem-dot ${paid?'on':''}${clickable?' clickable':''}" ${clickable?`onclick="toggleGeminiPaid('${esc(email)}','${mo.key}')"`:''} title="${paid?'Paid':'Not paid'}"><i class="fas ${paid?'fa-check':'fa-xmark'}"></i></span></td>`;
+          }).join('')}
+        </tr>`;
+      }).join('');
     }
 
     /* ── Drive & Access ── */
@@ -907,11 +1107,13 @@
       const id = parseDriveFolderId(val);
       if (!id) { document.getElementById('driveStatusText').textContent = "Couldn't read a folder ID from that link."; return; }
       driveLinkSaved = val; driveId = id; apiKeySaved = key;
-      renderDriveStatus(); renderDriveBrowser(); renderMembers();
-      const synced = await pushToGitHub();
-      document.getElementById('driveStatusText').textContent = synced
-        ? 'Connected & synced — everyone sees this folder now ✓'
-        : 'Connected (this browser only — add a GitHub token above to sync for everyone)';
+      renderDriveStatus(); renderDriveBrowser(); renderMembers(); renderGeminiTab();
+      const result = await pushToGitHub();
+      const text = document.getElementById('driveStatusText');
+      if (result.ok) text.textContent = 'Connected & synced — everyone sees this folder now ✓';
+      else if (result.reason === 'bad-token') text.textContent = "Saved on this browser only — your GitHub token looks invalid, check it below.";
+      else if (result.reason === 'no-token') text.textContent = 'Connected (this browser only — add a GitHub token above to sync for everyone)';
+      else text.textContent = "Saved locally — couldn't reach GitHub to sync right now, try again.";
     }
     function renderMembers() {
       const body = document.getElementById('memberTableBody');
@@ -924,8 +1126,8 @@
           <td>${m.role === 'admin' ? '' : `<button class="icon-action danger" onclick="removeMember(${m.id})"><i class="fas fa-user-slash"></i></button>`}</td>
         </tr>`).join('');
     }
-    function toggleMember(id, field) { const m = members.find(x => x.id === id); m[field] = !m[field]; renderMembers(); pushToGitHub(); }
-    function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); pushToGitHub(); }
+    function toggleMember(id, field) { const m = members.find(x => x.id === id); m[field] = !m[field]; renderMembers(); renderGeminiTab(); pushToGitHub(); }
+    function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); renderGeminiTab(); pushToGitHub(); }
     function inviteMember() {
       const email = document.getElementById('inviteEmail').value.trim();
       if (!email) return;
@@ -933,22 +1135,41 @@
       members.push({ id: Date.now(), name: email, email: email.toLowerCase(), initials: email.slice(0, 2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
       document.getElementById('inviteEmail').value = '';
       renderMembers();
+      renderGeminiTab();
       pushToGitHub();
     }
 
     /* ── Entry gate ── */
     const gateEl = document.getElementById('roleGate');
+    function showGateOptions() {
+      document.getElementById('gateOptions').classList.remove('hidden');
+      document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateChecking').classList.remove('show');
+      document.getElementById('gateDenied').classList.remove('show');
+      document.getElementById('gateErr').textContent = '';
+    }
+    function showGateChecking(msg) {
+      document.getElementById('gateOptions').classList.add('hidden');
+      document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateDenied').classList.remove('show');
+      document.getElementById('gateChecking').classList.add('show');
+      document.getElementById('gateCheckingText').textContent = msg || 'Checking…';
+    }
+    function showGateDenied(msg) {
+      document.getElementById('gateOptions').classList.add('hidden');
+      document.getElementById('gatePwStep').classList.remove('open');
+      document.getElementById('gateChecking').classList.remove('show');
+      document.getElementById('gateDenied').classList.add('show');
+      document.getElementById('gateDeniedText').innerHTML = msg;
+    }
     document.getElementById('gateOptAdmin').addEventListener('click', () => {
       document.getElementById('gateOptions').classList.add('hidden');
       document.getElementById('gatePwStep').classList.add('open');
       setTimeout(() => document.getElementById('gatePw').focus(), 150);
     });
-    document.getElementById('gateOptMember').addEventListener('click', () => enterAs('member'));
-    document.getElementById('gateBackBtn').addEventListener('click', () => {
-      document.getElementById('gateOptions').classList.remove('hidden');
-      document.getElementById('gatePwStep').classList.remove('open');
-      document.getElementById('gateErr').textContent = '';
-    });
+    document.getElementById('gateOptMember').addEventListener('click', startMemberSignIn);
+    document.getElementById('gateBackBtn').addEventListener('click', showGateOptions);
+    document.getElementById('gateDeniedBackBtn').addEventListener('click', showGateOptions);
     async function attemptAdminLogin() {
       const pw = document.getElementById('gatePw').value;
       const err = document.getElementById('gateErr');
@@ -976,18 +1197,48 @@
         document.querySelector('.r-tab[data-tab="files"]').click();
       } else {
         const savedToken = sessionStorage.getItem('civil_gh_token');
-        if (savedToken) document.getElementById('research-gh-token').value = savedToken;
+        if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
       }
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab();
+    }
+
+    /* ── GitHub token live validation (so a wrong token never fails silently) ── */
+    let ghVerifyTimer = null;
+    function updateGhTokenStatus(msg, color) {
+      const el = document.getElementById('ghTokenStatus');
+      if (!el) return;
+      el.textContent = msg; el.style.color = color || 'var(--muted)';
+    }
+    async function verifyGhToken(token) {
+      if (!token) { updateGhTokenStatus('', ''); return; }
+      updateGhTokenStatus('Checking token…', 'var(--muted)');
+      try {
+        const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
+        if (res.ok) {
+          const u = await res.json();
+          updateGhTokenStatus(`Token looks valid ✓ — signed in as ${u.login}`, '#0f9d58');
+        } else if (res.status === 401) {
+          updateGhTokenStatus('✗ This token is invalid or expired — generate a new one on GitHub.', '#ef4444');
+        } else {
+          updateGhTokenStatus(`✗ GitHub returned an error (${res.status}) — check the token's permissions.`, '#ef4444');
+        }
+      } catch (e) {
+        updateGhTokenStatus("Couldn't reach GitHub to verify — check your connection.", 'var(--muted)');
+      }
     }
     document.getElementById('research-gh-token').addEventListener('input', e => {
-      sessionStorage.setItem('civil_gh_token', e.target.value.trim());
+      const val = e.target.value.trim();
+      sessionStorage.setItem('civil_gh_token', val);
+      clearTimeout(ghVerifyTimer);
+      if (!val) { updateGhTokenStatus('', ''); return; }
+      ghVerifyTimer = setTimeout(() => verifyGhToken(val), 700);
     });
     document.getElementById('switchViewBtn').addEventListener('click', () => {
       if (role === 'admin') siteAdminLogout();
+      if (role === 'member') clearMemberProfile();
+      currentUser = null;
       role = null;
-      document.getElementById('gateOptions').classList.remove('hidden');
-      document.getElementById('gatePwStep').classList.remove('open');
+      showGateOptions();
       document.getElementById('gatePw').value = '';
       gateEl.style.display = 'flex';
     });
@@ -1000,12 +1251,28 @@
     });
 
     /* ── init ── */
-    loadFromCache();           // instant paint from last-known data
-    renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab();
-    fetchFromGitHub().then(() => {
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab();
-    });
-    if (siteIsAdmin()) { enterAs('admin'); } // already logged in elsewhere on the site this tab
+    async function boot() {
+      loadFromCache();         // instant paint from last-known data
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab();
+      const freshPromise = fetchFromGitHub().then(() => {
+        renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab();
+      });
+      if (siteIsAdmin()) { enterAs('admin'); return; } // already logged in elsewhere on the site this tab
+      const cached = loadMemberProfile();
+      if (cached && cached.email) {
+        showGateChecking('Checking your access…');
+        await freshPromise; // make sure the member list is current before trusting the cached sign-in
+        if (isMemberEmail(cached.email)) {
+          currentUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
+          enterAs('member');
+          trySilentReauth();
+          return;
+        }
+        clearMemberProfile(); // admin removed them since the last visit
+      }
+      showGateOptions();
+    }
+    boot();
   </script>
 
   <!-- Add notice modal -->
