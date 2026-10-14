@@ -53,6 +53,38 @@
     .notices-empty { text-align:center; padding:40px 20px; color:var(--muted); border:2px dashed var(--line); border-radius:var(--radius); }
     .notices-empty i { font-size:32px; display:block; margin-bottom:10px; opacity:0.4; }
 
+    /* ── EXAM SCHEDULE TRACKER (within Notice Board) ─────── */
+    .ex-counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:14px; }
+    .ex-count { background:var(--surface); padding:10px 12px; text-align:center; min-width:0; }
+    .ex-count .n { font-size:20px; font-weight:800; letter-spacing:-0.02em; line-height:1.1; }
+    .ex-count .l { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; margin-top:2px; }
+    .ex-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+    @media (max-width:700px) { .ex-filters { grid-template-columns:1fr; } }
+    .notice-card.ex-new      { border-color:var(--blue); }
+    .notice-card.ex-ongoing  { border-color:#10b981; }
+    .notice-card.ex-upcoming { border-color:#f59e0b; }
+    .notice-card.ex-earlier, .notice-card.ex-past, .notice-card.ex-tba { border-color:var(--line); opacity:0.85; }
+    .ex-state { font-size:10px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; padding:4px 9px; border-radius:100px; border:1px solid var(--line); white-space:nowrap; flex-shrink:0; }
+    .ex-state.ex-new      { color:var(--blue); border-color:rgba(37,99,235,0.3); background:rgba(37,99,235,0.08); }
+    .ex-state.ex-ongoing  { color:#0f9d58; border-color:#bbf7d0; background:#f0fdf4; }
+    .ex-state.ex-upcoming { color:#b45309; border-color:#fde68a; background:#fffbeb; }
+    .ex-state.ex-earlier, .ex-state.ex-past, .ex-state.ex-tba { color:var(--muted); }
+    .ex-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .ex-chip { font-size:10px; font-weight:600; padding:2px 8px; border-radius:100px; border:1px solid var(--line); color:var(--muted); white-space:nowrap; }
+    .ex-when { text-align:right; white-space:nowrap; flex-shrink:0; }
+    .ex-when b { display:block; font-size:13px; font-weight:700; }
+    .ex-when small { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+    .ex-openpdf { display:inline-block; margin-top:4px; font-size:11px; font-weight:700; color:var(--blue); text-decoration:underline; text-underline-offset:2px; }
+    @media (max-width:640px) {
+      .notice-card { flex-wrap:wrap; }
+      .ex-when { text-align:left; margin-left:50px; }
+    }
+    details.ex-advanced { margin-top:14px; border:1px solid var(--line); border-radius:var(--radius); }
+    details.ex-advanced summary { cursor:pointer; padding:11px 16px; font-size:12.5px; font-weight:700; color:var(--muted); list-style:none; }
+    details.ex-advanced summary::-webkit-details-marker { display:none; }
+    details.ex-advanced[open] summary { border-bottom:1px solid var(--line); color:var(--ink); }
+    details.ex-advanced .ex-advanced-body { padding:14px 16px; }
+
     /* ── SEMESTER TABS ─────────────────────────────────── */
     .sem-section { padding:40px 0; border-top:1px solid var(--line); }
     .sem-section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
@@ -384,7 +416,92 @@
           <button class="btn primary sm admin-only" id="add-notice-btn"><i class="fas fa-plus"></i> Add Notice</button>
         </div>
       </div>
-      <div id="notices-container"></div>
+
+      <div class="sem-tabs-wrap" style="margin-bottom:18px;">
+        <div class="sem-tabs">
+          <button class="sem-tab active" id="notice-tab-general"><i class="fas fa-thumbtack"></i> General</button>
+          <button class="sem-tab" id="notice-tab-exam"><i class="fas fa-calendar-check"></i> Exam Schedule</button>
+        </div>
+      </div>
+
+      <div id="notice-panel-general">
+        <div id="notices-container"></div>
+      </div>
+
+      <div id="notice-panel-exam" style="display:none;">
+        <div class="ex-counts">
+          <div class="ex-count"><div class="n" id="exCNew">0</div><div class="l">New</div></div>
+          <div class="ex-count"><div class="n" id="exCOngoing">0</div><div class="l">Ongoing</div></div>
+          <div class="ex-count"><div class="n" id="exCUpcoming">0</div><div class="l">Upcoming</div></div>
+          <div class="ex-count"><div class="n" id="exCPast">0</div><div class="l">Past</div></div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+          <button class="btn secondary sm" id="exRefreshBtn"><i class="fas fa-rotate"></i> Refresh now</button>
+          <button class="btn secondary sm" id="exPollBtn"><i class="fas fa-satellite-dish"></i> Auto-poll</button>
+          <button class="btn secondary sm" id="exAlertBtn"><i class="fas fa-bell"></i> Alerts</button>
+          <span id="exStatus" style="font-size:12px;color:var(--muted);"></span>
+        </div>
+
+        <div class="ex-filters">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Status</label>
+            <select id="exFStatus">
+              <option value="all">All</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="new">New notice</option>
+              <option value="earlier">Earlier</option>
+              <option value="tba">No date</option>
+              <option value="past">Past</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Year</label>
+            <select id="exFYear">
+              <option value="all">All years</option>
+              <option value="1">Year 1</option>
+              <option value="2">Year 2</option>
+              <option value="3">Year 3</option>
+              <option value="4">Year 4</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Source</label>
+            <select id="exFSource">
+              <option value="all">All sources</option>
+              <option value="api">DU feed</option>
+              <option value="paste">Pasted</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="exList"></div>
+
+        <details class="ex-advanced admin-only">
+          <summary><i class="fas fa-sliders" style="margin-right:6px;"></i>Advanced: feed source &amp; manual entry</summary>
+          <div class="ex-advanced-body">
+            <div class="form-group">
+              <label>Worker URL</label>
+              <input type="url" id="exProxyUrl">
+            </div>
+            <div class="form-group">
+              <label>PDF base URL</label>
+              <input type="url" id="exPdfBase">
+            </div>
+            <div class="form-group">
+              <label>Paste notice or routine text</label>
+              <textarea id="exPasteText" placeholder="B.Sc. Engineering (Civil) 3rd Year 2nd Semester Final Examination-2026 will be held from 01.10.2026 to 20.10.2026."></textarea>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn primary sm" id="exParseBtn"><i class="fas fa-wand-magic-sparkles"></i> Parse Notices</button>
+              <button class="btn secondary sm" id="exSampleBtn">Load sample</button>
+              <button class="btn secondary sm" id="exClearBtn">Clear parsed</button>
+            </div>
+            <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">PDF base defaults to the DU engineering-colleges notice server. Title click on a DU-feed item opens the PDF directly.</p>
+          </div>
+        </details>
+      </div>
     </section>
 
     <div class="quick-tools-bar reveal-grid">
@@ -1079,6 +1196,264 @@
       notices.unshift({ id:uid(), title, text:document.getElementById('n-text').value.trim(), type:document.getElementById('n-type').value, date:new Date().toLocaleDateString('en-BD',{day:'2-digit',month:'short',year:'numeric'}) });
       saveNotices(notices); renderNotices(); closeModal('modal-notice'); toast('Notice added ✓', 'success');
     });
+
+    /* ════════════════════════════════════════════════════════
+       EXAM SCHEDULE TRACKER — live DU engineering-colleges feed
+       (ported from the DU Engineering Exam Tracker tool; filtered
+       to Civil Engineering only, restyled to match this page)
+    ════════════════════════════════════════════════════════ */
+    (() => {
+      const EX_DEFAULT_PROXY = 'https://du-exam-proxy.md-shaikh-alam-005.workers.dev';
+      const EX_DEFAULT_BASE  = 'https://bk.eco.du.ac.bd/get-notice-file/';
+      const EX_SET_KEY = 'civil_ex_settings_v1', EX_API_KEY = 'civil_ex_api_v1', EX_PASTE_KEY = 'civil_ex_paste_v1', EX_DAY = 86400000;
+      let exApiItems = [], exPasteItems = [], exNotified = {}, exPollTimer = null;
+
+      function exToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+      function exFmtDate(d) { return d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'; }
+      function exBn2en(s) {
+        const m = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+        let out = ''; s = String(s||'');
+        for (let i=0;i<s.length;i++){ const c=s.charAt(i); out += (m[c]!==undefined?m[c]:c); }
+        return out;
+      }
+      function exParseDUDate(str) {
+        if (!str) return null;
+        str = exBn2en(String(str)).trim();
+        let m = str.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{2,4})$/);
+        if (m) { let d=+m[1], mo=+m[2], y=+m[3]; if (y<100) y+=2000; const dt=new Date(y,mo-1,d); return isNaN(dt)?null:dt; }
+        m = str.match(/^(\d{1,2})\s+([A-Za-z]+)\.?,?\s+(\d{4})$/);
+        if (m) {
+          const months = {jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
+          const mo2 = months[m[2].toLowerCase()];
+          if (mo2) { const dt2=new Date(+m[3],mo2-1,+m[1]); return isNaN(dt2)?null:dt2; }
+        }
+        const f = Date.parse(str); return isNaN(f) ? null : new Date(f);
+      }
+      function exDaysSince(dateStr) { if (!dateStr) return null; const d=new Date(dateStr); if (isNaN(d)) return null; d.setHours(0,0,0,0); return Math.round((exToday().getTime()-d.getTime())/EX_DAY); }
+      function exClassifyApi(pub) { const ds=exDaysSince(pub); if (ds===null) return 'tba'; if (ds<=30) return 'new'; if (ds<=120) return 'earlier'; return 'past'; }
+      function exClassifyPaste(n) { if (!n.start) return 'tba'; const t=exToday().getTime(); if (n.end && n.end.getTime()<t) return 'past'; if (n.start.getTime()>t) return 'upcoming'; return 'ongoing'; }
+      function exPYear(t) { t=exBn2en(t); const m=t.match(/(\d{1,2})[^\d]{0,5}?(?:বর্ষ|year)/i); return m?parseInt(m[1],10):null; }
+      function exPSem(t) { t=exBn2en(t); const m=t.match(/(\d{1,2})[^\d]{0,5}?(?:সেমিস্টার|semester)/i); return m?parseInt(m[1],10):null; }
+      function exPExamYear(t) { t=exBn2en(t); const m=t.match(/(\d{4})/); return m?parseInt(m[1],10):null; }
+      function exPType(t) {
+        t = exBn2en(t);
+        if (/ফলাফল|result/i.test(t)) return 'Result';
+        if (/ম.{0,2}সূচি|routine|date\s*sheet|seat\s*plan|সিট\s*প্ল্যান/i.test(t)) return 'Schedule';
+        if (/ফরম.{0,2}পূরণ|ফরমপূরণ|ফিস|fee|registration|আবেদন|apply/i.test(t)) return 'Registration';
+        if (/বিশেষ.{0,2}ফলোআন|স্পেশাল.{0,2}ইমপ্রুভমেন্ট|special\s*improvement|improvement/i.test(t)) return 'Special Improvement';
+        if (/মিড[-\s]*টার্ম|আংশিক|mid[-\s]*term/i.test(t)) return 'Mid-term';
+        if (/প্র্যাকটিক্যাল|সেশনাল|practical|sessional/i.test(t)) return 'Practical';
+        if (/ফলোআন|follow[-\s]*on/i.test(t)) return 'Follow-on';
+        if (/পরীক্ষা|examination|exam/i.test(t)) return 'Exam';
+        return 'Notice';
+      }
+      const EX_CIVIL = /civil|সিভিল/i;
+      const EX_OTHER = /leather|textile|medical|dental|nursing|health.?technolog|physiotherap|home.?econom|media|epidemiolog|ayurvedic|upani|pharmac|data[.\s]*engineer|software[.\s]*engineer|pmaide|pm[.\s]*aide|masters|master[.\s]*of|m\.?sc|phd|ph\.?d|research|fellowship|recruitment|appointment|tender|contract|vacanc/i;
+      function exIsCivil(n) { const blob=(n.title+' '+(n.file||'')); if (EX_OTHER.test(blob)) return false; return EX_CIVIL.test(blob); }
+      function exNormApi(it) {
+        const title = String(it.title||it.notice_title||'').replace(/\s+/g,' ').trim();
+        const norm = exBn2en(title);
+        const pub = (it.published||it.create_at) ? String(it.published||it.create_at).slice(0,10) : null;
+        const n = { id:it.id||title, title, year:(it.year!=null?it.year:exPYear(norm)), sem:(it.sem!=null?it.sem:exPSem(norm)), examYear:(it.examYear!=null?it.examYear:exPExamYear(norm)), type:exPType(norm)||it.type||'Notice', published:pub, file:it.file||it.notice_file||null, source:'api' };
+        n.status = exClassifyApi(pub); n.key = 'a|'+n.id; return n;
+      }
+      function exPdfHref(n) {
+        const base = (document.getElementById('exPdfBase').value||'').trim();
+        if (base && n.file) return base.replace(/\/+$/,'') + '/' + n.file;
+        const w = (document.getElementById('exProxyUrl').value||'').trim();
+        if (w && n.file) return w.replace(/\/+$/,'') + '/pdf?file=' + encodeURIComponent(n.file);
+        if (n.id) return 'https://eco.du.ac.bd/notice-details?id=' + encodeURIComponent(n.id);
+        return 'https://eco.du.ac.bd/notice';
+      }
+      function exSplitBlocks(text) {
+        let blocks = String(text||'').trim().split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);
+        if (blocks.length <= 1) {
+          const lines = String(text||'').split(/\n/); blocks = []; let buf = [];
+          lines.forEach(ln => {
+            if (/examination|improvement|mid[-\s]?term|practical exam|final exam|পরীক্ষা|ফলোআন|সময়সূচি|ফরম/i.test(exBn2en(ln)) && buf.join(' ').trim()) { blocks.push(buf.join('\n')); buf=[ln]; }
+            else buf.push(ln);
+          });
+          if (buf.join(' ').trim()) blocks.push(buf.join('\n'));
+        }
+        return blocks.filter(x => x.length > 10);
+      }
+      function exParseBlock(block) {
+        const norm = exBn2en(block);
+        if (!/examination|improvement|mid[-\s]?term|practical exam|final exam|পরীক্ষা|ফলোআন|সময়সূচি|ফরম/i.test(norm)) return null;
+        const year=exPYear(norm), sem=exPSem(norm), type=exPType(norm);
+        const toks = []; const re = /(\d{1,2}[.\-\/]\d{1,2}[.\-\/]\d{2,4})|(\d{1,2}\s+[A-Za-z]+\.?,?\s+\d{4})/g; let dm;
+        while ((dm = re.exec(norm)) !== null) { const d=exParseDUDate(dm[0]); if (d) toks.push(d); }
+        toks.sort((a,b)=>a-b);
+        let start=null, end=null;
+        if (toks.length>=2){ start=toks[0]; end=toks[toks.length-1]; } else if (toks.length===1){ start=end=toks[0]; }
+        const fl = (block.split('\n').find(l=>l.trim())||'').trim();
+        const title = fl.length>110 ? fl.slice(0,107)+'...' : (fl||type);
+        const n = { id:'p|'+title, title, year, sem, examYear:exPExamYear(norm), type, start, end, published:null, file:null, source:'paste' };
+        n.status = exClassifyPaste(n); n.key = 'p|'+(year||'')+'|'+(sem||'')+'|'+type+'|'+(start?start.toISOString().slice(0,10):'x');
+        return n;
+      }
+      function exSaveApi() { try { localStorage.setItem(EX_API_KEY, JSON.stringify(exApiItems)); } catch(e){} }
+      function exSavePaste() { try { localStorage.setItem(EX_PASTE_KEY, JSON.stringify(exPasteItems.map(n=>({id:n.id,title:n.title,year:n.year,sem:n.sem,examYear:n.examYear,type:n.type,start:n.start?n.start.toISOString():null,end:n.end?n.end.toISOString():null,status:n.status,key:n.key})))); } catch(e){} }
+      function exLoadStored() {
+        try { const a = JSON.parse(localStorage.getItem(EX_API_KEY)||'[]'); exApiItems = a.map(it => { const n=exNormApi(it); n.status=exClassifyApi(n.published); return n; }); } catch(e) { exApiItems = []; }
+        try {
+          const p = JSON.parse(localStorage.getItem(EX_PASTE_KEY)||'[]');
+          exPasteItems = p.map(it => { const n = { id:it.id, title:it.title, year:it.year, sem:it.sem, examYear:it.examYear, type:it.type, start:it.start?new Date(it.start):null, end:it.end?new Date(it.end):null, published:null, file:null, source:'paste' }; n.status=exClassifyPaste(n); n.key=it.key||('p|'+n.title); return n; });
+        } catch(e) { exPasteItems = []; }
+      }
+      function exAllItems() { return exApiItems.concat(exPasteItems); }
+      function exRenderCounts() {
+        const c = {new:0, ongoing:0, upcoming:0, past:0};
+        exAllItems().forEach(n => { if (n.status==='new') c.new++; else if (n.status==='ongoing') c.ongoing++; else if (n.status==='upcoming') c.upcoming++; else if (n.status==='past'||n.status==='earlier') c.past++; });
+        document.getElementById('exCNew').textContent = c.new;
+        document.getElementById('exCOngoing').textContent = c.ongoing;
+        document.getElementById('exCUpcoming').textContent = c.upcoming;
+        document.getElementById('exCPast').textContent = c.past;
+      }
+      function exChipHTML(label) { return `<span class="ex-chip">${esc(label)}</span>`; }
+      function exWhenHtml(n) {
+        if (n.source === 'paste') {
+          if (!n.start) return '<b>Date TBA</b><small>awaiting schedule</small>';
+          const range = (n.start.getTime()!==n.end.getTime()) ? (exFmtDate(n.start)+' - '+exFmtDate(n.end)) : exFmtDate(n.start);
+          const t = exToday(); let sub = '';
+          if (n.status === 'ongoing') { const l=Math.round((n.end.getTime()-t.getTime())/EX_DAY); sub = l<=0 ? 'last day today' : 'ends in '+l+' day'+(l>1?'s':''); }
+          else if (n.status === 'upcoming') { const o=Math.round((n.start.getTime()-t.getTime())/EX_DAY); sub = o<=0 ? 'starts today' : 'in '+o+' day'+(o>1?'s':''); }
+          else { const ag=Math.round((t.getTime()-n.end.getTime())/EX_DAY); sub = 'ended '+ag+' day'+(ag>1?'s':'')+' ago'; }
+          return `<b>${esc(range)}</b><small>${esc(sub)}</small>`;
+        }
+        const main = n.published ? exFmtDate(new Date(n.published)) : '—';
+        const ds = exDaysSince(n.published);
+        const sub2 = ds===null ? 'no date' : (ds<=0 ? 'today' : (ds===1 ? '1 day ago' : ds+' days ago'));
+        let extra = '';
+        if (n.file) extra = `<a class="ex-openpdf" href="${esc(exPdfHref(n))}" target="_blank" rel="noopener">Open PDF</a>`;
+        return `<b>${esc(main)}</b><small>${esc(sub2)}</small>${extra}`;
+      }
+      function exRender() {
+        exRenderCounts();
+        const wrap = document.getElementById('exList');
+        const fs = document.getElementById('exFStatus').value, fy = document.getElementById('exFYear').value, fsrc = document.getElementById('exFSource').value;
+        let arr = exAllItems().filter(n => (fs==='all'||n.status===fs) && (fy==='all'||String(n.year)===fy) && (fsrc==='all'||n.source===fsrc));
+        if (!arr.length) { wrap.innerHTML = `<div class="notices-empty"><i class="fas fa-calendar-xmark"></i><p>${exAllItems().length ? 'No notices match these filters.' : 'No exam notices loaded yet — click Refresh now.'}</p></div>`; return; }
+        const order = {ongoing:0, upcoming:1, new:2, earlier:3, tba:4, past:5};
+        arr.sort((a,b) => {
+          const od = order[a.status]-order[b.status]; if (od) return od;
+          const ad = a.source==='paste' ? (a.start?a.start.getTime():8e15) : (a.published?new Date(a.published).getTime():0);
+          const bd = b.source==='paste' ? (b.start?b.start.getTime():8e15) : (b.published?new Date(b.published).getTime():0);
+          if (a.status==='upcoming'||a.status==='ongoing') return ad-bd;
+          return bd-ad;
+        });
+        wrap.innerHTML = `<div class="notices-grid">${arr.map(n => {
+          const chips = [];
+          if (n.year) chips.push(exChipHTML('Year '+n.year));
+          if (n.sem) chips.push(exChipHTML('Sem '+n.sem));
+          if (n.examYear) chips.push(exChipHTML('Exam '+n.examYear));
+          if (n.type) chips.push(exChipHTML(n.type));
+          chips.push(exChipHTML(n.source==='api' ? 'DU feed' : 'Pasted'));
+          const titleHtml = n.source==='api'
+            ? `<a class="tlink" style="color:inherit;text-decoration:none;" href="${esc(exPdfHref(n))}" target="_blank" rel="noopener">${esc(n.title)}</a>`
+            : `<span>${esc(n.title)}</span>`;
+          const stateLabel = n.status==='new' ? 'new notice' : (n.status==='tba' ? 'no date' : n.status);
+          return `<div class="notice-card ex-${n.status}">
+              <span class="ex-state ex-${n.status}">${esc(stateLabel)}</span>
+              <div class="n-body"><div class="n-title">${titleHtml}</div><div class="ex-chips">${chips.join('')}</div></div>
+              <div class="ex-when">${exWhenHtml(n)}</div>
+            </div>`;
+        }).join('')}</div>`;
+      }
+      function exParseFromTextarea() {
+        const t = document.getElementById('exPasteText').value;
+        if (!t.trim()) { document.getElementById('exStatus').textContent = 'Paste some notice text first.'; return; }
+        exPasteItems = exSplitBlocks(t).map(exParseBlock).filter(Boolean);
+        exSavePaste(); exRender();
+        document.getElementById('exStatus').textContent = exPasteItems.length ? `Parsed ${exPasteItems.length} notice(s) from text.` : 'No exam notices found in that text.';
+      }
+      function exLoadSample() {
+        document.getElementById('exPasteText').value = 'B.Sc. Engineering (Civil) 3rd Year 2nd Semester Final Examination-2026 will be held from 01.10.2026 to 20.10.2026.\n\nSpecial Improvement Examination for 1st Year 2nd Semester (Civil Engineering) will be held from 20.09.2026 to 25.09.2026.';
+        exParseFromTextarea();
+      }
+      function exClearAll() {
+        exApiItems = []; exPasteItems = []; exNotified = {}; exSaveApi(); exSavePaste(); exRender();
+        document.getElementById('exStatus').textContent = 'Cleared.'; document.getElementById('exPasteText').value = '';
+      }
+      function exSaveSettings() { try { localStorage.setItem(EX_SET_KEY, JSON.stringify({ proxy:document.getElementById('exProxyUrl').value.trim(), pdfBase:document.getElementById('exPdfBase').value.trim() })); } catch(e){} }
+      function exLoadSettings() {
+        try { const s = JSON.parse(localStorage.getItem(EX_SET_KEY)||'{}'); document.getElementById('exProxyUrl').value = s.proxy || EX_DEFAULT_PROXY; document.getElementById('exPdfBase').value = s.pdfBase || EX_DEFAULT_BASE; }
+        catch(e) { document.getElementById('exProxyUrl').value = EX_DEFAULT_PROXY; document.getElementById('exPdfBase').value = EX_DEFAULT_BASE; }
+      }
+      async function exRefresh(manual) {
+        const url = (document.getElementById('exProxyUrl').value||'').trim();
+        if (!url) { if (manual) document.getElementById('exStatus').textContent = 'Set worker URL first.'; return false; }
+        try {
+          const res = await fetch(url, { cache:'no-store' });
+          if (!res.ok) throw new Error('HTTP '+res.status);
+          const body = await res.text(); let j = null; try { j = JSON.parse(body); } catch(e){}
+          if (j && j.error) { if (manual) document.getElementById('exStatus').textContent = 'Worker error: '+j.error; return false; }
+          const items = (j && Array.isArray(j.items)) ? j.items : (j && Array.isArray(j.data) ? j.data : null);
+          if (items) {
+            exApiItems = items.map(exNormApi).filter(exIsCivil);
+            exSaveApi(); exRender(); exCheckAlerts();
+            document.getElementById('exStatus').textContent = `Loaded ${exApiItems.length} Civil notice(s).`;
+            return true;
+          }
+          exPasteItems = exSplitBlocks(body).map(exParseBlock).filter(Boolean);
+          exSavePaste(); exRender();
+          document.getElementById('exStatus').textContent = exPasteItems.length ? `Parsed ${exPasteItems.length} notice(s) from worker text.` : 'Worker returned text but no exam notices found.';
+          return true;
+        } catch (e) {
+          if (manual) document.getElementById('exStatus').textContent = 'Refresh failed: '+e.message+'. Check worker URL.';
+          return false;
+        }
+      }
+      function exTogglePoll() {
+        const btn = document.getElementById('exPollBtn');
+        if (exPollTimer) { clearInterval(exPollTimer); exPollTimer=null; btn.innerHTML='<i class="fas fa-satellite-dish"></i> Auto-poll'; document.getElementById('exStatus').textContent='Auto-poll stopped.'; return; }
+        if (!(document.getElementById('exProxyUrl').value||'').trim()) { document.getElementById('exStatus').textContent='Set worker URL first.'; return; }
+        exRefresh(); exPollTimer=setInterval(()=>exRefresh(false), 30*60*1000);
+        btn.innerHTML='<i class="fas fa-satellite-dish"></i> Stop auto-poll'; document.getElementById('exStatus').textContent='Auto-poll every 30 min.';
+      }
+      function exEnableAlerts() {
+        if (typeof Notification === 'undefined') { document.getElementById('exStatus').textContent='Notifications not supported here.'; return; }
+        Notification.requestPermission().then(p => {
+          document.getElementById('exStatus').textContent = p==='granted' ? 'Alerts on. New Civil notices will notify.' : 'Alert permission '+p+'.';
+          if (p==='granted') exCheckAlerts();
+        });
+      }
+      function exCheckAlerts() {
+        if (typeof Notification==='undefined' || Notification.permission!=='granted') return;
+        exApiItems.filter(n=>n.status==='new').forEach(n => {
+          if (!exNotified[n.key]) { exNotified[n.key]=1; try { new Notification('New Civil exam notice'+(n.year?' — Year '+n.year:''), { body:n.type+(n.published?' · '+exFmtDate(new Date(n.published)):'') }); } catch(e){} }
+        });
+      }
+
+      document.getElementById('exProxyUrl') && document.getElementById('exProxyUrl').addEventListener('input', exSaveSettings);
+      document.getElementById('exPdfBase')  && document.getElementById('exPdfBase').addEventListener('input', exSaveSettings);
+      document.getElementById('exFStatus').addEventListener('change', exRender);
+      document.getElementById('exFYear').addEventListener('change', exRender);
+      document.getElementById('exFSource').addEventListener('change', exRender);
+      document.getElementById('exRefreshBtn').addEventListener('click', () => exRefresh(true));
+      document.getElementById('exPollBtn').addEventListener('click', exTogglePoll);
+      document.getElementById('exAlertBtn').addEventListener('click', exEnableAlerts);
+      document.getElementById('exParseBtn').addEventListener('click', exParseFromTextarea);
+      document.getElementById('exSampleBtn').addEventListener('click', exLoadSample);
+      document.getElementById('exClearBtn').addEventListener('click', exClearAll);
+
+      /* Tabs: General ⇄ Exam Schedule */
+      document.getElementById('notice-tab-general').addEventListener('click', () => {
+        document.getElementById('notice-tab-general').classList.add('active');
+        document.getElementById('notice-tab-exam').classList.remove('active');
+        document.getElementById('notice-panel-general').style.display = '';
+        document.getElementById('notice-panel-exam').style.display = 'none';
+      });
+      document.getElementById('notice-tab-exam').addEventListener('click', () => {
+        document.getElementById('notice-tab-exam').classList.add('active');
+        document.getElementById('notice-tab-general').classList.remove('active');
+        document.getElementById('notice-panel-exam').style.display = '';
+        document.getElementById('notice-panel-general').style.display = 'none';
+      });
+
+      exLoadSettings(); exLoadStored(); exRender();
+      exRefresh(false); // quietly fetch the live feed for every visitor on page load
+    })();
 
     /* ── Semester panels ───────────────────── */
     const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
