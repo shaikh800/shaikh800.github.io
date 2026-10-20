@@ -127,13 +127,13 @@ body::after {
 .nav-scrim.is-open { opacity: 1; pointer-events: auto; }
 
 .site-nav {
-  position: fixed; top: 0; right: 0; bottom: 0; left: auto;
+  position: fixed; top: 0; left: 0; bottom: 0; right: auto;
   width: 78%; max-width: 280px; overflow-y: auto;
   display: flex; flex-direction: column; align-items: stretch; gap: 2px;
   padding: 20px 14px calc(20px + env(safe-area-inset-bottom, 0px));
-  border: none; border-left: 1px solid var(--line); border-radius: 0;
-  background: var(--surface); box-shadow: -14px 0 34px rgba(0,0,0,0.2);
-  transform: translateX(100%);
+  border: none; border-right: 1px solid var(--line); border-radius: 0;
+  background: var(--surface); box-shadow: 14px 0 34px rgba(0,0,0,0.2);
+  transform: translateX(-100%);
   transition: transform 0.28s var(--ease-out);
   z-index: 2000;
 }
@@ -383,22 +383,8 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 .quick-tool-card .qt-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
 .quick-tool-card .qt-arrow { margin-top: auto; font-size: 11.5px; font-weight: 700; color: var(--blue); }
 
-.sem-tabs-sticky {
-  position: sticky; top: var(--header-h, 60px); z-index: 100;
-  background: rgba(248,250,252,0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
-  margin: 0 calc(-1 * (100vw - min(1120px, 100% - 32px)) / 2);
-  padding: 0 max(16px, (100vw - min(1120px, 100%)) / 2);
-}
-
 @media (max-width: 900px) {
   .civil-hero-card { grid-column: span 1; }
-  .sem-tabs-sticky {
-    margin: 0 -16px; padding: 0 16px; top: 60px;
-    /* backdrop-filter on a sticky bar is expensive to repaint every scroll frame on phones — use a solid background on mobile instead */
-    background: var(--surface);
-    backdrop-filter: none; -webkit-backdrop-filter: none;
-  }
 }
 @media (max-width: 640px) {
   .quick-tools-bar { grid-template-columns: 1fr; gap: 8px; }

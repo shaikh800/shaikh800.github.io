@@ -39,18 +39,10 @@
     .sem-section { padding:40px 0; border-top:1px solid var(--line); }
     .sem-section-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
     .sem-section-head h2 { margin:0; font-size:clamp(22px,3vw,30px); letter-spacing:-0.02em; }
-    .sem-tabs-wrap { 
-      overflow-x:auto; padding-bottom:4px; margin-bottom:28px;
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE/Edge */
-      -webkit-overflow-scrolling: touch;
-      scroll-behavior: smooth;
-    }
-    .sem-tabs-wrap::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-    .sem-tabs { display:flex; gap:8px; min-width:max-content; }
-    .sem-tab { padding:8px 18px; border-radius:100px; border:1px solid var(--line); background:var(--surface); color:var(--muted); font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s ease; white-space:nowrap; }
-    .sem-tab:hover { border-color:var(--blue); color:var(--blue); }
-    .sem-tab.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+    .sem-list { display:flex; flex-direction:column; gap:8px; margin-bottom:28px; }
+    .sem-list .fs-folder-card .sem-list-count { color:var(--muted); font-size:12px; flex-shrink:0; margin-right:4px; }
+    .back-link { display:inline-flex; align-items:center; gap:7px; color:var(--muted); background:none; border:none; cursor:pointer; text-decoration:none; font-size:13px; font-weight:700; margin-bottom:14px; padding:0; font-family:inherit; }
+    .back-link:hover { color:var(--blue); }
     .sem-panel { display:none; }
     .sem-panel.active { display:block; animation:fadeIn 0.3s var(--ease-out); }
     .sem-panel-title { font-size:18px; font-weight:800; letter-spacing:-0.02em; margin-bottom:20px; }
@@ -402,21 +394,8 @@
           <button class="btn primary sm admin-only" id="add-resource-btn"><i class="fas fa-plus"></i> Add Resource</button>
         </div>
       </div>
-      <div class="sem-tabs-sticky">
-        <div class="sem-tabs-wrap">
-          <div class="sem-tabs" id="sem-tabs">
-            <button class="sem-tab active" data-sem="1">1st Sem</button>
-            <button class="sem-tab" data-sem="2">2nd Sem</button>
-            <button class="sem-tab" data-sem="3">3rd Sem</button>
-            <button class="sem-tab" data-sem="4">4th Sem</button>
-            <button class="sem-tab" data-sem="5">5th Sem</button>
-            <button class="sem-tab" data-sem="6">6th Sem</button>
-            <button class="sem-tab" data-sem="7">7th Sem</button>
-            <button class="sem-tab" data-sem="8">8th Sem</button>
-          </div>
-        </div>
-      </div>
-      <div id="sem-panels"></div>
+      <div class="sem-list" id="sem-list"></div>
+      <div id="sem-panels" style="display:none;"></div>
     </section>
 
     <section class="section">
@@ -993,10 +972,33 @@
     function buildPanels() {
       document.getElementById('sem-panels').innerHTML = Array.from({length:8},(_,i)=>`
         <div class="sem-panel${i===0?' active':''}" id="sem-panel-${i+1}">
+          <a class="back-link" onclick="backToSemList()"><i class="fas fa-arrow-left"></i> Semester Resources</a>
           <div class="sem-panel-title">${semLabels[i+1]} Semester <span id="sem-count-${i+1}"></span></div>
           <div class="resource-grid" id="sem-grid-${i+1}"></div>
         </div>`).join('');
     }
+
+    function buildSemList() {
+      const sems = loadSems();
+      document.getElementById('sem-list').innerHTML = Array.from({length:8},(_,i)=>{
+        const n = i + 1;
+        const count = (sems[n] || []).length;
+        const countLabel = count ? `${count} file${count===1?'':'s'}` : 'Empty';
+        return `
+          <div class="fs-folder-card" data-sem="${n}">
+            <i class="fas fa-folder"></i>
+            <span>${semLabels[n]} Semester</span>
+            <span class="sem-list-count">${countLabel}</span>
+            <i class="fas fa-chevron-right fs-folder-chevron"></i>
+          </div>`;
+      }).join('');
+    }
+
+    window.backToSemList = function() {
+      document.getElementById('sem-panels').style.display = 'none';
+      document.getElementById('sem-list').style.display = '';
+      buildSemList();
+    };
 
     function renderSem(n) {
       const items = (loadSems()[n] || []);
@@ -1168,15 +1170,16 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
 
     function renderAllSems() { for(let i=1;i<=8;i++) renderSem(i); }
 
-    /* ── Semester tabs ─────────────────────── */
-    document.getElementById('sem-tabs').addEventListener('click', e => {
-      const tab = e.target.closest('.sem-tab'); if(!tab) return;
-      const n = parseInt(tab.dataset.sem);
-      document.querySelectorAll('.sem-tab').forEach(t => t.classList.toggle('active', t===tab));
+    /* ── Semester list → opens into that semester's folder view ── */
+    document.getElementById('sem-list').addEventListener('click', e => {
+      const card = e.target.closest('.fs-folder-card[data-sem]'); if (!card) return;
+      const n = parseInt(card.dataset.sem);
       document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${n}`));
-      currentSemPath = ""; 
+      currentSemPath = "";
       activeSem = n;
-      renderSem(n); 
+      document.getElementById('sem-list').style.display = 'none';
+      document.getElementById('sem-panels').style.display = '';
+      renderSem(n);
     });
 
     /* ── Open resource ─────────────────────── */
@@ -1415,6 +1418,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
 
     /* ── Init ──────────────────────────────── */
     buildPanels();
+    buildSemList();
 
     // Show spinner while loading shared data from GitHub
     document.querySelectorAll('[id^="sem-grid-"]').forEach(g => {
@@ -1423,8 +1427,10 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
     fetchFromGitHub().then(ok => {
       if (!ok) console.warn('GitHub fetch failed — using local cache.');
       renderAllSems();
+      buildSemList();
     }).catch(() => {
       renderAllSems();
+      buildSemList();
     });
   })();
   </script>
