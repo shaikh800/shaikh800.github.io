@@ -103,7 +103,14 @@ document.querySelectorAll(".nav-group-head > .nav-link").forEach((link) => {
       history.replaceState("", document.title, window.location.pathname + window.location.search + "#" + hash);
     }
     const target = hash && sections.find((sec) => sec.id === hash);
-    sections.forEach((sec) => { sec.hidden = Boolean(target) && sec !== target; });
+    sections.forEach((sec) => {
+      // Elements marked data-keep-hidden (e.g. a page's own hero that a newer,
+      // page-specific tab system has permanently retired) should never be forced
+      // back open by this generic fallback -- only an explicit matching hash may
+      // reveal them.
+      if (!target && sec.hasAttribute('data-keep-hidden')) return;
+      sec.hidden = Boolean(target) && sec !== target;
+    });
     if (backBar) backBar.hidden = !target;
     if (target) target.scrollIntoView({ block: "start" });
   }
