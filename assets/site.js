@@ -25,6 +25,18 @@ if (navToggle && siteNav) {
   });
 }
 
+/* ── NAV ACCORDION (Civil / 3D / Academy / Research sub-menus) ─ */
+document.querySelectorAll(".nav-caret").forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const group = btn.closest(".nav-group");
+    if (!group) return;
+    const isOpen = group.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", String(isOpen));
+  });
+});
+
 /* ── ACTIVE NAV LINK ─────────────────────────────────────── */
 const pagePath = window.location.pathname.split("/").pop() || "index.html";
 document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
@@ -32,8 +44,26 @@ document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
   if (isCurrent) {
     link.classList.add("is-active");
     link.setAttribute("aria-current", "page");
+    const group = link.closest(".nav-group");
+    if (group) {
+      group.classList.add("is-open");
+      const caret = group.querySelector(".nav-caret");
+      if (caret) caret.setAttribute("aria-expanded", "true");
+    }
   }
 });
+
+/* ── ACTIVE NAV SUB-LINK (matches the current page + hash) ── */
+if (window.location.hash) {
+  document.querySelectorAll(".nav-sub a").forEach((link) => {
+    const href = link.getAttribute("href") || "";
+    const [hrefPage, hrefHash] = href.split("#");
+    const linkPage = hrefPage || pagePath;
+    if (linkPage === pagePath && hrefHash && window.location.hash === "#" + hrefHash) {
+      link.classList.add("is-active");
+    }
+  });
+}
 
 
 /* ── SCROLL REVEAL ───────────────────────────────────────── */

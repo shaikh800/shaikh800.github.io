@@ -148,6 +148,33 @@ body::after {
 .site-nav .nav-cta { color: #fff; background: var(--blue); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2); }
 .site-nav .nav-cta:hover { background: var(--blue-dark); transform: translateY(-1px); }
 
+/* ── NAV ACCORDION (per-page sub-sections in the drawer) ──── */
+.nav-group { display: flex; flex-direction: column; }
+.nav-group-head { display: flex; align-items: stretch; gap: 2px; }
+.nav-group-head .nav-link { flex: 1; min-width: 0; }
+.nav-caret {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; min-height: 46px; border: none; border-radius: var(--radius);
+  background: transparent; color: var(--muted); cursor: pointer; flex-shrink: 0;
+}
+.nav-caret:hover { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
+.nav-caret i { font-size: 12px; transition: transform 0.25s var(--ease-out); }
+.nav-group.is-open .nav-caret i { transform: rotate(180deg); }
+.nav-sub {
+  display: flex; flex-direction: column; overflow: hidden;
+  max-height: 0; opacity: 0;
+  transition: max-height 0.25s var(--ease-out), opacity 0.2s ease;
+}
+.nav-group.is-open .nav-sub { max-height: 260px; opacity: 1; }
+.nav-sub a {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 38px; padding: 0 14px 0 36px; margin-left: 4px;
+  border-radius: var(--radius);
+  text-decoration: none; color: var(--muted); font-size: 13.5px; font-weight: 600;
+  transition: all 0.2s ease;
+}
+.nav-sub a:hover, .nav-sub a.is-active { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
+
 body.nav-open { overflow: hidden; }
 
 /* ─── PAGE SHELL ─────────────────────────────────────────── */
