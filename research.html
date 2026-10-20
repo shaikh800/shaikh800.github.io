@@ -537,10 +537,11 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Folder path <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — overrides the category folder above)</span></label>
+            <label>Folder path <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — Browse to pick any existing folder in your Drive, incl. top-level ones)</span></label>
             <div class="path-input-wrap" style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);overflow:hidden;padding:0 8px;">
               <i class="fas fa-folder-open" style="color:var(--muted);font-size:13px;margin:0 6px;"></i>
               <input type="text" id="upDrivePath" placeholder="e.g. Dataset / 2026" style="border:none;outline:none;background:transparent;padding:10px 6px;flex:1;box-shadow:none !important;font-family:monospace;font-size:12.5px;min-width:0;">
+              <input type="hidden" id="upDriveFolderId">
               <button type="button" id="upBrowseDriveBtn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
             </div>
           </div>
@@ -1204,17 +1205,26 @@
         return;
       }
       const pathOverride = document.getElementById('upDrivePath').value;
+      const pickedFolderId = document.getElementById('upDriveFolderId').value;
       setUploadStatus('Uploading to your Drive…', '');
       try {
         const token = currentUser.token;
-        let parentId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
-        // A path typed or picked via Browse Drive wins over the category dropdown.
-        const folders = (pathOverride && pathOverride.trim())
-          ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
-          : [category];
-        if (!folders.length) folders.push(category);
-        for (const folderName of folders) {
-          parentId = await findOrCreateFolder(folderName, parentId, token);
+        let parentId;
+        if (pickedFolderId) {
+          // Picked an exact folder via Browse Drive (could be anywhere in the
+          // uploader's own Drive, including a pre-existing top-level folder) --
+          // upload straight into it, no re-creation / re-nesting by name.
+          parentId = pickedFolderId;
+        } else {
+          parentId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
+          // A path typed by hand wins over the category dropdown.
+          const folders = (pathOverride && pathOverride.trim())
+            ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
+            : [category];
+          if (!folders.length) folders.push(category);
+          for (const folderName of folders) {
+            parentId = await findOrCreateFolder(folderName, parentId, token);
+          }
         }
         const meta = JSON.stringify({ name: file.name, parents: [parentId] });
         const boundary = '-------research_upload_boundary';
@@ -1238,7 +1248,7 @@
           date: new Date().toISOString()
         };
         uploads.unshift(newUpload);
-        fileInput.value = ''; document.getElementById('upTitle').value = ''; document.getElementById('upDrivePath').value = '';
+        fileInput.value = ''; document.getElementById('upTitle').value = ''; document.getElementById('upDrivePath').value = ''; document.getElementById('upDriveFolderId').value = '';
         setUploadStatus('Uploaded ✓', 'ok');
         renderUploads();
         await syncChange('addUpload', newUpload);
@@ -1302,27 +1312,28 @@
     document.getElementById('teamReconnectBtn').addEventListener('click', signInWithGoogle);
     document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
 
-    // Browse Drive button -- same shared DrivePicker used on Civil/3D Portfolio,
-    // rooted at this uploader's own "Research Hub Uploads" folder.
-    document.getElementById('upBrowseDriveBtn').addEventListener('click', async () => {
+    // Browse Drive button -- same shared DrivePicker used on Civil/3D Portfolio.
+    // Rooted at the real Drive root (My Drive) so an uploader can see and pick
+    // folders that already exist there (e.g. a top-level "Research Papers"
+    // folder) -- not just subfolders of the app's own "Research Hub Uploads"
+    // folder. Picking a folder stores its real id, so the upload goes straight
+    // into that exact folder instead of recreating it by name somewhere else.
+    document.getElementById('upBrowseDriveBtn').addEventListener('click', () => {
       if (!isAuthorizedUploader() || !currentUser || Date.now() > currentUser.expiry - 5000) {
         alert('Sign in with Google first.'); return;
       }
-      const btn = document.getElementById('upBrowseDriveBtn');
-      const orig = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting…';
-      try {
-        const token = currentUser.token;
-        const rootId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
-        DrivePicker.open({
-          token, rootId, rootLabel: 'Research Hub Uploads',
-          onChoose: (path) => { document.getElementById('upDrivePath').value = path; }
-        });
-      } catch (e) {
-        alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
-      } finally {
-        btn.disabled = false; btn.innerHTML = orig;
-      }
+      DrivePicker.open({
+        token: currentUser.token, rootId: 'root', rootLabel: 'My Drive',
+        onChoose: (path, folderId) => {
+          document.getElementById('upDrivePath').value = path;
+          document.getElementById('upDriveFolderId').value = folderId || '';
+        }
+      });
+    });
+    // Typing a path by hand means "build/find this by name" again, not "use the
+    // folder I browsed to" -- so a manual edit clears any picked folder id.
+    document.getElementById('upDrivePath').addEventListener('input', () => {
+      document.getElementById('upDriveFolderId').value = '';
     });
 
     /* ── Notices ── */

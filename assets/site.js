@@ -174,11 +174,16 @@ document.querySelectorAll(".reveal, .reveal-grid").forEach((el) => {
    blindly typing a path and hoping it matches what's already there.
    Self-contained: injects its own modal + styles once, namespaced
    (drv-pk-*) so it never collides with a page's own CSS. Usage:
-     DrivePicker.open({ token, rootId, rootLabel, onChoose(path) })
-   onChoose receives the chosen folder as a '/'-joined name path (e.g.
-   "CE 501 / Books") — callers that already do findOrCreateFolder-by-
-   name on a typed path can feed that string straight back in, so no
-   folder IDs need to flow through existing upload code at all. ─────── */
+     DrivePicker.open({ token, rootId, rootLabel, onChoose(path, folderId) })
+   onChoose receives both a '/'-joined display path (e.g. "CE 501 / Books")
+   AND the real Drive id of the folder the user landed on. Callers that just
+   want a human-readable path (e.g. to show in a text field) can use the
+   first argument; callers that want to upload directly into the exact
+   folder the user picked -- including a folder that already existed,
+   like a top-level "Research Papers" folder -- should upload straight
+   into folderId instead of re-resolving the path by name, which would
+   otherwise re-create it nested under whatever app-specific root the
+   caller normally defaults to. ─────── */
 const DrivePicker = (function () {
   let overlay = null;
   let state = null; // { token, stack: [{id,name}], onChoose }
@@ -232,9 +237,14 @@ const DrivePicker = (function () {
     document.getElementById("drvPkChooseBtn").addEventListener("click", () => {
       if (!state) return;
       const path = state.stack.map((s) => s.name).join("/");
+      const folderId = state.stack[state.stack.length - 1].id;
       const cb = state.onChoose;
       close();
-      if (cb) cb(path);
+      // Pass the REAL folder's id along with the display path, so callers can
+      // upload straight into the exact folder the user picked (e.g. an existing
+      // top-level "Research Papers" folder) instead of re-creating it by name
+      // nested under some app-specific wrapper folder.
+      if (cb) cb(path, folderId);
     });
     document.getElementById("drvPkNewBtn").addEventListener("click", createFolder);
     document.getElementById("drvPkNewName").addEventListener("keydown", (e) => { if (e.key === "Enter") createFolder(); });

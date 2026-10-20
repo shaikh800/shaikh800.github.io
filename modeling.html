@@ -462,6 +462,7 @@
             <div class="path-input-wrap" style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);overflow:hidden;padding:0 8px;margin-bottom:8px;">
               <i class="fas fa-folder-open" style="color:var(--muted);font-size:13px;margin:0 6px;"></i>
               <input type="text" id="w-drive-path" placeholder="Optional: custom folder path, e.g. Render / Hero Shots" style="border:none;outline:none;background:transparent;padding:10px 6px;flex:1;box-shadow:none !important;font-family:monospace;font-size:12.5px;min-width:0;">
+              <input type="hidden" id="w-drive-folder-id">
               <button type="button" id="w-browse-drive-btn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
             </div>
             <p style="font-size:11px;color:var(--muted);margin:-4px 0 8px;">Leave blank to file under the category above, or pick/create a folder below.</p>
@@ -672,7 +673,7 @@
       return folder.id;
     }
 
-    async function uploadWorkFileToDrive(file, category, accessMode, pathOverride) {
+    async function uploadWorkFileToDrive(file, category, accessMode, pathOverride, folderIdOverride) {
       const token = await getDriveToken();
       const mode = accessMode === 'view' ? 'view' : 'preview'; // default: view only
 
@@ -681,17 +682,26 @@
       const txt  = document.getElementById('work-drive-progress-text');
       if (prog) { prog.classList.add('show'); fill.style.width = '10%'; txt.textContent = 'Connecting to Drive...'; }
 
-      let parentId = await findOrCreateFolder('3D Portfolio', 'root', token);
-      // A path typed or picked via Browse Drive wins over the category dropdown,
-      // and may be several levels deep (e.g. "Render / Hero Shots").
-      const folders = (pathOverride && pathOverride.trim())
-        ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
-        : [category || 'Other'];
-      if (!folders.length) folders.push(category || 'Other');
-      for (const folderName of folders) {
-        parentId = await findOrCreateFolder(folderName, parentId, token);
+      let parentId;
+      if (folderIdOverride) {
+        // Picked an exact folder via Browse Drive (anywhere in the uploader's
+        // own Drive, including a pre-existing top-level folder) -- upload
+        // straight into it, no re-creation / re-nesting by name.
+        parentId = folderIdOverride;
+        if (fill) { fill.style.width = '35%'; txt.textContent = 'Accessing your chosen folder...'; }
+      } else {
+        parentId = await findOrCreateFolder('3D Portfolio', 'root', token);
+        // A path typed by hand wins over the category dropdown, and may be
+        // several levels deep (e.g. "Render / Hero Shots").
+        const folders = (pathOverride && pathOverride.trim())
+          ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
+          : [category || 'Other'];
+        if (!folders.length) folders.push(category || 'Other');
+        for (const folderName of folders) {
+          parentId = await findOrCreateFolder(folderName, parentId, token);
+        }
+        if (fill) { fill.style.width = '35%'; txt.textContent = `Accessing folder: ${folders.join(' / ')}...`; }
       }
-      if (fill) { fill.style.width = '35%'; txt.textContent = `Accessing folder: ${folders.join(' / ')}...`; }
 
       const meta = JSON.stringify({ name: file.name, parents: [parentId] });
       const boundary = '-------modeling_upload_boundary';
@@ -1025,8 +1035,9 @@
       try {
         const category = document.getElementById('w-cat').value || 'Other';
         const pathOverride = document.getElementById('w-drive-path').value;
+        const folderIdOverride = document.getElementById('w-drive-folder-id').value;
         const accessMode = document.querySelector('input[name="work-drive-access"]:checked').value;
-        const result = await uploadWorkFileToDrive(file, category, accessMode, pathOverride);
+        const result = await uploadWorkFileToDrive(file, category, accessMode, pathOverride, folderIdOverride);
         pendingDriveUpload = { fileId: result.fileId, viewLink: result.viewLink, name: file.name, access: result.access };
         document.getElementById('w-drive-link').value = '';
         status.textContent = `Uploaded: ${file.name} \u2713`; status.className = 'file-status ok';
@@ -1043,18 +1054,24 @@
       if (this.value.trim()) pendingDriveUpload = null; // a pasted link overrides a pending upload
     });
 
-    // Browse Drive button -- same shared DrivePicker used on Civil/Research,
-    // rooted at this uploader's own "3D Portfolio" folder.
+    // Browse Drive button -- same shared DrivePicker used on Civil/Research.
+    // Rooted at the real Drive root (My Drive) so an uploader can see and pick
+    // folders that already exist there, not just subfolders of the app's own
+    // "3D Portfolio" folder. Picking a folder stores its real id, so the
+    // upload goes straight into that exact folder instead of recreating it by
+    // name somewhere else.
     document.getElementById('w-browse-drive-btn').addEventListener('click', async () => {
       const btn = document.getElementById('w-browse-drive-btn');
       const orig = btn.innerHTML;
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting…';
       try {
         const token = await getDriveToken();
-        const rootId = await findOrCreateFolder('3D Portfolio', 'root', token);
         DrivePicker.open({
-          token, rootId, rootLabel: '3D Portfolio',
-          onChoose: (path) => { document.getElementById('w-drive-path').value = path; }
+          token, rootId: 'root', rootLabel: 'My Drive',
+          onChoose: (path, folderId) => {
+            document.getElementById('w-drive-path').value = path;
+            document.getElementById('w-drive-folder-id').value = folderId || '';
+          }
         });
       } catch (e) {
         alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
@@ -1062,10 +1079,15 @@
         btn.disabled = false; btn.innerHTML = orig;
       }
     });
+    // Typing a path by hand clears any picked folder id -- it means "build/find
+    // this by name" again, not "use the folder I browsed to".
+    document.getElementById('w-drive-path').addEventListener('input', () => {
+      document.getElementById('w-drive-folder-id').value = '';
+    });
 
     /* ── ADD PROJECT ── */
     function resetForm() {
-      ['w-title','w-desc','w-tool','w-link','w-market-link','w-img-url','w-drive-link','w-drive-path'].forEach(id => document.getElementById(id).value = '');
+      ['w-title','w-desc','w-tool','w-link','w-market-link','w-img-url','w-drive-link','w-drive-path','w-drive-folder-id'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('w-cat').value = 'Render';
       document.getElementById('edit-id').value = '';
       document.getElementById('thumb-preview').classList.remove('show');

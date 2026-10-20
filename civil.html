@@ -504,6 +504,7 @@
           <div class="path-input-wrap">
             <i class="fas fa-folder-open"></i>
             <input type="text" id="r-drive-path" placeholder="e.g. CE 501 / Books">
+            <input type="hidden" id="r-drive-folder-id">
             <button type="button" id="r-browse-drive-btn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
           </div>
           <div class="path-suggestions" id="path-suggestions">
@@ -904,7 +905,7 @@
       return folder.id;
     }
 
-    async function uploadFileToDrive(file, pathString, accessMode) {
+    async function uploadFileToDrive(file, pathString, accessMode, folderIdOverride) {
       const token = await getDriveToken();
       
       const prog = document.getElementById('drive-progress');
@@ -912,24 +913,33 @@
       const txt  = document.getElementById('drive-progress-text');
       prog.classList.add('show'); fill.style.width = '10%'; txt.textContent = 'Connecting to Drive...';
 
-      let currentParentId = await findOrCreateFolder('Civil Engineering', 'root', token);
-      
-      // Parse the custom folder path
-      const folders = pathString.split('/').map(f => f.trim()).filter(f => f);
-      if (folders.length === 0) folders.push(`Semester ${activeSem}`); // safety fallback
+      let finalFolderId;
+      if (folderIdOverride) {
+        // Picked an exact folder via Browse Drive (anywhere in the admin's own
+        // Drive, including a pre-existing top-level folder) -- upload straight
+        // into it, no re-creation / re-nesting under Civil Engineering.
+        finalFolderId = folderIdOverride;
+        fill.style.width = '40%'; txt.textContent = 'Accessing your chosen folder...';
+      } else {
+        let currentParentId = await findOrCreateFolder('Civil Engineering', 'root', token);
 
-      let step = 30 / folders.length;
-      let currentProg = 10;
+        // Parse the custom folder path
+        const folders = pathString.split('/').map(f => f.trim()).filter(f => f);
+        if (folders.length === 0) folders.push(`Semester ${activeSem}`); // safety fallback
 
-      for (const folderName of folders) {
-        currentParentId = await findOrCreateFolder(folderName, currentParentId, token);
-        currentProg += step;
-        fill.style.width = currentProg + '%'; 
-        txt.textContent = `Accessing folder: ${folderName}...`;
+        let step = 30 / folders.length;
+        let currentProg = 10;
+
+        for (const folderName of folders) {
+          currentParentId = await findOrCreateFolder(folderName, currentParentId, token);
+          currentProg += step;
+          fill.style.width = currentProg + '%'; 
+          txt.textContent = `Accessing folder: ${folderName}...`;
+        }
+
+        fill.style.width = '40%'; txt.textContent = 'Uploading file...';
+        finalFolderId = currentParentId;
       }
-
-      fill.style.width = '40%'; txt.textContent = 'Uploading file...';
-      const finalFolderId = currentParentId;
 
       // Multipart upload
       const meta = JSON.stringify({ name: file.name, parents: [finalFolderId] });
@@ -1271,25 +1281,36 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
     });
 
-    // Browse Drive button -- opens the shared DrivePicker rooted at this page's
-    // own upload folder so the uploader can see / reuse / create real folders
-    // instead of blindly typing a path.
+    // Browse Drive button -- opens the shared DrivePicker rooted at the real
+    // Drive root (My Drive), so the uploader can see and pick a folder that
+    // already exists there, not just subfolders of the app's own "Civil
+    // Engineering" folder. Picking a folder stores its real id, so the file
+    // goes straight into that exact folder instead of being recreated by name
+    // nested under "Civil Engineering / Semester X".
     document.getElementById('r-browse-drive-btn').addEventListener('click', async () => {
       const btn = document.getElementById('r-browse-drive-btn');
       const orig = btn.innerHTML;
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting…';
       try {
         const token = await getDriveToken();
-        const rootId = await findOrCreateFolder('Civil Engineering', 'root', token);
         DrivePicker.open({
-          token, rootId, rootLabel: 'Civil Engineering',
-          onChoose: (path) => { document.getElementById('r-drive-path').value = path; }
+          token, rootId: 'root', rootLabel: 'My Drive',
+          onChoose: (path, folderId) => {
+            document.getElementById('r-drive-path').value = path;
+            document.getElementById('r-drive-folder-id').value = folderId || '';
+          }
         });
       } catch (e) {
         alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
       } finally {
         btn.disabled = false; btn.innerHTML = orig;
       }
+    });
+    // Typing a path by hand clears any picked folder id -- it means "build/find
+    // this by name under Civil Engineering / Semester X" again, not "use the
+    // folder I browsed to".
+    document.getElementById('r-drive-path').addEventListener('input', () => {
+      document.getElementById('r-drive-folder-id').value = '';
     });
 
     // Path Builder Click Logic
@@ -1299,6 +1320,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       // Clear button
       if (e.target.closest('.clear-path')) {
         input.value = '';
+        document.getElementById('r-drive-folder-id').value = ''; // back to Semester X / General
         return;
       }
 
@@ -1325,6 +1347,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
 
       // rebuild path
       input.value = parts.join('/');
+      document.getElementById('r-drive-folder-id').value = ''; // chips build a name path, not a picked folder
     });
 
     // File drop zone
@@ -1357,6 +1380,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       document.getElementById('r-url').value   = '';
       document.getElementById('r-gdrive').value = '';
       document.getElementById('r-drive-path').value = ''; // Default path
+      document.getElementById('r-drive-folder-id').value = '';
       document.getElementById('gdrive-detected').style.display = 'none';
       document.getElementById('file-status').textContent = '';
       document.getElementById('drive-progress').classList.remove('show');
@@ -1447,7 +1471,8 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
           const rawMode = document.querySelector('input[name="upload-access"]:checked').value;
           isHidden = (rawMode === 'private');
           const mode = isHidden ? 'preview' : rawMode;
-          const result = await uploadFileToDrive(_pendingFile, folderPath, mode);
+          const pickedFolderId = document.getElementById('r-drive-folder-id').value;
+          const result = await uploadFileToDrive(_pendingFile, folderPath, mode, pickedFolderId);
           src = result.embedUrl;
         } catch (err) {
           console.error(err);
