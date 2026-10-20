@@ -311,6 +311,8 @@
     .admin-fab:hover { transform: scale(1.1); }
     .admin-fab.active { background: var(--blue); }
     #modal-admin { z-index: 2200; }
+    .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .browse-drive-btn:hover { background: rgba(15,157,88,0.08); border-color: #0f9d58; }
   </style>
 </head>
 <body>
@@ -532,6 +534,14 @@
                 <option value="private">Private — only me &amp; admin</option>
                 <option value="public">Public — everyone can see</option>
               </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Folder path <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — overrides the category folder above)</span></label>
+            <div class="path-input-wrap" style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);overflow:hidden;padding:0 8px;">
+              <i class="fas fa-folder-open" style="color:var(--muted);font-size:13px;margin:0 6px;"></i>
+              <input type="text" id="upDrivePath" placeholder="e.g. Dataset / 2026" style="border:none;outline:none;background:transparent;padding:10px 6px;flex:1;box-shadow:none !important;font-family:monospace;font-size:12.5px;min-width:0;">
+              <button type="button" id="upBrowseDriveBtn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
             </div>
           </div>
           <button class="btn primary sm" id="upSubmitBtn"><i class="fas fa-cloud-arrow-up"></i> Upload</button>
@@ -891,7 +901,7 @@
     async function pushToGitHub() {
       const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, pendingRequests, geminiCycleStart, geminiCycleEnd, geminiMonthlyFee, updated: new Date().toISOString() };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-      const token = sessionStorage.getItem('civil_gh_token');
+      const token = localStorage.getItem('site_gh_token');
       if (!token) return { ok: false, reason: 'no-token' };
       try {
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
@@ -929,7 +939,7 @@
     // Saves a change by whichever path can actually reach GitHub right now: this
     // browser's own admin token if it has one, otherwise the sync Worker above.
     async function syncChange(action, payload) {
-      if (sessionStorage.getItem('civil_gh_token')) return pushToGitHub();
+      if (localStorage.getItem('site_gh_token')) return pushToGitHub();
       return syncWrite(action, payload);
     }
 
@@ -1193,11 +1203,19 @@
         setUploadStatus('Your sign-in expired — click Sign in with Google again, then retry.', 'err');
         return;
       }
+      const pathOverride = document.getElementById('upDrivePath').value;
       setUploadStatus('Uploading to your Drive…', '');
       try {
         const token = currentUser.token;
         let parentId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
-        parentId = await findOrCreateFolder(category, parentId, token);
+        // A path typed or picked via Browse Drive wins over the category dropdown.
+        const folders = (pathOverride && pathOverride.trim())
+          ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
+          : [category];
+        if (!folders.length) folders.push(category);
+        for (const folderName of folders) {
+          parentId = await findOrCreateFolder(folderName, parentId, token);
+        }
         const meta = JSON.stringify({ name: file.name, parents: [parentId] });
         const boundary = '-------research_upload_boundary';
         const bodyStart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`;
@@ -1220,7 +1238,7 @@
           date: new Date().toISOString()
         };
         uploads.unshift(newUpload);
-        fileInput.value = ''; document.getElementById('upTitle').value = '';
+        fileInput.value = ''; document.getElementById('upTitle').value = ''; document.getElementById('upDrivePath').value = '';
         setUploadStatus('Uploaded ✓', 'ok');
         renderUploads();
         await syncChange('addUpload', newUpload);
@@ -1283,6 +1301,29 @@
     document.getElementById('googleSigninBtn').addEventListener('click', signInWithGoogle);
     document.getElementById('teamReconnectBtn').addEventListener('click', signInWithGoogle);
     document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
+
+    // Browse Drive button -- same shared DrivePicker used on Civil/3D Portfolio,
+    // rooted at this uploader's own "Research Hub Uploads" folder.
+    document.getElementById('upBrowseDriveBtn').addEventListener('click', async () => {
+      if (!isAuthorizedUploader() || !currentUser || Date.now() > currentUser.expiry - 5000) {
+        alert('Sign in with Google first.'); return;
+      }
+      const btn = document.getElementById('upBrowseDriveBtn');
+      const orig = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting…';
+      try {
+        const token = currentUser.token;
+        const rootId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
+        DrivePicker.open({
+          token, rootId, rootLabel: 'Research Hub Uploads',
+          onChoose: (path) => { document.getElementById('upDrivePath').value = path; }
+        });
+      } catch (e) {
+        alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
+      } finally {
+        btn.disabled = false; btn.innerHTML = orig;
+      }
+    });
 
     /* ── Notices ── */
     let noticePage = 1;
@@ -1720,7 +1761,7 @@
         document.getElementById('panel-access').hidden = true;
         document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       } else {
-        const savedToken = sessionStorage.getItem('civil_gh_token');
+        const savedToken = localStorage.getItem('site_gh_token');
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
         document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       }
@@ -1773,7 +1814,7 @@
     }
     document.getElementById('research-gh-token').addEventListener('input', e => {
       const val = e.target.value.trim();
-      sessionStorage.setItem('civil_gh_token', val);
+      localStorage.setItem('site_gh_token', val);
       clearTimeout(ghVerifyTimer);
       if (!val) { updateGhTokenStatus('', ''); return; }
       ghVerifyTimer = setTimeout(() => verifyGhToken(val), 700);
@@ -1782,11 +1823,11 @@
     // and give a manual button — tapping Check always works no matter how the value got there.
     document.getElementById('research-gh-token').addEventListener('blur', e => {
       const val = e.target.value.trim();
-      if (val) { sessionStorage.setItem('civil_gh_token', val); verifyGhToken(val); }
+      if (val) { localStorage.setItem('site_gh_token', val); verifyGhToken(val); }
     });
     document.getElementById('ghTokenCheckBtn').addEventListener('click', () => {
       const val = document.getElementById('research-gh-token').value.trim();
-      sessionStorage.setItem('civil_gh_token', val);
+      localStorage.setItem('site_gh_token', val);
       verifyGhToken(val);
     });
     function exitToGate() {

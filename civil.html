@@ -155,6 +155,8 @@
     .path-input-wrap:focus-within { border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
     .path-input-wrap i { color: var(--muted); font-size: 13px; margin: 0 6px; }
     .path-input-wrap input { border: none; outline: none; background: transparent; padding: 10px 6px; flex: 1; box-shadow: none !important; font-family: monospace; font-size: 13px; }
+    .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .browse-drive-btn:hover { background: rgba(15,157,88,0.08); border-color: #0f9d58; }
     .path-suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .path-chip {
       padding: 5px 12px; background: var(--surface); border: 1px solid var(--line);
@@ -502,6 +504,7 @@
           <div class="path-input-wrap">
             <i class="fas fa-folder-open"></i>
             <input type="text" id="r-drive-path" placeholder="e.g. CE 501 / Books">
+            <button type="button" id="r-browse-drive-btn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
           </div>
           <div class="path-suggestions" id="path-suggestions">
             <span class="path-chip"><i class="fas fa-folder"></i> CE 501</span>
@@ -675,7 +678,7 @@
     }
 
     async function pushToGitHub() {
-      const token = sessionStorage.getItem('civil_gh_token');
+      const token = localStorage.getItem('site_gh_token');
       if (!token) return;
       const data = { semesters: loadSems(), notices: loadNotices(), updated: new Date().toISOString() };
       try {
@@ -811,6 +814,10 @@
       if (adminMode) { adminMode = false; siteAdminLogout(); applyAdmin(); toast('Admin mode off', 'info'); return; }
       document.getElementById('admin-pass').value = '';
       document.getElementById('admin-error').style.display = 'none';
+      // GitHub token persists in localStorage once entered, so it doesn't need
+      // to be retyped at every admin login (it used to live in sessionStorage,
+      // which is wiped on every browser restart -- that silently broke saves).
+      document.getElementById('admin-gh-token').value = localStorage.getItem('site_gh_token') || '';
       openModal('modal-admin');
       setTimeout(() => document.getElementById('admin-pass').focus(), 300);
     });
@@ -824,7 +831,7 @@
       if (result.ok) {
         adminMode = true;
         const ghToken = document.getElementById('admin-gh-token').value.trim();
-        if (ghToken) sessionStorage.setItem('civil_gh_token', ghToken);
+        if (ghToken) localStorage.setItem('site_gh_token', ghToken);
         applyAdmin(); closeModal('modal-admin');
         toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
       } else {
@@ -1262,6 +1269,27 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       const tab = e.target.closest('.form-tab'); if(!tab) return;
       document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t===tab));
       document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.tab));
+    });
+
+    // Browse Drive button -- opens the shared DrivePicker rooted at this page's
+    // own upload folder so the uploader can see / reuse / create real folders
+    // instead of blindly typing a path.
+    document.getElementById('r-browse-drive-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('r-browse-drive-btn');
+      const orig = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting…';
+      try {
+        const token = await getDriveToken();
+        const rootId = await findOrCreateFolder('Civil Engineering', 'root', token);
+        DrivePicker.open({
+          token, rootId, rootLabel: 'Civil Engineering',
+          onChoose: (path) => { document.getElementById('r-drive-path').value = path; }
+        });
+      } catch (e) {
+        alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
+      } finally {
+        btn.disabled = false; btn.innerHTML = orig;
+      }
     });
 
     // Path Builder Click Logic

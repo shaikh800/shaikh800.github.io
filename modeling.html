@@ -259,6 +259,8 @@
       #works-container { max-width:100%; }
       .form-row { grid-template-columns:1fr; }
     }
+    .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .browse-drive-btn:hover { background: rgba(15,157,88,0.08); border-color: #0f9d58; }
   </style>
 </head>
 <body>
@@ -457,6 +459,12 @@
             <p style="font-size:11px;color:var(--muted);margin-top:4px;">Drive → Share → copy the link → paste it here.</p>
           </div>
           <div class="dsrc-panel" id="file-upload-panel">
+            <div class="path-input-wrap" style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);overflow:hidden;padding:0 8px;margin-bottom:8px;">
+              <i class="fas fa-folder-open" style="color:var(--muted);font-size:13px;margin:0 6px;"></i>
+              <input type="text" id="w-drive-path" placeholder="Optional: custom folder path, e.g. Render / Hero Shots" style="border:none;outline:none;background:transparent;padding:10px 6px;flex:1;box-shadow:none !important;font-family:monospace;font-size:12.5px;min-width:0;">
+              <button type="button" id="w-browse-drive-btn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
+            </div>
+            <p style="font-size:11px;color:var(--muted);margin:-4px 0 8px;">Leave blank to file under the category above, or pick/create a folder below.</p>
             <div class="file-drop-zone" id="work-file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
               <p>Click to upload — goes to Drive via your Google account</p>
@@ -576,7 +584,7 @@
     }
 
     async function pushToGitHub() {
-      const token = sessionStorage.getItem('modeling_gh_token');
+      const token = localStorage.getItem('site_gh_token');
       if (!token) return;
       setSyncStatus(false, true);
       const data = { works: loadWorks(), updated: new Date().toISOString() };
@@ -664,7 +672,7 @@
       return folder.id;
     }
 
-    async function uploadWorkFileToDrive(file, category, accessMode) {
+    async function uploadWorkFileToDrive(file, category, accessMode, pathOverride) {
       const token = await getDriveToken();
       const mode = accessMode === 'view' ? 'view' : 'preview'; // default: view only
 
@@ -674,8 +682,16 @@
       if (prog) { prog.classList.add('show'); fill.style.width = '10%'; txt.textContent = 'Connecting to Drive...'; }
 
       let parentId = await findOrCreateFolder('3D Portfolio', 'root', token);
-      parentId = await findOrCreateFolder(category || 'Other', parentId, token);
-      if (fill) { fill.style.width = '35%'; txt.textContent = `Accessing folder: ${category || 'Other'}...`; }
+      // A path typed or picked via Browse Drive wins over the category dropdown,
+      // and may be several levels deep (e.g. "Render / Hero Shots").
+      const folders = (pathOverride && pathOverride.trim())
+        ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
+        : [category || 'Other'];
+      if (!folders.length) folders.push(category || 'Other');
+      for (const folderName of folders) {
+        parentId = await findOrCreateFolder(folderName, parentId, token);
+      }
+      if (fill) { fill.style.width = '35%'; txt.textContent = `Accessing folder: ${folders.join(' / ')}...`; }
 
       const meta = JSON.stringify({ name: file.name, parents: [parentId] });
       const boundary = '-------modeling_upload_boundary';
@@ -779,6 +795,9 @@
       openModal('modal-admin');
       document.getElementById('admin-pass').value = '';
       document.getElementById('admin-error').style.display = 'none';
+      // GitHub token persists in localStorage once entered (shared with the other
+      // pages), so it doesn't need to be retyped at every admin login.
+      document.getElementById('admin-gh-token').value = localStorage.getItem('site_gh_token') || '';
       setTimeout(() => document.getElementById('admin-pass').focus(), 300);
     });
     document.getElementById('admin-login-btn').addEventListener('click', async () => {
@@ -791,7 +810,7 @@
       if (result.ok) {
         adminMode = true;
         const ghToken = document.getElementById('admin-gh-token').value.trim();
-        if (ghToken) sessionStorage.setItem('modeling_gh_token', ghToken);
+        if (ghToken) localStorage.setItem('site_gh_token', ghToken);
         applyAdmin(); closeModal('modal-admin');
         toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
       } else {
@@ -1005,8 +1024,9 @@
       status.textContent = 'Uploading to your Drive\u2026'; status.className = 'file-status loading';
       try {
         const category = document.getElementById('w-cat').value || 'Other';
+        const pathOverride = document.getElementById('w-drive-path').value;
         const accessMode = document.querySelector('input[name="work-drive-access"]:checked').value;
-        const result = await uploadWorkFileToDrive(file, category, accessMode);
+        const result = await uploadWorkFileToDrive(file, category, accessMode, pathOverride);
         pendingDriveUpload = { fileId: result.fileId, viewLink: result.viewLink, name: file.name, access: result.access };
         document.getElementById('w-drive-link').value = '';
         status.textContent = `Uploaded: ${file.name} \u2713`; status.className = 'file-status ok';
@@ -1023,9 +1043,29 @@
       if (this.value.trim()) pendingDriveUpload = null; // a pasted link overrides a pending upload
     });
 
+    // Browse Drive button -- same shared DrivePicker used on Civil/Research,
+    // rooted at this uploader's own "3D Portfolio" folder.
+    document.getElementById('w-browse-drive-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('w-browse-drive-btn');
+      const orig = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Connecting…';
+      try {
+        const token = await getDriveToken();
+        const rootId = await findOrCreateFolder('3D Portfolio', 'root', token);
+        DrivePicker.open({
+          token, rootId, rootLabel: '3D Portfolio',
+          onChoose: (path) => { document.getElementById('w-drive-path').value = path; }
+        });
+      } catch (e) {
+        alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
+      } finally {
+        btn.disabled = false; btn.innerHTML = orig;
+      }
+    });
+
     /* ── ADD PROJECT ── */
     function resetForm() {
-      ['w-title','w-desc','w-tool','w-link','w-market-link','w-img-url','w-drive-link'].forEach(id => document.getElementById(id).value = '');
+      ['w-title','w-desc','w-tool','w-link','w-market-link','w-img-url','w-drive-link','w-drive-path'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('w-cat').value = 'Render';
       document.getElementById('edit-id').value = '';
       document.getElementById('thumb-preview').classList.remove('show');
