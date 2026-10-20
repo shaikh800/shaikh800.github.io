@@ -7,11 +7,11 @@
       "id": 1,
       "name": "Md. Shaikh Alam (You)",
       "email": "md.shaikh.alam.007@gmail.com",
-      "initials": "MS",
+      "initials": "MD",
       "role": "admin",
       "view": true,
       "download": true,
-      "whatsapp": "",
+      "whatsapp": "+8801700000000",
       "photo": ""
     }
   ],
@@ -30,5 +30,5 @@
   "geminiCycleStart": "",
   "geminiCycleEnd": "",
   "geminiMonthlyFee": 0,
-  "updated": "2026-10-20T19:25:43.257684Z"
+  "updated": "2026-10-20T19:26:05.799Z"
 }
