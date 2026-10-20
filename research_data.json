@@ -11,7 +11,7 @@
       "role": "admin",
       "view": true,
       "download": true,
-      "whatsapp": "+8801700000000",
+      "whatsapp": "",
       "photo": ""
     }
   ],
@@ -30,5 +30,5 @@
   "geminiCycleStart": "",
   "geminiCycleEnd": "",
   "geminiMonthlyFee": 0,
-  "updated": "2026-10-20T19:26:05.799Z"
+  "updated": "2026-10-20T19:26:15.532Z"
 }
