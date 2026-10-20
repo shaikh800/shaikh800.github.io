@@ -118,21 +118,42 @@ body::after {
 .brand small { display: block; margin-top: 2px; color: var(--muted); font-weight: 600; font-size: 11px; }
 
 .nav-toggle {
-  display: none; width: 40px; height: 40px;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 17px;
+  width: 40px; height: 40px;
   border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--surface); color: var(--ink); cursor: pointer;
 }
 
-.site-nav { display: flex; align-items: center; gap: 6px; }
+.nav-scrim {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+  opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease-out);
+  z-index: 1999;
+}
+.nav-scrim.is-open { opacity: 1; pointer-events: auto; }
+
+.site-nav {
+  position: fixed; top: 0; right: 0; bottom: 0; left: auto;
+  width: 78%; max-width: 280px; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+  padding: 20px 14px calc(20px + env(safe-area-inset-bottom, 0px));
+  border: none; border-left: 1px solid var(--line); border-radius: 0;
+  background: var(--surface); box-shadow: -14px 0 34px rgba(0,0,0,0.2);
+  transform: translateX(100%);
+  transition: transform 0.28s var(--ease-out);
+  z-index: 2000;
+}
+.site-nav.is-open { transform: translateX(0); }
 .site-nav a {
   display: inline-flex; align-items: center; gap: 8px;
-  min-height: 38px; padding: 0 14px; border-radius: var(--radius);
-  text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 600;
+  min-height: 46px; padding: 0 14px; border-radius: var(--radius);
+  text-decoration: none; color: var(--muted); font-size: 15px; font-weight: 600;
   transition: all 0.2s ease;
 }
 .site-nav a:hover, .site-nav a.is-active { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
 .site-nav .nav-cta { color: #fff; background: var(--blue); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2); }
 .site-nav .nav-cta:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
+body.nav-open { overflow: hidden; }
 
 /* ─── PAGE SHELL ─────────────────────────────────────────── */
 .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 60px 0; }
@@ -284,31 +305,8 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
     padding: 12px 0;
   }
   .brand small { display: none; }
-  .nav-toggle { display: inline-flex; align-items: center; justify-content: center; font-size: 17px; }
+  /* Nav toggle + drawer are now universal (same ⋮ system on desktop and mobile) — see the base .nav-toggle/.site-nav/.nav-scrim rules above. */
 
-  .nav-scrim {
-    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
-    opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease-out);
-    z-index: 1999;
-  }
-  .nav-scrim.is-open { opacity: 1; pointer-events: auto; }
-
-  .site-nav {
-    position: fixed; top: 0; right: 0; bottom: 0; left: auto;
-    width: 78%; max-width: 280px; overflow-y: auto;
-    flex-direction: column; align-items: stretch; gap: 2px;
-    padding: 20px 14px calc(20px + env(safe-area-inset-bottom, 0px));
-    border: none; border-left: 1px solid var(--line); border-radius: 0;
-    background: var(--surface); box-shadow: -14px 0 34px rgba(0,0,0,0.2);
-    transform: translateX(100%);
-    transition: transform 0.28s var(--ease-out);
-    z-index: 2000;
-  }
-  .site-nav.is-open { transform: translateX(0); }
-  .site-nav a { min-height: 46px; font-size: 15px; }
-
-  body.nav-open { overflow: hidden; }
-  
   .intro { min-height: auto; padding: 36px 0; display: block; }
   .intro-content { max-width: 100%; text-align: center; margin: 0 auto; }
   .intro-content .eyebrow { justify-content: center; }
@@ -335,7 +333,7 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   .contact-links a { flex: 1 1 100%; }
 }
 
-/* Mobile nav now lives in the .nav-scrim/.site-nav drawer under MOBILE RESPONSIVENESS above. */
+/* Nav drawer (⋮ toggle) is universal now — see the base .nav-toggle/.site-nav/.nav-scrim rules near the top. */
 /* ─── NEW AI UPDATES (CIVIL FEATURED & TOOLS) ───────────────── */
 .civil-quick-strip { display: flex; gap: 8px; flex-wrap: wrap; }
 .civil-quick-link {
