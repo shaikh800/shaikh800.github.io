@@ -65,6 +65,15 @@
     .nav-sub a.admin-only { display: none; }
     body.admin-mode .nav-sub a.admin-only { display: inline-flex; }
 
+    /* ── My Account panel ── */
+    .acct-avatar-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .acct-avatar {
+      width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+      background: var(--surface-soft); color: var(--muted); border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+    }
+    .acct-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
     .r-panel { animation: fadeSlideUp .3s var(--ease-out) both; }
 
     /* ── Toolbar shared by panels ── */
@@ -208,6 +217,7 @@
     .member-table tr:last-child td { border-bottom: none; }
     .member-who { display: flex; align-items: center; gap: 10px; }
     .chat-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .chat-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
     .role-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
     .role-pill.admin { background: rgba(37,99,235,0.1); color: var(--blue); }
     .role-pill.member { background: var(--surface-soft); color: var(--muted); }
@@ -406,6 +416,7 @@
             <a href="research.html#uploads">Team Uploads</a>
             <a href="research.html#notices">Notice Board</a>
             <a href="research.html#gemini">Gemini</a>
+            <a href="research.html#account">My Account</a>
             <a href="research.html#access" class="admin-only">Drive &amp; Access</a>
           </div>
         </div>
@@ -440,6 +451,7 @@
         <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
         <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini <span class="count due" id="geminiDueBadge" style="display:none;"></span></button>
+        <button class="r-tab" data-tab="account"><i class="fas fa-user-gear"></i> My Account</button>
           <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
         </div>
         <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
@@ -590,6 +602,49 @@
         </div>
       </div>
 
+      <!-- ══ MY ACCOUNT PANEL (every signed-in user) ══ -->
+      <div class="r-panel" id="panel-account" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>My Account</h2>
+            <p>Your name, photo and WhatsApp number — visible to the rest of the team.</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;max-width:420px;">
+          <div class="acct-avatar-row">
+            <div class="acct-avatar" id="acctAvatarPreview"><i class="fas fa-user"></i></div>
+            <div>
+              <button class="btn secondary sm" type="button" id="acctPhotoBtn"><i class="fas fa-camera"></i> Change photo</button>
+              <input type="file" id="acctPhotoInput" accept="image/*" style="display:none;">
+              <p style="font-size:11px;color:var(--muted);margin-top:6px;">JPG or PNG — a square photo looks best.</p>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:18px;">
+            <label>Name</label>
+            <input type="text" id="acctName" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="acctEmail" disabled>
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Number</label>
+            <input type="tel" id="acctWhatsapp" placeholder="e.g. +8801XXXXXXXXX">
+          </div>
+
+          <button class="btn primary sm" id="acctSaveBtn" type="button"><i class="fas fa-check"></i> Save changes</button>
+          <div class="upload-status" id="acctStatus"></div>
+        </div>
+
+        <div class="card" style="padding:16px 20px;max-width:420px;margin-top:16px;border-color:rgba(239,68,68,0.25);">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">Log out</div>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">Signs you out of the Research Hub on this device.</p>
+          <button class="btn secondary sm" id="acctLogoutBtn" type="button"><i class="fas fa-right-from-bracket"></i> Log out</button>
+        </div>
+      </div>
+
       <!-- ══ DRIVE & ACCESS PANEL (admin only) ══ -->
       <div class="r-panel admin-only" id="panel-access" hidden>
         <div class="r-toolbar">
@@ -696,6 +751,14 @@
     const GITHUB_BRANCH = 'main';
     const CACHE_KEY     = 'research_data_cache_v1';
 
+    // A member's browser has no GitHub token of its own, so writes it makes (its own
+    // profile, its own uploads, an access request) go through this small Cloudflare
+    // Worker instead of the GitHub API directly -- see tools/research-sync-worker/.
+    // Empty until deployed: syncWrite() below quietly no-ops (falls back to a local-only
+    // save) rather than erroring, so nothing breaks before this is wired up.
+    const SYNC_WORKER_URL = ''; // e.g. 'https://research-sync-worker.<your-subdomain>.workers.dev'
+    const SYNC_CLIENT_KEY = 'M-eYQsJn_Gsu5m-DYh3S2ZjjSWl_Hy-r';
+
     const GDRIVE_CLIENT_ID    = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
     const GDRIVE_UPLOAD_SCOPE = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 
@@ -732,6 +795,12 @@
     }
 
     function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function avatarHtml(m) {
+      const bg = m.role === 'admin' ? '' : 'background:#10b981;';
+      const initials = esc(m.initials || '?');
+      if (m.photo) return `<span class="chat-avatar" style="${bg}"><img src="${esc(m.photo)}" onerror="this.outerHTML='${initials}'"></span>`;
+      return `<span class="chat-avatar" style="${bg}">${initials}</span>`;
+    }
 
     /* ── Pagination (shared util) ── */
     function pagerRange(current, total) {
@@ -770,13 +839,27 @@
         }
       });
     });
+    function goToTab(tab) {
+      const tabs = ['files', 'uploads', 'notices', 'gemini', 'account'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
+      if (!tabs.includes(tab)) return;
+      const btn = document.querySelector('.r-tab[data-tab="' + tab + '"]');
+      if (btn) btn.click();
+    }
     window.addEventListener('hashchange', () => {
-      const h = (window.location.hash || '').replace('#', '');
-      const tabs = ['files', 'uploads', 'notices', 'gemini'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
-      if (tabs.includes(h)) {
-        const btn = document.querySelector('.r-tab[data-tab="' + h + '"]');
-        if (btn) btn.click();
-      }
+      goToTab((window.location.hash || '').replace('#', ''));
+    });
+    // The sidebar's own Research sub-links also switch tabs directly on click, instead of
+    // only through the 'hashchange' event above — a same-page click that lands on the hash
+    // it's already on (or anything else that keeps the hashchange event from firing) would
+    // otherwise leave the tab stuck with no visible reaction. This makes "Files" etc. in the
+    // sidebar work every time regardless of that.
+    document.querySelectorAll('.nav-sub a[href^="research.html#"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const tab = link.getAttribute('href').split('#')[1];
+        e.preventDefault();
+        history.pushState('', document.title, window.location.pathname + window.location.search + '#' + tab);
+        goToTab(tab);
+      });
     });
 
     /* ── GitHub shared storage (config + catalog — the files themselves live in Drive) ── */
@@ -825,6 +908,29 @@
         if (put.status === 401 || put.status === 403) return { ok: false, reason: 'bad-token' };
         return { ok: put.ok, reason: put.ok ? null : 'push-failed' };
       } catch (e) { return { ok: false, reason: 'network' }; }
+    }
+
+    // Writes one specific, limited change through the sync Worker -- for anyone without
+    // their own GitHub token (i.e. every member). See tools/research-sync-worker/.
+    async function syncWrite(action, payload) {
+      if (!SYNC_WORKER_URL) return { ok: false, reason: 'worker-not-configured' };
+      try {
+        const res = await fetch(SYNC_WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Client-Key': SYNC_CLIENT_KEY },
+          body: JSON.stringify({ action, payload }),
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok && data.ok === true, reason: data.error };
+      } catch (e) {
+        return { ok: false, reason: 'network' };
+      }
+    }
+    // Saves a change by whichever path can actually reach GitHub right now: this
+    // browser's own admin token if it has one, otherwise the sync Worker above.
+    async function syncChange(action, payload) {
+      if (sessionStorage.getItem('civil_gh_token')) return pushToGitHub();
+      return syncWrite(action, payload);
     }
 
     /* ── Drive browser — real Drive data, rendered as our own page (no iframe, no new tab) ── */
@@ -932,8 +1038,16 @@
       loadCurrentFolder();
     }
 
-    /* ── Google sign-in (used for gate entry as a Member, and for Team Uploads) ── */
+    /* ── Google sign-in (Team Uploads' own Drive auth, separate from the gate) ── */
     let _uploadTokenClient = null;
+    // True once this page load has actually completed a Drive-scope consent at least
+    // once. Only then is it safe to ask Google for a *silent* (prompt:'') token — before
+    // that, Google can't silently grant a scope nobody has agreed to yet, so a silent
+    // request just fails with no visible dialog at all. That's the bug this used to hit:
+    // the old code decided silent-vs-consent from whether the gate identity (currentUser)
+    // existed, which is true for every signed-in member/admin — so "Sign in with Google" /
+    // "Reconnect Google" always tried silently and looked like it did nothing ("cancelled").
+    let _driveAuthGranted = false;
     function initUploadAuth() {
       if (_uploadTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
       _uploadTokenClient = google.accounts.oauth2.initTokenClient({
@@ -957,11 +1071,20 @@
       });
     }
 
+    let _authInFlight = false; // guards against trySilentReauth and signInWithGoogle both
+                                // calling requestAccessToken on the same shared client at once
     async function signInWithGoogle() {
+      if (_authInFlight) return;
       const ready = await waitForTokenClient();
       if (!ready) { alert("Google sign-in didn't load — check your connection and try again."); return; }
+      _authInFlight = true;
       _uploadTokenClient.callback = async (resp) => {
-        if (resp.error) return;
+        _authInFlight = false;
+        if (resp.error) {
+          alert("Google sign-in was closed or blocked before it finished — tap Sign in with Google and complete the Google window to continue.");
+          return;
+        }
+        _driveAuthGranted = true;
         const token = resp.access_token;
         try {
           const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(r => r.json());
@@ -972,7 +1095,7 @@
         if (role === 'member') saveMemberProfile({ email: currentUser.email, name: currentUser.name, picture: currentUser.picture });
         renderTeamTab();
       };
-      _uploadTokenClient.requestAccessToken({ prompt: currentUser ? '' : 'consent' });
+      _uploadTokenClient.requestAccessToken({ prompt: _driveAuthGranted ? '' : 'consent' });
     }
     function signOutGoogle() {
       if (currentUser && currentUser.token && window.google && window.google.accounts) {
@@ -1017,15 +1140,22 @@
       enterAs(alreadyMember ? 'member' : 'pending');
     }
     async function trySilentReauth() {
+      // Nothing to silently refresh until Drive consent has actually been granted once
+      // this page load (see _driveAuthGranted above) — attempting it before that always
+      // fails instantly with no dialog, so there's no point trying, and it would also race
+      // with a manual "Sign in with Google" tap on the same shared token client.
+      if (!_driveAuthGranted || _authInFlight) return;
       const ready = await waitForTokenClient();
       if (!ready || !currentUser) return;
+      _authInFlight = true;
       _uploadTokenClient.callback = (resp) => {
+        _authInFlight = false;
         if (resp.error) return; // fine — they can still browse; uploading will ask them to reconnect
         currentUser.token = resp.access_token;
         currentUser.expiry = Date.now() + (resp.expires_in - 60) * 1000;
         renderTeamTab();
       };
-      try { _uploadTokenClient.requestAccessToken({ prompt: '' }); } catch (e) {}
+      try { _uploadTokenClient.requestAccessToken({ prompt: '' }); } catch (e) { _authInFlight = false; }
     }
 
     /* ── Drive upload helpers (uploader's own Drive, drive.file scope only) ── */
@@ -1083,16 +1213,17 @@
         if (visibility === 'public') {
           await driveApiCall('POST', `/files/${uploaded.id}/permissions`, { role: 'reader', type: 'anyone' }, token);
         }
-        uploads.unshift({
+        const newUpload = {
           id: uploaded.id, title, category, visibility,
           uploaderName: currentUser.name, uploaderEmail: currentUser.email,
           link: `https://drive.google.com/file/d/${uploaded.id}/view`,
           date: new Date().toISOString()
-        });
+        };
+        uploads.unshift(newUpload);
         fileInput.value = ''; document.getElementById('upTitle').value = '';
         setUploadStatus('Uploaded ✓', 'ok');
         renderUploads();
-        await pushToGitHub();
+        await syncChange('addUpload', newUpload);
       } catch (e) {
         setUploadStatus('Upload failed: ' + (e.message || 'try again'), 'err');
       }
@@ -1106,7 +1237,7 @@
       }
       uploads = uploads.filter(x => x.id !== id);
       renderUploads();
-      pushToGitHub();
+      syncChange('removeUpload', { email: (currentUser && currentUser.email) || '', id });
     }
     function visibleUploads() {
       return uploads.filter(u => u.visibility === 'public' || role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase()));
@@ -1281,7 +1412,7 @@
         }).join('');
         if (email === myEmail) myDueMonths = rowDueMonths;
         return `<tr>
-          <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
+          <td><div class="member-who">${avatarHtml(m)} ${esc(m.name)}</div></td>
           ${cells}
           <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
         </tr>`;
@@ -1304,6 +1435,91 @@
         if (dueBadge) dueBadge.style.display = 'none';
       }
     }
+
+    /* ── My Account (every signed-in user edits their own name/photo/WhatsApp) ── */
+    let _acctPendingPhoto = null; // data URL staged in the browser until Save is pressed
+
+    function myMemberRecord() {
+      const email = ((currentUser && currentUser.email) || '').toLowerCase();
+      if (!email) return null;
+      return members.find(m => (m.email || '').toLowerCase() === email) || null;
+    }
+
+    function renderAccountTab() {
+      const nameEl = document.getElementById('acctName');
+      if (!nameEl || !currentUser) return;
+      const me = myMemberRecord();
+      _acctPendingPhoto = null;
+      nameEl.value = (me && me.name) || currentUser.name || '';
+      document.getElementById('acctEmail').value = currentUser.email || '';
+      document.getElementById('acctWhatsapp').value = (me && me.whatsapp) || '';
+      const preview = document.getElementById('acctAvatarPreview');
+      const photo = (me && me.photo) || currentUser.picture || '';
+      preview.innerHTML = photo
+        ? `<img src="${esc(photo)}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'">`
+        : '<i class="fas fa-user"></i>';
+      const status = document.getElementById('acctStatus');
+      if (status) { status.textContent = ''; status.className = 'upload-status'; }
+    }
+
+    document.getElementById('acctPhotoBtn').addEventListener('click', () => document.getElementById('acctPhotoInput').click());
+    document.getElementById('acctPhotoInput').addEventListener('change', function () {
+      const file = this.files[0];
+      this.value = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Crop to a centred square and shrink — keeps every member's photo roughly
+          // the same size in the shared data file no matter what they upload.
+          const size = Math.min(img.width, img.height);
+          const canvas = document.createElement('canvas');
+          canvas.width = 160; canvas.height = 160;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 160, 160);
+          _acctPendingPhoto = canvas.toDataURL('image/jpeg', 0.85);
+          document.getElementById('acctAvatarPreview').innerHTML = `<img src="${_acctPendingPhoto}">`;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function saveAccountProfile() {
+      if (!currentUser) return;
+      const name = document.getElementById('acctName').value.trim();
+      const whatsapp = document.getElementById('acctWhatsapp').value.trim();
+      const statusEl = document.getElementById('acctStatus');
+      if (!name) { statusEl.textContent = 'Enter your name.'; statusEl.className = 'upload-status err'; return; }
+
+      const newPhoto = _acctPendingPhoto;
+      currentUser.name = name;
+      if (newPhoto) currentUser.picture = newPhoto;
+
+      const me = myMemberRecord();
+      if (me) {
+        me.name = name;
+        me.whatsapp = whatsapp;
+        me.initials = name.slice(0, 2).toUpperCase();
+        if (newPhoto) me.photo = newPhoto;
+      }
+      if (role === 'member') {
+        saveMemberProfile({ email: currentUser.email, name, picture: currentUser.picture || '' });
+      }
+      _acctPendingPhoto = null;
+      renderMembers(); renderGeminiTab(); renderTeamTab();
+
+      statusEl.textContent = 'Saving…'; statusEl.className = 'upload-status';
+      const result = await syncChange('updateProfile', { email: currentUser.email, name, whatsapp, photo: newPhoto || '' });
+      // Either way the change is saved for this device/browser right now (above). Once
+      // the sync Worker is deployed (tools/research-sync-worker/), a member's own save
+      // reaches the shared file straight away too, same as the admin's.
+      statusEl.textContent = result.ok ? 'Saved ✓' : 'Saved on this device ✓';
+      statusEl.className = 'upload-status ok';
+    }
+    document.getElementById('acctSaveBtn').addEventListener('click', saveAccountProfile);
+    document.getElementById('acctLogoutBtn').addEventListener('click', () => exitToGate());
 
     /* ── Drive & Access ── */
     function renderDriveStatus() {
@@ -1337,7 +1553,7 @@
       const body = document.getElementById('memberTableBody');
       body.innerHTML = members.map(m => `
         <tr>
-          <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${m.initials}</span> ${esc(m.name)}</div></td>
+          <td><div class="member-who">${avatarHtml(m)} ${esc(m.name)}</div></td>
           <td><span class="role-pill ${m.role}">${m.role === 'admin' ? 'Admin' : 'Member'}</span></td>
           <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.view ? 'on' : ''}" onclick="toggleMember(${m.id},'view')"></span>`}</td>
           <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.download ? 'on' : ''}" onclick="toggleMember(${m.id},'download')"></span>`}</td>
@@ -1366,7 +1582,7 @@
       const existing = pendingRequests.find(r => r.email === email);
       if (existing) { existing.name = name; existing.requestedAt = new Date().toISOString(); }
       else pendingRequests.push({ email, name, requestedAt: new Date().toISOString() });
-      pushToGitHub();
+      syncChange('addPendingRequest', { email, name });
     }
     function renderPendingRequests() {
       const box = document.getElementById('pendingRequestsBox');
@@ -1495,7 +1711,7 @@
         return;
       }
       const hashTab = (window.location.hash || '').replace('#', '');
-      const validTabs = ['files', 'uploads', 'notices', 'gemini'].concat(role === 'admin' ? ['access'] : []);
+      const validTabs = ['files', 'uploads', 'notices', 'gemini', 'account'].concat(role === 'admin' ? ['access'] : []);
       const initialTab = validTabs.includes(hashTab) ? hashTab : 'files';
       if (hashTab !== initialTab) {
         history.replaceState('', document.title, window.location.pathname + window.location.search + '#' + initialTab);
@@ -1508,7 +1724,7 @@
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
         document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       }
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
     }
     function renderPendingView() {
       if (!currentUser) return;
@@ -1573,7 +1789,7 @@
       sessionStorage.setItem('civil_gh_token', val);
       verifyGhToken(val);
     });
-    document.getElementById('switchViewBtn').addEventListener('click', () => {
+    function exitToGate() {
       if (role === 'admin') siteAdminLogout();
       if (role === 'member' || role === 'pending') clearMemberProfile();
       currentUser = null;
@@ -1581,7 +1797,8 @@
       applyAdminFab();
       showGateOptions();
       gateEl.style.display = 'flex';
-    });
+    }
+    document.getElementById('switchViewBtn').addEventListener('click', exitToGate);
 
     /* Add-notice modal wiring (modal markup added lazily via JS to keep page HTML short) */
     function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -1593,9 +1810,9 @@
     /* ── init ── */
     async function boot() {
       loadFromCache();         // instant paint from last-known data
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
       const freshPromise = fetchFromGitHub().then(() => {
-        renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
+        renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
       });
       if (siteIsAdmin()) { enterAs('admin'); return; } // already logged in elsewhere on the site this tab
       const cached = loadMemberProfile();
