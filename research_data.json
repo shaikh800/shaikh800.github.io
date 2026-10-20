@@ -26,9 +26,15 @@
   ],
   "uploads": [],
   "geminiPayments": {},
-  "pendingRequests": [],
+  "pendingRequests": [
+    {
+      "email": "turbo.researchers@gmail.com",
+      "name": "turbo.researchers",
+      "requestedAt": "2026-10-20T20:17:43.065Z"
+    }
+  ],
   "geminiCycleStart": "",
   "geminiCycleEnd": "",
   "geminiMonthlyFee": 0,
-  "updated": "2026-10-20T20:02:18.392Z"
+  "updated": "2026-10-20T20:17:43.065Z"
 }
