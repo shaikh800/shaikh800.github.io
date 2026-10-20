@@ -570,13 +570,13 @@
             </div>
             <button class="btn primary sm" onclick="saveGeminiCycle()"><i class="fas fa-check"></i> Save</button>
           </div>
-          <p style="font-size:11px;color:var(--muted);margin-top:8px;">খালি রাখলে শেষ ৬ মাস auto-দেখাবে। Fee সেট করলে প্রতি মাসে কে কত বাকি সেটাও হিসাব হবে।</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;">Leave the cycle blank to auto-show the last 6 months. Set a fee to work out who owes what each month.</p>
           <div id="geminiCycleStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;color:var(--muted);"></div>
         </div>
 
         <div id="geminiDueBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);margin-bottom:14px;">
           <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:18px;"></i>
-          <div><b>Due Payment:</b> <span class="due-amount">৳0</span> বাকি আছে — admin-কে জানিয়ে দিও।</div>
+          <div><b>Payment due</b> — <span class="due-months"></span></div>
         </div>
 
         <div id="geminiAdminTableWrap">
@@ -1229,7 +1229,7 @@
       const input = prompt(`Amount paid for ${key} (\u09f3):`, current || '');
       if (input === null) return;
       const amt = parseFloat(input);
-      if (isNaN(amt) || amt < 0) { alert('\u099f\u09be\u0995\u09be\u09b0 \u09aa\u09b0\u09bf\u09ae\u09be\u09a3 \u09a0\u09bf\u0995 \u09a8\u09be\u0964'); return; }
+      if (isNaN(amt) || amt < 0) { alert('Enter a valid amount.'); return; }
       if (!geminiPayments[email]) geminiPayments[email] = {};
       geminiPayments[email][key] = amt;
       renderGeminiTab();
@@ -1256,28 +1256,30 @@
       // has to guess who's paid; only admin can tap a cell to edit an amount.
       const hint = document.getElementById('geminiHint');
       if (hint) hint.textContent = canEdit
-        ? '\u098f\u0995\u099f\u09be \u09b8\u09c7\u09b2\u09c7 \u0995\u09cd\u09b2\u09bf\u0995 \u0995\u09b0\u09c7 \u09b8\u09c7\u0987 \u09ae\u09be\u09b8\u09c7 \u0993\u0987 \u09b8\u09a6\u09b8\u09cd\u09af \u0995\u09a4 \u099f\u09be\u0995\u09be \u09a6\u09bf\u09df\u09c7\u099b\u09c7 \u09b2\u09bf\u0996\u09c7 \u09a6\u09bf\u0993\u0964'
+        ? "Click a cell to enter how much that member paid for that month."
         : "Everyone can see who's paid each month \u2014 only the admin can edit amounts.";
 
       const head = document.getElementById('geminiTableHead');
       head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
       const body = document.getElementById('geminiTableBody');
-      let myTotalDue = 0;
+      let myDueMonths = [];
       const myEmail = ((currentUser && currentUser.email) || '').toLowerCase();
       body.innerHTML = members.map(m => {
         const email = (m.email || '').toLowerCase();
         const row = geminiPayments[email] || {};
         let totalDue = 0;
+        const rowDueMonths = [];
         const cells = months.map(mo => {
           const paid = row[mo.key] || 0;
           const due = Math.max(0, geminiMonthlyFee - paid);
           totalDue += due;
+          if (geminiMonthlyFee > 0 && due > 0) rowDueMonths.push(mo.label);
           const cls = geminiMonthlyFee > 0 ? (due <= 0 ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
           const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
           const clickAttr = canEdit ? ` onclick="setGeminiAmount('${esc(email)}','${mo.key}')"` : '';
           return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
         }).join('');
-        if (email === myEmail) myTotalDue = totalDue;
+        if (email === myEmail) myDueMonths = rowDueMonths;
         return `<tr>
           <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
           ${cells}
@@ -1285,11 +1287,18 @@
         </tr>`;
       }).join('');
 
+      // Simple, month-based due status: fully paid for a month -> that
+      // month just shows green in the table (done, nothing more to say).
+      // Anything still owed shows here as which months, not a running total.
       const dueBanner = document.getElementById('geminiDueBanner');
       const dueBadge  = document.getElementById('geminiDueBadge');
-      if (geminiMonthlyFee > 0 && myTotalDue > 0) {
-        if (dueBanner) { dueBanner.style.display = 'flex'; dueBanner.querySelector('.due-amount').textContent = `\u09f3${myTotalDue}`; }
-        if (dueBadge) { dueBadge.style.display = 'inline-flex'; dueBadge.textContent = '!'; }
+      if (myDueMonths.length > 0) {
+        const n = myDueMonths.length;
+        if (dueBanner) {
+          dueBanner.style.display = 'flex';
+          dueBanner.querySelector('.due-months').textContent = `${n} month${n > 1 ? 's' : ''} unpaid \u2014 ${myDueMonths.join(', ')}`;
+        }
+        if (dueBadge) { dueBadge.style.display = 'inline-flex'; dueBadge.textContent = String(n); }
       } else {
         if (dueBanner) dueBanner.style.display = 'none';
         if (dueBadge) dueBadge.style.display = 'none';

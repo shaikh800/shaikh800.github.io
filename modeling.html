@@ -365,7 +365,7 @@
             <i class="fas fa-file-import"></i> Import
             <input type="file" id="import-file" accept=".json" style="display:none;">
           </label>
-          <button class="btn secondary sm admin-actions" id="clear-data-btn" title="এই device-এর locally-saved data মুছে ফেলুন">
+          <button class="btn secondary sm admin-actions" id="clear-data-btn" title="Delete this device's locally-saved data">
             <i class="fas fa-trash-can"></i> Clear Device Data
           </button>
           <button class="btn primary sm admin-actions" id="add-work-btn">
@@ -440,32 +440,32 @@
         </div>
 
         <div class="form-group">
-          <label>Marketplace Link <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — BlenderMarket, Gumroad ইত্যাদি)</span></label>
+          <label>Marketplace Link <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — BlenderMarket, Gumroad, etc.)</span></label>
           <input type="url" id="w-market-link" placeholder="https://blendermarket.com/products/...">
         </div>
 
         <!-- Project file (Google Drive) -->
         <div class="form-group">
-          <label>Project File <span style="color:var(--muted);font-weight:500;font-size:11px;">(Google Drive — full-res render, video বা .blend)</span></label>
+          <label>Project File <span style="color:var(--muted);font-weight:500;font-size:11px;">(Google Drive — full-res render, video or .blend)</span></label>
           <div class="dsrc-tabs" id="file-src-tabs">
             <button class="dsrc-tab active" data-fpanel="file-link-panel" type="button">🔗 Drive Link</button>
             <button class="dsrc-tab" data-fpanel="file-upload-panel" type="button">📁 Upload to Drive</button>
           </div>
           <div class="dsrc-panel active" id="file-link-panel">
             <input type="url" id="w-drive-link" placeholder="https://drive.google.com/file/d/...">
-            <p style="font-size:11px;color:var(--muted);margin-top:4px;">Drive → Share → Link copy করে এখানে paste করো।</p>
+            <p style="font-size:11px;color:var(--muted);margin-top:4px;">Drive → Share → copy the link → paste it here.</p>
           </div>
           <div class="dsrc-panel" id="file-upload-panel">
             <div class="file-drop-zone" id="work-file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
-              <p>Click to upload — তোমার Google account দিয়ে Drive-এ যাবে</p>
+              <p>Click to upload — goes to Drive via your Google account</p>
               <input type="file" id="w-drive-file">
             </div>
             <div class="file-status" id="work-file-status"></div>
           </div>
           <div class="access-box">
             <div class="access-label">Access Control</div>
-            <label class="access-option"><input type="radio" name="work-drive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — Download বাটন থাকবে না</span></label>
+            <label class="access-option"><input type="radio" name="work-drive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — no download button</span></label>
             <label class="access-option"><input type="radio" name="work-drive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
           </div>
           <div class="drive-progress" id="work-drive-progress">
@@ -1189,7 +1189,7 @@
 
     /* ── EXPORT / IMPORT (JSON backup) ── */
     document.getElementById('clear-data-btn').addEventListener('click', () => {
-      if (!confirm('এই device-এর locally-saved সব project data মুছে যাবে — default 2টি seed project দেখাবে। Continue?')) return;
+      if (!confirm('This device\'s locally-saved project data will be deleted — the default 2 seed projects will show instead. Continue?')) return;
       localStorage.removeItem(STORE_KEY);
       renderWorks();
       toast('Device data cleared ✓', 'success');
@@ -1213,10 +1213,10 @@
           const data = JSON.parse(e.target.result);
           const works = data.works || data; // support both wrapped and raw array
           if (!Array.isArray(works)) { toast('Invalid backup file', 'error'); return; }
-          if (!confirm(`Import করলে ${works.length}টি project load হবে। Continue?`)) return;
+          if (!confirm(`Importing will load ${works.length} project${works.length===1?'':'s'}. Continue?`)) return;
           localStorage.setItem(STORE_KEY, JSON.stringify(works));
           renderWorks();
-          toast(`${works.length}টি project imported ✓`, 'success');
+          toast(`${works.length} project${works.length===1?'':'s'} imported \u2713`, 'success');
         } catch { toast('JSON parse error', 'error'); }
       };
       reader.readAsText(f);

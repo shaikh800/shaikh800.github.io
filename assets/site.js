@@ -21,6 +21,13 @@ if (navToggle && siteNav) {
     setNavOpen(false);
   });
   document.querySelectorAll(".site-nav a").forEach((link) => {
+    // A group's own label (Civil / 3D / Academy / Research) only toggles its
+    // dropdown — it's handled by the NAV ACCORDION block below. If this loop
+    // also closed the drawer on that same click, the whole sidebar would
+    // vanish the instant someone tapped a group label (the dropdown opens
+    // internally for a frame, then the drawer closes over it) — so it's
+    // excluded here and only real navigation links close the drawer.
+    if (link.closest(".nav-group-head")) return;
     link.addEventListener("click", () => setNavOpen(false));
   });
 }
