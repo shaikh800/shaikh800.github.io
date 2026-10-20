@@ -66,6 +66,43 @@ if (window.location.hash) {
 }
 
 
+/* ── SECTION FOCUS MODE (sidebar sub-links open just that one section) ──
+   When the page is reached via a hash that matches one of main.page's
+   direct <section id="..."> children (the way every sidebar dropdown
+   sub-link points), every other top-level section — including the page
+   hero — is hidden, so only that section's content shows. A small back
+   link lets you return to the full page. Visiting a page with no hash
+   still shows the normal full overview, unchanged. ─────────────────── */
+(function () {
+  const main = document.querySelector("main.page");
+  if (!main) return;
+  const sections = Array.from(main.children).filter((el) => el.tagName === "SECTION");
+  if (sections.length < 2) return;
+
+  const backBar = document.createElement("div");
+  backBar.className = "focus-backbar";
+  backBar.hidden = true;
+  backBar.innerHTML = '<a class="back-link" href="#"><i class="fas fa-arrow-left"></i> <span>Back to full page</span></a>';
+  main.insertBefore(backBar, main.firstChild);
+  backBar.querySelector("a").addEventListener("click", (e) => {
+    e.preventDefault();
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+    applySectionFocus();
+    window.scrollTo(0, 0);
+  });
+
+  function applySectionFocus() {
+    const hash = (window.location.hash || "").slice(1);
+    const target = hash && sections.find((sec) => sec.id === hash);
+    sections.forEach((sec) => { sec.hidden = Boolean(target) && sec !== target; });
+    backBar.hidden = !target;
+    if (target) target.scrollIntoView({ block: "start" });
+  }
+
+  window.addEventListener("hashchange", applySectionFocus);
+  applySectionFocus();
+})();
+
 /* ── SCROLL REVEAL ───────────────────────────────────────── */
 const observer = new IntersectionObserver(
   (entries) => {

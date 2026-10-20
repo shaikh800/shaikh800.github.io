@@ -363,7 +363,7 @@
           </div>
           <div class="nav-sub">
             <a href="civil.html#semester-section">Semester Resources</a>
-            <a href="notice.html">Notices</a>
+            <a href="notice.html#notice-section">Notices</a>
           </div>
         </div>
 
@@ -408,7 +408,7 @@
 
   <main class="page">
 
-    <section class="page-title reveal">
+    <section class="page-title reveal" id="research-hero">
       <h1>Research Hub</h1>
       <p class="lead">Browse shared files, upload your own papers or 3D work, and track notices — everything stored on Google Drive.</p>
       <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
@@ -766,6 +766,25 @@
         }
       });
     });
+    function applyResearchHeroFocus() {
+      const h = (window.location.hash || '').replace('#', '');
+      const tabs = ['files', 'uploads', 'notices', 'gemini'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
+      const focused = tabs.includes(h);
+      const hero = document.getElementById('research-hero');
+      if (hero) hero.hidden = focused;
+      let bar = document.getElementById('researchBackBar');
+      if (focused) {
+        if (!bar && hero) {
+          bar = document.createElement('div');
+          bar.className = 'focus-backbar';
+          bar.id = 'researchBackBar';
+          bar.innerHTML = '<a class="back-link" href="research.html"><i class="fas fa-arrow-left"></i> <span>Research Hub</span></a>';
+          hero.parentNode.insertBefore(bar, hero);
+        }
+      } else if (bar) {
+        bar.remove();
+      }
+    }
     window.addEventListener('hashchange', () => {
       const h = (window.location.hash || '').replace('#', '');
       const tabs = ['files', 'uploads', 'notices', 'gemini'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
@@ -773,6 +792,7 @@
         const btn = document.querySelector('.r-tab[data-tab="' + h + '"]');
         if (btn) btn.click();
       }
+      applyResearchHeroFocus();
     });
 
     /* ── GitHub shared storage (config + catalog — the files themselves live in Drive) ── */
@@ -1508,6 +1528,7 @@
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
         document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       }
+      applyResearchHeroFocus();
       renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
     }
     function renderPendingView() {

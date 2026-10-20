@@ -175,6 +175,21 @@ body::after {
 }
 .nav-sub a:hover, .nav-sub a.is-active { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
 
+/* [hidden] must always win, even over classes that set their own
+   display (e.g. .contact-strip { display:flex }) — otherwise toggling
+   the hidden attribute/property on them silently does nothing. */
+[hidden] { display: none !important; }
+
+/* ── SECTION FOCUS MODE back link ──────────────────────────── */
+.focus-backbar { margin-bottom: 20px; }
+.back-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  text-decoration: none; font-size: 13px; font-weight: 700; padding: 0;
+  font-family: inherit;
+}
+.back-link:hover { color: var(--blue); }
+
 body.nav-open { overflow: hidden; }
 
 /* ─── PAGE SHELL ─────────────────────────────────────────── */
