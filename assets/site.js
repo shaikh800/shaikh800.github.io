@@ -37,6 +37,63 @@ document.querySelectorAll(".nav-caret").forEach((btn) => {
   });
 });
 
+/* ── SECTION FOCUS MODE (sidebar sub-links open just that one section) ──
+   When the page is reached via a hash that matches one of main.page's
+   direct <section id="..."> children (the way every sidebar dropdown
+   sub-link points), every other top-level section — including the page
+   hero — is hidden, so only that section's content shows.
+   Civil / 3D / Academy declare data-default-section on <main.page>, so
+   they have no standalone "overview" page at all: a bare visit (no hash)
+   jumps straight into that default section instead, and there's no back
+   link, since there's no full page to go back to — only the sidebar's
+   sub-links move between sections. Pages without that attribute (Notice,
+   Research, Home) keep the old behaviour: show everything by default,
+   and offer a back link once a hash focuses one section. ───────────── */
+(function () {
+  const main = document.querySelector("main.page");
+  if (!main) return;
+  const sections = Array.from(main.children).filter((el) => el.tagName === "SECTION");
+  if (sections.length < 2) return;
+
+  // Pages that opt in (civil/modeling/academy) set data-default-section on
+  // <main.page>: with no hash, they jump straight into that section instead
+  // of showing an overview/menu — there is no "main page" to land on, only
+  // the sidebar's sub-links. Pages that don't opt in (notice/research/index)
+  // keep the old behaviour — show everything unless a hash targets one.
+  const defaultSection = main.dataset.defaultSection || null;
+
+  let backBar = null;
+  if (!defaultSection) {
+    backBar = document.createElement("div");
+    backBar.className = "focus-backbar";
+    backBar.hidden = true;
+    backBar.innerHTML = '<a class="back-link" href="#"><i class="fas fa-arrow-left"></i> <span>Back to full page</span></a>';
+    main.insertBefore(backBar, main.firstChild);
+    backBar.querySelector("a").addEventListener("click", (e) => {
+      e.preventDefault();
+      history.pushState("", document.title, window.location.pathname + window.location.search);
+      applySectionFocus();
+      window.scrollTo(0, 0);
+    });
+  }
+
+  function applySectionFocus() {
+    let hash = (window.location.hash || "").slice(1);
+    if (!hash && defaultSection) {
+      hash = defaultSection;
+      history.replaceState("", document.title, window.location.pathname + window.location.search + "#" + hash);
+    }
+    const target = hash && sections.find((sec) => sec.id === hash);
+    sections.forEach((sec) => { sec.hidden = Boolean(target) && sec !== target; });
+    if (backBar) backBar.hidden = !target;
+    if (target) target.scrollIntoView({ block: "start" });
+  }
+
+  window.addEventListener("hashchange", applySectionFocus);
+  applySectionFocus();
+})();
+
+
 /* ── ACTIVE NAV LINK ─────────────────────────────────────── */
 const pagePath = window.location.pathname.split("/").pop() || "index.html";
 document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
@@ -65,56 +122,6 @@ if (window.location.hash) {
   });
 }
 
-
-/* ── SECTION FOCUS MODE (sidebar sub-links open just that one section) ──
-   When the page is reached via a hash that matches one of main.page's
-   direct <section id="..."> children (the way every sidebar dropdown
-   sub-link points), every other top-level section — including the page
-   hero — is hidden, so only that section's content shows. A small back
-   link lets you return to the full page. Visiting a page with no hash
-   still shows the normal full overview, unchanged. ─────────────────── */
-(function () {
-  const main = document.querySelector("main.page");
-  if (!main) return;
-  const sections = Array.from(main.children).filter((el) => el.tagName === "SECTION");
-  if (sections.length < 2) return;
-
-  const backBar = document.createElement("div");
-  backBar.className = "focus-backbar";
-  backBar.hidden = true;
-  backBar.innerHTML = '<a class="back-link" href="#"><i class="fas fa-arrow-left"></i> <span>Back to full page</span></a>';
-  main.insertBefore(backBar, main.firstChild);
-  backBar.querySelector("a").addEventListener("click", (e) => {
-    e.preventDefault();
-    history.pushState("", document.title, window.location.pathname + window.location.search);
-    applySectionFocus();
-    window.scrollTo(0, 0);
-  });
-
-  // Pages that opt in (civil/modeling/academy) mark their hero + menu with
-  // data-focus-root: those are the only thing shown with no hash, and every
-  // other section is hidden until it's the one you opened. Pages that don't
-  // opt in (notice/research/index) keep the old behaviour — show everything
-  // unless a specific section is targeted.
-  const hasRoot = sections.some((sec) => sec.hasAttribute("data-focus-root"));
-
-  function applySectionFocus() {
-    const hash = (window.location.hash || "").slice(1);
-    const target = hash && sections.find((sec) => sec.id === hash);
-    sections.forEach((sec) => {
-      if (hasRoot) {
-        sec.hidden = sec.hasAttribute("data-focus-root") ? Boolean(target) : (!target || sec !== target);
-      } else {
-        sec.hidden = Boolean(target) && sec !== target;
-      }
-    });
-    backBar.hidden = !target;
-    if (target) target.scrollIntoView({ block: "start" });
-  }
-
-  window.addEventListener("hashchange", applySectionFocus);
-  applySectionFocus();
-})();
 
 /* ── SCROLL REVEAL ───────────────────────────────────────── */
 const observer = new IntersectionObserver(

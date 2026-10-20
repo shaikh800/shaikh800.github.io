@@ -33,10 +33,15 @@
     .switch-view:hover { color: var(--blue); }
 
     /* ── Tabs ── */
-    .research-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;
-      border-bottom: 1px solid var(--line);
+    .research-tabs-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid var(--line);
     }
+    .research-tabs-row .switch-view { flex-shrink: 0; }
+    .research-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .research-tabs-row .research-tabs { margin-bottom: 0; border-bottom: none; }
     .r-tab {
       font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted);
       background: none; border: none; cursor: pointer; padding: 12px 16px;
@@ -374,7 +379,6 @@
           </div>
           <div class="nav-sub">
             <a href="modeling.html#works-title">All Works</a>
-            <a href="modeling.html#direction">Improve</a>
           </div>
         </div>
 
@@ -408,10 +412,9 @@
 
   <main class="page">
 
-    <section class="page-title reveal" id="research-hero">
+    <section class="page-title reveal" id="research-hero" hidden>
       <h1>Research Hub</h1>
       <p class="lead">Browse shared files, upload your own papers or 3D work, and track notices — everything stored on Google Drive.</p>
-      <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
     </section>
 
     <!-- ══ PENDING APPROVAL VIEW — shown instead of the tabs, for a signed-up account the admin hasn't approved yet ══ -->
@@ -427,12 +430,15 @@
     </section>
 
     <section class="section" id="mainSection">
-      <div class="research-tabs">
-        <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
+      <div class="research-tabs-row">
+        <div class="research-tabs">
+          <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
         <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
         <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini <span class="count due" id="geminiDueBadge" style="display:none;"></span></button>
-        <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
+          <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
+        </div>
+        <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
       </div>
 
       <!-- ══ FILES PANEL — the real connected Google Drive folder, browsed on this page ══ -->
@@ -766,25 +772,6 @@
         }
       });
     });
-    function applyResearchHeroFocus() {
-      const h = (window.location.hash || '').replace('#', '');
-      const tabs = ['files', 'uploads', 'notices', 'gemini'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
-      const focused = tabs.includes(h);
-      const hero = document.getElementById('research-hero');
-      if (hero) hero.hidden = focused;
-      let bar = document.getElementById('researchBackBar');
-      if (focused) {
-        if (!bar && hero) {
-          bar = document.createElement('div');
-          bar.className = 'focus-backbar';
-          bar.id = 'researchBackBar';
-          bar.innerHTML = '<a class="back-link" href="research.html"><i class="fas fa-arrow-left"></i> <span>Research Hub</span></a>';
-          hero.parentNode.insertBefore(bar, hero);
-        }
-      } else if (bar) {
-        bar.remove();
-      }
-    }
     window.addEventListener('hashchange', () => {
       const h = (window.location.hash || '').replace('#', '');
       const tabs = ['files', 'uploads', 'notices', 'gemini'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
@@ -792,7 +779,6 @@
         const btn = document.querySelector('.r-tab[data-tab="' + h + '"]');
         if (btn) btn.click();
       }
-      applyResearchHeroFocus();
     });
 
     /* ── GitHub shared storage (config + catalog — the files themselves live in Drive) ── */
@@ -1520,6 +1506,9 @@
       const hashTab = (window.location.hash || '').replace('#', '');
       const validTabs = ['files', 'uploads', 'notices', 'gemini'].concat(role === 'admin' ? ['access'] : []);
       const initialTab = validTabs.includes(hashTab) ? hashTab : 'files';
+      if (hashTab !== initialTab) {
+        history.replaceState('', document.title, window.location.pathname + window.location.search + '#' + initialTab);
+      }
       if (role !== 'admin') {
         document.getElementById('panel-access').hidden = true;
         document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
@@ -1528,7 +1517,6 @@
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
         document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       }
-      applyResearchHeroFocus();
       renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
     }
     function renderPendingView() {
