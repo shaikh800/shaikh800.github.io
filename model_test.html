@@ -521,6 +521,7 @@ th { background-color: #f8fafc; }
   </div>
 </div>
 
+<script src="assets/site-auth.js"></script>
 <script>
 const SCRIPT_GAS_URL = "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
 
@@ -587,8 +588,7 @@ const _sp = new URLSearchParams(window.location.search);
 let portalStudentId     = _sp.get('studentId')   ? String(_sp.get('studentId'))   : null;
 let portalStudentName   = _sp.get('studentName')  ? decodeURIComponent(_sp.get('studentName'))  : null;
 let portalStudentMobile = _sp.get('studentMobile')? decodeURIComponent(_sp.get('studentMobile')): null;
-const ADMIN_PW_KEY = 'civil_admin_pw';
-let adminUnlocked = sessionStorage.getItem('civil_admin') === '1';
+let adminUnlocked = siteIsAdmin();
 let fullGithubData = { semesters: {}, notices: [], exams: [] };
 
 window.onload = async function() {
@@ -831,24 +831,19 @@ function closeAdminModal() {
   box.classList.remove('show');
   setTimeout(() => document.getElementById('admin-login-modal').style.display = 'none', 300);
 }
-function unlockAdmin() {
+async function unlockAdmin() {
   const entered = document.getElementById('admin-password').value.trim();
   if (!entered) {
     showAlert('পাসওয়ার্ড দিন!', '⚠️');
     return;
   }
-  const saved = localStorage.getItem(ADMIN_PW_KEY);
-  if (!saved) {
-    showAlert('Admin পাসওয়ার্ড এখনো সেট করা হয়নি।\n\nBrowser Console খুলুন (F12) এবং এই command টি চালান:\n\nlocalStorage.setItem("civil_admin_pw", "আপনার-পাসওয়ার্ড")', '🔒');
-    return;
-  }
-  if (entered === saved) {
+  const result = await siteAdminLogin(entered);
+  if (result.ok) {
     adminUnlocked = true;
-    sessionStorage.setItem('civil_admin', '1');
     closeAdminModal();
     showAdminScreen();
   } else {
-    showAlert('ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', '❌');
+    showAlert(result.message || 'ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', '❌');
   }
 }
 function showAdminScreen() {

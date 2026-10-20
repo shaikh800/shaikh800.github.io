@@ -46,6 +46,14 @@
     .r-tab:hover { color: var(--ink); }
     .r-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
     .r-tab .count { background: var(--surface-soft); color: var(--muted); font-size: 11px; padding: 1px 7px; border-radius: 100px; }
+    .r-tab .count.due { background: rgba(239,68,68,0.15); color: #ef4444; font-weight: 800; }
+    .gem-amt { display:inline-flex; align-items:center; justify-content:center; min-width:48px; padding:3px 10px; border-radius:100px; background:var(--surface-soft); color:var(--muted); font-size:12px; font-weight:700; }
+    .gem-amt.on { background: rgba(16,185,129,0.15); color:#0f9d58; }
+    .gem-amt.partial { background: rgba(245,158,11,0.15); color:#f59e0b; }
+    .gem-amt.clickable { cursor:pointer; }
+    .gem-amt.clickable:hover { outline:2px solid var(--blue); outline-offset:1px; }
+    #geminiCycleBox input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    #geminiCycleBox .field label { display:block; margin-bottom:4px; }
     .r-tab.admin-only { display: none; }
     body.admin-mode .r-tab.admin-only { display: flex; }
 
@@ -376,8 +384,8 @@
         <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
         <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
         <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
-        <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini</button>
-        <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access</button>
+        <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini <span class="count due" id="geminiDueBadge" style="display:none;"></span></button>
+        <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
       </div>
 
       <!-- ══ FILES PANEL — the real connected Google Drive folder, browsed on this page ══ -->
@@ -488,13 +496,48 @@
             <p>Who's paid their share of the shared Gemini subscription, month by month.</p>
           </div>
         </div>
-        <div style="overflow-x:auto;">
-          <table class="member-table gemini-table" id="geminiTable">
-            <thead><tr id="geminiTableHead"></tr></thead>
-            <tbody id="geminiTableBody"></tbody>
+
+        <div class="card" id="geminiCycleBox" style="display:none;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:10px;">Subscription Cycle &amp; Fee</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+            <div class="field" style="flex:1;min-width:130px;">
+              <label style="font-size:11px;color:var(--muted);">Cycle starts</label>
+              <input type="month" id="geminiCycleStartInput">
+            </div>
+            <div class="field" style="flex:1;min-width:130px;">
+              <label style="font-size:11px;color:var(--muted);">Cycle ends</label>
+              <input type="month" id="geminiCycleEndInput">
+            </div>
+            <div class="field" style="flex:1;min-width:110px;">
+              <label style="font-size:11px;color:var(--muted);">Monthly fee (৳)</label>
+              <input type="number" id="geminiFeeInput" min="0" placeholder="e.g. 150">
+            </div>
+            <button class="btn primary sm" onclick="saveGeminiCycle()"><i class="fas fa-check"></i> Save</button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;">খালি রাখলে শেষ ৬ মাস auto-দেখাবে। Fee সেট করলে প্রতি মাসে কে কত বাকি সেটাও হিসাব হবে।</p>
+          <div id="geminiCycleStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;color:var(--muted);"></div>
+        </div>
+
+        <div id="geminiAdminTableWrap" style="display:none;">
+          <div style="overflow-x:auto;">
+            <table class="member-table gemini-table" id="geminiTable">
+              <thead><tr id="geminiTableHead"></tr></thead>
+              <tbody id="geminiTableBody"></tbody>
+            </table>
+          </div>
+          <p class="drive-hint" style="margin-top:10px;">একটা সেলে ক্লিক করে সেই মাসে ওই সদস্য কত টাকা দিয়েছে লিখে দিও।</p>
+        </div>
+
+        <div id="geminiMemberView" style="display:none;">
+          <div id="geminiDueBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);margin-bottom:14px;">
+            <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:18px;"></i>
+            <div><b>Due Payment:</b> <span class="due-amount">৳0</span> বাকি আছে — admin-কে জানিয়ে দিও।</div>
+          </div>
+          <table class="member-table">
+            <thead><tr><th>Month</th><th>Paid</th><th>Status</th></tr></thead>
+            <tbody id="geminiMemberTableBody"></tbody>
           </table>
         </div>
-        <p class="drive-hint admin-only-inline" style="margin-top:10px;">Click a circle to mark that month paid or unpaid for that person.</p>
       </div>
 
       <!-- ══ DRIVE & ACCESS PANEL (admin only) ══ -->
@@ -552,6 +595,12 @@
             <p>Connect a Drive folder above first — then pick who can see it.</p>
           </div>
           <div id="memberUnlocked" style="display:none;">
+            <div id="pendingRequestsBox" style="display:none;margin-bottom:18px;">
+              <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">
+                <i class="fas fa-hourglass-half" style="color:#f59e0b;"></i> Pending Requests <span class="count" id="pendingReqCount">0</span>
+              </div>
+              <div id="pendingRequestsList"></div>
+            </div>
             <table class="member-table">
               <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th></th></tr></thead>
               <tbody id="memberTableBody"></tbody>
@@ -622,6 +671,10 @@
 
     let uploads = [];
     let geminiPayments = {}; // { "<email>": { "2026-10": true, ... } }
+    let pendingRequests = []; // [{ email, name, requestedAt }] — signups waiting for admin approval
+    let geminiCycleStart = ''; // 'YYYY-MM', admin-set; '' = fall back to a rolling last-6-months view
+    let geminiCycleEnd   = ''; // 'YYYY-MM'
+    let geminiMonthlyFee = 0;  // ৳ per month; 0 = not tracking amounts yet
 
     let currentUser = null; // { name, email, picture, token, expiry } — set by Google sign-in
 
@@ -678,6 +731,10 @@
       if (Array.isArray(data.notices)) notices = data.notices;
       if (Array.isArray(data.uploads)) uploads = data.uploads;
       if (data.geminiPayments) geminiPayments = data.geminiPayments;
+      if (Array.isArray(data.pendingRequests)) pendingRequests = data.pendingRequests;
+      if (typeof data.geminiCycleStart === 'string') geminiCycleStart = data.geminiCycleStart;
+      if (typeof data.geminiCycleEnd === 'string') geminiCycleEnd = data.geminiCycleEnd;
+      if (typeof data.geminiMonthlyFee === 'number') geminiMonthlyFee = data.geminiMonthlyFee;
     }
     async function fetchFromGitHub() {
       try {
@@ -693,7 +750,7 @@
       try { const d = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (d) applyData(d); } catch {}
     }
     async function pushToGitHub() {
-      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, updated: new Date().toISOString() };
+      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, pendingRequests, geminiCycleStart, geminiCycleEnd, geminiMonthlyFee, updated: new Date().toISOString() };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       const token = sessionStorage.getItem('civil_gh_token');
       if (!token) return { ok: false, reason: 'no-token' };
@@ -898,7 +955,9 @@
       await fetchFromGitHub(); // make sure we have the freshest member list before deciding
       currentUser = { name, email, picture: '', token: null, expiry: 0 };
       saveMemberProfile({ email, name, picture: '', passwordHash });
-      enterAs(isMemberEmail(email) ? 'member' : 'pending');
+      const alreadyMember = isMemberEmail(email);
+      if (!alreadyMember) addPendingRequest(name, email);
+      enterAs(alreadyMember ? 'member' : 'pending');
     }
     async function trySilentReauth() {
       const ready = await waitForTokenClient();
@@ -1075,40 +1134,125 @@
     }
 
     /* ── Gemini subscription tracker ── */
-    function geminiMonthKeys(n) {
+    function geminiMonthKeys() {
       const out = [];
+      if (geminiCycleStart && geminiCycleEnd) {
+        let [sy, sm] = geminiCycleStart.split('-').map(Number);
+        const [ey, em] = geminiCycleEnd.split('-').map(Number);
+        let y = sy, m = sm, guard = 0;
+        while ((y < ey || (y === ey && m <= em)) && guard < 60) {
+          const dt = new Date(y, m - 1, 1);
+          out.push({ key: y + '-' + String(m).padStart(2, '0'), label: dt.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) });
+          m++; if (m > 12) { m = 1; y++; }
+          guard++;
+        }
+        if (out.length) return out;
+      }
+      // fallback: rolling last 6 months ending this month (cycle not set yet)
       const base = new Date(); base.setDate(1);
-      for (let i = n - 1; i >= 0; i--) {
+      for (let i = 5; i >= 0; i--) {
         const dt = new Date(base.getFullYear(), base.getMonth() - i, 1);
         out.push({ key: dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'), label: dt.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) });
       }
       return out;
     }
-    function toggleGeminiPaid(email, key) {
+    function saveGeminiCycle() {
       if (role !== 'admin') return;
+      geminiCycleStart = document.getElementById('geminiCycleStartInput').value || '';
+      geminiCycleEnd   = document.getElementById('geminiCycleEndInput').value || '';
+      geminiMonthlyFee = parseFloat(document.getElementById('geminiFeeInput').value) || 0;
+      renderGeminiTab();
+      pushToGitHub();
+      const status = document.getElementById('geminiCycleStatus');
+      if (status) status.textContent = 'Saved \u2713';
+    }
+    function setGeminiAmount(email, key) {
+      if (role !== 'admin') return;
+      const current = (geminiPayments[email] && geminiPayments[email][key]) || 0;
+      const input = prompt(`Amount paid for ${key} (\u09f3):`, current || '');
+      if (input === null) return;
+      const amt = parseFloat(input);
+      if (isNaN(amt) || amt < 0) { alert('\u099f\u09be\u0995\u09be\u09b0 \u09aa\u09b0\u09bf\u09ae\u09be\u09a3 \u09a0\u09bf\u0995 \u09a8\u09be\u0964'); return; }
       if (!geminiPayments[email]) geminiPayments[email] = {};
-      geminiPayments[email][key] = !geminiPayments[email][key];
+      geminiPayments[email][key] = amt;
       renderGeminiTab();
       pushToGitHub();
     }
     function renderGeminiTab() {
-      const months = geminiMonthKeys(6);
-      const head = document.getElementById('geminiTableHead');
-      if (!head) return;
-      head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('');
-      const body = document.getElementById('geminiTableBody');
-      body.innerHTML = members.map(m => {
-        const email = (m.email || '').toLowerCase();
-        const row = geminiPayments[email] || {};
-        const clickable = role === 'admin';
+      const months = geminiMonthKeys();
+      const cycleBox = document.getElementById('geminiCycleBox');
+      const adminWrap = document.getElementById('geminiAdminTableWrap');
+      const memberWrap = document.getElementById('geminiMemberView');
+      if (!adminWrap || !memberWrap) return;
+
+      if (cycleBox) {
+        cycleBox.style.display = role === 'admin' ? 'block' : 'none';
+        const sEl = document.getElementById('geminiCycleStartInput');
+        const eEl = document.getElementById('geminiCycleEndInput');
+        const fEl = document.getElementById('geminiFeeInput');
+        if (sEl && !sEl.matches(':focus')) sEl.value = geminiCycleStart;
+        if (eEl && !eEl.matches(':focus')) eEl.value = geminiCycleEnd;
+        if (fEl && !fEl.matches(':focus')) fEl.value = geminiMonthlyFee || '';
+      }
+
+      if (role === 'admin') {
+        adminWrap.style.display = 'block';
+        memberWrap.style.display = 'none';
+        const head = document.getElementById('geminiTableHead');
+        head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
+        const body = document.getElementById('geminiTableBody');
+        body.innerHTML = members.map(m => {
+          const email = (m.email || '').toLowerCase();
+          const row = geminiPayments[email] || {};
+          let totalDue = 0;
+          const cells = months.map(mo => {
+            const paid = row[mo.key] || 0;
+            const due = Math.max(0, geminiMonthlyFee - paid);
+            totalDue += due;
+            const cls = geminiMonthlyFee > 0 ? (due <= 0 ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
+            const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
+            return `<td style="text-align:center;"><span class="gem-amt ${cls} clickable" onclick="setGeminiAmount('${esc(email)}','${mo.key}')" title="${esc(mo.label)}">${label}</span></td>`;
+          }).join('');
+          return `<tr>
+            <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
+            ${cells}
+            <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        adminWrap.style.display = 'none';
+        memberWrap.style.display = 'block';
+        renderMemberGeminiView(months);
+      }
+    }
+    function renderMemberGeminiView(months) {
+      const email = ((currentUser && currentUser.email) || '').toLowerCase();
+      const row = geminiPayments[email] || {};
+      let totalDue = 0;
+      const rowsHtml = months.map(mo => {
+        const paid = row[mo.key] || 0;
+        const due = Math.max(0, geminiMonthlyFee - paid);
+        totalDue += due;
+        const ok = geminiMonthlyFee > 0 ? due <= 0 : paid > 0;
+        const paidLabel = geminiMonthlyFee > 0 ? `\u09f3${paid} / \u09f3${geminiMonthlyFee}` : (paid > 0 ? `\u09f3${paid}` : '\u2014');
         return `<tr>
-          <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
-          ${months.map(mo => {
-            const paid = !!row[mo.key];
-            return `<td style="text-align:center;"><span class="gem-dot ${paid?'on':''}${clickable?' clickable':''}" ${clickable?`onclick="toggleGeminiPaid('${esc(email)}','${mo.key}')"`:''} title="${paid?'Paid':'Not paid'}"><i class="fas ${paid?'fa-check':'fa-xmark'}"></i></span></td>`;
-          }).join('')}
+          <td>${esc(mo.label)}</td>
+          <td style="text-align:center;">${paidLabel}</td>
+          <td style="text-align:center;"><span class="gem-dot ${ok?'on':''}"><i class="fas ${ok?'fa-check':'fa-xmark'}"></i></span></td>
         </tr>`;
       }).join('');
+      const listEl = document.getElementById('geminiMemberTableBody');
+      if (listEl) listEl.innerHTML = rowsHtml;
+
+      const dueBanner = document.getElementById('geminiDueBanner');
+      const dueBadge  = document.getElementById('geminiDueBadge');
+      if (geminiMonthlyFee > 0 && totalDue > 0) {
+        if (dueBanner) { dueBanner.style.display = 'flex'; dueBanner.querySelector('.due-amount').textContent = `\u09f3${totalDue}`; }
+        if (dueBadge) { dueBadge.style.display = 'inline-flex'; dueBadge.textContent = '!'; }
+      } else {
+        if (dueBanner) dueBanner.style.display = 'none';
+        if (dueBadge) dueBadge.style.display = 'none';
+      }
     }
 
     /* ── Drive & Access ── */
@@ -1157,9 +1301,58 @@
       if (!email) return;
       const access = document.getElementById('inviteRole').value;
       members.push({ id: Date.now(), name: email, email: email.toLowerCase(), initials: email.slice(0, 2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
+      pendingRequests = pendingRequests.filter(r => r.email !== email.toLowerCase());
       document.getElementById('inviteEmail').value = '';
       renderMembers();
       renderGeminiTab();
+      renderPendingRequests();
+      pushToGitHub();
+    }
+
+    /* \u2500\u2500 Pending sign-up requests (shared queue, visible to the admin from any device) \u2500\u2500 */
+    function addPendingRequest(name, email) {
+      email = (email || '').toLowerCase();
+      if (!email || isMemberEmail(email)) return;
+      const existing = pendingRequests.find(r => r.email === email);
+      if (existing) { existing.name = name; existing.requestedAt = new Date().toISOString(); }
+      else pendingRequests.push({ email, name, requestedAt: new Date().toISOString() });
+      pushToGitHub();
+    }
+    function renderPendingRequests() {
+      const box = document.getElementById('pendingRequestsBox');
+      const tabCount = document.getElementById('pendingTabCount');
+      if (!box) return;
+      if (!pendingRequests.length) {
+        box.style.display = 'none';
+        if (tabCount) tabCount.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      document.getElementById('pendingReqCount').textContent = pendingRequests.length;
+      if (tabCount) { tabCount.style.display = 'inline-flex'; tabCount.textContent = pendingRequests.length; }
+      document.getElementById('pendingRequestsList').innerHTML = pendingRequests.map(r => `
+        <div class="card" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+          <div>
+            <div style="font-weight:700;font-size:13px;">${esc(r.name || r.email)}</div>
+            <div style="font-size:12px;color:var(--muted);">${esc(r.email)}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn primary sm" onclick="approveRequest('${esc(r.email)}')"><i class="fas fa-check"></i> Approve</button>
+            <button class="btn secondary sm" onclick="rejectRequest('${esc(r.email)}')"><i class="fas fa-xmark"></i> Reject</button>
+          </div>
+        </div>`).join('');
+    }
+    function approveRequest(email) {
+      const req = pendingRequests.find(r => r.email === email);
+      if (!req) return;
+      members.push({ id: Date.now(), name: req.name || req.email, email: req.email, initials: (req.name || req.email).slice(0, 2).toUpperCase(), role: 'member', view: true, download: false });
+      pendingRequests = pendingRequests.filter(r => r.email !== email);
+      renderMembers(); renderGeminiTab(); renderPendingRequests();
+      pushToGitHub();
+    }
+    function rejectRequest(email) {
+      pendingRequests = pendingRequests.filter(r => r.email !== email);
+      renderPendingRequests();
       pushToGitHub();
     }
 
@@ -1250,7 +1443,7 @@
         const savedToken = sessionStorage.getItem('civil_gh_token');
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
       }
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
     }
     function renderPendingView() {
       if (!currentUser) return;
@@ -1335,9 +1528,9 @@
     /* ── init ── */
     async function boot() {
       loadFromCache();         // instant paint from last-known data
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
       const freshPromise = fetchFromGitHub().then(() => {
-        renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab();
+        renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests();
       });
       if (siteIsAdmin()) { enterAs('admin'); return; } // already logged in elsewhere on the site this tab
       const cached = loadMemberProfile();

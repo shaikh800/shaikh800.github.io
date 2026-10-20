@@ -19,6 +19,7 @@
   <meta property="og:image" content="https://mdshaikh.me/assets/images/shaikh.jpg">
   <meta property="og:url" content="https://mdshaikh.me/modeling.html">
   <meta name="twitter:card" content="summary">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* ── FILTER TABS ─────────────────────────────────────── */
     .filter-bar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
@@ -31,7 +32,7 @@
     .filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
 
     /* ── WORKS GRID ──────────────────────────────────────── */
-    #works-container { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+    #works-container { display:flex; flex-direction:column; gap:20px; max-width:640px; margin:0 auto; }
     .work-card {
       position:relative; border:1px solid var(--line); border-radius:var(--radius-lg);
       background:var(--surface); box-shadow:var(--shadow); overflow:hidden;
@@ -68,7 +69,12 @@
       border-radius:100px; padding:3px 10px; margin-bottom:10px;
     }
     .work-title { font-size:17px; font-weight:800; letter-spacing:-0.01em; margin-bottom:6px; }
-    .work-desc { color:var(--muted); font-size:13px; line-height:1.6; margin-bottom:14px; }
+    .work-desc { color:var(--muted); font-size:13px; line-height:1.6; margin-bottom:14px; white-space:pre-wrap; }
+    .see-more-btn {
+      display:inline; margin-left:4px; font-size:13px; font-weight:700; color:var(--blue);
+      cursor:pointer; background:none; border:none; padding:0; font-family:inherit;
+    }
+    .see-more-btn:hover { text-decoration:underline; }
     .work-footer {
       display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
       padding-top:12px; border-top:1px solid var(--line);
@@ -211,6 +217,26 @@
     .src-tab.active { background:var(--blue); color:#fff; }
     .src-panel { display:none; }
     .src-panel.active { display:block; }
+
+    /* ── PROJECT FILE (Drive) — own classes so these tabs never fight with the thumbnail tabs above ── */
+    .dsrc-tabs { display:flex; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:12px; }
+    .dsrc-tab { flex:1; padding:8px; border:none; background:var(--surface-soft); color:var(--muted); font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+    .dsrc-tab.active { background:var(--blue); color:#fff; }
+    .dsrc-panel { display:none; }
+    .dsrc-panel.active { display:block; }
+    .file-status { font-size:13px; margin-top:8px; font-weight:600; }
+    .file-status.ok { color:var(--green); }
+    .file-status.loading { color:var(--muted); }
+    .file-status.error { color:#ef4444; }
+    .drive-progress { display:none; padding:12px 14px; background:rgba(37,99,235,0.06); border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius); margin-top:8px; }
+    .drive-progress.show { display:block; }
+    .drive-progress-bar { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-top:8px; }
+    .drive-progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width 0.3s; }
+    .drive-progress-text { font-size:12px; color:var(--muted); font-weight:600; }
+    .access-box { padding:14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); margin-top:8px; }
+    .access-box .access-label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:10px; }
+    .access-option { display:flex; align-items:center; gap:10px; padding:6px 0; cursor:pointer; font-size:13px; font-weight:600; }
+    .access-option input { accent-color:var(--blue); }
     .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:38px; padding:0 16px; border-radius:var(--radius); text-decoration:none; font-weight:700; font-size:14px; transition:all 0.2s var(--ease-spring); border:1px solid transparent; cursor:pointer; }
     .btn:hover { transform:translateY(-1px); }
     .btn.primary { color:#fff; background:var(--blue); box-shadow:0 6px 14px rgba(37,99,235,0.2); }
@@ -230,7 +256,7 @@
     .page-title h1 { font-size:clamp(32px,5vw,54px); margin-bottom:10px; }
 
     @media (max-width:600px) {
-      #works-container { grid-template-columns:1fr; }
+      #works-container { max-width:100%; }
       .form-row { grid-template-columns:1fr; }
     }
   </style>
@@ -418,6 +444,44 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label>Marketplace Link <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — BlenderMarket, Gumroad ইত্যাদি)</span></label>
+          <input type="url" id="w-market-link" placeholder="https://blendermarket.com/products/...">
+        </div>
+
+        <!-- Project file (Google Drive) -->
+        <div class="form-group">
+          <label>Project File <span style="color:var(--muted);font-weight:500;font-size:11px;">(Google Drive — full-res render, video বা .blend)</span></label>
+          <div class="dsrc-tabs" id="file-src-tabs">
+            <button class="dsrc-tab active" data-fpanel="file-link-panel" type="button">🔗 Drive Link</button>
+            <button class="dsrc-tab" data-fpanel="file-upload-panel" type="button">📁 Upload to Drive</button>
+          </div>
+          <div class="dsrc-panel active" id="file-link-panel">
+            <input type="url" id="w-drive-link" placeholder="https://drive.google.com/file/d/...">
+            <p style="font-size:11px;color:var(--muted);margin-top:4px;">Drive → Share → Link copy করে এখানে paste করো।</p>
+          </div>
+          <div class="dsrc-panel" id="file-upload-panel">
+            <div class="file-drop-zone" id="work-file-drop">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Click to upload — তোমার Google account দিয়ে Drive-এ যাবে</p>
+              <input type="file" id="w-drive-file">
+            </div>
+            <div class="file-status" id="work-file-status"></div>
+          </div>
+          <div class="access-box">
+            <div class="access-label">Access Control</div>
+            <label class="access-option"><input type="radio" name="work-drive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — Download বাটন থাকবে না</span></label>
+            <label class="access-option"><input type="radio" name="work-drive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+          </div>
+          <div class="drive-progress" id="work-drive-progress">
+            <div class="drive-progress-text" id="work-drive-progress-text">Uploading to Drive...</div>
+            <div class="drive-progress-bar"><div class="drive-progress-fill" id="work-drive-progress-fill" style="width:0%"></div></div>
+          </div>
+          <div id="work-drive-current" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(37,99,235,0.06);border-radius:var(--radius);border:1px solid rgba(37,99,235,0.15);font-size:12px;">
+            <i class="fab fa-google-drive" style="color:#0f9d58;"></i> <span id="work-drive-current-text"></span>
+          </div>
+        </div>
+
         <!-- Thumbnail source -->
         <div class="form-group">
           <label>Thumbnail</label>
@@ -490,11 +554,10 @@
 
   <!-- ── SCRIPTS ────────────────────────────────────────── -->
   <script src="assets/site.js"></script>
+  <script src="assets/site-auth.js"></script>
   <script>
   (() => {
     /* ── CONFIG ── */
-    const ADMIN_PW_KEY = 'civil_admin_pw'; // shared with civil page
-    const DEFAULT_PW   = '';
     const STORE_KEY    = 'modeling_works';
     const DB_NAME = 'modelingDB'; const DB_VER = 1; const STORE = 'thumbs';
 
@@ -559,6 +622,98 @@
       }
     }
 
+    /* ── GOOGLE DRIVE (admin uploads the full project file to their own Drive) ── */
+    const GDRIVE_CLIENT_ID = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
+    const GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.file';
+    let _driveToken = null;
+    let _tokenClient = null;
+
+    function initDriveAuth() {
+      if (!window.google || !window.google.accounts) return;
+      _tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: GDRIVE_SCOPE,
+        callback: () => {}
+      });
+    }
+    window.addEventListener('load', () => { setTimeout(initDriveAuth, 1500); });
+
+    async function getDriveToken() {
+      if (_driveToken && Date.now() < _driveToken.expiry) return _driveToken.token;
+      if (!_tokenClient) throw new Error('Google Drive not ready yet \u2014 \u0986\u09ac\u09be\u09b0 \u099a\u09c7\u09b7\u09cd\u099f\u09be \u0995\u09b0\u09cb\u0964');
+      return new Promise((res, rej) => {
+        _tokenClient.callback = (resp) => {
+          if (resp.error) { rej(new Error('Drive sign-in cancelled or failed')); return; }
+          _driveToken = { token: resp.access_token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+          res(_driveToken.token);
+        };
+        _tokenClient.requestAccessToken({ prompt: '' });
+      });
+    }
+
+    async function driveAPI(method, endpoint, body, token) {
+      const res = await fetch('https://www.googleapis.com/drive/v3' + endpoint, {
+        method,
+        headers: { 'Authorization': 'Bearer ' + token, ...(body ? {'Content-Type':'application/json'} : {}) },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      return res.json();
+    }
+
+    async function findOrCreateFolder(name, parentId, token) {
+      const q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
+      const list = await driveAPI('GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, null, token);
+      if (list.files && list.files.length) return list.files[0].id;
+      const folder = await driveAPI('POST', '/files', { name, mimeType:'application/vnd.google-apps.folder', parents:[parentId] }, token);
+      return folder.id;
+    }
+
+    async function uploadWorkFileToDrive(file, category, accessMode) {
+      const token = await getDriveToken();
+      const mode = accessMode === 'view' ? 'view' : 'preview'; // default: view only
+
+      const prog = document.getElementById('work-drive-progress');
+      const fill = document.getElementById('work-drive-progress-fill');
+      const txt  = document.getElementById('work-drive-progress-text');
+      if (prog) { prog.classList.add('show'); fill.style.width = '10%'; txt.textContent = 'Connecting to Drive...'; }
+
+      let parentId = await findOrCreateFolder('3D Portfolio', 'root', token);
+      parentId = await findOrCreateFolder(category || 'Other', parentId, token);
+      if (fill) { fill.style.width = '35%'; txt.textContent = `Accessing folder: ${category || 'Other'}...`; }
+
+      const meta = JSON.stringify({ name: file.name, parents: [parentId] });
+      const boundary = '-------modeling_upload_boundary';
+      const body = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type}\r\n\r\n`;
+      const bodyEnd = `\r\n--${boundary}--`;
+      const bodyBlob = new Blob([body, file, bodyEnd]);
+
+      if (fill) { fill.style.width = '70%'; txt.textContent = 'Uploading file...'; }
+      const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body: bodyBlob
+      });
+      const uploaded = await uploadRes.json();
+      if (!uploaded.id) throw new Error((uploaded.error && uploaded.error.message) || 'Drive upload failed');
+
+      if (fill) { fill.style.width = '85%'; txt.textContent = 'Setting permissions...'; }
+      await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
+      if (mode === 'preview') {
+        await driveAPI('PATCH', `/files/${uploaded.id}?fields=copyRequiresWriterPermission`, { copyRequiresWriterPermission: true }, token);
+      }
+
+      if (fill) { fill.style.width = '100%'; txt.textContent = 'Done!'; setTimeout(() => prog.classList.remove('show'), 1500); }
+
+      return { fileId: uploaded.id, viewLink: `https://drive.google.com/file/d/${uploaded.id}/${mode}?usp=sharing`, access: mode };
+    }
+
+    /* ── Google Drive link \u2192 extract file ID (to normalize a pasted link to the chosen access mode) ── */
+    function extractDriveId(url) {
+      const patterns = [/\/file\/d\/([a-zA-Z0-9_-]+)/, /id=([a-zA-Z0-9_-]+)/, /\/d\/([a-zA-Z0-9_-]+)/];
+      for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+      return null;
+    }
+
     /* ── SEED DATA (shown when localStorage is empty) ── */
     const SEED_WORKS = [
       { id:'seed1', title:'Blender Project', desc:'Detailed 3D project made in Blender.', cat:'Render', tool:'Blender 4.2', link:'', img:'', imgSrc:'none' },
@@ -612,8 +767,8 @@
     function saveWorks(arr) { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); pushToGitHub(); }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
-    /* ── ADMIN MODE ── */
-    let adminMode = sessionStorage.getItem('civil_admin') === '1';
+    /* ── ADMIN MODE — shared, server-checked session (assets/site-auth.js) ── */
+    let adminMode = siteIsAdmin();
     function applyAdmin() {
       document.body.classList.toggle('admin-mode', adminMode);
       const fab = document.getElementById('admin-fab');
@@ -624,21 +779,27 @@
     applyAdmin();
 
     document.getElementById('admin-fab').addEventListener('click', () => {
-      if (adminMode) { adminMode = false; sessionStorage.removeItem('civil_admin'); applyAdmin(); return; }
+      if (adminMode) { adminMode = false; siteAdminLogout(); applyAdmin(); toast('Admin mode off', 'info'); return; }
       openModal('modal-admin');
       document.getElementById('admin-pass').value = '';
       document.getElementById('admin-error').style.display = 'none';
       setTimeout(() => document.getElementById('admin-pass').focus(), 300);
     });
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
-      const pw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
-      if (document.getElementById('admin-pass').value === pw) {
-        adminMode = true; sessionStorage.setItem('civil_admin','1');
+    document.getElementById('admin-login-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('admin-login-btn');
+      const pw = document.getElementById('admin-pass').value;
+      if (!pw) { document.getElementById('admin-error').textContent = 'Enter the admin password.'; document.getElementById('admin-error').style.display = 'block'; return; }
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking...';
+      const result = await siteAdminLogin(pw);
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock';
+      if (result.ok) {
+        adminMode = true;
         const ghToken = document.getElementById('admin-gh-token').value.trim();
         if (ghToken) sessionStorage.setItem('modeling_gh_token', ghToken);
         applyAdmin(); closeModal('modal-admin');
         toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
       } else {
+        document.getElementById('admin-error').textContent = result.message;
         document.getElementById('admin-error').style.display = 'block';
         document.getElementById('admin-pass').select();
       }
@@ -721,11 +882,19 @@
             <div class="work-body">
               <div class="work-cat">${esc(w.cat||'Other')}</div>
               <div class="work-title">${esc(w.title)}</div>
-              ${w.desc ? `<div class="work-desc">${esc(w.desc)}</div>` : ''}
+              ${w.desc ? (w.desc.length > 160
+                ? `<div class="work-desc" data-full="${esc(w.desc)}" data-expanded="0"><span class="desc-text">${esc(w.desc.slice(0,160).trim())}\u2026</span><button class="see-more-btn" type="button">See more</button></div>`
+                : `<div class="work-desc">${esc(w.desc)}</div>`) : ''}
               <div class="work-footer">
                 <div class="work-tool"><i class="fas fa-cube" style="color:var(--blue)"></i> ${esc(w.tool||'Blender')}</div>
                 ${w.link ? `<a class="work-link" href="${esc(w.link)}" target="_blank" rel="noopener">
                   ${hasVideo ? '<i class="fab fa-youtube"></i> Watch' : '<i class="fas fa-external-link-alt"></i> Open'} →
+                </a>` : ''}
+                ${w.driveLink ? `<a class="work-link" href="${esc(w.driveLink)}" target="_blank" rel="noopener">
+                  ${w.driveAccess === 'view' ? '<i class="fas fa-download"></i> Download' : '<i class="fas fa-eye"></i> View Project'} →
+                </a>` : ''}
+                ${w.marketLink ? `<a class="work-link" href="${esc(w.marketLink)}" target="_blank" rel="noopener">
+                  <i class="fas fa-cart-shopping"></i> Marketplace →
                 </a>` : ''}
               </div>
             </div>
@@ -737,7 +906,7 @@
       // Click to view image (non-link area)
       container.querySelectorAll('.work-card').forEach(card => {
         card.addEventListener('click', async e => {
-          if (e.target.closest('.work-action-btn') || e.target.closest('.work-link')) return;
+          if (e.target.closest('.work-action-btn') || e.target.closest('.work-link') || e.target.closest('.see-more-btn')) return;
           const id = card.dataset.id;
           const w = loadWorks().find(x => x.id === id);
           if (!w) return;
@@ -754,6 +923,23 @@
       // Edit / Delete buttons
       container.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id); }));
       container.querySelectorAll('.del-btn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deleteWork(btn.dataset.id); }));
+
+      // "See more" / "See less" — expand the full description in place (Facebook-feed style)
+      container.querySelectorAll('.see-more-btn').forEach(btn => btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const wrap = btn.closest('.work-desc');
+        const span = wrap.querySelector('.desc-text');
+        const expanded = wrap.dataset.expanded === '1';
+        if (expanded) {
+          span.textContent = wrap.dataset.full.slice(0, 160).trim() + '\u2026';
+          btn.textContent = 'See more';
+          wrap.dataset.expanded = '0';
+        } else {
+          span.textContent = wrap.dataset.full;
+          btn.textContent = 'See less';
+          wrap.dataset.expanded = '1';
+        }
+      }));
     }
 
     /* ── DELETE ── */
@@ -803,9 +989,47 @@
       }
     });
 
+    /* ── PROJECT FILE SOURCE TABS (own tab group — never toggles the thumbnail tabs above) ── */
+    let pendingDriveUpload = null; // { fileId, viewLink, name } — set right after a successful Drive upload
+    document.getElementById('file-src-tabs').addEventListener('click', e => {
+      const tab = e.target.closest('.dsrc-tab'); if (!tab) return;
+      document.querySelectorAll('#file-src-tabs .dsrc-tab').forEach(t => t.classList.toggle('active', t===tab));
+      document.querySelectorAll('.dsrc-panel').forEach(p => p.classList.toggle('active', p.id===tab.dataset.fpanel));
+    });
+    const workFileDrop  = document.getElementById('work-file-drop');
+    const workFileInput = document.getElementById('w-drive-file');
+    workFileDrop.addEventListener('click', () => workFileInput.click());
+    workFileDrop.addEventListener('dragover', e => { e.preventDefault(); workFileDrop.classList.add('dragover'); });
+    workFileDrop.addEventListener('dragleave', () => workFileDrop.classList.remove('dragover'));
+    workFileDrop.addEventListener('drop', e => { e.preventDefault(); workFileDrop.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleWorkFileUpload(e.dataTransfer.files[0]); });
+    workFileInput.addEventListener('change', () => { if (workFileInput.files[0]) handleWorkFileUpload(workFileInput.files[0]); });
+
+    async function handleWorkFileUpload(file) {
+      const status = document.getElementById('work-file-status');
+      status.textContent = 'Uploading to your Drive\u2026'; status.className = 'file-status loading';
+      try {
+        const category = document.getElementById('w-cat').value || 'Other';
+        const accessMode = document.querySelector('input[name="work-drive-access"]:checked').value;
+        const result = await uploadWorkFileToDrive(file, category, accessMode);
+        pendingDriveUpload = { fileId: result.fileId, viewLink: result.viewLink, name: file.name, access: result.access };
+        document.getElementById('w-drive-link').value = '';
+        status.textContent = `Uploaded: ${file.name} \u2713`; status.className = 'file-status ok';
+        const cur = document.getElementById('work-drive-current');
+        cur.style.display = 'block';
+        document.getElementById('work-drive-current-text').textContent = file.name;
+      } catch (err) {
+        status.textContent = 'Drive upload failed \u2014 ' + (err.message || err);
+        status.className = 'file-status error';
+        toast('Drive upload failed \u2014 ' + (err.message || 'check Drive sign-in'), 'error');
+      }
+    }
+    document.getElementById('w-drive-link').addEventListener('input', function() {
+      if (this.value.trim()) pendingDriveUpload = null; // a pasted link overrides a pending upload
+    });
+
     /* ── ADD PROJECT ── */
     function resetForm() {
-      ['w-title','w-desc','w-tool','w-link','w-img-url'].forEach(id => document.getElementById(id).value = '');
+      ['w-title','w-desc','w-tool','w-link','w-market-link','w-img-url','w-drive-link'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('w-cat').value = 'Render';
       document.getElementById('edit-id').value = '';
       document.getElementById('thumb-preview').classList.remove('show');
@@ -814,6 +1038,16 @@
       // reset to URL tab
       document.querySelectorAll('.src-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.src-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+      // reset project-file tabs + state
+      pendingDriveUpload = null;
+      document.getElementById('work-drive-current').style.display = 'none';
+      document.getElementById('work-file-status').textContent = '';
+      document.getElementById('work-file-status').className = 'file-status';
+      document.querySelectorAll('#file-src-tabs .dsrc-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+      document.querySelectorAll('.dsrc-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+      // reset access control to default (view only)
+      const defAccess = document.querySelector('input[name="work-drive-access"][value="preview"]');
+      if (defAccess) defAccess.checked = true;
     }
 
     document.getElementById('add-work-btn').addEventListener('click', () => {
@@ -833,6 +1067,7 @@
       document.getElementById('w-desc').value   = w.desc  || '';
       document.getElementById('w-tool').value   = w.tool  || '';
       document.getElementById('w-link').value   = w.link  || '';
+      document.getElementById('w-market-link').value = w.marketLink || '';
       document.getElementById('w-cat').value    = w.cat   || 'Render';
       document.getElementById('work-modal-title').innerHTML = '<i class="fas fa-pen" style="color:var(--blue);margin-right:8px;"></i>Edit Project';
       document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Update';
@@ -846,6 +1081,16 @@
           if (data) { pendingThumb = data; document.getElementById('thumb-preview-img').src = data; document.getElementById('thumb-preview').classList.add('show'); }
         });
       }
+
+      if (w.driveLink) {
+        document.getElementById('w-drive-link').value = w.driveLink;
+        const cur = document.getElementById('work-drive-current');
+        cur.style.display = 'block';
+        document.getElementById('work-drive-current-text').textContent = w.driveFileName || 'Drive link attached';
+      }
+      const savedAccess = document.querySelector(`input[name="work-drive-access"][value="${w.driveAccess || 'preview'}"]`);
+      if (savedAccess) savedAccess.checked = true;
+
       openModal('modal-work');
     }
 
@@ -876,13 +1121,37 @@
         }
       }
 
+      // Project file (Drive): a pasted link wins; otherwise a just-finished upload;
+      // otherwise keep whatever was already saved when editing.
+      const accessModeVal = document.querySelector('input[name="work-drive-access"]:checked').value;
+      const driveLinkVal = document.getElementById('w-drive-link').value.trim();
+      let driveLink = '', driveFileId = '', driveFileName = '', driveAccess = accessModeVal;
+      if (driveLinkVal) {
+        const extractedId = extractDriveId(driveLinkVal);
+        driveLink = extractedId ? `https://drive.google.com/file/d/${extractedId}/${accessModeVal}?usp=sharing` : driveLinkVal;
+        driveFileId = extractedId || '';
+      } else if (pendingDriveUpload) {
+        driveLink = pendingDriveUpload.viewLink;
+        driveFileId = pendingDriveUpload.fileId;
+        driveFileName = pendingDriveUpload.name;
+        driveAccess = pendingDriveUpload.access || accessModeVal;
+      } else if (editId) {
+        const existing = loadWorks().find(w => w.id === editId);
+        driveLink = existing?.driveLink || '';
+        driveFileId = existing?.driveFileId || '';
+        driveFileName = existing?.driveFileName || '';
+        driveAccess = existing?.driveAccess || accessModeVal;
+      }
+
       const work = {
         id, title,
         desc : document.getElementById('w-desc').value.trim(),
         cat  : document.getElementById('w-cat').value,
         tool : document.getElementById('w-tool').value.trim() || 'Blender 4.2',
         link : document.getElementById('w-link').value.trim(),
-        img, imgSrc
+        marketLink : document.getElementById('w-market-link').value.trim(),
+        img, imgSrc,
+        driveLink, driveFileId, driveFileName, driveAccess
       };
 
       let works = loadWorks();
