@@ -180,6 +180,18 @@ body::after {
    the hidden attribute/property on them silently does nothing. */
 [hidden] { display: none !important; }
 
+/* ── PAGE MENU (default landing list of a page's sub-sections) ── */
+.page-menu { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+.page-menu-card {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  text-decoration: none; color: var(--ink); transition: all 0.15s;
+}
+.page-menu-card:hover { border-color: var(--blue); background: var(--surface-soft); }
+.page-menu-card .page-menu-icon { color: var(--blue); font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.page-menu-card span { font-weight: 600; font-size: 14.5px; flex: 1; min-width: 0; }
+.page-menu-card .page-menu-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+
 /* ── SECTION FOCUS MODE back link ──────────────────────────── */
 .focus-backbar { margin-bottom: 20px; }
 .back-link {

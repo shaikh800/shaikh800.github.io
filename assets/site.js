@@ -91,10 +91,23 @@ if (window.location.hash) {
     window.scrollTo(0, 0);
   });
 
+  // Pages that opt in (civil/modeling/academy) mark their hero + menu with
+  // data-focus-root: those are the only thing shown with no hash, and every
+  // other section is hidden until it's the one you opened. Pages that don't
+  // opt in (notice/research/index) keep the old behaviour — show everything
+  // unless a specific section is targeted.
+  const hasRoot = sections.some((sec) => sec.hasAttribute("data-focus-root"));
+
   function applySectionFocus() {
     const hash = (window.location.hash || "").slice(1);
     const target = hash && sections.find((sec) => sec.id === hash);
-    sections.forEach((sec) => { sec.hidden = Boolean(target) && sec !== target; });
+    sections.forEach((sec) => {
+      if (hasRoot) {
+        sec.hidden = sec.hasAttribute("data-focus-root") ? Boolean(target) : (!target || sec !== target);
+      } else {
+        sec.hidden = Boolean(target) && sec !== target;
+      }
+    });
     backBar.hidden = !target;
     if (target) target.scrollIntoView({ block: "start" });
   }
