@@ -25,15 +25,27 @@ if (navToggle && siteNav) {
   });
 }
 
-/* ── NAV ACCORDION (Civil / 3D / Academy / Research sub-menus) ─ */
+/* ── NAV ACCORDION (Civil / 3D / Academy / Research sub-menus) ──
+   A group's own label (Civil, 3D, Academy, Research) only opens its
+   dropdown — it never jumps straight into the first sub-item. Picking
+   where to go is always a second, deliberate tap on one of the sub-links. */
+function toggleNavGroup(group) {
+  if (!group) return;
+  const isOpen = group.classList.toggle("is-open");
+  const caret = group.querySelector(".nav-caret");
+  if (caret) caret.setAttribute("aria-expanded", String(isOpen));
+}
 document.querySelectorAll(".nav-caret").forEach((btn) => {
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const group = btn.closest(".nav-group");
-    if (!group) return;
-    const isOpen = group.classList.toggle("is-open");
-    btn.setAttribute("aria-expanded", String(isOpen));
+    toggleNavGroup(btn.closest(".nav-group"));
+  });
+});
+document.querySelectorAll(".nav-group-head > .nav-link").forEach((link) => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleNavGroup(link.closest(".nav-group"));
   });
 });
 

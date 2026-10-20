@@ -32,16 +32,17 @@
     }
     .switch-view:hover { color: var(--blue); }
 
-    /* ── Tabs ── */
+    /* ── Tabs ──
+       The tab row itself duplicates what the sidebar sub-links already do,
+       so it's not shown — switching sections happens from the sidebar only.
+       The buttons stay in the DOM (still driven by hash) just in case, but
+       visually only the "switch view" control remains here. ──────────── */
     .research-tabs-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
     }
     .research-tabs-row .switch-view { flex-shrink: 0; }
-    .research-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap;
-    }
-    .research-tabs-row .research-tabs { margin-bottom: 0; border-bottom: none; }
+    .research-tabs { display: none; }
     .r-tab {
       font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted);
       background: none; border: none; cursor: pointer; padding: 12px 16px;
@@ -61,6 +62,8 @@
     #geminiCycleBox .field label { display:block; margin-bottom:4px; }
     .r-tab.admin-only { display: none; }
     body.admin-mode .r-tab.admin-only { display: flex; }
+    .nav-sub a.admin-only { display: none; }
+    body.admin-mode .nav-sub a.admin-only { display: inline-flex; }
 
     .r-panel { animation: fadeSlideUp .3s var(--ease-out) both; }
 
@@ -403,6 +406,7 @@
             <a href="research.html#uploads">Team Uploads</a>
             <a href="research.html#notices">Notice Board</a>
             <a href="research.html#gemini">Gemini</a>
+            <a href="research.html#access" class="admin-only">Drive &amp; Access</a>
           </div>
         </div>
       </nav>
@@ -570,25 +574,19 @@
           <div id="geminiCycleStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;color:var(--muted);"></div>
         </div>
 
-        <div id="geminiAdminTableWrap" style="display:none;">
+        <div id="geminiDueBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);margin-bottom:14px;">
+          <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:18px;"></i>
+          <div><b>Due Payment:</b> <span class="due-amount">৳0</span> বাকি আছে — admin-কে জানিয়ে দিও।</div>
+        </div>
+
+        <div id="geminiAdminTableWrap">
           <div style="overflow-x:auto;">
             <table class="member-table gemini-table" id="geminiTable">
               <thead><tr id="geminiTableHead"></tr></thead>
               <tbody id="geminiTableBody"></tbody>
             </table>
           </div>
-          <p class="drive-hint" style="margin-top:10px;">একটা সেলে ক্লিক করে সেই মাসে ওই সদস্য কত টাকা দিয়েছে লিখে দিও।</p>
-        </div>
-
-        <div id="geminiMemberView" style="display:none;">
-          <div id="geminiDueBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);margin-bottom:14px;">
-            <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:18px;"></i>
-            <div><b>Due Payment:</b> <span class="due-amount">৳0</span> বাকি আছে — admin-কে জানিয়ে দিও।</div>
-          </div>
-          <table class="member-table">
-            <thead><tr><th>Month</th><th>Paid</th><th>Status</th></tr></thead>
-            <tbody id="geminiMemberTableBody"></tbody>
-          </table>
+          <p class="drive-hint" style="margin-top:10px;" id="geminiHint">Everyone can see who's paid. Click a cell to mark it (admin only).</p>
         </div>
       </div>
 
@@ -1241,11 +1239,11 @@
       const months = geminiMonthKeys();
       const cycleBox = document.getElementById('geminiCycleBox');
       const adminWrap = document.getElementById('geminiAdminTableWrap');
-      const memberWrap = document.getElementById('geminiMemberView');
-      if (!adminWrap || !memberWrap) return;
+      if (!adminWrap) return;
+      const canEdit = role === 'admin';
 
       if (cycleBox) {
-        cycleBox.style.display = role === 'admin' ? 'block' : 'none';
+        cycleBox.style.display = canEdit ? 'block' : 'none';
         const sEl = document.getElementById('geminiCycleStartInput');
         const eEl = document.getElementById('geminiCycleEndInput');
         const fEl = document.getElementById('geminiFeeInput');
@@ -1254,59 +1252,43 @@
         if (fEl && !fEl.matches(':focus')) fEl.value = geminiMonthlyFee || '';
       }
 
-      if (role === 'admin') {
-        adminWrap.style.display = 'block';
-        memberWrap.style.display = 'none';
-        const head = document.getElementById('geminiTableHead');
-        head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
-        const body = document.getElementById('geminiTableBody');
-        body.innerHTML = members.map(m => {
-          const email = (m.email || '').toLowerCase();
-          const row = geminiPayments[email] || {};
-          let totalDue = 0;
-          const cells = months.map(mo => {
-            const paid = row[mo.key] || 0;
-            const due = Math.max(0, geminiMonthlyFee - paid);
-            totalDue += due;
-            const cls = geminiMonthlyFee > 0 ? (due <= 0 ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
-            const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
-            return `<td style="text-align:center;"><span class="gem-amt ${cls} clickable" onclick="setGeminiAmount('${esc(email)}','${mo.key}')" title="${esc(mo.label)}">${label}</span></td>`;
-          }).join('');
-          return `<tr>
-            <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
-            ${cells}
-            <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
-          </tr>`;
+      // Everyone with access sees the full table, admin or member, so no one
+      // has to guess who's paid; only admin can tap a cell to edit an amount.
+      const hint = document.getElementById('geminiHint');
+      if (hint) hint.textContent = canEdit
+        ? '\u098f\u0995\u099f\u09be \u09b8\u09c7\u09b2\u09c7 \u0995\u09cd\u09b2\u09bf\u0995 \u0995\u09b0\u09c7 \u09b8\u09c7\u0987 \u09ae\u09be\u09b8\u09c7 \u0993\u0987 \u09b8\u09a6\u09b8\u09cd\u09af \u0995\u09a4 \u099f\u09be\u0995\u09be \u09a6\u09bf\u09df\u09c7\u099b\u09c7 \u09b2\u09bf\u0996\u09c7 \u09a6\u09bf\u0993\u0964'
+        : "Everyone can see who's paid each month \u2014 only the admin can edit amounts.";
+
+      const head = document.getElementById('geminiTableHead');
+      head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
+      const body = document.getElementById('geminiTableBody');
+      let myTotalDue = 0;
+      const myEmail = ((currentUser && currentUser.email) || '').toLowerCase();
+      body.innerHTML = members.map(m => {
+        const email = (m.email || '').toLowerCase();
+        const row = geminiPayments[email] || {};
+        let totalDue = 0;
+        const cells = months.map(mo => {
+          const paid = row[mo.key] || 0;
+          const due = Math.max(0, geminiMonthlyFee - paid);
+          totalDue += due;
+          const cls = geminiMonthlyFee > 0 ? (due <= 0 ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
+          const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
+          const clickAttr = canEdit ? ` onclick="setGeminiAmount('${esc(email)}','${mo.key}')"` : '';
+          return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
         }).join('');
-      } else {
-        adminWrap.style.display = 'none';
-        memberWrap.style.display = 'block';
-        renderMemberGeminiView(months);
-      }
-    }
-    function renderMemberGeminiView(months) {
-      const email = ((currentUser && currentUser.email) || '').toLowerCase();
-      const row = geminiPayments[email] || {};
-      let totalDue = 0;
-      const rowsHtml = months.map(mo => {
-        const paid = row[mo.key] || 0;
-        const due = Math.max(0, geminiMonthlyFee - paid);
-        totalDue += due;
-        const ok = geminiMonthlyFee > 0 ? due <= 0 : paid > 0;
-        const paidLabel = geminiMonthlyFee > 0 ? `\u09f3${paid} / \u09f3${geminiMonthlyFee}` : (paid > 0 ? `\u09f3${paid}` : '\u2014');
+        if (email === myEmail) myTotalDue = totalDue;
         return `<tr>
-          <td>${esc(mo.label)}</td>
-          <td style="text-align:center;">${paidLabel}</td>
-          <td style="text-align:center;"><span class="gem-dot ${ok?'on':''}"><i class="fas ${ok?'fa-check':'fa-xmark'}"></i></span></td>
+          <td><div class="member-who"><span class="chat-avatar" style="${m.role==='admin'?'':'background:#10b981;'}">${esc(m.initials||'?')}</span> ${esc(m.name)}</div></td>
+          ${cells}
+          <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
         </tr>`;
       }).join('');
-      const listEl = document.getElementById('geminiMemberTableBody');
-      if (listEl) listEl.innerHTML = rowsHtml;
 
       const dueBanner = document.getElementById('geminiDueBanner');
       const dueBadge  = document.getElementById('geminiDueBadge');
-      if (geminiMonthlyFee > 0 && totalDue > 0) {
-        if (dueBanner) { dueBanner.style.display = 'flex'; dueBanner.querySelector('.due-amount').textContent = `\u09f3${totalDue}`; }
+      if (geminiMonthlyFee > 0 && myTotalDue > 0) {
+        if (dueBanner) { dueBanner.style.display = 'flex'; dueBanner.querySelector('.due-amount').textContent = `\u09f3${myTotalDue}`; }
         if (dueBadge) { dueBadge.style.display = 'inline-flex'; dueBadge.textContent = '!'; }
       } else {
         if (dueBanner) dueBanner.style.display = 'none';
