@@ -1,0 +1,34 @@
+{
+  "driveLink": "",
+  "driveId": "",
+  "apiKey": "",
+  "members": [
+    {
+      "id": 1,
+      "name": "Md. Shaikh Alam (You)",
+      "email": "md.shaikh.alam.007@gmail.com",
+      "initials": "MS",
+      "role": "admin",
+      "view": true,
+      "download": true,
+      "whatsapp": "",
+      "photo": ""
+    }
+  ],
+  "notices": [
+    {
+      "id": 1,
+      "type": "info",
+      "title": "Welcome to the Research Hub",
+      "text": "Browse the Drive folder for shared papers and data, upload your own work under Team Uploads, and check this board for updates.",
+      "date": "Oct 13"
+    }
+  ],
+  "uploads": [],
+  "geminiPayments": {},
+  "pendingRequests": [],
+  "geminiCycleStart": "",
+  "geminiCycleEnd": "",
+  "geminiMonthlyFee": 0,
+  "updated": "2026-10-20T19:25:43.257684Z"
+}
