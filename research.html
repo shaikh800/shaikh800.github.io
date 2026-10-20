@@ -84,16 +84,10 @@
     .breadcrumb a:hover { color: var(--blue); }
     .breadcrumb i { font-size: 10px; opacity: .5; }
 
-    .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 18px; }
-    .folder-grid:empty { display: none; margin: 0; }
-    .folder-card {
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 14px; cursor: pointer; transition: .15s; display: flex; align-items: center; gap: 10px;
-    }
-    .folder-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
-    .folder-card i { font-size: 20px; color: #f4b400; flex-shrink: 0; }
-    .folder-card .f-meta { min-width: 0; }
-    .folder-card .f-name { font-weight: 700; font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .drive-row-folder { cursor: pointer; }
+    .drive-row-folder:hover td { background: var(--surface-soft); }
+    .drive-folder-icon { color: #f4b400 !important; }
+    .drive-row-chevron { color: var(--muted); font-size: 12px; }
 
     .file-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
     .file-table:empty { display: none; }
@@ -101,7 +95,7 @@
       text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
       font-weight: 700; padding: 10px 14px; background: var(--surface-soft); border-bottom: 1px solid var(--line);
     }
-    .file-table td { padding: 11px 14px; font-size: 13.5px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .file-table td { padding: 10px 14px; font-size: 13.5px; border-bottom: 1px solid var(--line); vertical-align: middle; }
     .file-table tr:last-child td { border-bottom: none; }
     .file-table tr:hover td { background: var(--surface-soft); }
     .file-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -418,7 +412,6 @@
         <div id="driveBrowser" style="display:none;">
           <div class="breadcrumb" id="breadcrumb"></div>
           <div class="drive-loading" id="driveLoading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
-          <div class="folder-grid" id="folderGrid"></div>
           <table class="file-table" id="fileTable">
             <thead><tr><th>Name</th><th>Modified</th><th>Size</th><th></th></tr></thead>
             <tbody id="fileTableBody"></tbody>
@@ -717,6 +710,7 @@
     }
 
     /* ── Tabs ── */
+    let _reauthAttempted = false;
     document.querySelectorAll('.r-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.r-tab').forEach(b => b.classList.remove('active'));
@@ -724,6 +718,10 @@
         const tab = btn.dataset.tab;
         document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
         document.getElementById('panel-' + tab).hidden = false;
+        if (tab === 'uploads' && !_reauthAttempted && currentUser && !currentUser.token) {
+          _reauthAttempted = true;
+          trySilentReauth();
+        }
       });
     });
 
@@ -831,7 +829,6 @@
       openLink.href = `https://drive.google.com/drive/folders/${current.id}`;
       openLink.style.display = '';
       document.getElementById('driveLoading').style.display = 'block';
-      document.getElementById('folderGrid').innerHTML = '';
       document.getElementById('fileTableBody').innerHTML = '';
       document.getElementById('driveFolderEmpty').style.display = 'none';
       try {
@@ -839,13 +836,15 @@
         document.getElementById('driveLoading').style.display = 'none';
         const folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
         const files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
-        document.getElementById('folderGrid').innerHTML = folders.map(f => `
-          <div class="folder-card" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
-            <i class="fas ${fileIconClass(f.mimeType)}"></i>
-            <div class="f-meta"><span class="f-name">${esc(f.name)}</span></div>
-          </div>`).join('');
-        document.getElementById('fileTableBody').innerHTML = files.map(f => `
-          <tr>
+        const folderRows = folders.map(f => `
+          <tr class="drive-row-folder" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
+            <td><div class="file-name-cell"><i class="fas fa-folder drive-folder-icon"></i><span class="fn">${esc(f.name)}</span></div></td>
+            <td class="muted-cell">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
+            <td class="muted-cell">—</td>
+            <td><div class="row-actions"><i class="fas fa-chevron-right drive-row-chevron"></i></div></td>
+          </tr>`).join('');
+        const fileRows = files.map(f => `
+          <tr class="drive-row-file">
             <td><div class="file-name-cell"><i class="fas ${fileIconClass(f.mimeType)}"></i><span class="fn">${esc(f.name)}</span></div></td>
             <td class="muted-cell">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
             <td class="muted-cell">${fmtSize(f.size)}</td>
@@ -854,6 +853,7 @@
               ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
             </div></td>
           </tr>`).join('');
+        document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
         if (!folders.length && !files.length) document.getElementById('driveFolderEmpty').style.display = 'block';
         else document.getElementById('driveFolderEmpty').style.display = 'none';
       } catch (e) {
@@ -1550,7 +1550,9 @@
         await freshPromise; // make sure the member list is current before trusting the cached sign-in
         currentUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
         enterAs(isMemberEmail(cached.email) ? 'member' : 'pending');
-        trySilentReauth();
+        // Drive token is fetched lazily (see Tabs below) only when the member actually opens
+        // Team Uploads — requesting it eagerly here pops Google's account-chooser window on
+        // every single page load, even for people who never touch uploads.
         return;
       }
       showGateOptions();
