@@ -466,3 +466,12 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
   .hero-tools { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; scrollbar-width: none; }
   .hero-tools::-webkit-scrollbar { display: none; }
 }
+
+
+/* ── Phone polish ── */
+/* Links like civil.html#semester-section should land below the sticky header, not under it */
+[id] { scroll-margin-top: 84px; }
+/* Admin lock button: smaller on phones so it does not cover names, emails or list items (all pages) */
+@media (max-width: 600px) {
+  .admin-fab { width: 44px !important; height: 44px !important; right: 14px !important; bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important; font-size: 14px !important; opacity: .9; }
+}

@@ -28,6 +28,27 @@
     .page-title { padding-bottom: 24px; }
     .page-title h1 { font-size: clamp(30px, 5vw, 48px); margin-bottom: 8px; }
     .page-title .lead { margin-bottom: 0; }
+    /* ── Phone polish: Shared Files look like the Semester list; no empty band above panels ── */
+    @media (max-width: 640px) {
+      .research-tabs-row:not(:has(.switch-view:not([hidden]):not([style*="display: none"]))) { display: none; }
+      .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
+      #mainSection, #pendingView { margin-top: 0; padding-top: 12px; border-top: 0; }
+      #fileTable { display: block; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+      #fileTable thead { display: none; }
+      #fileTable tbody { display: block; }
+      #fileTable tr { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+      #fileTable tr:last-child { border-bottom: none; }
+      #fileTable td { padding: 0; border: 0; background: none !important; }
+      #fileTable td:first-child { flex: 1; min-width: 0; }
+      #fileTable td:nth-child(2) { font-size: 12px; color: var(--muted); white-space: nowrap; }
+      #fileTable td:nth-child(3) { display: none; }
+      #fileTable td:nth-child(4) { flex-shrink: 0; }
+      #fileTable .fn { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+    }
+    @media (max-width: 640px) {
+      #pendingView div[style*="gap:10px"] { flex-direction: column; }
+      #pendingView div[style*="gap:10px"] .btn { width: 100%; justify-content: center; white-space: normal; text-align: center; }
+    }
     .switch-view {
       font-size: 12.5px; font-weight: 700; color: var(--muted); background: none; border: none;
       cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
@@ -44,6 +65,9 @@
       flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
     }
     .research-tabs-row .switch-view { flex-shrink: 0; }
+    @media (max-width: 640px) {
+      .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
+    }
     .research-tabs { display: none; }
     .r-tab {
       font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted);
