@@ -169,14 +169,14 @@
     .upload-status.err { color: #ef4444; }
 
     .uploads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 14px; }
-    .upload-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .upload-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .upload-cat { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); }
-    .upload-card h4 { margin: 0; font-size: 14.5px; line-height: 1.35; }
+    .upload-card h4 { margin: 0; font-size: 14.5px; line-height: 1.35; overflow-wrap: anywhere; word-break: break-word; }
     .upload-meta { font-size: 12px; color: var(--muted); }
     .vis-badge { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 100px; width: fit-content; }
     .vis-badge.public { background: rgba(16,185,129,0.12); color: #0f9d58; }
     .vis-badge.private { background: var(--surface-soft); color: var(--muted); }
-    .upload-actions { display: flex; gap: 8px; margin-top: 6px; align-items: center; }
+    .upload-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; align-items: center; }
 
     /* ── NOTICE BOARD ── */
     .notices-grid { display: grid; gap: 10px; }
@@ -853,7 +853,12 @@
     let geminiCycleEnd   = ''; // 'YYYY-MM'
     let geminiMonthlyFee = 0;  // ৳ per month; 0 = not tracking amounts yet
 
-    let currentUser = null; // { name, email, picture, token, expiry } — set by Google sign-in
+    // gateUser = the member/admin identity browsing the hub. A Google Drive sign-in in Team Uploads
+    // must never replace it, otherwise the saved member profile ends up with the Turbo account's email
+    // and the next page load sends the real member to the "Request sent" screen.
+    let gateUser = null;
+    function gateIdentity() { return gateUser || currentUser; }
+    let currentUser = null; // { name, email, picture, token, expiry } -- Google Drive sign-in only — set by Google sign-in
     let isUploadOnly = false; // true when the signed-in Google user's member record has uploadOnly:true
 
     const MEMBER_PROFILE_KEY = 'research_member_profile_v1';
@@ -1213,7 +1218,7 @@
         } catch (e) {
           currentUser = { name: 'Signed in', email: '', picture: '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
         }
-        if (role === 'member') saveMemberProfile({ email: currentUser.email, name: currentUser.name, picture: currentUser.picture });
+        // Drive identity only. Do NOT save this to the member profile: it is a different account.
         renderTeamTab();
       };
       _uploadTokenClient.requestAccessToken({ prompt: _driveAuthGranted ? '' : 'consent' });
@@ -1238,6 +1243,7 @@
       }
       if (role === 'member') {
         currentUser = null;
+        gateUser = null;
         clearMemberProfile();
         role = null;
         showGateOptions();
@@ -1270,7 +1276,7 @@
       showGateChecking('Checking access…');
       const passwordHash = await sha256Hex(email + ':' + pass);
       await fetchFromGitHub(); // make sure we have the freshest member list before deciding
-      currentUser = { name, email, picture: '', token: null, expiry: 0 };
+      gateUser = { name, email, picture: '', token: null, expiry: 0 };
       saveMemberProfile({ email, name, picture: '', passwordHash });
       const alreadyMember = isMemberEmail(email);
       if (!alreadyMember) addPendingRequest(name, email);
@@ -1401,6 +1407,20 @@
       renderUploads();
       syncChange('removeUpload', { email: (currentUser && currentUser.email) || '', id });
     }
+    async function shareUpload(id) {
+      const u = uploads.find(x => x.id === id);
+      if (!u || !u.link) return;
+      if (navigator.share) {
+        try { await navigator.share({ title: u.title, url: u.link }); return; }
+        catch (e) { if (e && e.name === 'AbortError') return; }
+      }
+      try {
+        await navigator.clipboard.writeText(u.link);
+        toast(u.visibility === 'public' ? 'Link copied' : 'Link copied \u2014 only people the file is shared with can open it', 'success');
+      } catch (e) {
+        toast("Couldn't copy the link here. Use Open and copy it from Drive.", 'error', 4000);
+      }
+    }
     function visibleUploads() {
       return uploads.filter(u => u.visibility === 'public' || role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase()));
     }
@@ -1417,6 +1437,7 @@
           <span class="vis-badge ${u.visibility}">${u.visibility === 'public' ? 'Public' : 'Private'}</span>
           <div class="upload-actions">
             <a class="btn secondary sm" href="${esc(u.link)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Open</a>
+            <button class="btn secondary sm" onclick="shareUpload('${esc(u.id)}')"><i class="fas fa-share-nodes"></i> Share</button>
             ${canRemove ? `<button class="icon-action danger" title="Remove" onclick="removeUpload('${esc(u.id)}')"><i class="fas fa-trash"></i></button>` : ''}
           </div>
         </div>`;
@@ -1605,6 +1626,8 @@
     }
     function renderGeminiTab() {
       const months = geminiMonthKeys();
+      const _now = new Date();
+      const curKey = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0');
       const cycleBox = document.getElementById('geminiCycleBox');
       const adminWrap = document.getElementById('geminiAdminTableWrap');
       if (!adminWrap) return;
@@ -1631,7 +1654,7 @@
       head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
       const body = document.getElementById('geminiTableBody');
       let myDueMonths = [];
-      const myEmail = ((currentUser && currentUser.email) || '').toLowerCase();
+      const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
       body.innerHTML = members.filter(m => !m.uploadOnly).map(m => {
         const email = (m.email || '').toLowerCase();
         const row = geminiPayments[email] || {};
@@ -1639,10 +1662,13 @@
         const rowDueMonths = [];
         const cells = months.map(mo => {
           const paid = row[mo.key] || 0;
-          const due = Math.max(0, geminiMonthlyFee - paid);
+          // Only a month that has already ended can be overdue. The current month and
+          // future months are not due yet, so they never add to the due banner or total.
+          const isPast = mo.key < curKey;
+          const due = (geminiMonthlyFee > 0 && isPast) ? Math.max(0, geminiMonthlyFee - paid) : 0;
           totalDue += due;
           if (geminiMonthlyFee > 0 && due > 0) rowDueMonths.push(mo.label);
-          const cls = geminiMonthlyFee > 0 ? (due <= 0 ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
+          const cls = geminiMonthlyFee > 0 ? (paid >= geminiMonthlyFee ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
           const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
           const clickAttr = canEdit ? ` onclick="setGeminiAmount('${esc(email)}','${mo.key}')"` : '';
           return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
@@ -1677,21 +1703,21 @@
     let _acctPendingPhoto = null; // data URL staged in the browser until Save is pressed
 
     function myMemberRecord() {
-      const email = ((currentUser && currentUser.email) || '').toLowerCase();
+      const email = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
       if (!email) return null;
       return members.find(m => (m.email || '').toLowerCase() === email) || null;
     }
 
     function renderAccountTab() {
       const nameEl = document.getElementById('acctName');
-      if (!nameEl || !currentUser) return;
+      if (!nameEl || !gateIdentity()) return;
       const me = myMemberRecord();
       _acctPendingPhoto = null;
-      nameEl.value = (me && me.name) || currentUser.name || '';
-      document.getElementById('acctEmail').value = currentUser.email || '';
+      nameEl.value = (me && me.name) || gateIdentity().name || '';
+      document.getElementById('acctEmail').value = gateIdentity().email || '';
       document.getElementById('acctWhatsapp').value = (me && me.whatsapp) || '';
       const preview = document.getElementById('acctAvatarPreview');
-      const photo = (me && me.photo) || currentUser.picture || '';
+      const photo = (me && me.photo) || gateIdentity().picture || '';
       preview.innerHTML = photo
         ? `<img src="${esc(photo)}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'">`
         : '<i class="fas fa-user"></i>';
@@ -1724,15 +1750,15 @@
     });
 
     async function saveAccountProfile() {
-      if (!currentUser) return;
+      if (!gateIdentity()) return;
       const name = document.getElementById('acctName').value.trim();
       const whatsapp = document.getElementById('acctWhatsapp').value.trim();
       const statusEl = document.getElementById('acctStatus');
       if (!name) { statusEl.textContent = 'Enter your name.'; statusEl.className = 'upload-status err'; return; }
 
       const newPhoto = _acctPendingPhoto;
-      currentUser.name = name;
-      if (newPhoto) currentUser.picture = newPhoto;
+      gateIdentity().name = name;
+      if (newPhoto) gateIdentity().picture = newPhoto;
 
       const me = myMemberRecord();
       if (me) {
@@ -1742,13 +1768,13 @@
         if (newPhoto) me.photo = newPhoto;
       }
       if (role === 'member') {
-        saveMemberProfile({ email: currentUser.email, name, picture: currentUser.picture || '' });
+        saveMemberProfile({ email: gateIdentity().email, name, picture: gateIdentity().picture || '' });
       }
       _acctPendingPhoto = null;
       renderMembers(); renderGeminiTab(); renderTeamTab();
 
       statusEl.textContent = 'Saving…'; statusEl.className = 'upload-status';
-      const result = await syncChange('updateProfile', { email: currentUser.email, name, whatsapp, photo: newPhoto || '' });
+      const result = await syncChange('updateProfile', { email: gateIdentity().email, name, whatsapp, photo: newPhoto || '' });
       // Either way the change is saved for this device/browser right now (above). Once
       // the sync Worker is deployed (tools/research-sync-worker/), a member's own save
       // reaches the shared file straight away too, same as the admin's.
@@ -1957,7 +1983,7 @@
     function applyRole() {
       applyAdminFab();
       // Compute uploadOnly state from current user's member record
-      const myEmail = ((currentUser && currentUser.email) || '').toLowerCase();
+      const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
       const myMember = myEmail ? members.find(m => (m.email || '').toLowerCase() === myEmail) : null;
       isUploadOnly = !!(myMember && myMember.uploadOnly);
       // Hide Gemini tab for uploadOnly accounts
@@ -2001,12 +2027,12 @@
       renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
     }
     function renderPendingView() {
-      if (!currentUser) return;
+      if (!gateIdentity()) return;
       const chip = document.getElementById('pendingChip');
-      chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
-        <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>`;
+      chip.innerHTML = `${gateIdentity().picture ? `<img src="${esc(gateIdentity().picture)}" onerror="this.style.display='none'">` : ''}
+        <div><div class="tu-name">${esc(gateIdentity().name)}</div><div class="tu-email">${esc(gateIdentity().email)}</div></div>`;
       const subject = encodeURIComponent('Research Hub access request');
-      const body = encodeURIComponent(`Hi,\n\nPlease approve my access to the Research Hub.\nName: ${currentUser.name}\nEmail: ${currentUser.email}\n`);
+      const body = encodeURIComponent(`Hi,\n\nPlease approve my access to the Research Hub.\nName: ${gateIdentity().name}\nEmail: ${gateIdentity().email}\n`);
       const mailLink = `mailto:md.shaikh.alam.007@gmail.com?subject=${subject}&body=${body}`;
       document.getElementById('pendingContactBtn').href = mailLink;
 
@@ -2080,6 +2106,7 @@
       if (role === 'admin') siteAdminLogout();
       if (role === 'member' || role === 'pending') clearMemberProfile();
       currentUser = null;
+      gateUser = null;
       role = null;
       document.body.classList.remove('admin-mode');
       applyAdminFab();
@@ -2094,7 +2121,7 @@
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking…';
       try {
         await fetchFromGitHub(); // pull the freshest member list before deciding
-        if (currentUser && isMemberEmail(currentUser.email)) {
+        if (gateIdentity() && isMemberEmail(gateIdentity().email)) {
           role = 'member';
           applyRole();
         } else {
@@ -2127,7 +2154,7 @@
       if (cached && cached.email) {
         showGateChecking('Checking your access…');
         await freshPromise; // make sure the member list is current before trusting the cached sign-in
-        currentUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
+        gateUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
         enterAs(isMemberEmail(cached.email) ? 'member' : 'pending');
         // Drive token is fetched lazily (see Tabs below) only when the member actually opens
         // Team Uploads — requesting it eagerly here pops Google's account-chooser window on
