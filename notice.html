@@ -424,7 +424,7 @@
     (() => {
       const EX_DEFAULT_PROXY = 'https://du-exam-proxy.md-shaikh-alam-005.workers.dev';
       const EX_DEFAULT_BASE  = 'https://bk.eco.du.ac.bd/get-notice-file/';
-      const EX_SET_KEY = 'civil_ex_settings_v1', EX_API_KEY = 'civil_ex_api_v1', EX_PASTE_KEY = 'civil_ex_paste_v1', EX_DAY = 86400000;
+      const EX_SET_KEY = 'civil_ex_settings_v1', EX_API_KEY = 'civil_ex_api_v1', EX_PASTE_KEY = 'civil_ex_paste_v1', EX_NOTIFIED_KEY = 'civil_ex_notified_v1', EX_DAY = 86400000;
       let exApiItems = [], exPasteItems = [], exNotified = {}, exPollTimer = null;
       let exPage = 1; const EX_PAGE_SIZE = 6;
       function pagerRange(current, total) {
@@ -536,6 +536,7 @@
       function exSavePaste() { try { localStorage.setItem(EX_PASTE_KEY, JSON.stringify(exPasteItems.map(n=>({id:n.id,title:n.title,year:n.year,sem:n.sem,examYear:n.examYear,type:n.type,start:n.start?n.start.toISOString():null,end:n.end?n.end.toISOString():null,status:n.status,key:n.key})))); } catch(e){} }
       function exLoadStored() {
         try { const a = JSON.parse(localStorage.getItem(EX_API_KEY)||'[]'); exApiItems = a.map(it => { const n=exNormApi(it); n.status=exClassifyApi(n.published); return n; }); } catch(e) { exApiItems = []; }
+        try { exNotified = JSON.parse(localStorage.getItem(EX_NOTIFIED_KEY)||'{}'); } catch(e) { exNotified = {}; }
         try {
           const p = JSON.parse(localStorage.getItem(EX_PASTE_KEY)||'[]');
           exPasteItems = p.map(it => { const n = { id:it.id, title:it.title, year:it.year, sem:it.sem, examYear:it.examYear, type:it.type, start:it.start?new Date(it.start):null, end:it.end?new Date(it.end):null, published:null, file:null, source:'paste' }; n.status=exClassifyPaste(n); n.key=it.key||('p|'+n.title); return n; });
@@ -616,7 +617,7 @@
         exParseFromTextarea();
       }
       function exClearAll() {
-        exApiItems = []; exPasteItems = []; exNotified = {}; exSaveApi(); exSavePaste(); exRender();
+        exApiItems = []; exPasteItems = []; exNotified = {}; exSaveApi(); exSavePaste(); try { localStorage.removeItem(EX_NOTIFIED_KEY); } catch(e){} exRender();
         document.getElementById('exStatus').textContent = 'Cleared.'; document.getElementById('exPasteText').value = '';
       }
       function exSaveSettings() { try { localStorage.setItem(EX_SET_KEY, JSON.stringify({ proxy:document.getElementById('exProxyUrl').value.trim(), pdfBase:document.getElementById('exPdfBase').value.trim() })); } catch(e){} }
@@ -665,7 +666,7 @@
       function exCheckAlerts() {
         if (typeof Notification==='undefined' || Notification.permission!=='granted') return;
         exApiItems.filter(n=>n.status==='new').forEach(n => {
-          if (!exNotified[n.key]) { exNotified[n.key]=1; try { new Notification('New Civil exam notice'+(n.year?' — Year '+n.year:''), { body:n.type+(n.published?' · '+exFmtDate(new Date(n.published)):'') }); } catch(e){} }
+          if (!exNotified[n.key]) { exNotified[n.key]=1; try { localStorage.setItem(EX_NOTIFIED_KEY, JSON.stringify(exNotified)); } catch(e){} try { new Notification('New Civil exam notice'+(n.year?' — Year '+n.year:''), { body:n.type+(n.published?' · '+exFmtDate(new Date(n.published)):'') }); } catch(e){} }
         });
       }
 
@@ -682,8 +683,10 @@
       document.getElementById('exClearBtn').addEventListener('click', exClearAll);
 
       exLoadSettings(); exLoadStored(); exRender();
-      exRefresh(false); // quietly fetch the live feed for every visitor on page load
-      if ((document.getElementById('exProxyUrl').value||'').trim()) exTogglePoll(); // auto-update on its own, no click needed
+      // On load: if proxy URL is set, exTogglePoll() starts polling AND fires an immediate exRefresh().
+      // If no URL is set there's nothing live to fetch — paste-only mode.
+      if ((document.getElementById('exProxyUrl').value||'').trim()) exTogglePoll();
+      else exRefresh(false);
     })();
   </script>
 </body>
