@@ -839,41 +839,45 @@
       }));
     }
 
-    /* ── Tabs ── */
+    /* ── Tabs ──
+       Every way of switching tabs (the tab bar, a sidebar link, applyRole() on
+       sign-in, or the browser's own Back/Forward) now goes through ONE path, so
+       the address bar's hash always matches what's actually on screen. Before,
+       only the sidebar links updated the hash (via pushState) -- clicking the
+       tab bar itself changed nothing about the URL, so Back had no real history
+       to return to and just kept landing back on the same tab, looking "stuck". */
     let _reauthAttempted = false;
-    document.querySelectorAll('.r-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.r-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
-        document.getElementById('panel-' + tab).hidden = false;
-        if (tab === 'uploads' && !_reauthAttempted && currentUser && !currentUser.token) {
-          _reauthAttempted = true;
-          trySilentReauth();
-        }
-      });
-    });
+    function activateTab(tab) {
+      document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
+      const panel = document.getElementById('panel-' + tab);
+      if (panel) panel.hidden = false;
+      if (tab === 'uploads' && !_reauthAttempted && currentUser && !currentUser.token) {
+        _reauthAttempted = true;
+        trySilentReauth();
+      }
+    }
     function goToTab(tab) {
       const tabs = ['files', 'uploads', 'notices', 'gemini', 'account'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
       if (!tabs.includes(tab)) return;
-      const btn = document.querySelector('.r-tab[data-tab="' + tab + '"]');
-      if (btn) btn.click();
+      if ((window.location.hash || '').replace('#', '') !== tab) {
+        history.pushState('', document.title, window.location.pathname + window.location.search + '#' + tab);
+      }
+      activateTab(tab);
     }
-    window.addEventListener('hashchange', () => {
-      goToTab((window.location.hash || '').replace('#', ''));
+    document.querySelectorAll('.r-tab').forEach(btn => {
+      btn.addEventListener('click', () => goToTab(btn.dataset.tab));
     });
-    // The sidebar's own Research sub-links also switch tabs directly on click, instead of
-    // only through the 'hashchange' event above — a same-page click that lands on the hash
-    // it's already on (or anything else that keeps the hashchange event from firing) would
-    // otherwise leave the tab stuck with no visible reaction. This makes "Files" etc. in the
-    // sidebar work every time regardless of that.
+    window.addEventListener('hashchange', () => {
+      // The hash already changed (typed, a link, or Back/Forward) -- just reflect
+      // it. Never push a new entry here, or pressing Back would instantly push
+      // right back Forward and the button would feel like it does nothing.
+      activateTab((window.location.hash || '').replace('#', ''));
+    });
     document.querySelectorAll('.nav-sub a[href^="research.html#"]').forEach((link) => {
       link.addEventListener('click', (e) => {
-        const tab = link.getAttribute('href').split('#')[1];
         e.preventDefault();
-        history.pushState('', document.title, window.location.pathname + window.location.search + '#' + tab);
-        goToTab(tab);
+        goToTab(link.getAttribute('href').split('#')[1]);
       });
     });
 
@@ -1735,11 +1739,10 @@
     }
     document.getElementById('admin-fab').addEventListener('click', () => {
       if (role === 'admin') {
-        siteAdminLogout();
-        role = null;
-        applyAdminFab();
-        showGateOptions();
-        gateEl.style.display = 'flex';
+        // Route through the one shared exitToGate() instead of duplicating its
+        // steps here -- a separate copy had been leaving the "admin-mode" body
+        // class stuck on, which left admin-only UI visible after logging out.
+        exitToGate();
         return;
       }
       document.getElementById('admin-pass').value = '';
@@ -1793,12 +1796,11 @@
       }
       if (role !== 'admin') {
         document.getElementById('panel-access').hidden = true;
-        document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       } else {
         const savedToken = localStorage.getItem('site_gh_token');
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
-        document.querySelector('.r-tab[data-tab="' + initialTab + '"]').click();
       }
+      activateTab(initialTab);
       renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
     }
     function renderPendingView() {
@@ -1814,11 +1816,24 @@
       // First time this profile lands on "pending" — open the admin's email automatically
       // (one tap to send, from their own mail app) so a request never relies on them
       // remembering to click a button. Only fires once per profile, not on every reload.
+      // Open the admin's mail app via a throwaway link click instead of
+      // window.location.href -- some browsers treat a direct location
+      // assignment to a mailto: URL as leaving the page, which can interrupt
+      // SPA state; a clicked <a> opens the mail handler without navigating.
       const cached = loadMemberProfile();
       if (cached && !cached.requested) {
         cached.requested = true;
         saveMemberProfile(cached);
-        setTimeout(() => { try { window.location.href = mailLink; } catch (e) {} }, 400);
+        setTimeout(() => {
+          try {
+            const a = document.createElement('a');
+            a.href = mailLink;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          } catch (e) {}
+        }, 400);
       }
     }
 
@@ -1869,6 +1884,7 @@
       if (role === 'member' || role === 'pending') clearMemberProfile();
       currentUser = null;
       role = null;
+      document.body.classList.remove('admin-mode');
       applyAdminFab();
       showGateOptions();
       gateEl.style.display = 'flex';
