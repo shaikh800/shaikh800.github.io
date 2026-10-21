@@ -311,6 +311,7 @@
     .admin-fab:hover { transform: scale(1.1); }
     .admin-fab.active { background: var(--blue); }
     #modal-admin { z-index: 2200; }
+    #modal-gemini-pay { z-index: 2200; }
 
     /* ── Toast (used mainly to surface a sync save that silently failed) ── */
     .toast-wrap { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 2400; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
@@ -371,6 +372,25 @@
       <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
         <button class="btn secondary sm" onclick="closeModal('modal-admin')">Cancel</button>
         <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="modal-gemini-pay">
+    <div class="modal-box" style="max-width:340px;">
+      <div class="modal-head">
+        <h3><i class="fas fa-money-bill-wave" style="color:var(--blue);margin-right:8px;"></i>Set Payment</h3>
+        <button class="modal-close" onclick="closeModal('modal-gemini-pay')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <label id="gemini-pay-label" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px;"></label>
+        <input type="number" id="gemini-pay-input" min="0" step="0.01" placeholder="Amount (৳)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);">
+        <p id="gemini-pay-error" style="color:#ef4444;font-size:13px;display:none;margin-top:8px;">Enter a valid amount.</p>
+      </div>
+      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
+        <button class="btn secondary sm" onclick="closeModal('modal-gemini-pay')">Cancel</button>
+        <button class="btn primary sm" id="gemini-pay-save-btn"><i class="fas fa-save"></i> Save</button>
       </div>
     </div>
   </div>
@@ -1558,17 +1578,30 @@
         reportSyncResult(result);
       }
     }
-    async function setGeminiAmount(email, key) {
+    function setGeminiAmount(email, key) {
       if (role !== 'admin') return;
       const current = (geminiPayments[email] && geminiPayments[email][key]) || 0;
-      const input = prompt(`Amount paid for ${key} (\u09f3):`, current || '');
-      if (input === null) return;
-      const amt = parseFloat(input);
-      if (isNaN(amt) || amt < 0) { alert('Enter a valid amount.'); return; }
-      if (!geminiPayments[email]) geminiPayments[email] = {};
-      geminiPayments[email][key] = amt;
-      renderGeminiTab();
-      reportSyncResult(await pushToGitHub());
+      const label = document.getElementById('gemini-pay-label');
+      const inp = document.getElementById('gemini-pay-input');
+      const err = document.getElementById('gemini-pay-error');
+      const btn = document.getElementById('gemini-pay-save-btn');
+      if (label) label.textContent = 'Amount paid for ' + key + ' (৳):';
+      if (inp) { inp.value = current || ''; }
+      if (err) err.style.display = 'none';
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', async () => {
+        const amt = parseFloat(inp.value);
+        if (isNaN(amt) || amt < 0) { if (err) err.style.display = ''; return; }
+        closeModal('modal-gemini-pay');
+        if (!geminiPayments[email]) geminiPayments[email] = {};
+        geminiPayments[email][key] = amt;
+        renderGeminiTab();
+        reportSyncResult(await pushToGitHub());
+      });
+      inp.onkeydown = (e) => { if (e.key === 'Enter') newBtn.click(); };
+      openModal('modal-gemini-pay');
+      setTimeout(() => { if (inp) inp.focus(); }, 80);
     }
     function renderGeminiTab() {
       const months = geminiMonthKeys();
