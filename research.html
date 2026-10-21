@@ -511,6 +511,13 @@
           </div>
         </div>
 
+        <!-- Shown to regular members (non-uploadOnly) instead of the upload form -->
+        <div class="denied-box" id="teamMemberUploadNote" hidden>
+          <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+          File uploads are handled exclusively through the shared <strong>Turbo Researchers</strong> team account.
+          Contact the admin to have a file uploaded to the shared Drive folder.
+        </div>
+
         <div class="signin-row" id="teamSignin">
           <i class="fab fa-google"></i>
           <p>Admin: sign in with your own Google account here to upload under your personal Drive too (separate from the admin password you used to get in).</p>
@@ -810,6 +817,7 @@
     let geminiMonthlyFee = 0;  // ৳ per month; 0 = not tracking amounts yet
 
     let currentUser = null; // { name, email, picture, token, expiry } — set by Google sign-in
+    let isUploadOnly = false; // true when the signed-in Google user's member record has uploadOnly:true
 
     const MEMBER_PROFILE_KEY = 'research_member_profile_v1';
     function saveMemberProfile(p) { try { localStorage.setItem(MEMBER_PROFILE_KEY, JSON.stringify(p)); } catch (e) {} }
@@ -866,6 +874,7 @@
       // the one place with real admin controls (remove member, etc.), so it
       // gets its own explicit check rather than relying on CSS alone.
       if (tab === 'access' && role !== 'admin') tab = 'files';
+      if (tab === 'gemini' && isUploadOnly) tab = 'uploads';
       document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
       const panel = document.getElementById('panel-' + tab);
@@ -876,7 +885,7 @@
       }
     }
     function goToTab(tab) {
-      const tabs = ['files', 'uploads', 'notices', 'gemini', 'account'].concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
+      const tabs = ['files', 'uploads', 'notices'].concat(isUploadOnly ? [] : ['gemini']).concat(['account']).concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
       if (!tabs.includes(tab)) return;
       if ((window.location.hash || '').replace('#', '') !== tab) {
         history.pushState('', document.title, window.location.pathname + window.location.search + '#' + tab);
@@ -1182,8 +1191,8 @@
       renderTeamTab();
     }
     function isAuthorizedUploader() {
-      // Membership was already verified at the gate — admin and member both qualify.
-      return role === 'admin' || role === 'member';
+      // Only admin and uploadOnly members (turbo shared account) can upload.
+      return role === 'admin' || (role === 'member' && isUploadOnly);
     }
 
     /* ── Gate: simple name + email + password sign-in (no Google needed to get past the gate) ── */
@@ -1359,6 +1368,17 @@
       const chip = document.getElementById('teamUserChip');
       const formArea = document.getElementById('teamUploadForm');
       const reconnectArea = document.getElementById('teamReconnect');
+      // Only uploadOnly members (the shared Turbo account) and admin can upload.
+      // Regular members see an info message instead of the upload form.
+      const memberInfo = document.getElementById('teamMemberUploadNote');
+      if (!isAuthorizedUploader()) {
+        // Regular member — hide all upload UI, show explanation
+        signinArea.style.display = 'none'; chip.style.display = 'none';
+        formArea.style.display = 'none'; reconnectArea.style.display = 'none';
+        if (memberInfo) memberInfo.hidden = false;
+        renderUploads(); return;
+      }
+      if (memberInfo) memberInfo.hidden = true;
       if (!currentUser) {
         signinArea.style.display = 'flex'; chip.style.display = 'none';
         formArea.style.display = 'none'; reconnectArea.style.display = 'none';
@@ -1529,7 +1549,7 @@
       const body = document.getElementById('geminiTableBody');
       let myDueMonths = [];
       const myEmail = ((currentUser && currentUser.email) || '').toLowerCase();
-      body.innerHTML = members.map(m => {
+      body.innerHTML = members.filter(m => !m.uploadOnly).map(m => {
         const email = (m.email || '').toLowerCase();
         const row = geminiPayments[email] || {};
         let totalDue = 0;
@@ -1853,6 +1873,13 @@
     }
     function applyRole() {
       applyAdminFab();
+      // Compute uploadOnly state from current user's member record
+      const myEmail = ((currentUser && currentUser.email) || '').toLowerCase();
+      const myMember = myEmail ? members.find(m => (m.email || '').toLowerCase() === myEmail) : null;
+      isUploadOnly = !!(myMember && myMember.uploadOnly);
+      // Hide Gemini tab for uploadOnly accounts
+      const geminiTabBtn = document.querySelector('.r-tab[data-tab="gemini"]');
+      if (geminiTabBtn) geminiTabBtn.hidden = isUploadOnly;
       document.body.classList.toggle('admin-mode', role === 'admin');
       const switchLabel = document.getElementById('switchViewLabel');
       switchLabel.textContent = role === 'admin' ? 'Viewing as Admin · switch?' : role === 'pending' ? 'Waiting for approval · switch?' : 'Viewing as Member · switch?';
@@ -1866,7 +1893,7 @@
         return;
       }
       const hashTab = (window.location.hash || '').replace('#', '');
-      const validTabs = ['files', 'uploads', 'notices', 'gemini', 'account'].concat(role === 'admin' ? ['access'] : []);
+      const validTabs = ['files', 'uploads', 'notices'].concat(isUploadOnly ? [] : ['gemini']).concat(['account']).concat(role === 'admin' ? ['access'] : []);
       const initialTab = validTabs.includes(hashTab) ? hashTab : 'files';
       if (hashTab !== initialTab) {
         history.replaceState('', document.title, window.location.pathname + window.location.search + '#' + initialTab);
