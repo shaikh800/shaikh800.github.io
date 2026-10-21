@@ -1179,7 +1179,10 @@
       _uploadTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GDRIVE_CLIENT_ID,
         scope: GDRIVE_UPLOAD_SCOPE,
-        callback: () => {}
+        callback: () => {},
+        // Fires when the Google window is closed or fails to open. Without this, _authInFlight
+        // stayed true and the sign-in button stopped responding until a full page refresh.
+        error_callback: () => { _authInFlight = false; renderTeamTab(); }
       });
     }
     window.addEventListener('load', initUploadAuth);
@@ -1202,12 +1205,13 @@
     async function signInWithGoogle() {
       if (_authInFlight) return;
       const ready = await waitForTokenClient();
-      if (!ready) { alert("Google sign-in didn't load — check your connection and try again."); return; }
+      if (!ready) { toast("Google sign-in didn't load. Check your connection and try again.", 'error', 5000); return; }
       _authInFlight = true;
       _uploadTokenClient.callback = async (resp) => {
         _authInFlight = false;
         if (resp.error) {
-          alert("Google sign-in was closed or blocked before it finished — tap Sign in with Google and complete the Google window to continue.");
+          toast("Google sign-in was closed before it finished. Tap Sign in with Google to try again.", 'error', 5000);
+          renderTeamTab();
           return;
         }
         _driveAuthGranted = true;
