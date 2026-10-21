@@ -541,7 +541,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Folder path <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — Browse to pick any existing folder in your Drive, incl. top-level ones)</span></label>
+            <label>Folder path <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — Browse to pick an existing folder inside the shared Files folder)</span></label>
             <div class="path-input-wrap" style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);overflow:hidden;padding:0 8px;">
               <i class="fas fa-folder-open" style="color:var(--muted);font-size:13px;margin:0 6px;"></i>
               <input type="text" id="upDrivePath" placeholder="e.g. Dataset / 2026" style="border:none;outline:none;background:transparent;padding:10px 6px;flex:1;box-shadow:none !important;font-family:monospace;font-size:12.5px;min-width:0;">
@@ -551,7 +551,7 @@
           </div>
           <button class="btn primary sm" id="upSubmitBtn"><i class="fas fa-cloud-arrow-up"></i> Upload</button>
           <div class="upload-status" id="uploadStatus"></div>
-          <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">Uploads go into your own Google Drive, inside a "Research Hub Uploads" folder — not the admin's. You remain the owner and can delete it anytime, from here or from Drive.</p>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;" id="uploadDestNote"></p>
         </div>
 
         <div style="font-weight:700;font-size:14px;margin:18px 0 10px;">Shared uploads</div>
@@ -1187,8 +1187,10 @@
       const safeName = name.replace(/'/g, "\\'");
       const q = `name='${safeName}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
       const list = await driveApiCall('GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, null, token);
+      if (list.error) throw new Error(list.error.message || `Can't see that folder (check Drive sharing permissions)`);
       if (list.files && list.files.length) return list.files[0].id;
       const folder = await driveApiCall('POST', '/files', { name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] }, token);
+      if (!folder.id) throw new Error((folder.error && folder.error.message) || `Can't create "${name}" there (the admin may need to share that Drive folder as Editor, not just Viewer)`);
       return folder.id;
     }
     function setUploadStatus(msg, cls) {
@@ -1215,17 +1217,23 @@
         const token = currentUser.token;
         let parentId;
         if (pickedFolderId) {
-          // Picked an exact folder via Browse Drive (could be anywhere in the
-          // uploader's own Drive, including a pre-existing top-level folder) --
-          // upload straight into it, no re-creation / re-nesting by name.
+          // Picked an exact folder via Browse Drive (could be anywhere the
+          // uploader has access to, including a subfolder of the shared Files
+          // folder) -- upload straight into it, no re-creation / re-nesting.
           parentId = pickedFolderId;
         } else {
-          parentId = await findOrCreateFolder('Research Hub Uploads', 'root', token);
-          // A path typed by hand wins over the category dropdown.
+          // Default destination: inside the SAME shared Drive folder the Files
+          // tab browses (driveId), under a category subfolder -- so an upload
+          // shows up right there in Files for everyone, instead of landing in
+          // the uploader's own separate personal Drive. Only falls back to a
+          // personal "Research Hub Uploads" folder if the site has no shared
+          // Files folder configured at all yet.
+          const anchorId = driveId || await findOrCreateFolder('Research Hub Uploads', 'root', token);
           const folders = (pathOverride && pathOverride.trim())
             ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
             : [category];
           if (!folders.length) folders.push(category);
+          parentId = anchorId;
           for (const folderName of folders) {
             parentId = await findOrCreateFolder(folderName, parentId, token);
           }
@@ -1310,6 +1318,12 @@
         if (tokenFresh) { formArea.style.display = 'block'; reconnectArea.style.display = 'none'; }
         else { formArea.style.display = 'none'; reconnectArea.style.display = 'block'; }
       }
+      const destNote = document.getElementById('uploadDestNote');
+      if (destNote) {
+        destNote.innerHTML = driveId
+          ? "By default, uploads go straight into the shared <b>Files</b> folder (under a folder named after the category) so everyone can see them there — use Browse to pick a different existing folder instead. This needs the admin to have shared that Drive folder as Editor, not just Viewer; if an upload fails, that's the first thing to check."
+          : "Uploads go into your own Google Drive, inside a &quot;Research Hub Uploads&quot; folder — not the admin's. You remain the owner and can delete it anytime, from here or from Drive.";
+      }
       renderUploads();
     }
     document.getElementById('googleSigninBtn').addEventListener('click', signInWithGoogle);
@@ -1317,17 +1331,22 @@
     document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
 
     // Browse Drive button -- same shared DrivePicker used on Civil/3D Portfolio.
-    // Rooted at the real Drive root (My Drive) so an uploader can see and pick
-    // folders that already exist there (e.g. a top-level "Research Papers"
-    // folder) -- not just subfolders of the app's own "Research Hub Uploads"
-    // folder. Picking a folder stores its real id, so the upload goes straight
-    // into that exact folder instead of recreating it by name somewhere else.
+    // Rooted at the SAME shared Files folder the Files tab browses (driveId),
+    // so an uploader sees the real existing folders (Basic, GeoTech, FEC Thesis
+    // Papers, ...) and the file lands right there in Files -- not off in their
+    // own separate personal Drive. Falls back to the uploader's own Drive root
+    // only if the site has no shared Files folder configured yet.
+    // Note: browsing it needs only the folder's normal "anyone with the link"
+    // view access (same as Files tab); actually uploading into it needs the
+    // admin to have shared that folder as Editor, not just Viewer.
     document.getElementById('upBrowseDriveBtn').addEventListener('click', () => {
       if (!isAuthorizedUploader() || !currentUser || Date.now() > currentUser.expiry - 5000) {
         alert('Sign in with Google first.'); return;
       }
       DrivePicker.open({
-        token: currentUser.token, rootId: 'root', rootLabel: 'My Drive',
+        token: currentUser.token,
+        rootId: driveId || 'root',
+        rootLabel: driveId ? 'Shared Files' : 'My Drive',
         onChoose: (path, folderId) => {
           document.getElementById('upDrivePath').value = path;
           document.getElementById('upDriveFolderId').value = folderId || '';
