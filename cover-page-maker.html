@@ -671,13 +671,13 @@ const courseData = [
     { code: "CE 606", name: "Transportation Engineering Sessional I", teacher: "Md. Sharitul Islam", desig: "Adjunct Lecturer" },
     { code: "CE 607", name: "Hydrology", teacher: "Ashish Modak", desig: "Adjunct Lecturer" },
     { code: "CE 608", name: "Environmental Engineering Sessional", teacher: "Engr. Shahed Mahmud", desig: "Workshop/Laboratory Incharge" }
-].sort((a,b) => a.code.localeCompare(b.code));
+].sort((a,b) => (b.code.startsWith('CE 6') - a.code.startsWith('CE 6')) || a.code.localeCompare(b.code));
 
 const extraTeachers = [
     { name: "Raihan Khan Apu", desig: "Assistant Professor" },
     { name: "Puja Brombha", desig: "Adjunct Lecturer" },
     { name: "Foysal Ahmed", desig: "Adjunct Lecturer" },
-    { name: "Md. Ashikur Rahman", desig: "" }
+    { name: "Md. Ashikur Rahman", desig: "", sem6: true }
 ];
 
 const studentData = [
@@ -734,9 +734,15 @@ const tList = document.getElementById('teacher-list');
 courseData.forEach(c => {
     cCodeL.innerHTML += `<option value="${c.code}">`;
     cNameL.innerHTML += `<option value="${c.name}">`;
-    tList.innerHTML += `<option value="${c.teacher}">`;
 });
-extraTeachers.forEach(t => { tList.innerHTML += `<option value="${t.name}">`; });
+// Teacher suggestions: 6th-semester teachers first, then everyone else (no duplicates).
+const teacherOrder = [];
+const addTeacher = n => { if (n && !teacherOrder.includes(n)) teacherOrder.push(n); };
+courseData.filter(c => c.code.startsWith('CE 6')).forEach(c => addTeacher(c.teacher));
+extraTeachers.filter(t => t.sem6).forEach(t => addTeacher(t.name));
+courseData.forEach(c => addTeacher(c.teacher));
+extraTeachers.forEach(t => addTeacher(t.name));
+teacherOrder.forEach(n => { tList.innerHTML += `<option value="${n}">`; });
 studentData.forEach(s => {
     nList.innerHTML += `<option value="${s.name}">`;
     if (s.reg) rList.innerHTML += `<option value="${s.reg}">`;
