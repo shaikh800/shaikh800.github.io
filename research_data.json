@@ -35,10 +35,14 @@
     }
   ],
   "uploads": [],
-  "geminiPayments": {},
+  "geminiPayments": {
+    "md.shaikh.alam.007@gmail.com": {
+      "2026-10": 100
+    }
+  },
   "pendingRequests": [],
-  "geminiCycleStart": "",
-  "geminiCycleEnd": "",
-  "geminiMonthlyFee": 0,
-  "updated": "2026-10-21T05:11:14.820296+00:00"
+  "geminiCycleStart": "2026-10",
+  "geminiCycleEnd": "2027-09",
+  "geminiMonthlyFee": 100,
+  "updated": "2026-10-21T14:29:53.163Z"
 }
