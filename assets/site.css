@@ -138,6 +138,8 @@ body::after {
   z-index: 2000;
 }
 .site-nav.is-open { transform: translateX(0); }
+/* Closed drawer must not cast its shadow onto the page edge on phones */
+.site-nav:not(.is-open) { box-shadow: none; }
 .site-nav a {
   display: inline-flex; align-items: center; gap: 8px;
   min-height: 46px; padding: 0 14px; border-radius: var(--radius);

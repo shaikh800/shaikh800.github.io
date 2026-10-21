@@ -35,6 +35,10 @@
 
     /* ── WORKS GRID ──────────────────────────────────────── */
     #works-container { display:flex; flex-direction:column; gap:20px; max-width:640px; margin:0 auto; }
+    /* Desktop: projects sit side by side in two columns */
+    @media (min-width: 900px) {
+      #works-container { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:24px; max-width:1100px; }
+    }
     .work-card {
       position:relative; border:1px solid var(--line); border-radius:var(--radius-lg);
       background:var(--surface); box-shadow:var(--shadow); overflow:hidden;
@@ -62,6 +66,14 @@
       width:100%; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;
       background:linear-gradient(135deg, var(--surface-soft), rgba(37,99,235,0.06));
       color:var(--blue); font-size:48px; opacity:0.6;
+    }
+    /* Phones: shorter thumbnails and tighter card text so more of each project fits on screen */
+    @media (max-width: 600px) {
+      .work-thumb, .work-thumb-placeholder { aspect-ratio:2/1; }
+      .work-thumb-placeholder { font-size:36px; }
+      .work-body { padding:14px 16px; }
+      .work-title { font-size:16px; }
+      .work-footer { gap:10px; }
     }
     .work-body { padding:18px 20px; }
     .work-cat {
@@ -152,6 +164,10 @@
       background:var(--ink); color:#fff; font-size:16px; cursor:pointer;
       box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:all 0.2s var(--ease-spring);
       display:flex; align-items:center; justify-content:center;
+    }
+    /* Phones: smaller admin button so it never covers the content */
+    @media (max-width: 600px) {
+      .admin-fab { width:44px; height:44px; right:14px; bottom:calc(14px + env(safe-area-inset-bottom, 0px)); font-size:14px; }
     }
     .admin-fab:hover { transform:scale(1.1); }
     .admin-fab.active { background:var(--blue); }
@@ -865,7 +881,20 @@
     }
 
     /* ── RENDER WORKS ── */
+    /* Older uploads lived only in this browser (IndexedDB), so other devices never saw them.
+       Move any thumbnail this browser still has into the synced data. Each work is moved once. */
+    async function migrateLegacyThumbs() {
+      const works = loadWorks();
+      let changed = false;
+      for (const w of works) {
+        if (w.imgSrc !== 'idb') continue;
+        const data = await getThumb(w.id);
+        if (data) { w.img = data; w.imgSrc = 'data'; changed = true; }
+      }
+      if (changed) saveWorks(works);
+    }
     async function renderWorks() {
+      await migrateLegacyThumbs();
       const works = loadWorks();
       const filtered = activeFilter === 'all' ? works : works.filter(w => w.cat === activeFilter);
       const container = document.getElementById('works-container');
@@ -1133,7 +1162,11 @@
       document.getElementById('work-modal-title').innerHTML = '<i class="fas fa-pen" style="color:var(--blue);margin-right:8px;"></i>Edit Project';
       document.getElementById('save-work-btn').innerHTML = '<i class="fas fa-check"></i> Update';
 
-      if (w.img && w.imgSrc !== 'idb') {
+      if (w.imgSrc === 'data' && w.img) {
+        pendingThumb = w.img;
+        document.getElementById('thumb-preview-img').src = w.img;
+        document.getElementById('thumb-preview').classList.add('show');
+      } else if (w.img && w.imgSrc !== 'idb') {
         document.getElementById('w-img-url').value = w.img;
         document.getElementById('thumb-preview-img').src = w.img;
         document.getElementById('thumb-preview').classList.add('show');
@@ -1169,8 +1202,8 @@
       let imgSrc = '', img = '';
 
       if (useUpload && pendingThumb) {
-        await saveThumb(id, pendingThumb);
-        imgSrc = 'idb'; img = '';
+        // Keep the thumbnail inside the synced data so every device can show it.
+        imgSrc = 'data'; img = pendingThumb;
       } else if (urlVal) {
         imgSrc = 'url'; img = urlVal;
         if (editId && loadWorks().find(w=>w.id===editId)?.imgSrc === 'idb') await delThumb(editId);

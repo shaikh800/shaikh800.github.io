@@ -92,6 +92,18 @@
       .notice-card { flex-wrap:wrap; }
       .ex-when { text-align:left; margin-left:50px; }
     }
+    /* Phones: each notice reads top to bottom — status, title, tags, then its date on a separate line */
+    @media (max-width: 640px) {
+      .notices-grid { gap:10px; }
+      .notice-card { flex-direction:column; align-items:stretch; gap:8px; padding:14px 16px; }
+      .notice-card .n-body { width:100%; }
+      .notice-card .n-title { font-size:15px; line-height:1.4; overflow-wrap:anywhere; }
+      .notice-card .ex-state { align-self:flex-start; }
+      .ex-when { text-align:left; margin-left:0; white-space:normal; border-top:1px dashed var(--line); padding-top:8px; }
+      .ex-when b { display:inline; margin-right:6px; }
+      .ex-when small { display:inline; }
+      .ex-chips { margin-top:4px; }
+    }
     details.ex-advanced { margin-top:14px; border:1px solid var(--line); border-radius:var(--radius); }
     details.ex-advanced summary { cursor:pointer; padding:11px 16px; font-size:12.5px; font-weight:700; color:var(--muted); list-style:none; }
     details.ex-advanced summary::-webkit-details-marker { display:none; }
@@ -156,6 +168,10 @@
       background:var(--ink); color:#fff; font-size:16px; cursor:pointer;
       box-shadow:0 4px 16px rgba(0,0,0,0.25); transition:all 0.2s var(--ease-spring);
       display:flex; align-items:center; justify-content:center;
+    }
+    /* Phones: smaller admin button so it never covers the content */
+    @media (max-width: 600px) {
+      .admin-fab { width:44px; height:44px; right:14px; bottom:calc(14px + env(safe-area-inset-bottom, 0px)); font-size:14px; }
     }
     .admin-fab:hover { transform:scale(1.1); }
     .admin-fab.active { background:var(--blue); }
