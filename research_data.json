@@ -33,11 +33,22 @@
       "date": "Oct 13"
     }
   ],
-  "uploads": [],
+  "uploads": [
+    {
+      "id": "1eJE2fYhboRV1fjxno3JqAF9pyZ4f4p93",
+      "title": "IEVW_SA_EV_Merging_Techniques_Summary",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1eJE2fYhboRV1fjxno3JqAF9pyZ4f4p93/view",
+      "date": "2026-10-21T02:45:22.196Z"
+    }
+  ],
   "geminiPayments": {},
   "pendingRequests": [],
   "geminiCycleStart": "",
   "geminiCycleEnd": "",
   "geminiMonthlyFee": 0,
-  "updated": "2026-10-21T02:39:23.000Z"
+  "updated": "2026-10-21T02:45:24.832Z"
 }
