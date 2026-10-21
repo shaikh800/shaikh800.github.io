@@ -507,20 +507,16 @@
         <div class="r-toolbar">
           <div>
             <h2>Team Uploads</h2>
-            <p>Sign in with Google to upload your own research paper or 3D work, under your own account.</p>
+            <p>Sign in with the shared <strong>Turbo Researchers</strong> Google account to upload files to the team Drive.</p>
           </div>
         </div>
 
-        <!-- Shown to regular members (non-uploadOnly) instead of the upload form -->
-        <div class="denied-box" id="teamMemberUploadNote" hidden>
-          <i class="fas fa-info-circle" style="margin-right:6px;"></i>
-          File uploads are handled exclusively through the shared <strong>Turbo Researchers</strong> team account.
-          Contact the admin to have a file uploaded to the shared Drive folder.
-        </div>
+        <!-- Shown when the user signs in with a Google account other than turbo.researchers@gmail.com -->
+        <div class="denied-box" id="teamMemberUploadNote" hidden></div>
 
         <div class="signin-row" id="teamSignin">
           <i class="fab fa-google"></i>
-          <p>Admin: sign in with your own Google account here to upload under your personal Drive too (separate from the admin password you used to get in).</p>
+          <p>Sign in with the shared <strong>Turbo Researchers</strong> account (<code>turbo.researchers@gmail.com</code>) to upload files to the team Drive. All team members use this shared account for uploads.</p>
           <button class="btn primary sm" id="googleSigninBtn"><i class="fab fa-google"></i> Sign in with Google</button>
         </div>
 
@@ -867,6 +863,7 @@
        tab bar itself changed nothing about the URL, so Back had no real history
        to return to and just kept landing back on the same tab, looking "stuck". */
     let _reauthAttempted = false;
+    let _activeTab = ''; // track so we can clear Google when leaving uploads
     function activateTab(tab) {
       // Never show the admin-only "access" panel to a non-admin session, even
       // if the body's admin-mode class (which is what the tab button's own
@@ -875,6 +872,11 @@
       // gets its own explicit check rather than relying on CSS alone.
       if (tab === 'access' && role !== 'admin') tab = 'files';
       if (tab === 'gemini' && isUploadOnly) tab = 'uploads';
+      // Auto-clear Google sign-in when navigating AWAY from the uploads tab
+      if (_activeTab === 'uploads' && tab !== 'uploads' && currentUser && currentUser.token) {
+        clearGoogleSession();
+      }
+      _activeTab = tab;
       document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
       const panel = document.getElementById('panel-' + tab);
@@ -1175,6 +1177,20 @@
       };
       _uploadTokenClient.requestAccessToken({ prompt: _driveAuthGranted ? '' : 'consent' });
     }
+    /* clearGoogleSession: clears only the Google OAuth token, keeping the gate session intact.
+       Called when the user leaves the upload tab, so they're automatically signed out of Google
+       and returned to their "default" gate-session state next time they visit the upload tab. */
+    function clearGoogleSession() {
+      if (!currentUser) return;
+      if (currentUser.token && window.google && window.google.accounts) {
+        try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
+      }
+      currentUser.token = null;
+      currentUser.expiry = 0;
+      _driveAuthGranted = false;
+      renderTeamTab();
+    }
+
     function signOutGoogle() {
       if (currentUser && currentUser.token && window.google && window.google.accounts) {
         try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
@@ -1191,8 +1207,10 @@
       renderTeamTab();
     }
     function isAuthorizedUploader() {
-      // Only admin and uploadOnly members (turbo shared account) can upload.
-      return role === 'admin' || (role === 'member' && isUploadOnly);
+      // Upload requires being signed in via Google as the shared Turbo Researchers account.
+      // The gate role just needs to be member or admin — but the Google sign-in must be turbo.
+      if (!currentUser || !currentUser.token || Date.now() > currentUser.expiry - 5000) return false;
+      return (currentUser.email || '').toLowerCase() === 'turbo.researchers@gmail.com';
     }
 
     /* ── Gate: simple name + email + password sign-in (no Google needed to get past the gate) ── */
@@ -1368,28 +1386,39 @@
       const chip = document.getElementById('teamUserChip');
       const formArea = document.getElementById('teamUploadForm');
       const reconnectArea = document.getElementById('teamReconnect');
-      // Only uploadOnly members (the shared Turbo account) and admin can upload.
-      // Regular members see an info message instead of the upload form.
-      const memberInfo = document.getElementById('teamMemberUploadNote');
-      if (!isAuthorizedUploader()) {
-        // Regular member — hide all upload UI, show explanation
-        signinArea.style.display = 'none'; chip.style.display = 'none';
-        formArea.style.display = 'none'; reconnectArea.style.display = 'none';
-        if (memberInfo) memberInfo.hidden = false;
-        renderUploads(); return;
-      }
-      if (memberInfo) memberInfo.hidden = true;
-      if (!currentUser) {
-        signinArea.style.display = 'flex'; chip.style.display = 'none';
-        formArea.style.display = 'none'; reconnectArea.style.display = 'none';
-      } else {
-        signinArea.style.display = 'none';
+      const wrongAccNote = document.getElementById('teamMemberUploadNote');
+      const TURBO_EMAIL = 'turbo.researchers@gmail.com';
+
+      const hasGoogleToken = currentUser && currentUser.token && Date.now() < currentUser.expiry - 5000;
+      const isTurboAccount = currentUser && (currentUser.email || '').toLowerCase() === TURBO_EMAIL;
+
+      // Hide everything by default, then show the right state
+      signinArea.style.display = 'none'; chip.style.display = 'none';
+      formArea.style.display = 'none'; reconnectArea.style.display = 'none';
+      if (wrongAccNote) wrongAccNote.hidden = true;
+
+      if (!currentUser || !currentUser.token) {
+        // Not signed in with Google — show sign-in prompt (open to all members)
+        signinArea.style.display = 'flex';
+      } else if (!isTurboAccount) {
+        // Signed in with a DIFFERENT Google account — show error, let them sign out & retry
         chip.style.display = 'flex';
         chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
           <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
-          ${role === 'member' ? '' : `<button class="btn secondary sm" onclick="signOutGoogle()">Sign out</button>`}`;
-        const tokenFresh = currentUser.token && Date.now() < currentUser.expiry - 5000;
-        if (tokenFresh) { formArea.style.display = 'block'; reconnectArea.style.display = 'none'; }
+          <button class="btn secondary sm" onclick="clearGoogleSession()">Switch account</button>`;
+        if (wrongAccNote) {
+          wrongAccNote.hidden = false;
+          wrongAccNote.innerHTML = `<i class="fas fa-triangle-exclamation" style="margin-right:6px;color:#f59e0b;"></i>
+            File uploads must go through the shared <strong>Turbo Researchers</strong> account (<code>${TURBO_EMAIL}</code>).
+            Click <strong>Switch account</strong> above, then sign in again with that account.`;
+        }
+      } else {
+        // Signed in as turbo — show chip + form (or reconnect if token stale)
+        chip.style.display = 'flex';
+        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
+          <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
+          <button class="btn secondary sm" onclick="clearGoogleSession()">Sign out</button>`;
+        if (hasGoogleToken) { formArea.style.display = 'block'; reconnectArea.style.display = 'none'; }
         else { formArea.style.display = 'none'; reconnectArea.style.display = 'block'; }
       }
       const destNote = document.getElementById('uploadDestNote');
