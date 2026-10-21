@@ -1,6 +1,21 @@
 {
   "works": [
     {
+      "id": "mvigrglg7qlv",
+      "title": "Inferno",
+      "desc": "A white humanoid robot with a rounded head, glowing blue visor-style eyes, a glowing circular light on its chest, black articulated joints, and brown boots. Modeled and rendered in Blender against a dark green studio background with soft shadows.",
+      "cat": "Render",
+      "tool": "Blender 4.2",
+      "link": "",
+      "marketLink": "",
+      "img": "",
+      "imgSrc": "idb",
+      "driveLink": "",
+      "driveFileId": "",
+      "driveFileName": "",
+      "driveAccess": "preview"
+    },
+    {
       "id": "mvigprraq7y5",
       "title": "Swordfish Ship",
       "desc": "An anime-inspired sci-fi hover craft with a glossy red, weathered body, polished chrome cannon barrel, twin angled wing fins with propeller-style details, and an open cockpit canopy. Modeled and rendered in Blender, shown against a plain white studio background.",
@@ -31,5 +46,5 @@
       "driveAccess": "view"
     }
   ],
-  "updated": "2026-10-21T18:45:29.940Z"
+  "updated": "2026-10-21T18:46:48.786Z"
 }
