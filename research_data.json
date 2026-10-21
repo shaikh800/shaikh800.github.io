@@ -37,8 +37,8 @@
   "uploads": [],
   "geminiPayments": {},
   "pendingRequests": [],
-  "geminiCycleStart": "",
-  "geminiCycleEnd": "",
-  "geminiMonthlyFee": 0,
-  "updated": "2026-10-21T05:11:14.820296+00:00"
+  "geminiCycleStart": "2026-10",
+  "geminiCycleEnd": "2027-09",
+  "geminiMonthlyFee": 100,
+  "updated": "2026-10-21T14:28:55.949Z"
 }
