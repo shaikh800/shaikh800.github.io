@@ -7,7 +7,26 @@
 <title>FEC Truss Analyzer | Interactive Structural Solver</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 <!-- MathJax for rendering equations in the Exam Report (Polyfill removed for security/stability) -->
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+    /* Load MathJax only when a page actually needs to typeset math (saves a big download on every visit). */
+    window.ensureMathJax = function (src) {
+      if (window.MathJax && MathJax.typesetPromise) return Promise.resolve(window.MathJax);
+      if (!window.__mjLoading) {
+        window.__mjLoading = new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          s.onload = function () {
+            var ready = window.MathJax && MathJax.startup && MathJax.startup.promise;
+            (ready || Promise.resolve()).then(function () { resolve(window.MathJax); });
+          };
+          s.onerror = function () { window.__mjLoading = null; reject(new Error('MathJax failed to load')); };
+          document.head.appendChild(s);
+        });
+      }
+      return window.__mjLoading;
+    };
+  </script>
 
 <style>
   :root{
@@ -996,7 +1015,9 @@
     examReportWrap.insertAdjacentHTML('beforeend', page3);
 
     // Trigger MathJax render
-    if(window.MathJax) { MathJax.typesetPromise([examReportWrap]).catch(err => console.log(err)); }
+    ensureMathJax('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js')
+      .then(function (M) { return M.typesetPromise([examReportWrap]); })
+      .catch(function (err) { console.log(err); });
   }
 
   // Load/Save init...

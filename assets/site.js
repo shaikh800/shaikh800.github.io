@@ -332,3 +332,10 @@ const DrivePicker = (function () {
 
   return { open, close };
 })();
+
+/* ── SERVICE WORKER: faster repeat visits on slow mobile data (see sw.js) ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}

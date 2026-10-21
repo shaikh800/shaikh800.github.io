@@ -16,7 +16,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </noscript>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script>
+    /* Load MathJax only when a page actually needs to typeset math (saves a big download on every visit). */
+    window.ensureMathJax = function (src) {
+      if (window.MathJax && MathJax.typesetPromise) return Promise.resolve(window.MathJax);
+      if (!window.__mjLoading) {
+        window.__mjLoading = new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          s.onload = function () {
+            var ready = window.MathJax && MathJax.startup && MathJax.startup.promise;
+            (ready || Promise.resolve()).then(function () { resolve(window.MathJax); });
+          };
+          s.onerror = function () { window.__mjLoading = null; reject(new Error('MathJax failed to load')); };
+          document.head.appendChild(s);
+        });
+      }
+      return window.__mjLoading;
+    };
+  </script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
   MathJax = {
@@ -757,9 +776,9 @@ function initializeExamUI() {
   });
 
   setTimeout(() => {
-    if (window.MathJax && MathJax.typesetPromise) {
-      MathJax.typesetPromise().catch(() => {});
-    }
+    ensureMathJax('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js')
+      .then(M => M.typesetPromise())
+      .catch(() => {});
   }, 500);
   renderQNav();
   updateQNav();
