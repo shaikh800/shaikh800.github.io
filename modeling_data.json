@@ -1,4 +1,80 @@
 {
-  "works": [],
-  "updated": "2026-10-20T20:07:46.000Z"
+  "works": [
+    {
+      "id": "mviguz6zdxr5",
+      "title": "Car animation",
+      "desc": "An orange supercar seen from behind, driving across a city bridge at night. Street lamps and tail lights light up the scene, and the number plate shows a Dhaka Metro design. Animated and rendered in Blender.",
+      "cat": "Render",
+      "tool": "Blender 4.0",
+      "link": "",
+      "marketLink": "",
+      "img": "",
+      "imgSrc": "idb",
+      "driveLink": "",
+      "driveFileId": "",
+      "driveFileName": "",
+      "driveAccess": "preview"
+    },
+    {
+      "id": "mvigtbgbgw35",
+      "title": "OH",
+      "desc": "A small grey cube-bodied robot on two slender articulated legs with pointed metal feet. It has a red status light on top, a red ring button on one side, and \"OH\" and \"PROJECT 06\" markings on its body. Modeled and rendered in Blender on a plain grey studio background.",
+      "cat": "Render",
+      "tool": "Blender 4.2",
+      "link": "",
+      "marketLink": "",
+      "img": "",
+      "imgSrc": "idb",
+      "driveLink": "",
+      "driveFileId": "",
+      "driveFileName": "",
+      "driveAccess": "preview"
+    },
+    {
+      "id": "mvigrglg7qlv",
+      "title": "Inferno",
+      "desc": "A white humanoid robot with a rounded head, glowing blue visor-style eyes, a glowing circular light on its chest, black articulated joints, and brown boots. Modeled and rendered in Blender against a dark green studio background with soft shadows.",
+      "cat": "Render",
+      "tool": "Blender 4.2",
+      "link": "",
+      "marketLink": "",
+      "img": "",
+      "imgSrc": "idb",
+      "driveLink": "",
+      "driveFileId": "",
+      "driveFileName": "",
+      "driveAccess": "preview"
+    },
+    {
+      "id": "mvigprraq7y5",
+      "title": "Swordfish Ship",
+      "desc": "An anime-inspired sci-fi hover craft with a glossy red, weathered body, polished chrome cannon barrel, twin angled wing fins with propeller-style details, and an open cockpit canopy. Modeled and rendered in Blender, shown against a plain white studio background.",
+      "cat": "Render",
+      "tool": "Blender",
+      "link": "",
+      "marketLink": "",
+      "img": "",
+      "imgSrc": "idb",
+      "driveLink": "",
+      "driveFileId": "",
+      "driveFileName": "",
+      "driveAccess": "preview"
+    },
+    {
+      "id": "mvigm4n0slgv",
+      "title": "Robo 2.0",
+      "desc": "A 3D render of Robo 2.0, a stylized robot character with a cardboard-box head, glowing pink eyes on a dark screen, black headphones, a grey hoodie with orange sleeves, navy pants, and white boots with pink laces, shown against a clean white studio background. Modeled and rendered in Blender.",
+      "cat": "Render",
+      "tool": "Blender 4.2",
+      "link": "",
+      "marketLink": "",
+      "img": "",
+      "imgSrc": "idb",
+      "driveLink": "",
+      "driveFileId": "",
+      "driveFileName": "",
+      "driveAccess": "view"
+    }
+  ],
+  "updated": "2026-10-21T18:49:32.853Z"
 }
