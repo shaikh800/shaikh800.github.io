@@ -255,10 +255,8 @@
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
-          <button class="btn secondary sm" id="exRefreshBtn"><i class="fas fa-rotate"></i> Refresh now</button>
-          <button class="btn secondary sm" id="exPollBtn"><i class="fas fa-satellite-dish"></i> Auto-poll</button>
           <button class="btn secondary sm" id="exAlertBtn"><i class="fas fa-bell"></i> Alerts</button>
-          <span id="exStatus" style="font-size:12px;color:var(--muted);"></span>
+          <span id="exStatus" hidden></span>
         </div>
 
         <div class="ex-filters">
@@ -649,13 +647,6 @@
           return false;
         }
       }
-      function exTogglePoll() {
-        const btn = document.getElementById('exPollBtn');
-        if (exPollTimer) { clearInterval(exPollTimer); exPollTimer=null; btn.innerHTML='<i class="fas fa-satellite-dish"></i> Auto-poll'; document.getElementById('exStatus').textContent='Auto-poll stopped.'; return; }
-        if (!(document.getElementById('exProxyUrl').value||'').trim()) { document.getElementById('exStatus').textContent='Set worker URL first.'; return; }
-        exRefresh(); exPollTimer=setInterval(()=>exRefresh(false), 30*60*1000);
-        btn.innerHTML='<i class="fas fa-satellite-dish"></i> Stop auto-poll'; document.getElementById('exStatus').textContent='Auto-poll every 30 min.';
-      }
       function exEnableAlerts() {
         if (typeof Notification === 'undefined') { document.getElementById('exStatus').textContent='Notifications not supported here.'; return; }
         Notification.requestPermission().then(p => {
@@ -675,18 +666,23 @@
       document.getElementById('exFStatus').addEventListener('change', () => { exPage = 1; exRender(); });
       document.getElementById('exFYear').addEventListener('change', () => { exPage = 1; exRender(); });
       document.getElementById('exFSource').addEventListener('change', () => { exPage = 1; exRender(); });
-      document.getElementById('exRefreshBtn').addEventListener('click', () => exRefresh(true));
-      document.getElementById('exPollBtn').addEventListener('click', exTogglePoll);
       document.getElementById('exAlertBtn').addEventListener('click', exEnableAlerts);
       document.getElementById('exParseBtn').addEventListener('click', exParseFromTextarea);
       document.getElementById('exSampleBtn').addEventListener('click', exLoadSample);
       document.getElementById('exClearBtn').addEventListener('click', exClearAll);
 
       exLoadSettings(); exLoadStored(); exRender();
-      // On load: if proxy URL is set, exTogglePoll() starts polling AND fires an immediate exRefresh().
-      // If no URL is set there's nothing live to fetch — paste-only mode.
-      if ((document.getElementById('exProxyUrl').value||'').trim()) exTogglePoll();
-      else exRefresh(false);
+      // Notices update automatically: on load, every 5 minutes, and when the tab comes back into view.
+      const EX_AUTO_MS = 5 * 60 * 1000;
+      let exLastFetch = 0;
+      function exAutoRefresh() {
+        if (Date.now() - exLastFetch < 60 * 1000) return; // don't double-fetch on quick tab switches
+        exLastFetch = Date.now();
+        exRefresh(false);
+      }
+      exAutoRefresh();
+      setInterval(exAutoRefresh, EX_AUTO_MS);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) exAutoRefresh(); });
     })();
   </script>
 </body>
