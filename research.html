@@ -595,6 +595,27 @@
           </div>
         </div>
 
+
+        <!-- ══ PAYMENT INFO CARD ══ -->
+        <div class="card" id="geminiPayInfo" style="padding:16px 18px;margin-bottom:16px;border-left:4px solid var(--blue);">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-circle-info" style="color:var(--blue);"></i> How to Pay Your Share
+          </div>
+          <p style="font-size:13px;color:var(--ink);margin-bottom:10px;">
+            Payments are made from Rafat's card, so please send your share to his bank account each month.
+            If you have a bank account, transfer directly — it's easier for him. If not, bKash works too.
+          </p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 18px;font-size:12.5px;">
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Account Number</span><b>1065346220001</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Account Name</span><b>S. M. Rafat Uddin</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Bank</span><b>BRAC Bank PLC</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Branch</span><b>Faridpur SME/Krishi Br</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Routing No.</span><b>060290526</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">SWIFT Code</span><b>BRAKBDDH</b></div>
+          </div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:8px;">After sending, let Rafat know so he can mark your payment in the table below.</p>
+        </div>
+
         <div class="card" id="geminiCycleBox" style="display:none;padding:14px 16px;margin-bottom:16px;">
           <div style="font-weight:700;font-size:13.5px;margin-bottom:10px;">Subscription Cycle &amp; Fee</div>
           <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
@@ -1910,8 +1931,18 @@
       const geminiTabBtn = document.querySelector('.r-tab[data-tab="gemini"]');
       if (geminiTabBtn) geminiTabBtn.hidden = isUploadOnly;
       document.body.classList.toggle('admin-mode', role === 'admin');
+      // Show role-switcher only to admins and pending users; hide for regular members
+      const switchBtn = document.getElementById('switchViewBtn');
       const switchLabel = document.getElementById('switchViewLabel');
-      switchLabel.textContent = role === 'admin' ? 'Viewing as Admin · switch?' : role === 'pending' ? 'Waiting for approval · switch?' : 'Viewing as Member · switch?';
+      if (role === 'admin') {
+        switchBtn.hidden = false;
+        switchLabel.textContent = 'Viewing as Admin · switch?';
+      } else if (role === 'pending') {
+        switchBtn.hidden = false;
+        switchLabel.textContent = 'Waiting for approval · switch?';
+      } else {
+        switchBtn.hidden = true;
+      }
 
       document.getElementById('pendingView').hidden = role !== 'pending';
       document.getElementById('mainSection').hidden = role === 'pending';
