@@ -311,6 +311,15 @@
     .admin-fab:hover { transform: scale(1.1); }
     .admin-fab.active { background: var(--blue); }
     #modal-admin { z-index: 2200; }
+
+    /* ── Toast (used mainly to surface a sync save that silently failed) ── */
+    .toast-wrap { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 2400; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+    .toast { padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,0.15); animation: toastIn 0.3s var(--ease-out) both; pointer-events: none; white-space: nowrap; max-width: 90vw; white-space: normal; text-align: center; }
+    .toast.success { background: #10b981; color: #fff; }
+    .toast.error   { background: #ef4444; color: #fff; }
+    .toast.info    { background: var(--ink); color: #fff; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(10px); } }
     .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .browse-drive-btn:hover { background: rgba(15,157,88,0.08); border-color: #0f9d58; }
   </style>
@@ -319,6 +328,8 @@
 
   <!-- Admin access — lock icon, matches civil.html / modeling.html -->
   <button class="admin-fab" id="admin-fab" title="Admin login"><i class="fas fa-lock" id="admin-fab-icon"></i></button>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
 
   <!-- ══════════════ ENTRY GATE — shown first, every visit ══════════════ -->
   <div id="roleGate">
@@ -848,6 +859,12 @@
        to return to and just kept landing back on the same tab, looking "stuck". */
     let _reauthAttempted = false;
     function activateTab(tab) {
+      // Never show the admin-only "access" panel to a non-admin session, even
+      // if the body's admin-mode class (which is what the tab button's own
+      // CSS keys off) were ever out of sync with the real role -- this tab is
+      // the one place with real admin controls (remove member, etc.), so it
+      // gets its own explicit check rather than relying on CSS alone.
+      if (tab === 'access' && role !== 'admin') tab = 'files';
       document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
       const panel = document.getElementById('panel-' + tab);
@@ -950,6 +967,38 @@
     async function syncChange(action, payload) {
       if (localStorage.getItem('site_gh_token')) return pushToGitHub();
       return syncWrite(action, payload);
+    }
+
+    /* ── Toast + sync-result reporting ──
+       pushToGitHub()/syncChange() used to be fire-and-forget from every admin
+       action (remove member, add notice, etc.): the on-screen list updated
+       immediately from local state, but if the actual save to GitHub failed
+       (no token saved in this browser, an expired token, or no network) that
+       failure was silent -- the change just quietly reverted the next time
+       the page re-fetched the shared data, with no explanation. Every call
+       site below now awaits the result and reports it here. */
+    function toast(msg, type, ms) {
+      const wrap = document.getElementById('toast-wrap');
+      if (!wrap) return;
+      const el = document.createElement('div');
+      el.className = `toast ${type || 'info'}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => { el.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => el.remove(), 300); }, ms || 3200);
+    }
+    function reportSyncResult(result, okMsg) {
+      if (result && result.ok) {
+        if (okMsg) toast(okMsg, 'success');
+        return true;
+      }
+      const reason = (result && result.reason) || 'unknown';
+      const msg = reason === 'no-token' ? "Not saved -- enter your GitHub token under Drive & Access first."
+        : reason === 'bad-token' ? "Not saved -- your GitHub token is invalid or expired."
+        : reason === 'network' ? "Not saved -- couldn't reach GitHub, check your connection."
+        : reason === 'worker-not-configured' ? "Not saved -- the sync service isn't set up for this browser."
+        : "Not saved -- the change will be lost on refresh until this is retried.";
+      toast(msg, 'error', 5000);
+      return false;
     }
 
     /* ── Drive browser — real Drive data, rendered as our own page (no iframe, no new tab) ── */
@@ -1385,8 +1434,8 @@
       document.getElementById('noticeCount').textContent = notices.length;
       renderPager('noticesPager', noticePage, totalPages, p => { noticePage = p; renderNotices(); });
     }
-    function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); pushToGitHub(); }
-    function saveNotice() {
+    async function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); reportSyncResult(await pushToGitHub()); }
+    async function saveNotice() {
       const title = document.getElementById('noticeTitle').value.trim();
       const text = document.getElementById('noticeText').value.trim();
       const type = document.getElementById('noticeType').value;
@@ -1397,7 +1446,7 @@
       closeModal('modalNotice');
       noticePage = 1;
       renderNotices();
-      pushToGitHub();
+      reportSyncResult(await pushToGitHub(), 'Notice posted');
     }
 
     /* ── Gemini subscription tracker ── */
@@ -1423,17 +1472,22 @@
       }
       return out;
     }
-    function saveGeminiCycle() {
+    async function saveGeminiCycle() {
       if (role !== 'admin') return;
       geminiCycleStart = document.getElementById('geminiCycleStartInput').value || '';
       geminiCycleEnd   = document.getElementById('geminiCycleEndInput').value || '';
       geminiMonthlyFee = parseFloat(document.getElementById('geminiFeeInput').value) || 0;
       renderGeminiTab();
-      pushToGitHub();
+      const result = await pushToGitHub();
       const status = document.getElementById('geminiCycleStatus');
-      if (status) status.textContent = 'Saved \u2713';
+      if (result.ok) {
+        if (status) status.textContent = 'Saved \u2713';
+      } else {
+        if (status) status.textContent = '';
+        reportSyncResult(result);
+      }
     }
-    function setGeminiAmount(email, key) {
+    async function setGeminiAmount(email, key) {
       if (role !== 'admin') return;
       const current = (geminiPayments[email] && geminiPayments[email][key]) || 0;
       const input = prompt(`Amount paid for ${key} (\u09f3):`, current || '');
@@ -1443,7 +1497,7 @@
       if (!geminiPayments[email]) geminiPayments[email] = {};
       geminiPayments[email][key] = amt;
       renderGeminiTab();
-      pushToGitHub();
+      reportSyncResult(await pushToGitHub());
     }
     function renderGeminiTab() {
       const months = geminiMonthKeys();
@@ -1639,9 +1693,29 @@
           <td>${m.role === 'admin' ? '' : `<button class="icon-action danger" onclick="removeMember(${m.id})"><i class="fas fa-user-slash"></i></button>`}</td>
         </tr>`).join('');
     }
-    function toggleMember(id, field) { const m = members.find(x => x.id === id); m[field] = !m[field]; renderMembers(); renderGeminiTab(); pushToGitHub(); }
-    function removeMember(id) { members = members.filter(m => m.id !== id); renderMembers(); renderGeminiTab(); pushToGitHub(); }
-    function inviteMember() {
+    async function toggleMember(id, field) {
+      if (role !== 'admin') return;
+      const m = members.find(x => x.id === id);
+      if (!m) return;
+      const prev = m[field];
+      m[field] = !m[field];
+      renderMembers(); renderGeminiTab();
+      const result = await pushToGitHub();
+      if (!result.ok) { m[field] = prev; renderMembers(); renderGeminiTab(); }
+      reportSyncResult(result);
+    }
+    async function removeMember(id) {
+      if (role !== 'admin') return;
+      const removed = members.find(m => m.id === id);
+      if (!removed) return;
+      members = members.filter(m => m.id !== id);
+      renderMembers(); renderGeminiTab();
+      const result = await pushToGitHub();
+      if (!result.ok) { members.push(removed); renderMembers(); renderGeminiTab(); }
+      reportSyncResult(result, result.ok ? `Removed ${removed.name || removed.email}` : null);
+    }
+    async function inviteMember() {
+      if (role !== 'admin') return;
       const email = document.getElementById('inviteEmail').value.trim();
       if (!email) return;
       const access = document.getElementById('inviteRole').value;
@@ -1651,7 +1725,7 @@
       renderMembers();
       renderGeminiTab();
       renderPendingRequests();
-      pushToGitHub();
+      reportSyncResult(await pushToGitHub(), `Invited ${email}`);
     }
 
     /* \u2500\u2500 Pending sign-up requests (shared queue, visible to the admin from any device) \u2500\u2500 */
@@ -1687,18 +1761,20 @@
           </div>
         </div>`).join('');
     }
-    function approveRequest(email) {
+    async function approveRequest(email) {
+      if (role !== 'admin') return;
       const req = pendingRequests.find(r => r.email === email);
       if (!req) return;
       members.push({ id: Date.now(), name: req.name || req.email, email: req.email, initials: (req.name || req.email).slice(0, 2).toUpperCase(), role: 'member', view: true, download: false });
       pendingRequests = pendingRequests.filter(r => r.email !== email);
       renderMembers(); renderGeminiTab(); renderPendingRequests();
-      pushToGitHub();
+      reportSyncResult(await pushToGitHub(), `Approved ${email}`);
     }
-    function rejectRequest(email) {
+    async function rejectRequest(email) {
+      if (role !== 'admin') return;
       pendingRequests = pendingRequests.filter(r => r.email !== email);
       renderPendingRequests();
-      pushToGitHub();
+      reportSyncResult(await pushToGitHub());
     }
 
     /* ── Entry gate ── */
