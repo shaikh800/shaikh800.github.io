@@ -91,29 +91,37 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-/* ── HASH-TO-SECTION SCROLL ──────────────────────────────────
-   A sidebar dropdown sub-link points at a hash matching one of
-   main.page's direct <section id="..."> children. The page always
-   shows ALL of its sections -- this just smooth-scrolls to the one
-   the hash names, so a sub-link reads as "jump to" rather than
-   "show only this and hide the rest of the page". ───────────── */
+/* ── HASH-TO-SECTION FOCUS ─────────────────────────────────
+   Hub pages (civil/modeling/academy) list several independent
+   topics in their nav dropdown, each a hash link to one of the
+   page's own <section data-focus-section id="..."> children.
+   Opening one of those links should show ONLY that topic -- not
+   the page's hero or its other sections, sitting above/below it
+   to scroll past. So: a matching hash hides every sibling section
+   and shows just the target; no hash (or a hash this page didn't
+   opt in) shows the full page, which is also the fallback for a
+   bare visit with no hash at all.
+   Only sections explicitly marked data-focus-section take part,
+   so this never touches research.html -- its hash values name
+   internal tabs, not top-level sections, and it already runs its
+   own show-one-panel-at-a-time logic. ─────────────────────────── */
 (function () {
-  const main = document.querySelector("main.page");
-  if (!main) return;
-  const sections = Array.from(main.children).filter((el) => el.tagName === "SECTION");
+  const sections = Array.from(document.querySelectorAll("main.page > section[data-focus-section]"));
   if (sections.length < 2) return;
 
-  function scrollToHashSection() {
+  function focusHashSection() {
     const hash = (window.location.hash || "").slice(1);
-    if (!hash) return;
-    // data-keep-hidden marks a page's own retired hero (e.g. research.html's) --
-    // never scroll to / reveal it, even if something somehow linked its id.
-    const target = sections.find((sec) => sec.id === hash && !sec.hasAttribute("data-keep-hidden"));
-    if (target) target.scrollIntoView({ block: "start" });
+    const target = hash && sections.find((sec) => sec.id === hash);
+    if (target) {
+      sections.forEach((sec) => { sec.hidden = sec !== target; });
+      target.scrollIntoView({ block: "start" });
+    } else {
+      sections.forEach((sec) => { sec.hidden = false; });
+    }
   }
 
-  window.addEventListener("hashchange", scrollToHashSection);
-  scrollToHashSection();
+  window.addEventListener("hashchange", focusHashSection);
+  focusHashSection();
 })();
 
 
