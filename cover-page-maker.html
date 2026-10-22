@@ -131,7 +131,7 @@ body {
     opacity: 0.08;
     z-index: 0;
     pointer-events: none;
-    display: none;
+    display: block;
 }
 
 .pin-dot {
@@ -432,11 +432,11 @@ h3 {
     </div>
     <div class="toggle-wrapper">
         <label for="chk-watermark" class="toggle-text">Background Logo Watermark</label>
-        <label class="switch"><input type="checkbox" id="chk-watermark"><span class="slider"></span></label>
+        <label class="switch"><input type="checkbox" id="chk-watermark" checked><span class="slider"></span></label>
     </div>
     <div class="toggle-wrapper">
         <label for="chk-signature" class="toggle-text">Show Teacher's Signature</label>
-        <label class="switch"><input type="checkbox" id="chk-signature"><span class="slider"></span></label>
+        <label class="switch"><input type="checkbox" id="chk-signature" checked><span class="slider"></span></label>
     </div>
 
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #e2e8f0;">
@@ -594,7 +594,7 @@ h3 {
                     <div id="row-date-exp"><span id="out-date-exp-label">Date of Experiment</span>: <span id="out-date-exp"></span></div>
                     <div id="row-date-sub"><span id="out-date-sub-label">Date of Submission</span>: <span id="out-date"></span></div>
                 </div>
-                <div id="signature-block" style="display:none; padding-bottom: 5px;">
+                <div id="signature-block" style="display:block; padding-bottom: 5px;">
                     <div style="border-top: 1px dashed #333; width: 180px; padding-top: 5px; font-weight: bold; text-align: center;">Teacher's Signature</div>
                 </div>
             </div>

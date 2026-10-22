@@ -177,12 +177,6 @@ body::after {
 }
 .nav-sub a:hover, .nav-sub a.is-active { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
 .nav-sub a i { width: 14px; text-align: center; opacity: .7; font-size: 12px; }
-/* the first link in a group's dropdown -- goes to that section's own
-   full page rather than jumping to one specific part of it */
-.nav-sub a.nav-sub-overview {
-  font-weight: 700; opacity: 1; margin-bottom: 4px; padding-bottom: 10px;
-  border-radius: 0; border-bottom: 1px solid var(--line);
-}
 /* small non-interactive heading splitting a dropdown into groups
    (e.g. Civil: resources vs. standalone tools) */
 .nav-sub-label {
