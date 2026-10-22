@@ -32,6 +32,15 @@
       "role": "member",
       "view": true,
       "download": true
+    },
+    {
+      "id": 1792645432436,
+      "name": "naimur03rahman@gmail.com",
+      "email": "naimur03rahman@gmail.com",
+      "initials": "NA",
+      "role": "member",
+      "view": true,
+      "download": false
     }
   ],
   "notices": [
@@ -64,5 +73,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-22T05:03:21.544Z"
+  "updated": "2026-10-22T05:03:52.439Z"
 }
