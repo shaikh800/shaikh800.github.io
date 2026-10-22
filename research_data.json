@@ -40,7 +40,7 @@
       "initials": "NA",
       "role": "member",
       "view": true,
-      "download": false
+      "download": true
     }
   ],
   "notices": [
@@ -76,5 +76,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-22T17:37:27.692Z"
+  "updated": "2026-10-22T17:37:36.044Z"
 }
