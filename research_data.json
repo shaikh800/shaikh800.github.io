@@ -23,6 +23,15 @@
       "view": true,
       "download": true,
       "uploadOnly": true
+    },
+    {
+      "id": 1792645380197,
+      "name": "rafat.u.sifat@gmail.com",
+      "email": "rafat.u.sifat@gmail.com",
+      "initials": "RA",
+      "role": "member",
+      "view": true,
+      "download": true
     }
   ],
   "notices": [
@@ -49,11 +58,14 @@
   "geminiPayments": {
     "md.shaikh.alam.007@gmail.com": {
       "2026-10": 100
+    },
+    "rafat.u.sifat@gmail.com": {
+      "2026-10": 100
     }
   },
   "pendingRequests": [],
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-21T15:07:49.426Z"
+  "updated": "2026-10-22T05:07:24.487Z"
 }
