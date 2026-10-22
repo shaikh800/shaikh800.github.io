@@ -167,7 +167,7 @@ body::after {
   max-height: 0; opacity: 0;
   transition: max-height 0.25s var(--ease-out), opacity 0.2s ease;
 }
-.nav-group.is-open .nav-sub { max-height: 260px; opacity: 1; }
+.nav-group.is-open .nav-sub { max-height: 400px; opacity: 1; }
 .nav-sub a {
   display: inline-flex; align-items: center; gap: 8px;
   min-height: 38px; padding: 0 14px 0 36px; margin-left: 4px;
@@ -176,6 +176,14 @@ body::after {
   transition: all 0.2s ease;
 }
 .nav-sub a:hover, .nav-sub a.is-active { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
+.nav-sub a i { width: 14px; text-align: center; opacity: .7; font-size: 12px; }
+/* small non-interactive heading splitting a dropdown into groups
+   (e.g. Civil: resources vs. standalone tools) */
+.nav-sub-label {
+  display: block; margin: 6px 0 2px 36px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); opacity: .65;
+}
 
 /* [hidden] must always win, even over classes that set their own
    display (e.g. .contact-strip { display:flex }) — otherwise toggling
