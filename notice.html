@@ -10,8 +10,12 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
   <link rel="stylesheet" href="assets/site.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
   <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#f3f1ec">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Notice Board | Md. Shaikh Alam">
@@ -41,7 +45,7 @@
     .notice-card.warning { border-color:#f59e0b; }
     .notice-card.urgent  { border-color:#ef4444; }
     .notice-card .n-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-    .notice-card.info    .n-icon { background:rgba(37,99,235,0.1); color:var(--blue); }
+    .notice-card.info    .n-icon { background:rgba(23,22,15,0.1); color:var(--blue); }
     .notice-card.warning .n-icon { background:rgba(245,158,11,0.1); color:#f59e0b; }
     .notice-card.urgent  .n-icon { background:rgba(239,68,68,0.1);  color:#ef4444; }
     .notice-card .n-body { flex:1; min-width:0; }
@@ -78,7 +82,7 @@
     .notice-card.ex-upcoming { border-color:#f59e0b; }
     .notice-card.ex-earlier, .notice-card.ex-past, .notice-card.ex-tba { border-color:var(--line); opacity:0.85; }
     .ex-state { font-size:10px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; padding:4px 9px; border-radius:100px; border:1px solid var(--line); white-space:nowrap; flex-shrink:0; }
-    .ex-state.ex-new      { color:var(--blue); border-color:rgba(37,99,235,0.3); background:rgba(37,99,235,0.08); }
+    .ex-state.ex-new      { color:var(--blue); border-color:rgba(23,22,15,0.3); background:rgba(23,22,15,0.08); }
     .ex-state.ex-ongoing  { color:#0f9d58; border-color:#bbf7d0; background:#f0fdf4; }
     .ex-state.ex-upcoming { color:#b45309; border-color:#fde68a; background:#fffbeb; }
     .ex-state.ex-earlier, .ex-state.ex-past, .ex-state.ex-tba { color:var(--muted); }
@@ -143,7 +147,7 @@
       font-size:14px; font-family:inherit; transition:border-color 0.2s; appearance:none; -webkit-appearance:none;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-      outline:none; border-color:var(--blue); background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+      outline:none; border-color:var(--blue); background:var(--surface); box-shadow:0 0 0 3px rgba(23,22,15,0.08);
     }
     .form-group textarea { resize:vertical; min-height:80px; }
 
@@ -177,7 +181,7 @@
     .admin-fab.active { background:var(--blue); }
     .admin-only { display:none !important; }
     body.admin-mode .admin-only { display:inline-flex !important; }
-    .admin-badge { display:none; align-items:center; gap:6px; padding:4px 12px; background:rgba(37,99,235,0.1); color:var(--blue); border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
+    .admin-badge { display:none; align-items:center; gap:6px; padding:4px 12px; background:rgba(23,22,15,0.1); color:var(--blue); border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
     body.admin-mode .admin-badge { display:inline-flex; }
 
     .back-link { display:inline-flex; align-items:center; gap:7px; color:var(--muted); text-decoration:none; font-size:13px; font-weight:700; margin-bottom:10px; }
@@ -244,7 +248,11 @@
             <a href="research.html#account">My Account</a>
           </div>
         </div>
-      </nav>
+              <div class="nav-actions">
+          <a class="act-ghost" href="assets/cv.pdf" download><i class="fas fa-arrow-down"></i> CV</a>
+          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+        </div>
+</nav>
       <div class="nav-scrim" id="navScrim"></div>
     </div>
   </header>

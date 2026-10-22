@@ -12,8 +12,12 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
   <link rel="stylesheet" href="assets/site.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
   <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#f3f1ec">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="3D Modeling | Md. Shaikh Alam">
@@ -50,7 +54,7 @@
       will-change: transform, opacity;
       transform: translateZ(0);
     }
-    .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
+    .work-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:rgba(23,22,15,0.3); }
     .work-thumb {
       width:100%; aspect-ratio:16/9; object-fit:cover; display:block;
       background:var(--surface-soft); transition:transform 0.4s var(--ease-out);
@@ -64,7 +68,7 @@
     }
     .work-thumb-placeholder {
       width:100%; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(135deg, var(--surface-soft), rgba(37,99,235,0.06));
+      background:linear-gradient(135deg, var(--surface-soft), rgba(23,22,15,0.06));
       color:var(--blue); font-size:48px; opacity:0.6;
     }
     /* Phones: shorter thumbnails and tighter card text so more of each project fits on screen */
@@ -79,7 +83,7 @@
     .work-cat {
       display:inline-flex; align-items:center; gap:5px;
       font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;
-      color:var(--blue); background:rgba(37,99,235,0.08);
+      color:var(--blue); background:rgba(23,22,15,0.08);
       border-radius:100px; padding:3px 10px; margin-bottom:10px;
     }
     .work-title { font-size:17px; font-weight:800; letter-spacing:-0.01em; margin-bottom:6px; }
@@ -152,7 +156,7 @@
     /* ── ADMIN BADGE ─────────────────────────────────────── */
     .admin-badge {
       display:none; align-items:center; gap:6px; padding:4px 12px;
-      background:rgba(37,99,235,0.1); color:var(--blue); border-radius:100px;
+      background:rgba(23,22,15,0.1); color:var(--blue); border-radius:100px;
       font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em;
     }
     body.admin-mode .admin-badge { display:inline-flex; }
@@ -211,7 +215,7 @@
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       outline:none; border-color:var(--blue); background:var(--surface);
-      box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+      box-shadow:0 0 0 3px rgba(23,22,15,0.08);
     }
     .form-group textarea { resize:vertical; min-height:72px; }
     .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
@@ -226,7 +230,7 @@
       border:2px dashed var(--line); border-radius:var(--radius); padding:24px 16px;
       text-align:center; cursor:pointer; transition:all 0.2s; color:var(--muted);
     }
-    .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(37,99,235,0.04); color:var(--blue); }
+    .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(23,22,15,0.04); color:var(--blue); }
     .file-drop-zone i { font-size:24px; display:block; margin-bottom:6px; }
     .file-drop-zone p { margin:0; font-size:13px; }
     .file-drop-zone input[type=file] { display:none; }
@@ -246,7 +250,7 @@
     .file-status.ok { color:var(--green); }
     .file-status.loading { color:var(--muted); }
     .file-status.error { color:#ef4444; }
-    .drive-progress { display:none; padding:12px 14px; background:rgba(37,99,235,0.06); border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius); margin-top:8px; }
+    .drive-progress { display:none; padding:12px 14px; background:rgba(23,22,15,0.06); border:1px solid rgba(23,22,15,0.2); border-radius:var(--radius); margin-top:8px; }
     .drive-progress.show { display:block; }
     .drive-progress-bar { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-top:8px; }
     .drive-progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width 0.3s; }
@@ -257,7 +261,7 @@
     .access-option input { accent-color:var(--blue); }
     .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:38px; padding:0 16px; border-radius:var(--radius); text-decoration:none; font-weight:700; font-size:14px; transition:all 0.2s var(--ease-spring); border:1px solid transparent; cursor:pointer; }
     .btn:hover { transform:translateY(-1px); }
-    .btn.primary { color:#fff; background:var(--blue); box-shadow:0 6px 14px rgba(37,99,235,0.2); }
+    .btn.primary { color:#fff; background:var(--blue); box-shadow:0 6px 14px rgba(23,22,15,0.2); }
     .btn.primary:hover { background:var(--blue-dark); }
     .btn.secondary { color:var(--ink); background:var(--surface); border-color:var(--line); }
     .btn.secondary:hover { border-color:var(--blue); color:var(--blue); }
@@ -342,7 +346,11 @@
             <a href="research.html#account">My Account</a>
           </div>
         </div>
-      </nav>
+              <div class="nav-actions">
+          <a class="act-ghost" href="assets/cv.pdf" download><i class="fas fa-arrow-down"></i> CV</a>
+          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+        </div>
+</nav>
       <div class="nav-scrim" id="navScrim"></div>
     </div>
   </header>
@@ -501,7 +509,7 @@
             <div class="drive-progress-text" id="work-drive-progress-text">Uploading to Drive...</div>
             <div class="drive-progress-bar"><div class="drive-progress-fill" id="work-drive-progress-fill" style="width:0%"></div></div>
           </div>
-          <div id="work-drive-current" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(37,99,235,0.06);border-radius:var(--radius);border:1px solid rgba(37,99,235,0.15);font-size:12px;">
+          <div id="work-drive-current" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(23,22,15,0.06);border-radius:var(--radius);border:1px solid rgba(23,22,15,0.15);font-size:12px;">
             <i class="fab fa-google-drive" style="color:#0f9d58;"></i> <span id="work-drive-current-text"></span>
           </div>
         </div>

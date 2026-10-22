@@ -13,9 +13,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/site.css">
-  <link rel="stylesheet" href="assets/home.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
   <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#f3f1ec">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Md. Shaikh Alam | Portfolio">
@@ -90,179 +93,136 @@
             <a href="research.html#account">My Account</a>
           </div>
         </div>
-      </nav>
+              <div class="nav-actions">
+          <a class="act-ghost" href="assets/cv.pdf" download><i class="fas fa-arrow-down"></i> CV</a>
+          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+        </div>
+</nav>
       <div class="nav-scrim" id="navScrim"></div>
     </div>
   </header>
 
   <main class="page">
 
-    <section class="intro" aria-labelledby="intro-title">
-      <svg class="hero-blueprint" viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="230" cy="230" r="180" stroke="#2563eb" stroke-width="1" stroke-dasharray="2 6"/>
-        <circle cx="230" cy="230" r="120" stroke="#2563eb" stroke-width="1"/>
-        <path d="M230 50 L230 20 M230 410 L230 440 M50 230 L20 230 M410 230 L440 230" stroke="#2563eb" stroke-width="1.2"/>
-        <path d="M70 330 L170 230 L230 270 L390 110" stroke="#2563eb" stroke-width="1.4" stroke-linecap="round"/>
-        <circle cx="170" cy="230" r="4" fill="#2563eb"/>
-        <circle cx="230" cy="270" r="4" fill="#2563eb"/>
-        <circle cx="390" cy="110" r="4" fill="#2563eb"/>
-        <text x="250" y="275" font-family="monospace" font-size="11" fill="#2563eb">M3</text>
-        <text x="120" y="245" font-family="monospace" font-size="11" fill="#2563eb">M1</text>
-      </svg>
+    <!-- ── HERO ──────────────────────────────────────────── -->
+    <section class="hm-hero" aria-labelledby="intro-title">
+      <div class="hm-hero-inner">
+        <div class="hm-hero-text reveal">
+          <span class="hm-hi">Hello, I'm</span>
+          <h1 id="intro-title">Civil engineering<br>student</h1>
+          <p class="hm-lead">I also build small tools on the side — document generators, a live exam
+            system, a truss solver. This is where all of it lives.</p>
 
-      <div class="intro-content">
-        <p class="eyebrow">Civil engineering student &amp; tool builder</p>
-        <h1 id="intro-title">Md. Shaikh Alam</h1>
-        <p class="lead">I build small, useful tools for study and engineering workflows — academic document utilities, live exam systems and a Google-Drive-backed research hub. Outside of that, I model and animate in Blender.</p>
+          <div class="hm-meta">
+            <img class="hm-avatar" src="assets/images/avatar.png" alt="Md. Shaikh Alam" width="78" height="78">
+            <span>
+              <span class="hm-loc">Faridpur, Bangladesh · FEC Civil Dept.</span>
+              <span class="hm-name">Md. Shaikh Alam</span>
+            </span>
+          </div>
 
-        <div class="actions">
-          <a class="btn primary" href="civil.html"><i class="fas fa-helmet-safety"></i> Civil Section</a>
-          <a class="btn secondary" href="academy.html"><i class="fas fa-graduation-cap"></i> Academy Tools</a>
+          <div class="hm-ctas">
+            <a class="btn primary" href="#explore">View my work <i class="fas fa-arrow-right"></i></a>
+            <a class="btn secondary" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email me</a>
+          </div>
+
+          <div class="hm-socials">
+            <a href="mailto:md.shaikh.alam.007@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            <a href="https://github.com/shaikh800" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://facebook.com/shaikh.069" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          </div>
         </div>
-        <div class="home-quicklinks">
-          <a class="civil-quick-link" href="cover-page-maker.html"><i class="fas fa-file-lines"></i> Cover Page</a>
-          <a class="civil-quick-link" href="lab-index.html"><i class="fas fa-table-list"></i> Lab Index</a>
-          <a class="civil-quick-link" href="truss-analyzer.html"><i class="fas fa-diagram-project"></i> Truss Analyzer</a>
-          <a class="civil-quick-link" href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
-        </div>
 
-        <div class="quick-facts" aria-label="Quick profile facts">
-          <div class="fact">
-            <strong>Study</strong>
-            <span>Civil Engineering · Faridpur Engineering College</span>
-          </div>
-          <div class="fact">
-            <strong>Current Focus</strong>
-            <span>Academic tools, PDF utilities and practical web apps</span>
-          </div>
-          <div class="fact">
-            <strong>Creative Side</strong>
-            <span>Blender 3D modeling, rigging and animation</span>
-          </div>
+        <div class="hm-photo reveal">
+          <img src="assets/images/portrait-tall.png" alt="Md. Shaikh Alam" width="900" height="960">
+          <span class="hm-badge"><span class="ic"><i class="fas fa-map-pin"></i></span>Faridpur, BD</span>
         </div>
       </div>
-
-      <aside class="profile-card" aria-label="Profile summary">
-        <img src="assets/images/shaikh.jpg" alt="Md. Shaikh Alam" width="400" height="400">
-        <div class="pc-name">Md. Shaikh Alam</div>
-        <div class="pc-role">Civil Engineering Student</div>
-        <div class="pc-row"><i class="fas fa-graduation-cap"></i><span>Faridpur Engineering College</span></div>
-        <div class="pc-row"><i class="fas fa-map-pin"></i><span>Faridpur, Bangladesh</span></div>
-        <div class="pc-row"><i class="fas fa-envelope"></i><span>md.shaikh.alam.007@gmail.com</span></div>
-        <div class="pc-row"><i class="fab fa-facebook"></i><span>facebook.com/shaikh.069</span></div>
-        <div class="pc-badge live"><span>Actively building</span></div>
-      </aside>
     </section>
 
-    <section class="section" aria-labelledby="featured-title">
+    <!-- ── FOUR SECTIONS ─────────────────────────────────── -->
+    <section class="section" id="explore" aria-labelledby="explore-title">
       <div class="section-head reveal">
-        <h2 id="featured-title">Featured Work</h2>
-        <p>Four sections, each a real tool people actually use — not just mockups.</p>
+        <p class="eyebrow">Explore</p>
+        <h2 id="explore-title">Four sections</h2>
+        <p>Everything on this site sits in one of these. Pick where you want to go.</p>
       </div>
 
-      <div class="showcase-grid reveal-grid">
-        <a class="showcase-card" href="civil.html">
-          <div class="showcase-thumb">
-            <img src="assets/images/thumb-civil.jpg" alt="Truss Analyzer tool showing a solved truss diagram with load and dimensions" loading="lazy">
-            <span class="showcase-thumb-badge"><i class="fas fa-helmet-safety"></i></span>
-          </div>
-          <div class="showcase-body">
-            <h3>Civil Engineering Section</h3>
-            <p>Cover page maker, lab index generator and a real-time truss analyzer &amp; solver — built for FEC Batch 10 coursework.</p>
-            <span class="showcase-meta">Open civil section <i class="fas fa-arrow-right"></i></span>
-          </div>
+      <div class="hm-grid reveal-grid">
+        <a class="hm-card" href="civil.html">
+          <span class="hm-ic"><i class="fas fa-helmet-safety"></i></span>
+          <span class="hm-tag">Civil Engineering</span>
+          <h3>Truss Analyzer</h3>
+          <p>Place joints, load them, read member forces live.</p>
+          <span class="hm-foot"><span class="hm-pill">3 tools</span><i class="fas fa-arrow-right"></i></span>
         </a>
 
-        <a class="showcase-card" href="modeling.html">
-          <div class="showcase-thumb">
-            <img src="assets/images/thumb-modeling.jpg" alt="Blender 3D renders — a car animation and a robot character" loading="lazy">
-            <span class="showcase-thumb-badge"><i class="fas fa-cube"></i></span>
-          </div>
-          <div class="showcase-body">
-            <h3>3D Modeling &amp; Animation</h3>
-            <p>Blender renders, rigging and short animations — from hard-surface sci-fi props to stylised characters.</p>
-            <span class="showcase-meta">View 3D work <i class="fas fa-arrow-right"></i></span>
-          </div>
+        <a class="hm-card" href="modeling.html">
+          <span class="hm-ic"><i class="fas fa-cube"></i></span>
+          <span class="hm-tag">3D Modeling</span>
+          <h3>Swordfish Ship</h3>
+          <p>An anime-inspired sci-fi hover craft, built in Blender.</p>
+          <span class="hm-foot"><span class="hm-pill">5 renders</span><i class="fas fa-arrow-right"></i></span>
         </a>
 
-        <a class="showcase-card" href="academy.html">
-          <div class="showcase-thumb">
-            <img src="assets/images/thumb-academy.jpg" alt="Academy Hub exam tools — Question Builder, Online Exam System and Exam Controller" loading="lazy">
-            <span class="showcase-thumb-badge"><i class="fas fa-graduation-cap"></i></span>
-          </div>
-          <div class="showcase-body">
-            <h3>Academy Hub</h3>
-            <p>Question Builder, a live online exam system with timers, and a student portal — used to run real tuition batches.</p>
-            <span class="showcase-meta">Open Academy <i class="fas fa-arrow-right"></i></span>
-          </div>
+        <a class="hm-card" href="academy.html">
+          <span class="hm-ic"><i class="fas fa-graduation-cap"></i></span>
+          <span class="hm-tag">Academy</span>
+          <h3>Online Exam System</h3>
+          <p>Runs live model tests for the batches I teach.</p>
+          <span class="hm-foot"><span class="hm-pill">5 tools</span><i class="fas fa-arrow-right"></i></span>
         </a>
 
-        <a class="showcase-card is-locked" href="research.html">
-          <span class="locked-pill"><i class="fas fa-lock"></i> Members only</span>
-          <div class="showcase-thumb">
-            <span class="showcase-icon"><i class="fas fa-flask"></i></span>
-          </div>
-          <div class="showcase-body">
-            <h3>Research Hub</h3>
-            <p>A private team workspace synced to Google Drive, with its own sign-up → admin-approval flow and a live file browser.</p>
-            <span class="showcase-meta">Request access <i class="fas fa-arrow-right"></i></span>
-          </div>
+        <a class="hm-card" href="research.html">
+          <span class="hm-ic"><i class="fas fa-lock"></i></span>
+          <span class="hm-tag">Research Hub</span>
+          <h3>Thesis workspace</h3>
+          <p>Satellite rainfall data and basin maps, kept private.</p>
+          <span class="hm-foot"><span class="hm-pill">Approval only</span><i class="fas fa-arrow-right"></i></span>
         </a>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="stack-title">
-      <div class="section-head reveal">
-        <p class="section-tag">Under the hood</p>
-        <h2 id="stack-title">Tools &amp; tech</h2>
-        <p>What these sections are actually built with.</p>
-      </div>
-      <div class="stack-row reveal">
-        <span class="stack-chip"><i class="fab fa-html5"></i> HTML &amp; CSS</span>
-        <span class="stack-chip"><i class="fab fa-js"></i> JavaScript</span>
-        <span class="stack-chip"><i class="fas fa-code"></i> Google Apps Script</span>
-        <span class="stack-chip"><i class="fab fa-google-drive"></i> Google Drive API</span>
-        <span class="stack-chip"><i class="fas fa-cloud"></i> Cloudflare Workers</span>
-        <span class="stack-chip"><i class="fab fa-github"></i> GitHub Pages</span>
-        <span class="stack-chip"><i class="fas fa-cube"></i> Blender 4.2</span>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="focus-title">
-      <div class="split-band reveal">
+    <!-- ── ABOUT ─────────────────────────────────────────── -->
+    <section class="section" aria-labelledby="about-title">
+      <div class="hm-about reveal">
         <div>
-          <p class="eyebrow">Approach</p>
-          <h2 id="focus-title">Practical tools, not just a portfolio.</h2>
-          <p class="lead" style="font-size:16px;margin-bottom:20px;">I focus on practical tools: civil engineering templates that cut repetitive formatting, exam and student tools for the Academy, and web pages that work well on any device.</p>
-          <ul class="note-list">
-            <li>Academic document tools that output submission-ready PDFs fast.</li>
-            <li>Online exam and student-portal tools built for FEC tuition batches.</li>
-            <li>Blender 3D modeling for learning and visual project work.</li>
-          </ul>
+          <p class="eyebrow">About</p>
+          <h2 id="about-title">Right now I'm in my 6th semester</h2>
+          <p class="lead" style="margin-bottom:0;">Studying civil engineering at Faridpur Engineering College,
+            and teaching two tuition batches on the side. Most of what's on this site started because I needed
+            it myself — a faster way to format a lab report, a way to run a model test without printing papers.
+            I'm still learning the web side as I go.</p>
+          <div class="hm-chips">
+            <span>HTML &amp; CSS</span><span>JavaScript</span><span>Google Apps Script</span>
+            <span>Google Drive API</span><span>Cloudflare Workers</span><span>GitHub Pages</span>
+            <span>Blender 4.2</span>
+          </div>
         </div>
-        <div class="media-note">
-          <div class="affiliation-card">
+
+        <div class="hm-fec">
+          <div class="hm-fec-top">
             <img src="assets/images/Faridpur_Engineering_College.jpg" alt="Faridpur Engineering College crest">
             <div>
-              <div class="aff-name">Faridpur Engineering College</div>
-              <div class="aff-dept">Dept. of Civil Engineering</div>
+              <h3>Faridpur Engineering College</h3>
+              <span>Dept. of Civil Engineering</span>
             </div>
           </div>
-          <h3>Engineering background</h3>
-          <p>Academic tools are built around Faridpur Engineering College's format and requirements — especially civil engineering reports, indexes, and printable documents.</p>
+          <p>Coursework, lab reports and the tools built around them all live under the Civil Engineering tab.</p>
         </div>
       </div>
     </section>
 
-    <section class="contact-strip reveal" aria-label="Contact and GitHub">
-      <div>
-        <h2>Contact</h2>
-        <p>For feedback or collaboration, reach me here.</p>
-      </div>
-      <div class="contact-links">
-        <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
-        <a href="https://www.facebook.com/shaikh.069" target="_blank" rel="noopener"><i class="fab fa-facebook"></i> Facebook</a>
-        <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+    <!-- ── CONTACT ───────────────────────────────────────── -->
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <div class="hm-band reveal">
+        <h2 id="contact-title">Questions about a tool, or want to compare coursework?</h2>
+        <p>Email is the fastest way to reach me — I check it daily.</p>
+        <div class="hm-acts">
+          <a href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+          <a href="https://github.com/shaikh800" target="_blank" rel="noopener"><i class="fab fa-github"></i> GitHub</a>
+          <a href="https://facebook.com/shaikh.069" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i> Facebook</a>
+        </div>
       </div>
     </section>
 

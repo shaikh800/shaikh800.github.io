@@ -12,8 +12,12 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
   <link rel="stylesheet" href="assets/site.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
   <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#f3f1ec">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Civil Engineering | Md. Shaikh Alam">
@@ -58,9 +62,9 @@
       transition:all 0.25s var(--ease-spring); animation:fadeSlideUp 0.4s var(--ease-out) both;
       position:relative;
     }
-    .resource-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:rgba(37,99,235,0.3); }
+    .resource-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:rgba(23,22,15,0.3); }
     .resource-card .rc-thumb { height:140px; display:flex; align-items:center; justify-content:center; background:var(--surface-soft); overflow:hidden; }
-    .resource-card.type-pdf .rc-thumb { background:rgba(37,99,235,0.06); }
+    .resource-card.type-pdf .rc-thumb { background:rgba(23,22,15,0.06); }
     .resource-card.type-image .rc-thumb { background:#000; }
     .resource-card .rc-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
     .resource-card .rc-thumb .rc-icon { font-size:48px; color:var(--blue); opacity:0.7; }
@@ -76,7 +80,7 @@
       background:none; border:none; cursor:pointer; padding:4px 7px;
       border-radius:6px; font-size:13px; transition:all 0.2s; color:var(--muted);
     }
-    .rc-btn.edit:hover { color:var(--blue); background:rgba(37,99,235,0.1); }
+    .rc-btn.edit:hover { color:var(--blue); background:rgba(23,22,15,0.1); }
     .rc-btn.del:hover  { color:#ef4444; background:rgba(239,68,68,0.1); }
     .rc-btn.admin-only { display:none !important; }
     body.admin-mode .rc-btn.admin-only { display:inline-flex !important; }
@@ -142,7 +146,7 @@
       font-size:14px; font-family:inherit; transition:border-color 0.2s; appearance:none; -webkit-appearance:none;
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-      outline:none; border-color:var(--blue); background:var(--surface); box-shadow:0 0 0 3px rgba(37,99,235,0.08);
+      outline:none; border-color:var(--blue); background:var(--surface); box-shadow:0 0 0 3px rgba(23,22,15,0.08);
     }
     .form-group textarea { resize:vertical; min-height:80px; }
     .form-tabs { display:flex; margin-bottom:16px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
@@ -154,7 +158,7 @@
     /* ── UPLOAD PATH UI ────────────────────────────────── */
     .path-builder { margin-bottom: 12px; }
     .path-input-wrap { display: flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-soft); overflow: hidden; padding: 0 8px; transition: border-color 0.2s; }
-    .path-input-wrap:focus-within { border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .path-input-wrap:focus-within { border-color: var(--blue); background: var(--surface); box-shadow: 0 0 0 3px rgba(23,22,15,0.08); }
     .path-input-wrap i { color: var(--muted); font-size: 13px; margin: 0 6px; }
     .path-input-wrap input { border: none; outline: none; background: transparent; padding: 10px 6px; flex: 1; box-shadow: none !important; font-family: monospace; font-size: 13px; }
     .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
@@ -165,7 +169,7 @@
       border-radius: 100px; font-size: 11px; font-weight: 600; color: var(--muted);
       cursor: pointer; transition: all 0.2s; user-select: none;
     }
-    .path-chip:hover { border-color: var(--blue); color: var(--blue); background: rgba(37,99,235,0.05); }
+    .path-chip:hover { border-color: var(--blue); color: var(--blue); background: rgba(23,22,15,0.05); }
     .path-chip.clear-path { border-color: rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.05); }
     .path-chip.clear-path:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 
@@ -173,7 +177,7 @@
       border:2px dashed var(--line); border-radius:var(--radius); padding:24px 16px;
       text-align:center; cursor:pointer; transition:all 0.2s; color:var(--muted);
     }
-    .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(37,99,235,0.04); color:var(--blue); }
+    .file-drop-zone:hover, .file-drop-zone.dragover { border-color:var(--blue); background:rgba(23,22,15,0.04); color:var(--blue); }
     .file-drop-zone i { font-size:28px; display:block; margin-bottom:8px; }
     .file-drop-zone p { margin:0; font-size:13px; }
     .file-drop-zone input[type=file] { display:none; }
@@ -189,8 +193,8 @@
 
     /* ── DRIVE UPLOAD PROGRESS ─────────────────────────── */
     .drive-progress {
-      display:none; padding:12px 14px; background:rgba(37,99,235,0.06);
-      border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius); margin-top:8px;
+      display:none; padding:12px 14px; background:rgba(23,22,15,0.06);
+      border:1px solid rgba(23,22,15,0.2); border-radius:var(--radius); margin-top:8px;
     }
     .drive-progress.show { display:block; }
     .drive-progress-bar { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-top:8px; }
@@ -227,7 +231,7 @@
     .admin-only { display:none !important; }
     body.admin-mode .admin-only { display:inline-flex !important; }
     body.admin-mode .n-delete { display:block !important; opacity:0; }
-    .admin-badge { display:none; align-items:center; gap:6px; padding:4px 12px; background:rgba(37,99,235,0.1); color:var(--blue); border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
+    .admin-badge { display:none; align-items:center; gap:6px; padding:4px 12px; background:rgba(23,22,15,0.1); color:var(--blue); border-radius:100px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; }
     body.admin-mode .admin-badge { display:inline-flex; }
 
     /* ── FILE SYSTEM & VIEW UI ─────────────────────────── */
@@ -247,7 +251,7 @@
       transition: all 0.15s;
     }
     .fs-folder-card:hover { border-color: var(--blue); background: var(--surface-soft); }
-    .fs-folder-card i.fa-folder { color: #f4b400; font-size: 16px; flex-shrink: 0; }
+    .fs-folder-card i.fa-folder { color: var(--muted); font-size: 16px; flex-shrink: 0; }
     .fs-folder-card span { font-weight: 600; font-size: 14px; color: var(--ink); flex: 1; min-width: 0; }
     .fs-folder-card .fs-folder-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; }
 
@@ -379,7 +383,11 @@
             <a href="research.html#account">My Account</a>
           </div>
         </div>
-      </nav>
+              <div class="nav-actions">
+          <a class="act-ghost" href="assets/cv.pdf" download><i class="fas fa-arrow-down"></i> CV</a>
+          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+        </div>
+</nav>
       <div class="nav-scrim" id="navScrim"></div>
     </div>
   </header>
@@ -534,7 +542,7 @@
             <input type="url" id="r-gdrive" placeholder="https://drive.google.com/file/d/...">
             <p class="text-muted">Drive → Share → copy the link → paste it here.</p>
           </div>
-          <div id="gdrive-detected" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(37,99,235,0.06);border-radius:var(--radius);border:1px solid rgba(37,99,235,0.15);font-size:12px;">
+          <div id="gdrive-detected" style="display:none;margin-bottom:12px;padding:10px 14px;background:rgba(23,22,15,0.06);border-radius:var(--radius);border:1px solid rgba(23,22,15,0.15);font-size:12px;">
             <span style="color:var(--muted);font-weight:700;">FILE ID: </span>
             <span id="gdrive-id-text" style="font-family:monospace;color:var(--ink);"></span>
           </div>

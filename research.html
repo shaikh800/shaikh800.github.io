@@ -12,8 +12,12 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
   <link rel="stylesheet" href="assets/site.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
   <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#f3f1ec">
   <link rel="apple-touch-icon" href="favicon.svg">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Research Hub | Md. Shaikh Alam">
@@ -129,7 +133,7 @@
 
     .drive-row-folder { cursor: pointer; }
     .drive-row-folder:hover td { background: var(--surface-soft); }
-    .drive-folder-icon { color: #f4b400 !important; }
+    .drive-folder-icon { color: var(--muted) !important; }
     .drive-row-chevron { color: var(--muted); font-size: 12px; }
 
     .file-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
@@ -215,7 +219,7 @@
     .notice-card.warning { border-left-color: #f59e0b; }
     .notice-card.urgent { border-left-color: #ef4444; }
     .notice-card .n-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; flex-shrink: 0; }
-    .notice-card.info .n-icon { background: rgba(37,99,235,0.1); color: var(--blue); }
+    .notice-card.info .n-icon { background: rgba(23,22,15,0.1); color: var(--blue); }
     .notice-card.warning .n-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
     .notice-card.urgent .n-icon { background: rgba(239,68,68,0.1); color: #ef4444; }
     .notice-card .n-title { font-weight: 700; font-size: 13.5px; margin-bottom: 2px; }
@@ -245,7 +249,7 @@
     .chat-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
     .chat-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
     .role-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
-    .role-pill.admin { background: rgba(37,99,235,0.1); color: var(--blue); }
+    .role-pill.admin { background: rgba(23,22,15,0.1); color: var(--blue); }
     .role-pill.member { background: var(--surface-soft); color: var(--muted); }
     .toggle { position: relative; width: 36px; height: 21px; border-radius: 100px; background: var(--line); cursor: pointer; flex-shrink: 0; transition: .15s; display: inline-block; }
     .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
@@ -480,7 +484,11 @@
             <a href="research.html#access" class="admin-only">Drive &amp; Access</a>
           </div>
         </div>
-      </nav>
+              <div class="nav-actions">
+          <a class="act-ghost" href="assets/cv.pdf" download><i class="fas fa-arrow-down"></i> CV</a>
+          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+        </div>
+</nav>
       <div class="nav-scrim" id="navScrim"></div>
     </div>
   </header>
@@ -503,7 +511,7 @@
           <button class="btn primary sm" id="pendingRecheckBtn" type="button"><i class="fas fa-rotate"></i> I've been approved — check again</button>
           <button class="btn secondary sm" id="pendingSwitchBtn" type="button"><i class="fas fa-right-left"></i> Not you? Switch view</button>
         </div>
-        <p style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;">Taking a while? <a id="pendingContactBtn" href="#">Email the admin</a> directly, or they can approve you under <b>Drive &amp; Access → Add a member</b>.</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;">The admin sees your request on their <b>Drive &amp; Access</b> page and will approve it there &mdash; no email needed. Just come back and tap <i>check again</i> once you've been approved.</p>
       </div>
     </section>
 
@@ -2060,11 +2068,6 @@
       const chip = document.getElementById('pendingChip');
       chip.innerHTML = `${gateIdentity().picture ? `<img src="${esc(gateIdentity().picture)}" onerror="this.style.display='none'">` : ''}
         <div><div class="tu-name">${esc(gateIdentity().name)}</div><div class="tu-email">${esc(gateIdentity().email)}</div></div>`;
-      const subject = encodeURIComponent('Research Hub access request');
-      const body = encodeURIComponent(`Hi,\n\nPlease approve my access to the Research Hub.\nName: ${gateIdentity().name}\nEmail: ${gateIdentity().email}\n`);
-      const mailLink = `mailto:md.shaikh.alam.007@gmail.com?subject=${subject}&body=${body}`;
-      document.getElementById('pendingContactBtn').href = mailLink;
-
       // The request is already queued automatically (see submitMemberForm ->
       // addPendingRequest -> syncChange) and shows up for the admin under
       // Drive & Access with a one-click Approve/Reject -- no email required.
