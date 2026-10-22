@@ -302,7 +302,7 @@
 <div id="g-loader">
   <div class="loader-card">
     <div class="spin-ring"></div>
-    <div class="loader-txt" id="loader-txt">সার্ভারে যোগাযোগ করা হচ্ছে...<br>একটু অপেক্ষা করুন।</div>
+    <div class="loader-txt" id="loader-txt">Connecting to the server...<br>Please wait a moment.</div>
   </div>
 </div>
 
@@ -331,22 +331,22 @@
   <!-- ══════════ AUTH SECTION ══════════ -->
   <div id="auth-section">
     <div class="panel">
-      <h2 class="panel-title"><i class="fas fa-user-graduate"></i> পোর্টালে প্রবেশ করুন</h2>
+      <h2 class="panel-title"><i class="fas fa-user-graduate"></i> Enter the Portal</h2>
 
       <!-- Step 1: Mobile number -->
       <div id="step-1">
         <p style="margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.8;">
-          আপনার মোবাইল নম্বর দিন। সিস্টেম ডেটাবেজ চেক করে জানাবে আপনি নতুন নাকি পুরনো ব্যবহারকারী।
+          Enter your mobile number. The system will check the database and tell you whether you're a new or existing user.
         </p>
         <div class="field">
-          <label>মোবাইল নম্বর</label>
+          <label>Mobile Number</label>
           <input type="tel" id="auth-mobile" class="inp"
             placeholder="01XXXXXXXXX" maxlength="11"
             onkeydown="if(event.key==='Enter') checkMobile()">
         </div>
         <div id="s1-error" class="alert al-error" style="display:none;"></div>
         <button class="btn primary" style="width:100%;" id="s1-btn" onclick="checkMobile()">
-          পরবর্তী <i class="fas fa-arrow-right"></i>
+          Next <i class="fas fa-arrow-right"></i>
         </button>
       </div>
 
@@ -356,54 +356,54 @@
         <!-- Mobile display -->
         <div class="mobile-row">
           <span><i class="fas fa-phone" style="color:var(--blue); margin-right:6px;"></i><span id="mobile-disp"></span></span>
-          <button onclick="goBack()"><i class="fas fa-pencil"></i> পরিবর্তন</button>
+          <button onclick="goBack()"><i class="fas fa-pencil"></i> Change</button>
         </div>
 
         <!-- Existing user welcome -->
         <div id="msg-exist" class="alert al-success" style="display:none;">
           <i class="fas fa-check-circle fa-lg"></i>
-          <span>স্বাগতম ফিরে আসার জন্য, <b id="exist-name"></b>! পাসওয়ার্ড দিয়ে প্রবেশ করুন।</span>
+          <span>Welcome back, <b id="exist-name"></b>! Enter with your password.</span>
         </div>
 
         <!-- New user notice -->
         <div id="msg-new" class="alert al-info" style="display:none;">
           <i class="fas fa-user-plus fa-lg"></i>
-          <span>নতুন ব্যবহারকারী! নিচের তথ্যগুলো পূরণ করুন।</span>
+          <span>New user! Fill in the details below.</span>
         </div>
 
         <!-- New user fields -->
         <div id="new-fields" style="display:none;">
           <div class="field">
-            <label>পুরো নাম <span style="color:#ef4444;">*</span></label>
-            <input type="text" id="reg-name" class="inp" placeholder="আপনার পুরো নাম লিখুন">
+            <label>Full Name <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="reg-name" class="inp" placeholder="Enter your full name">
           </div>
           <div class="field">
-            <label>স্কুল / কলেজের নাম</label>
-            <input type="text" id="reg-school" class="inp" placeholder="প্রতিষ্ঠানের নাম (ঐচ্ছিক)">
+            <label>School / College Name</label>
+            <input type="text" id="reg-school" class="inp" placeholder="Institution name (optional)">
           </div>
           <div class="field">
-            <label>ক্লাস / বর্ষ</label>
-            <input type="text" id="reg-class" class="inp" placeholder="যেমন: Class 10, 2nd Year (ঐচ্ছিক)">
+            <label>Class / Year</label>
+            <input type="text" id="reg-class" class="inp" placeholder="e.g. Class 10, 2nd Year (optional)">
           </div>
         </div>
 
         <!-- Password -->
         <div class="field">
-          <label>পাসওয়ার্ড <span style="color:#ef4444;">*</span></label>
-          <input type="password" id="auth-pass" class="inp" placeholder="পাসওয়ার্ড দিন"
+          <label>Password <span style="color:#ef4444;">*</span></label>
+          <input type="password" id="auth-pass" class="inp" placeholder="Enter a password"
             onkeydown="if(event.key==='Enter') handleLogin()">
         </div>
 
         <!-- Forgot password -->
         <button id="forgot-btn" class="forgot-btn" style="display:none;" onclick="requestReset()">
-          <i class="fas fa-key"></i> পাসওয়ার্ড ভুলে গেছেন?
+          <i class="fas fa-key"></i> Forgot your password?
         </button>
 
         <div id="s2-error"   class="alert al-error"   style="display:none;"></div>
         <div id="s2-success" class="alert al-success"  style="display:none;"></div>
 
         <button class="btn primary" style="width:100%;" id="auth-btn" onclick="handleLogin()">
-          <span id="auth-btn-txt">লগইন করুন</span> <i class="fas fa-arrow-right"></i>
+          <span id="auth-btn-txt">Login</span> <i class="fas fa-arrow-right"></i>
         </button>
       </div>
     </div>
@@ -438,13 +438,13 @@
     <div class="panel" style="padding:20px 28px 28px;">
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('exams',this)">
-          <i class="fas fa-list-check"></i> পরীক্ষাসমূহ
+          <i class="fas fa-list-check"></i> Exams
         </button>
         <button class="tab-btn" onclick="switchTab('history',this)">
-          <i class="fas fa-clock-rotate-left"></i> আমার ইতিহাস
+          <i class="fas fa-clock-rotate-left"></i> My History
         </button>
         <button class="tab-btn" style="margin-left:auto; color:#ef4444;" onclick="logout()">
-          <i class="fas fa-sign-out-alt"></i> বের হন
+          <i class="fas fa-sign-out-alt"></i> Log Out
         </button>
       </div>
 
@@ -452,14 +452,14 @@
       <div id="tab-exams" class="tab-pane active">
         <div id="exams-loader" class="pane-loader">
           <i class="fas fa-circle-notch fa-spin"></i>
-          পরীক্ষার তালিকা লোড হচ্ছে...
+          Loading exam list...
         </div>
         <div id="exams-container" style="display:none;">
           <!-- Pending section -->
           <div id="section-pending" class="exams-section" style="display:none;">
             <div class="exams-section-head">
               <span class="sh-dot sh-dot-pending"></span>
-              বাকি পরীক্ষা
+              Pending Exams
               <span class="sh-count" id="pending-count">0</span>
             </div>
             <div id="grid-pending" class="exam-grid"></div>
@@ -468,7 +468,7 @@
           <div id="section-done" class="exams-section" style="display:none;">
             <div class="exams-section-head">
               <span class="sh-dot sh-dot-done"></span>
-              সম্পন্ন পরীক্ষা
+              Completed Exams
               <span class="sh-count" id="done-count">0</span>
             </div>
             <div id="grid-done" class="exam-grid"></div>
@@ -476,7 +476,7 @@
         </div>
         <div id="exams-empty" class="empty-st" style="display:none;">
           <i class="fas fa-folder-open"></i>
-          <p>আপনার জন্য এই মুহূর্তে কোনো পরীক্ষা নেই।</p>
+          <p>There are no exams for you right now.</p>
         </div>
       </div>
 
@@ -484,16 +484,16 @@
       <div id="tab-history" class="tab-pane">
         <div id="history-loader" class="pane-loader">
           <i class="fas fa-circle-notch fa-spin"></i>
-          ফলাফল লোড হচ্ছে...
+          Loading results...
         </div>
         <div id="history-wrap" style="display:none; overflow-x:auto;">
           <table class="h-table">
             <thead>
               <tr>
-                <th>পরীক্ষার নাম</th>
-                <th>তারিখ</th>
-                <th>নম্বর</th>
-                <th style="text-align:right;">বিস্তারিত</th>
+                <th>Exam Name</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th style="text-align:right;">Details</th>
               </tr>
             </thead>
             <tbody id="history-body"></tbody>
@@ -501,7 +501,7 @@
         </div>
         <div id="history-empty" class="empty-st" style="display:none;">
           <i class="fas fa-history"></i>
-          <p>আপনি এখনো কোনো পরীক্ষায় অংশ নেননি।</p>
+          <p>You haven't taken any exam yet.</p>
         </div>
       </div>
     </div>
@@ -513,19 +513,19 @@
 <div class="modal-overlay" id="modal-edit">
   <div class="modal-box">
     <div class="modal-hd">
-      <h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> প্রোফাইল আপডেট রিকোয়েস্ট</h3>
+      <h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> Profile Update Request</h3>
       <button class="modal-close" onclick="closeModal('modal-edit')"><i class="fas fa-times"></i></button>
     </div>
     <p style="font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.7;">
-      নাম, স্কুল বা ক্লাস পরিবর্তনের রিকোয়েস্ট পাঠান।
-      অ্যাডমিন অনুমোদন করলে প্রোফাইল আপডেট হবে।
+      Send a request to change your name, school, or class.
+      Your profile will be updated once the admin approves it.
     </p>
-    <div class="field"><label>নাম</label><input type="text" id="edit-name" class="inp"></div>
-    <div class="field"><label>স্কুল / কলেজ</label><input type="text" id="edit-school" class="inp"></div>
-    <div class="field"><label>ক্লাস / বর্ষ</label><input type="text" id="edit-class" class="inp"></div>
+    <div class="field"><label>Name</label><input type="text" id="edit-name" class="inp"></div>
+    <div class="field"><label>School / College</label><input type="text" id="edit-school" class="inp"></div>
+    <div class="field"><label>Class / Year</label><input type="text" id="edit-class" class="inp"></div>
     <div id="edit-msg" style="display:none; margin-bottom:14px;"></div>
     <button class="btn primary" style="width:100%;" id="edit-btn" onclick="submitProfileUpdate()">
-      রিকোয়েস্ট পাঠান <i class="fas fa-paper-plane"></i>
+      Send Request <i class="fas fa-paper-plane"></i>
     </button>
   </div>
 </div>
@@ -534,7 +534,7 @@
 <div class="modal-overlay" id="modal-mis">
   <div class="modal-box" style="max-width:480px;">
     <div class="modal-hd">
-      <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> ভুলসমূহ</h3>
+      <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Mistakes</h3>
       <button class="modal-close" onclick="closeModal('modal-mis')"><i class="fas fa-times"></i></button>
     </div>
     <div id="mis-content"
@@ -557,13 +557,13 @@
 <script>
 // ══════════════════════════════════════════════════════════════
 //  CONFIG
-//  ⚠️ localStorage বা sessionStorage কোথাও ব্যবহার হয়নি
+//  ⚠️ localStorage or sessionStorage is not used anywhere
 // ══════════════════════════════════════════════════════════════
 const GAS_URL = "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
 const GH_RAW  = "https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json";
 
 // ══════════════════════════════════════════════════════════════
-//  STATE — শুধু মেমোরিতে। পেজ বন্ধ/রিলোড করলে মুছে যাবে।
+//  STATE — in memory only. Cleared when the page closes or reloads.
 // ══════════════════════════════════════════════════════════════
 let currentUser = null; // { id, name, mobile, school, studentClass }
 let isNewUser   = false;
@@ -594,22 +594,22 @@ async function gasCall(payload) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  STEP 1 — মোবাইল নম্বর চেক
+//  STEP 1 — Check mobile number
 // ══════════════════════════════════════════════════════════════
 async function checkMobile() {
   let mobile = document.getElementById('auth-mobile').value.trim();
 
-  // নম্বর normalize
+  // normalize the number
   if (mobile.startsWith('+880')) mobile = '0' + mobile.slice(4);
   if (mobile.startsWith('880') && mobile.length === 13) mobile = '0' + mobile.slice(3);
   document.getElementById('auth-mobile').value = mobile;
 
   // Validation
-  if (!mobile)                              return setS1Error('মোবাইল নম্বর দিন!');
-  if (!/^01[3-9]\d{8}$/.test(mobile))      return setS1Error('সঠিক বাংলাদেশি নম্বর দিন (01XXXXXXXXX)');
+  if (!mobile)                              return setS1Error('Enter a mobile number!');
+  if (!/^01[3-9]\d{8}$/.test(mobile))      return setS1Error('Enter a valid Bangladeshi number (01XXXXXXXXX)');
   setS1Error('');
 
-  showLoader('ডেটাবেজে নম্বর খোঁজা হচ্ছে...<br>একটু অপেক্ষা করুন।');
+  showLoader('Looking up the number in the database...<br>Please wait a moment.');
 
   try {
     const data = await gasCall({ action: 'checkMobile', mobile });
@@ -619,16 +619,16 @@ async function checkMobile() {
     isNewUser = !(data.status === 'success' && (data.found === true || data.found === 'true'));
 
     if (!isNewUser) {
-      // পুরনো user
+      // existing user
       document.getElementById('exist-name').innerText = data.name || 'Student';
       flexShow('msg-exist'); hide('msg-new'); hide('new-fields');
       show('forgot-btn');
-      document.getElementById('auth-btn-txt').innerText = 'লগইন করুন';
+      document.getElementById('auth-btn-txt').innerText = 'Login';
     } else {
-      // নতুন user
+      // new user
       flexShow('msg-new'); hide('msg-exist');
       show('new-fields'); hide('forgot-btn');
-      document.getElementById('auth-btn-txt').innerText = 'অ্যাকাউন্ট তৈরি করুন';
+      document.getElementById('auth-btn-txt').innerText = 'Create Account';
     }
 
     hide('step-1'); show('step-2');
@@ -641,7 +641,7 @@ async function checkMobile() {
 
   } catch (e) {
     hideLoader();
-    setS1Error('সার্ভারে সংযোগ হচ্ছে না। ইন্টারনেট চেক করুন।');
+    setS1Error('Could not connect to the server. Check your internet.');
   }
 }
 
@@ -660,12 +660,12 @@ function goBack() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  STEP 2 — লগইন বা রেজিস্ট্রেশন
+//  STEP 2 — Login or registration
 // ══════════════════════════════════════════════════════════════
 async function handleLogin() {
   const mobile   = document.getElementById('auth-mobile').value.trim();
   const password = document.getElementById('auth-pass').value.trim();
-  if (!password) return setS2Error('পাসওয়ার্ড দিতে হবে!');
+  if (!password) return setS2Error('A password is required!');
 
   const payload = { mobile, password };
 
@@ -674,15 +674,15 @@ async function handleLogin() {
     payload.name         = document.getElementById('reg-name').value.trim();
     payload.school       = document.getElementById('reg-school').value.trim();
     payload.studentClass = document.getElementById('reg-class').value.trim();
-    if (!payload.name)  return setS2Error('আপনার নাম দিতে হবে!');
+    if (!payload.name)  return setS2Error('Your name is required!');
   } else {
     payload.action = 'login';
   }
 
   setS2Error('');
   showLoader(isNewUser
-    ? 'অ্যাকাউন্ট তৈরি হচ্ছে...'
-    : 'লগইন যাচাই করা হচ্ছে...'
+    ? 'Creating account...'
+    : 'Verifying login...'
   );
 
   try {
@@ -699,11 +699,11 @@ async function handleLogin() {
       };
       showDashboard();
     } else {
-      setS2Error(data.message || 'পাসওয়ার্ড ভুল হয়েছে!');
+      setS2Error(data.message || 'Incorrect password!');
     }
   } catch (e) {
     hideLoader();
-    setS2Error('সার্ভারে সংযোগ হচ্ছে না। ইন্টারনেট চেক করুন।');
+    setS2Error('Could not connect to the server. Check your internet.');
   }
 }
 
@@ -722,23 +722,23 @@ function setS2Success(msg) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  পাসওয়ার্ড রিসেট রিকোয়েস্ট
+//  Password reset request
 // ══════════════════════════════════════════════════════════════
 async function requestReset() {
   const mobile = document.getElementById('auth-mobile').value.trim();
   setS2Error('');
-  showLoader('পাসওয়ার্ড রিসেট রিকোয়েস্ট পাঠানো হচ্ছে...');
+  showLoader('Sending password reset request...');
   try {
     const data = await gasCall({ action: 'requestPasswordReset', mobile });
     hideLoader();
     if (data.status === 'success') {
-      setS2Success('রিকোয়েস্ট পাঠানো হয়েছে! অ্যাডমিন পাসওয়ার্ড সেট করে দিলে লগইন করতে পারবেন।');
+      setS2Success('Request sent! You can log in once the admin sets a password for you.');
     } else {
-      setS2Error(data.message || 'রিকোয়েস্ট পাঠানো যায়নি।');
+      setS2Error(data.message || 'Could not send the request.');
     }
   } catch (e) {
     hideLoader();
-    setS2Error('সার্ভারে সংযোগ হচ্ছে না।');
+    setS2Error('Could not connect to the server.');
   }
 }
 
@@ -753,21 +753,21 @@ function showDashboard() {
     `${esc(currentUser.name)} <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button>`;
   document.getElementById('d-mobile').innerText = currentUser.mobile;
   document.getElementById('d-id').innerText     = currentUser.id;
-  document.getElementById('d-school').innerText = currentUser.school       || 'সেট করা হয়নি';
-  document.getElementById('d-class').innerText  = currentUser.studentClass || 'সেট করা হয়নি';
+  document.getElementById('d-school').innerText = currentUser.school       || 'Not set';
+  document.getElementById('d-class').innerText  = currentUser.studentClass || 'Not set';
 
   fetchDashboardData();
 }
 
 async function fetchDashboardData() {
-  showLoader('পরীক্ষার তালিকা ও ফলাফল লোড হচ্ছে...<br>একটু অপেক্ষা করুন।');
+  showLoader('Loading exam list and results...<br>Please wait a moment.');
   try {
-    // GitHub থেকে exam list
+    // exam list from GitHub
     const ghRes  = await fetch(`${GH_RAW}?_=${Date.now()}`);
     const ghData = await ghRes.json();
     allExams = ghData.exams || [];
 
-    // GAS থেকে student results
+    // student results from GAS
     const gasData = await gasCall({ action: 'getStudentResults', studentId: currentUser.id });
     myHistory = gasData.results || gasData.data || [];
 
@@ -778,7 +778,7 @@ async function fetchDashboardData() {
     hideLoader();
     document.getElementById('exams-loader').innerHTML =
       `<i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:28px; display:block; margin-bottom:12px;"></i>
-       ডেটা লোড করতে সমস্যা হচ্ছে।<br>পেজ রিলোড করুন।`;
+       Trouble loading the data.<br>Please reload the page.`;
   }
 }
 
@@ -797,11 +797,11 @@ function renderExams() {
 
   allExams.forEach(ex => {
     const allowed = ex.examData.allowedIds || [];
-    // allowedIds empty মানে সবার জন্য open
+    // an empty allowedIds means open for everyone
     const isAllowed = allowed.length === 0 ||
       allowed.map(String).includes(String(currentUser.id));
     if (!isAllowed) return;
-    // live === false হলে দেখাবে না
+    // don't show it if live === false
     if (ex.live === false) return;
 
     const isDone   = myHistory.some(h => String(h.examId || h.ExamId || '') === String(ex.id)) ||
@@ -810,7 +810,7 @@ function renderExams() {
     const duration = ex.examData.duration || '30 minutes';
     const hasPass  = !!ex.examData.password;
 
-    // Student info URL params হিসেবে পাঠানো — localStorage নয়
+    // Student info is passed as URL params — not localStorage
     const base = `model_test.html?examId=${ex.id}` +
       `&studentId=${enc(currentUser.id)}` +
       `&studentName=${enc(currentUser.name)}` +
@@ -818,27 +818,27 @@ function renderExams() {
 
     const card = isDone
       ? `<div class="exam-card">
-          <span class="ekbadge eb-done"><i class="fas fa-check"></i> সম্পন্ন</span>
+          <span class="ekbadge eb-done"><i class="fas fa-check"></i> Done</span>
           <h3>${esc(ex.examData.title)}</h3>
           <div class="exam-meta">
             <span><i class="far fa-clock"></i> ${esc(duration)}</span>
-            <span><i class="fas fa-list-ol"></i> ${qCount} টি প্রশ্ন</span>
-            <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${hasPass ? 'প্রয়োজন' : 'নেই'}</span>
+            <span><i class="fas fa-list-ol"></i> ${qCount} Questions</span>
+            <span><i class="fas fa-lock"></i> Password: ${hasPass ? 'Required' : 'None'}</span>
           </div>
           <a href="${base}&practice=1" class="btn secondary" style="width:100%;justify-content:center;">
             <i class="fas fa-redo"></i> Practice Mode
           </a>
         </div>`
       : `<div class="exam-card">
-          <span class="ekbadge eb-new">নতুন</span>
+          <span class="ekbadge eb-new">New</span>
           <h3>${esc(ex.examData.title)}</h3>
           <div class="exam-meta">
             <span><i class="far fa-clock"></i> ${esc(duration)}</span>
-            <span><i class="fas fa-list-ol"></i> ${qCount} টি প্রশ্ন</span>
-            <span><i class="fas fa-lock"></i> পাসওয়ার্ড: ${hasPass ? 'প্রয়োজন' : 'নেই'}</span>
+            <span><i class="fas fa-list-ol"></i> ${qCount} Questions</span>
+            <span><i class="fas fa-lock"></i> Password: ${hasPass ? 'Required' : 'None'}</span>
           </div>
           <a href="${base}" class="btn primary" style="width:100%;justify-content:center;">
-            <i class="fas fa-play"></i> পরীক্ষা শুরু করুন
+            <i class="fas fa-play"></i> Start Exam
           </a>
         </div>`;
 
@@ -906,7 +906,7 @@ function renderHistory() {
         <td style="color:var(--muted);font-size:12px;">${esc(dateStr)}</td>
         <td class="${cls}">${score}</td>
         <td style="text-align:right;">
-          <button class="btn-mis" onclick="viewMistakes('${safeD}')">ভুল দেখুন</button>
+          <button class="btn-mis" onclick="viewMistakes('${safeD}')">View Mistakes</button>
         </td>
       </tr>`;
   });
@@ -931,10 +931,10 @@ async function submitProfileUpdate() {
   const name         = document.getElementById('edit-name').value.trim();
   const school       = document.getElementById('edit-school').value.trim();
   const studentClass = document.getElementById('edit-class').value.trim();
-  if (!name) { showEditMsg('নাম দিতে হবে!', false); return; }
+  if (!name) { showEditMsg('A name is required!', false); return; }
 
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
 
   try {
     const data = await gasCall({
@@ -942,17 +942,17 @@ async function submitProfileUpdate() {
       id: currentUser.id, name, school, studentClass
     });
     if (data.status === 'success') {
-      showEditMsg('রিকোয়েস্ট পাঠানো হয়েছে! অ্যাডমিন অনুমোদন করলে প্রোফাইল আপডেট হবে।', true);
+      showEditMsg('Request sent! Your profile will be updated once the admin approves it.', true);
       setTimeout(() => closeModal('modal-edit'), 3000);
     } else {
-      showEditMsg(data.message || 'কোনো সমস্যা হয়েছে।', false);
+      showEditMsg(data.message || 'Something went wrong.', false);
     }
   } catch (e) {
-    showEditMsg('নেটওয়ার্ক সমস্যা!', false);
+    showEditMsg('Network error!', false);
   }
 
   btn.disabled = false;
-  btn.innerHTML = 'রিকোয়েস্ট পাঠান <i class="fas fa-paper-plane"></i>';
+  btn.innerHTML = 'Send Request <i class="fas fa-paper-plane"></i>';
 }
 
 function showEditMsg(msg, ok) {
@@ -970,10 +970,10 @@ function viewMistakes(str) {
   if (str === 'Perfect Score') {
     html = `<div style="text-align:center;color:#166534;font-weight:700;">
       <i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:14px;"></i>
-      অসাধারণ! কোনো ভুল হয়নি। Perfect Score! 🏆
+      Amazing! No mistakes. Perfect Score! 🏆
     </div>`;
   } else if (!str || str === 'No data') {
-    html = `<div style="text-align:center;color:var(--muted);">ভুলের তথ্য পাওয়া যায়নি।</div>`;
+    html = `<div style="text-align:center;color:var(--muted);">Mistake details not available.</div>`;
   } else {
     html = '<ul style="margin:0;padding-left:20px;">' +
       str.split(', ').filter(Boolean).map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') +
@@ -1010,7 +1010,7 @@ function closeModal(id) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  LOGOUT — শুধু মেমোরি clear, কোনো storage নেই
+//  LOGOUT — clears memory only, no storage
 // ══════════════════════════════════════════════════════════════
 function logout() {
   currentUser = null;
@@ -1021,8 +1021,8 @@ function logout() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  INIT — কোনো auto-login নেই। localStorage/sessionStorage নেই।
-//  পেজ লোড হলে শুধু mobile input-এ focus।
+//  INIT — no auto-login. No localStorage/sessionStorage.
+//  On page load, just focus the mobile input.
 // ══════════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
   document.getElementById('auth-mobile').focus();

@@ -336,12 +336,12 @@
   <div class="gate-box">
     <div style="font-size:40px; margin-bottom:14px;">🛡️</div>
     <h2>Admin Panel</h2>
-    <p>Admin পাসওয়ার্ড দিয়ে প্রবেশ করুন</p>
+    <p>Enter with the Admin password</p>
     <input type="password" id="gate-pw" class="gate-inp" placeholder="••••••••"
       onkeydown="if(event.key==='Enter') gateUnlock()" autocomplete="off">
-    <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> প্রবেশ করুন</button>
+    <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> Enter</button>
     <div class="gate-err" id="gate-err"></div>
-    <p style="color:#475569; font-size:12px; margin-top:16px;">🔒 Admin-only। URL শেয়ার করবেন না।</p>
+    <p style="color:#475569; font-size:12px; margin-top:16px;">🔒 Admin-only. Don't share this URL.</p>
   </div>
 </div>
 
@@ -353,10 +353,10 @@
     <h1><i class="fas fa-user-shield"></i> Academy Admin Panel</h1>
     <div class="hdr-btns">
       <span id="hdr-spinner" style="display:none; color:rgba(255,255,255,.6); font-size:14px;">
-        <i class="fas fa-circle-notch spin"></i> লোড হচ্ছে...
+        <i class="fas fa-circle-notch spin"></i> Loading...
       </span>
       <button class="hdr-btn blue" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
-      <button class="hdr-btn ghost" onclick="adminLogout()" title="এই device থেকে logout করুন"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <button class="hdr-btn ghost" onclick="adminLogout()" title="Logout from this device"><i class="fas fa-sign-out-alt"></i> Logout</button>
       <a href="academy.html" class="hdr-btn ghost"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
   </div>
@@ -364,7 +364,7 @@
   <!-- Server Config (collapsible) -->
   <div class="config-bar">
     <div class="config-toggle" onclick="toggleConfig()" id="cfg-toggle">
-      <span><i class="fas fa-server" style="margin-right:8px; color:var(--blue);"></i> Server Config (GAS URL ও Token)</span>
+      <span><i class="fas fa-server" style="margin-right:8px; color:var(--blue);"></i> Server Config (GAS URL & Token)</span>
       <i class="fas fa-chevron-down" id="cfg-chevron"></i>
     </div>
     <div class="config-fields" id="cfg-fields">
@@ -381,7 +381,7 @@
       <div class="cfg-field" style="display:flex; flex-direction:column; justify-content:flex-end;">
         <label>&nbsp;</label>
         <button class="hdr-btn blue" style="width:100%; justify-content:center;"
-          onclick="loadAll()"><i class="fas fa-sync"></i> Config সেভ করে Refresh</button>
+          onclick="loadAll()"><i class="fas fa-sync"></i> Save Config & Refresh</button>
       </div>
     </div>
   </div>
@@ -389,7 +389,7 @@
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="lbl">মোট Student</div>
+      <div class="lbl">Total Students</div>
       <div class="val" id="stat-total">—</div>
     </div>
     <div class="stat-card">
@@ -401,7 +401,7 @@
       <div class="val danger" id="stat-resets">—</div>
     </div>
     <div class="stat-card">
-      <div class="lbl">মোট Submissions</div>
+      <div class="lbl">Total Submissions</div>
       <div class="val green" id="stat-submissions">—</div>
     </div>
   </div>
@@ -427,22 +427,22 @@
     <div class="panel">
       <div class="panel-head">
         <h2><i class="fas fa-user-graduate" style="color:var(--blue);"></i> Registered Students</h2>
-        <span style="font-size:13px; color:var(--muted);">Pending request আছে এমন student উপরে থাকবে।</span>
+        <span style="font-size:13px; color:var(--muted);">Students with a pending request appear at the top.</span>
       </div>
       <div class="t-wrap">
         <table class="data-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>নাম ও যোগাযোগ</th>
-              <th>শিক্ষা-তথ্য</th>
+              <th>Name & Contact</th>
+              <th>Education Info</th>
               <th>Requests</th>
               <th style="text-align:right;">Actions</th>
             </tr>
           </thead>
           <tbody id="student-tbody">
             <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
-              <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> লোড হচ্ছে...
+              <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> Loading...
             </td></tr>
           </tbody>
         </table>
@@ -454,17 +454,17 @@
   <div id="tab-results" class="tab-pane">
     <div class="panel">
       <div class="panel-head">
-        <h2><i class="fas fa-chart-bar" style="color:var(--blue);"></i> সব Submissions</h2>
+        <h2><i class="fas fa-chart-bar" style="color:var(--blue);"></i> All Submissions</h2>
         <select id="filter-exam" class="inp-f" style="width:auto; min-width:220px; margin:0; padding:8px 12px;"
           onchange="renderAllResults()">
-          <option value="all">— সব Exam —</option>
+          <option value="all">— All Exams —</option>
         </select>
       </div>
       <div class="t-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>তারিখ ও সময়</th>
+              <th>Date & Time</th>
               <th>Student</th>
               <th>Exam Topic</th>
               <th>Score</th>
@@ -473,7 +473,7 @@
           </thead>
           <tbody id="results-tbody">
             <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
-              <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> লোড হচ্ছে...
+              <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> Loading...
             </td></tr>
           </tbody>
         </table>
@@ -487,14 +487,14 @@
       <div class="panel-head">
         <h2><i class="fas fa-list-check" style="color:var(--blue);"></i> GitHub Exam List</h2>
         <button class="act-btn act-view" onclick="loadExamList()">
-          <i class="fas fa-cloud-download-alt"></i> Exams লোড করুন
+          <i class="fas fa-cloud-download-alt"></i> Load Exams
         </button>
       </div>
 
       <!-- GitHub Token row -->
       <div class="gh-row">
         <div>
-          <label><i class="fab fa-github"></i> GitHub Token (Live toggle / Delete-এর জন্য প্রয়োজন)</label>
+          <label><i class="fab fa-github"></i> GitHub Token (needed for Live toggle / Delete)</label>
           <input type="password" class="cfg-inp" id="gh-token" placeholder="ghp_xxxxxxxxxxxxx" autocomplete="off">
         </div>
         <button class="hdr-btn blue" style="flex-shrink:0; height:38px;" onclick="loadExamList()">
@@ -505,7 +505,7 @@
       <div id="exam-list-area">
         <div class="empty-box">
           <i class="fas fa-cloud-download-alt"></i>
-          <p>উপরে "Exams লোড করুন" চাপুন</p>
+          <p>Click "Load Exams" above</p>
         </div>
       </div>
     </div>
@@ -516,28 +516,28 @@
 
     <!-- Clear student exam results only -->
     <div class="danger-panel">
-      <div class="danger-title"><i class="fas fa-user-times"></i> নির্দিষ্ট Student-এর সব Exam Results মুছুন</div>
+      <div class="danger-title"><i class="fas fa-user-times"></i> Delete all Exam Results for a specific Student</div>
       <div class="danger-desc">
-        Student ID দিয়ে শুধু তার exam results মুছবেন। Account থাকবে, শুধু পরীক্ষার ইতিহাস মুছে যাবে।
+        Deletes only that student's exam results by Student ID. The account stays — only the exam history is removed.
       </div>
       <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-        <input type="text" class="inp-f" id="dz-student-id" style="max-width:200px; margin:0;" placeholder="Student ID (যেমন: 101)">
+        <input type="text" class="inp-f" id="dz-student-id" style="max-width:200px; margin:0;" placeholder="Student ID (e.g. 101)">
         <button class="danger-btn orange" onclick="deleteStudentResults()">
-          <i class="fas fa-eraser"></i> Results মুছুন
+          <i class="fas fa-eraser"></i> Delete Results
         </button>
       </div>
     </div>
 
     <!-- Clear specific exam results from GAS -->
     <div class="danger-panel">
-      <div class="danger-title"><i class="fas fa-file-excel"></i> নির্দিষ্ট Exam-এর Results মুছুন (GAS)</div>
+      <div class="danger-title"><i class="fas fa-file-excel"></i> Delete Results for a specific Exam (GAS)</div>
       <div class="danger-desc">
-        Exam ID দিন। ওই exam-এ সবার submission GAS থেকে মুছে যাবে।
+        Enter the Exam ID. Every submission for that exam will be removed from GAS.
       </div>
       <div style="display:flex; gap:10px; align-items:center;">
-        <input type="text" class="inp-f" id="dz-exam-id" style="max-width:260px; margin:0;" placeholder="Exam ID (যেমন: ex_abc123)">
+        <input type="text" class="inp-f" id="dz-exam-id" style="max-width:260px; margin:0;" placeholder="Exam ID (e.g. ex_abc123)">
         <button class="danger-btn orange" onclick="clearExamResults()">
-          <i class="fas fa-trash-alt"></i> Clear করুন
+          <i class="fas fa-trash-alt"></i> Clear
         </button>
       </div>
     </div>
@@ -545,7 +545,7 @@
     <!-- GitHub token for danger actions -->
     <div class="panel" style="border-color:#fbbf24; background:#fffbeb;">
       <div class="panel-head">
-        <h2 style="color:#92400e;"><i class="fas fa-github"></i> GitHub Exams মুছতে Token লাগবে</h2>
+        <h2 style="color:#92400e;"><i class="fas fa-github"></i> A Token is needed to delete GitHub Exams</h2>
       </div>
       <div class="gh-row" style="margin-bottom:16px;">
         <div>
@@ -555,28 +555,28 @@
       </div>
       <div class="danger-row">
         <button class="danger-btn red" onclick="clearAllGitHubExams()">
-          <i class="fas fa-github"></i> সব GitHub Exams মুছুন
+          <i class="fas fa-github"></i> Delete all GitHub Exams
         </button>
         <button class="danger-btn orange" onclick="clearAllGASData()">
-          <i class="fas fa-database"></i> GAS Results & Logs মুছুন
+          <i class="fas fa-database"></i> Delete GAS Results & Logs
         </button>
         <button class="danger-btn red" id="clear-all-btn" onclick="clearEverything()">
-          <i class="fas fa-bomb"></i> সব কিছু মুছুন (GitHub + GAS)
+          <i class="fas fa-bomb"></i> Delete Everything (GitHub + GAS)
         </button>
       </div>
     </div>
 
     <!-- Delete student account -->
     <div class="danger-panel">
-      <div class="danger-title"><i class="fas fa-user-slash"></i> Student Account সম্পূর্ণ Delete</div>
+      <div class="danger-title"><i class="fas fa-user-slash"></i> Completely Delete Student Account</div>
       <div class="danger-desc">
-        Students tab থেকে "Details" খুলে নিচে "Account Delete" করুন।
-        অথবা এখানে সরাসরি ID দিন:
+        Open "Details" from the Students tab and use "Account Delete" below.
+        Or enter the ID directly here:
       </div>
       <div style="display:flex; gap:10px; align-items:center;">
         <input type="text" class="inp-f" id="dz-del-id" style="max-width:200px; margin:0;" placeholder="Student ID">
         <button class="danger-btn red" onclick="deleteStudentById()">
-          <i class="fas fa-user-times"></i> Account মুছুন (Results সহ)
+          <i class="fas fa-user-times"></i> Delete Account (with Results)
         </button>
       </div>
     </div>
@@ -604,10 +604,10 @@
       <h4 style="color:#991b1b; margin:0 0 12px;">Account Management</h4>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <button class="danger-btn orange" onclick="deleteStudentResultsOnly()">
-          <i class="fas fa-eraser"></i> Results মুছুন (Account রাখুন)
+          <i class="fas fa-eraser"></i> Delete Results (keep Account)
         </button>
         <button class="danger-btn red" onclick="deleteStudentFull()">
-          <i class="fas fa-user-times"></i> Account সম্পূর্ণ Delete
+          <i class="fas fa-user-times"></i> Completely Delete Account
         </button>
       </div>
     </div>
@@ -647,14 +647,14 @@
 <script>
 // ════════════════════════════════════════════════════════
 //  CONFIG
-//  ⚠️ ADMIN_PW এখানে নেই — GAS Script Properties-এ থাকে
+//  ⚠️ ADMIN_PW is not here — it lives in GAS Script Properties
 // ════════════════════════════════════════════════════════
 const GH_OWNER  = 'shaikh800';
 const GH_REPO   = 'shaikh800.github.io';
 const GH_FILE   = 'civil_data.json';
 const GH_BRANCH = 'main';
 
-// Session token keys — sessionStorage (browser বন্ধে auto-মুছে যাবে)
+// Session token keys — sessionStorage (auto-cleared when the browser closes)
 const SESSION_TOKEN_KEY  = 'shaikh_admin_token_v1';
 const SESSION_EXPIRY_KEY = 'shaikh_admin_expiry_v1';
 
@@ -666,10 +666,10 @@ let selectedStuId   = null;   // for modal
 
 // ── Config helpers ──
 function gasUrl() { return document.getElementById('cfg-gas-url').value.trim(); }
-// gasToken() সরানো হয়েছে — token এখন sessionStorage থেকে আসে
+// gasToken() removed — the token now comes from sessionStorage
 const GH_TOKEN_KEY = 'shaikh_gh_token_v1';
 
-// GitHub PAT: input → sessionStorage-এ save করে return
+// GitHub PAT: input → saves to sessionStorage, then returns
 function ghToken() {
   const tok = (document.getElementById('gh-token').value.trim()) ||
               (document.getElementById('dz-gh-token').value.trim());
@@ -681,7 +681,7 @@ function ghToken() {
   return tok || sessionStorage.getItem(GH_TOKEN_KEY) || '';
 }
 
-// Login-এর পর saved GitHub token দুটো input-এ ভরে দাও
+// After login, fill the saved GitHub token into both inputs
 function loadSavedToken() {
   const saved = sessionStorage.getItem(GH_TOKEN_KEY);
   if (saved) {
@@ -691,7 +691,7 @@ function loadSavedToken() {
 }
 
 // ════════════════════════════════════════════════════════
-//  GATE — password GAS-এ verify হয়, session token পাঠায়
+//  GATE — password is verified in GAS, which sends back a session token
 // ════════════════════════════════════════════════════════
 
 async function gateUnlock() {
@@ -699,13 +699,13 @@ async function gateUnlock() {
   const err = document.getElementById('gate-err');
   const btn = document.querySelector('.gate-btn');
 
-  if (!pw) { err.textContent = '❌ পাসওয়ার্ড দিন!'; return; }
+  if (!pw) { err.textContent = '❌ Enter a password!'; return; }
 
   const url = gasUrl();
-  if (!url) { err.textContent = '❌ GAS URL সেট করুন!'; return; }
+  if (!url) { err.textContent = '❌ Set the GAS URL!'; return; }
 
   btn.disabled  = true;
-  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> যাচাই হচ্ছে...';
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Verifying...';
   err.textContent = '';
 
   try {
@@ -723,17 +723,17 @@ async function gateUnlock() {
       loadSavedToken();
       loadAll();
     } else {
-      err.textContent = '❌ ' + (data.message || 'ভুল পাসওয়ার্ড!');
+      err.textContent = '❌ ' + (data.message || 'Incorrect password!');
       document.getElementById('gate-pw').value = '';
       document.getElementById('gate-pw').focus();
       setTimeout(() => { err.textContent = ''; }, 3000);
     }
   } catch (e) {
-    err.textContent = '❌ সার্ভারে সংযোগ হচ্ছে না।';
+    err.textContent = '❌ Could not connect to the server.';
   }
 
   btn.disabled  = false;
-  btn.innerHTML = '<i class="fas fa-unlock"></i> প্রবেশ করুন';
+  btn.innerHTML = '<i class="fas fa-unlock"></i> Enter';
 }
 
 function adminLogout() {
@@ -743,7 +743,7 @@ function adminLogout() {
   location.reload();
 }
 
-// Auto-login: sessionStorage-এ valid token থাকলে gate দেখাবে না
+// Auto-login: skip the gate if a valid token exists in sessionStorage
 (function autoLogin() {
   const token  = sessionStorage.getItem(SESSION_TOKEN_KEY);
   const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);
@@ -771,7 +771,7 @@ function stopLoad() {
 }
 
 // ════════════════════════════════════════════════════════
-//  GAS CALL — token এখন sessionStorage থেকে আসে
+//  GAS CALL — the token now comes from sessionStorage
 // ════════════════════════════════════════════════════════
 async function gasCall(action, payload = {}) {
   startLoad();
@@ -785,11 +785,11 @@ async function gasCall(action, payload = {}) {
     const data = await res.json();
     stopLoad();
 
-    // Token মেয়াদ শেষ বা invalid — force re-login
+    // Token expired or invalid — force re-login
     if (data && data.status === 'unauthorized') {
       sessionStorage.removeItem(SESSION_TOKEN_KEY);
       sessionStorage.removeItem(SESSION_EXPIRY_KEY);
-      toast('⏱️ Session শেষ! আবার login করুন।');
+      toast('⏱️ Session expired! Please log in again.');
       setTimeout(() => location.reload(), 1500);
       return null;
     }
@@ -813,7 +813,7 @@ async function loadStudents() {
   if (!data || data.status !== 'success') {
     document.getElementById('student-tbody').innerHTML =
       `<tr><td colspan="5" style="text-align:center;padding:20px;color:#ef4444;">
-        ❌ Students লোড করা যায়নি। GAS URL ও Token চেক করুন।
+        ❌ Could not load students. Check the GAS URL and Token.
       </td></tr>`;
     return;
   }
@@ -838,7 +838,7 @@ function renderStudents() {
 
   if (studentsData.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" class="empty-box" style="border:none;">
-      <i class="fas fa-users"></i><p>কোনো Student নেই।</p>
+      <i class="fas fa-users"></i><p>No students yet.</p>
     </td></tr>`;
     ['stat-total','stat-pending','stat-resets'].forEach(id =>
       document.getElementById(id).textContent = '0');
@@ -864,7 +864,7 @@ function renderStudents() {
         <div style="margin-bottom:8px;">
           <span class="badge warn"><i class="fas fa-pen-to-square"></i> Profile Update</span>
           <div style="font-size:11px; color:var(--muted); margin:4px 0;">
-            নাম: <b>${esc(u.name||'—')}</b> · স্কুল: <b>${esc(u.school||'—')}</b> · ক্লাস: <b>${esc(u.studentClass||'—')}</b>
+            Name: <b>${esc(u.name||'—')}</b> · School: <b>${esc(u.school||'—')}</b> · Class: <b>${esc(u.studentClass||'—')}</b>
           </div>
           <div style="display:flex;gap:6px;">
             <button class="act-btn act-approve" onclick="approveProfile('${s.id}')">✓ Accept</button>
@@ -912,14 +912,14 @@ function renderStudents() {
 }
 
 async function approveProfile(id) {
-  if (!await askConfirm('এই profile update approve করবেন?')) return;
+  if (!await askConfirm('Approve this profile update?')) return;
   const res = await gasCall('adminApproveProfile', { id });
   if (res?.status === 'success') { toast('✅ Profile approved!'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
 }
 
 async function rejectProfile(id) {
-  if (!await askConfirm('এই profile update reject করবেন?')) return;
+  if (!await askConfirm('Reject this profile update?')) return;
   const res = await gasCall('adminRejectProfile', { id });
   if (res?.status === 'success') { toast('🗑️ Request rejected.'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
@@ -928,8 +928,8 @@ async function rejectProfile(id) {
 async function resetPassword(id) {
   const el  = document.getElementById(`np-${id}`);
   const pw  = el ? el.value.trim() : '';
-  if (!pw) { toast('পাসওয়ার্ড লিখুন!'); return; }
-  if (!await askConfirm(`ID ${id}-এর পাসওয়ার্ড "${pw}" করবেন?`)) return;
+  if (!pw) { toast('Enter a password!'); return; }
+  if (!await askConfirm(`Set ID ${id}\'s password to "${pw}"?`)) return;
   const res = await gasCall('adminResetPassword', { id, newPassword: pw });
   if (res?.status === 'success') { toast('🔐 Password updated!'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
@@ -944,7 +944,7 @@ function togglePw() {
   if (!display || !icon) return;
   _pwVisible = !_pwVisible;
   if (_pwVisible) {
-    display.textContent = _currentModalPw || '(সেট করা হয়নি)';
+    display.textContent = _currentModalPw || '(not set)';
     display.style.letterSpacing = '0';
     icon.className = 'fas fa-eye-slash';
   } else {
@@ -964,18 +964,18 @@ function openStudentModal(id) {
     `<i class="fas fa-user-circle" style="color:var(--blue);"></i> ${esc(s.name)} <span style="font-size:13px;color:var(--muted);">(ID: ${s.id})</span>`;
 
   document.getElementById('modal-stu-bio').innerHTML = `
-    <div><strong>মোবাইল</strong>${esc(String(s.mobile))}</div>
-    <div><strong>পাসওয়ার্ড</strong>
+    <div><strong>Mobile</strong>${esc(String(s.mobile))}</div>
+    <div><strong>Password</strong>
       <span id="pw-display" style="font-family:monospace;letter-spacing:2px;">••••••••</span>
       <button onclick="togglePw()"
         id="pw-toggle-btn"
         style="margin-left:8px;background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;padding:0;"
-        title="দেখুন / লুকান">
+        title="Show / Hide">
         <i class="fas fa-eye" id="pw-eye-icon"></i>
       </button>
     </div>
-    <div><strong>স্কুল/কলেজ</strong>${esc(s.school||'সেট করা হয়নি')}</div>
-    <div><strong>ক্লাস/বর্ষ</strong>${esc(s.studentClass||'সেট করা হয়নি')}</div>
+    <div><strong>School/College</strong>${esc(s.school||'Not set')}</div>
+    <div><strong>Class/Year</strong>${esc(s.studentClass||'Not set')}</div>
   `;
   _currentModalPw = s.password || '';
   _pwVisible = false;
@@ -984,7 +984,7 @@ function openStudentModal(id) {
   const wrap = document.getElementById('modal-stu-results');
 
   if (sResults.length === 0) {
-    wrap.innerHTML = `<div class="empty-box"><i class="fas fa-history"></i><p>এখনো কোনো পরীক্ষা দেননি।</p></div>`;
+    wrap.innerHTML = `<div class="empty-box"><i class="fas fa-history"></i><p>Hasn't taken any exam yet.</p></div>`;
   } else {
     wrap.innerHTML = sResults.map(r => {
       const isPerfect = r.details === 'Perfect Score';
@@ -998,7 +998,7 @@ function openStudentModal(id) {
         </div>
         ${isPerfect
           ? `<div style="font-size:12px;color:#166534;font-weight:700;margin-top:6px;">🏆 Perfect Score!</div>`
-          : `<div class="mistakes-box"><strong>ভুল প্রশ্নসমূহ:</strong><br>${esc(r.details||'No data')}</div>`
+          : `<div class="mistakes-box"><strong>Wrong Questions:</strong><br>${esc(r.details||'No data')}</div>`
         }
       </div>`;
     }).join('');
@@ -1009,7 +1009,7 @@ function openStudentModal(id) {
 
 async function deleteStudentResultsOnly() {
   if (!selectedStuId) return;
-  if (!await askConfirm(`ID ${selectedStuId}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
+  if (!await askConfirm(`Delete all exam results for ID ${selectedStuId}? The account will stay.`)) return;
 
   // We delete results by iterating - use a custom action on GAS
   // Using adminDeleteStudent with deleteResults:true but keeping account - 
@@ -1024,23 +1024,23 @@ async function deleteStudentResultsOnly() {
   // So let's just do it the same way as the danger zone deleteStudentResults function
   const res = await gasCall('adminDeleteStudentResults', { id: selectedStuId });
   if (res?.status === 'success') {
-    toast('✅ Results মুছে ফেলা হয়েছে!');
+    toast('✅ Results deleted!');
     closeModal('modal-student');
     await loadAll();
   } else {
     // Fallback: GAS doesn't have this action yet - inform user
-    toast('⚠️ GAS-এ এই feature যোগ করতে হবে। Danger Zone ব্যবহার করুন।');
+    toast('⚠️ This feature needs to be added in GAS. Use the Danger Zone.');
   }
 }
 
 async function deleteStudentFull() {
   if (!selectedStuId) return;
-  if (!await askConfirm(`⚠️ সতর্কতা! ID ${selectedStuId}-এর account ও সব results চিরতরে মুছবে। নিশ্চিত?`)) return;
-  if (!await askConfirm('আবার নিশ্চিত করুন — এই কাজ ফেরানো যাবে না।')) return;
+  if (!await askConfirm(`⚠️ Warning! This will permanently delete ID ${selectedStuId}\'s account and all results. Are you sure?`)) return;
+  if (!await askConfirm('Confirm again — this action cannot be undone.')) return;
 
   const res = await gasCall('adminDeleteStudent', { id: selectedStuId, deleteResults: true });
   if (res?.status === 'success') {
-    toast('🗑️ Student account মুছে ফেলা হয়েছে।');
+    toast('🗑️ Student account deleted.');
     closeModal('modal-student');
     await loadAll();
   } else {
@@ -1054,7 +1054,7 @@ async function deleteStudentFull() {
 function populateExamFilter() {
   const sel = document.getElementById('filter-exam');
   const topics = [...new Set(allResultsData.map(r => r.topic))];
-  sel.innerHTML = '<option value="all">— সব Exam —</option>' +
+  sel.innerHTML = '<option value="all">— All Exams —</option>' +
     topics.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
 }
 
@@ -1064,7 +1064,7 @@ function renderAllResults() {
   const list   = filter === 'all' ? allResultsData : allResultsData.filter(r => r.topic === filter);
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">কোনো submission নেই।</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted);">No submissions yet.</td></tr>`;
     return;
   }
 
@@ -1092,10 +1092,10 @@ function showMistakes(str) {
   if (str === 'Perfect Score' || str === '') {
     el.innerHTML = `<div style="text-align:center;color:#166534;font-weight:700;">
       <i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:12px;"></i>
-      Perfect Score! কোনো ভুল নেই। 🏆
+      Perfect Score! No mistakes. 🏆
     </div>`;
   } else if (!str || str === 'No data') {
-    el.innerHTML = `<div style="text-align:center;color:var(--muted);">ভুলের তথ্য পাওয়া যায়নি।</div>`;
+    el.innerHTML = `<div style="text-align:center;color:var(--muted);">Mistake details not available.</div>`;
   } else {
     el.innerHTML = '<ul style="margin:0;padding-left:20px;">' +
       str.split(', ').filter(Boolean).map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') +
@@ -1113,7 +1113,7 @@ async function loadExamList() {
   const area = document.getElementById('exam-list-area');
   area.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);">
     <i class="fas fa-circle-notch spin fa-2x" style="display:block;margin-bottom:12px;"></i>
-    GitHub থেকে লোড হচ্ছে...
+    Loading from GitHub...
   </div>`;
 
   startLoad();
@@ -1132,7 +1132,7 @@ async function loadExamList() {
     stopLoad();
     area.innerHTML = `<div class="empty-box" style="border-color:#fecaca;background:#fff5f5;color:#991b1b;">
       <i class="fas fa-exclamation-triangle"></i>
-      <p>GitHub থেকে লোড করা যায়নি। Token চেক করুন।</p>
+      <p>Could not load from GitHub. Check the Token.</p>
     </div>`;
   }
 }
@@ -1142,7 +1142,7 @@ function renderExamList() {
   const exams = examFullData.exams || [];
 
   if (exams.length === 0) {
-    area.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><p>কোনো Exam নেই।</p></div>`;
+    area.innerHTML = `<div class="empty-box"><i class="fas fa-folder-open"></i><p>No exams yet.</p></div>`;
     return;
   }
 
@@ -1159,11 +1159,11 @@ function renderExamList() {
       <div class="exam-mgmt-info">
         <h3>${esc(ex.examData?.title||'Untitled')} ${liveBadge}</h3>
         <div class="exam-mgmt-meta">
-          <span><i class="fas fa-list-ol" style="color:var(--blue);"></i> ${qCount} প্রশ্ন</span>
+          <span><i class="fas fa-list-ol" style="color:var(--blue);"></i> ${qCount} Questions</span>
           <span><i class="fas fa-users" style="color:var(--blue);"></i>
-            ${allowed === 0 ? 'সবার জন্য Open' : allowed + ' জন allowed'}</span>
+            ${allowed === 0 ? 'Open for everyone' : allowed + ' allowed'}</span>
           <span><i class="fas fa-lock" style="color:var(--blue);"></i>
-            পাসওয়ার্ড: ${hasPass ? 'আছে' : 'নেই'}</span>
+            Password: ${hasPass ? 'Set' : 'None'}</span>
           <span style="font-size:11px; color:var(--muted);">ID: ${esc(ex.id)}</span>
         </div>
       </div>
@@ -1185,7 +1185,7 @@ function renderExamList() {
 
 async function toggleExamLive(id) {
   const tok = document.getElementById('gh-token').value.trim();
-  if (!tok) { toast('GitHub Token দিন!'); return; }
+  if (!tok) { toast('Enter a GitHub Token!'); return; }
 
   const idx = examFullData.exams.findIndex(e => e.id === id);
   if (idx === -1) return;
@@ -1195,7 +1195,7 @@ async function toggleExamLive(id) {
 
   const ok = await pushGitHub(tok, `Toggle live: ${id}`);
   if (ok) {
-    toast(examFullData.exams[idx].live ? '🟢 Exam Live করা হয়েছে!' : '🔴 Exam Pause করা হয়েছে!');
+    toast(examFullData.exams[idx].live ? '🟢 Exam set to Live!' : '🔴 Exam Paused!');
     renderExamList();
   } else {
     // Revert on failure
@@ -1204,17 +1204,17 @@ async function toggleExamLive(id) {
 }
 
 async function deleteExam(id, title) {
-  if (!await askConfirm(`"${title}" exam মুছবেন?`)) return;
+  if (!await askConfirm(`Delete the "${title}" exam?`)) return;
   const tok = document.getElementById('gh-token').value.trim();
-  if (!tok) { toast('GitHub Token দিন!'); return; }
+  if (!tok) { toast('Enter a GitHub Token!'); return; }
 
   examFullData.exams = examFullData.exams.filter(e => e.id !== id);
   const ok = await pushGitHub(tok, `Delete exam: ${id}`);
-  if (ok) { toast('🗑️ Exam মুছে ফেলা হয়েছে।'); renderExamList(); }
+  if (ok) { toast('🗑️ Exam deleted.'); renderExamList(); }
 }
 
 async function clearExamGASResults(examId, title) {
-  if (!await askConfirm(`"${title}"-এর সব GAS results মুছবেন?`)) return;
+  if (!await askConfirm(`Delete all GAS results for "${title}"?`)) return;
   const res = await gasCall('clearExamData', { examId });
   if (res?.status === 'success') {
     toast(`✅ ${res.message}`);
@@ -1256,22 +1256,22 @@ async function pushGitHub(tok, msg = 'Update') {
 // ════════════════════════════════════════════════════════
 async function deleteStudentResults() {
   const id = document.getElementById('dz-student-id').value.trim();
-  if (!id) { toast('Student ID দিন!'); return; }
-  if (!await askConfirm(`ID ${id}-এর সব exam results মুছবেন? Account থাকবে।`)) return;
+  if (!id) { toast('Enter a Student ID!'); return; }
+  if (!await askConfirm(`Delete all exam results for ID ${id}? The account will stay.`)) return;
   const res = await gasCall('adminDeleteStudentResults', { id });
   if (res?.status === 'success') {
-    toast('✅ Results মুছে ফেলা হয়েছে!');
+    toast('✅ Results deleted!');
     document.getElementById('dz-student-id').value = '';
     await loadResults();
   } else {
-    toast('❌ ' + (res?.message || 'GAS-এ এই feature আপডেট করতে হবে।'));
+    toast('❌ ' + (res?.message || 'This feature needs to be updated in GAS.'));
   }
 }
 
 async function clearExamResults() {
   const examId = document.getElementById('dz-exam-id').value.trim();
-  if (!examId) { toast('Exam ID দিন!'); return; }
-  if (!await askConfirm(`Exam ID "${examId}"-এর সব results মুছবেন?`)) return;
+  if (!examId) { toast('Enter an Exam ID!'); return; }
+  if (!await askConfirm(`Delete all results for Exam ID "${examId}"?`)) return;
   const res = await gasCall('clearExamData', { examId });
   if (res?.status === 'success') {
     toast(`✅ ${res.message}`);
@@ -1281,10 +1281,10 @@ async function clearExamResults() {
 }
 
 async function clearAllGASData() {
-  if (!await askConfirm('⚠️ GAS-এর সব results ও logs মুছবেন? User accounts অক্ষত থাকবে।')) return;
+  if (!await askConfirm('⚠️ Delete all GAS results and logs? User accounts will stay intact.')) return;
   const res = await gasCall('clearData');
   if (res?.status === 'success') {
-    toast('✅ GAS Data মুছে ফেলা হয়েছে।');
+    toast('✅ GAS Data deleted.');
     await loadAll();
   } else toast('❌ Failed');
 }
@@ -1292,21 +1292,21 @@ async function clearAllGASData() {
 async function clearAllGitHubExams() {
   const tok = getDzToken();
   if (!tok) return;
-  if (!await askConfirm('⚠️ GitHub-এর সব exams মুছবেন? ফেরানো যাবে না।')) return;
+  if (!await askConfirm('⚠️ Delete all exams on GitHub? This cannot be undone.')) return;
   examFullData.exams = [];
   const ok = await pushGitHub(tok, 'Clear all exams');
-  if (ok) toast('✅ GitHub-এর সব Exam মুছে ফেলা হয়েছে!');
+  if (ok) toast('✅ All GitHub Exams deleted!');
 }
 
 async function clearEverything() {
   const tok = getDzToken();
   if (!tok) return;
-  if (!await askConfirm('⚠️⚠️ সব কিছু মুছবেন? GitHub Exams + GAS Results + Logs — কিছুই থাকবে না!')) return;
-  if (!await askConfirm('শেষবার নিশ্চিত করুন।')) return;
+  if (!await askConfirm('⚠️⚠️ Delete everything? GitHub Exams + GAS Results + Logs — nothing will remain!')) return;
+  if (!await askConfirm('Confirm one last time.')) return;
 
   const btn = document.getElementById('clear-all-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> মুছছি...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
   examFullData.exams = [];
   const [ghOk] = await Promise.all([
@@ -1315,22 +1315,22 @@ async function clearEverything() {
   ]);
 
   btn.disabled = false;
-  btn.innerHTML = '<i class="fas fa-bomb"></i> সব কিছু মুছুন (GitHub + GAS)';
+  btn.innerHTML = '<i class="fas fa-bomb"></i> Delete Everything (GitHub + GAS)';
 
   if (ghOk) {
-    toast('✅ সব মুছে ফেলা হয়েছে!');
+    toast('✅ Everything deleted!');
     await loadAll();
   }
 }
 
 async function deleteStudentById() {
   const id = document.getElementById('dz-del-id').value.trim();
-  if (!id) { toast('Student ID দিন!'); return; }
-  if (!await askConfirm(`⚠️ ID ${id}-এর account ও সব results মুছবেন?`)) return;
-  if (!await askConfirm('শেষবার নিশ্চিত।')) return;
+  if (!id) { toast('Enter a Student ID!'); return; }
+  if (!await askConfirm(`⚠️ Delete ID ${id}\'s account and all results?`)) return;
+  if (!await askConfirm('One last confirmation.')) return;
   const res = await gasCall('adminDeleteStudent', { id, deleteResults: true });
   if (res?.status === 'success') {
-    toast('🗑️ Student মুছে ফেলা হয়েছে।');
+    toast('🗑️ Student deleted.');
     document.getElementById('dz-del-id').value = '';
     await loadAll();
   } else toast('❌ ' + (res?.message || 'Failed'));
@@ -1338,7 +1338,7 @@ async function deleteStudentById() {
 
 function getDzToken() {
   const tok = document.getElementById('dz-gh-token').value.trim();
-  if (!tok) { toast('GitHub Token দিন!'); return null; }
+  if (!tok) { toast('Enter a GitHub Token!'); return null; }
   return tok;
 }
 

@@ -145,12 +145,12 @@ td{border:1px solid var(--line);padding:9px 12px;}
       </svg>
     </div>
     <h2>Exam Controller</h2>
-    <p>Admin password দিয়ে প্রবেশ করুন</p>
+    <p>Enter with the Admin password</p>
     <input type="password" id="gate-pw-input" class="gate-inp" placeholder="••••••••"
            onkeydown="if(event.key==='Enter') gateUnlock()" autocomplete="off">
-    <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> প্রবেশ করুন</button>
+    <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> Enter</button>
     <div class="gate-err" id="gate-err"></div>
-    <div class="gate-hint">🔒 এই পেজটি admin-only। URL শেয়ার করবেন না।</div>
+    <div class="gate-hint">🔒 This page is admin-only. Don't share this URL.</div>
   </div>
 </div>
 
@@ -158,7 +158,7 @@ td{border:1px solid var(--line);padding:9px 12px;}
 
   <div class="hdr">
     <div style="display:flex;align-items:center;gap:14px;">
-        <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:12px;display:flex;align-items:center;gap:5px;" title="সাইটে ফিরে যান"><i class="fas fa-arrow-left"></i></a>
+        <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:12px;display:flex;align-items:center;gap:5px;" title="Back to site"><i class="fas fa-arrow-left"></i></a>
         <h1><i class="fas fa-chalkboard-teacher" style="color:var(--blue)"></i> Exam Controller</h1>
       </div>
     <div class="token-row">
@@ -166,22 +166,22 @@ td{border:1px solid var(--line);padding:9px 12px;}
       <input type="text" id="gas-url-hdr" class="inp" style="width:200px;" placeholder="Google Script URL" value="https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec">
       <input type="password" id="gas-admin-token" class="inp" style="width:150px;" placeholder="GAS Admin Token" autocomplete="off">
       <button class="btn btn-blue" onclick="syncAll()"><i class="fas fa-sync"></i> Sync</button>
-      <button class="btn btn-gray" onclick="ctrlLogout()" title="এই device থেকে logout"><i class="fas fa-sign-out-alt"></i></button>
+      <button class="btn btn-gray" onclick="ctrlLogout()" title="Logout from this device"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </div>
 
   <div style="text-align:center; padding: 15px; color: var(--muted); font-size: 13px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--rl); margin-bottom: 20px;">
-    💡 <b>Note:</b> Results, Stats, এবং Danger Zone এখন <a href="admin_panel.html" style="color: var(--blue); font-weight: bold; text-decoration: none;">Admin Panel</a>-এ শিফট করা হয়েছে।
+    💡 <b>Note:</b> Results, Stats, and the Danger Zone have moved to <a href="admin_panel.html" style="color: var(--blue); font-weight: bold; text-decoration: none;">Admin Panel</a>.
   </div>
 
   <div class="panel" id="dashboard-panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-list"></i></div> Exam তালিকা</div>
-      <button class="btn btn-blue" onclick="openBuilder()"><i class="fas fa-plus"></i> নতুন Exam</button>
+      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-list"></i></div> Exam List</div>
+      <button class="btn btn-blue" onclick="openBuilder()"><i class="fas fa-plus"></i> New Exam</button>
     </div>
 
     <div class="search-bar">
-      <input class="inp" id="exam-code-search" placeholder="Exam Code দিয়ে খুঁজুন (e.g. ex_abc123)..." onkeydown="if(event.key==='Enter')searchExam()">
+      <input class="inp" id="exam-code-search" placeholder="Search by Exam Code (e.g. ex_abc123)..." onkeydown="if(event.key==='Enter')searchExam()">
       <button class="btn btn-gray" onclick="searchExam()"><i class="fas fa-search"></i></button>
     </div>
 
@@ -191,13 +191,13 @@ td{border:1px solid var(--line);padding:9px 12px;}
 
   <div class="panel" id="builder-panel" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-edit"></i></div> নতুন Exam তৈরি</div>
+      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-edit"></i></div> Create New Exam</div>
       <button class="btn btn-gray" onclick="closeBuilder()"><i class="fas fa-arrow-left"></i> Back</button>
     </div>
-    <!-- Draft Banner: question-builder থেকে এলে দেখা যাবে -->
+    <!-- Draft Banner: shown when arriving from question-builder -->
     <div id="draft-banner" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:13px;color:#166534;align-items:center;gap:8px;">
       <i class="fas fa-file-import"></i>
-      <span>Question Builder থেকে প্রশ্নগুলো লোড হয়েছে। Password ও Student permission সেট করে <b>Save &amp; Publish</b> করুন।</span>
+      <span>Questions loaded from Question Builder. Set the Password and Student permissions, then <b>Save &amp; Publish</b>.</span>
     </div>
     <div class="grid-2">
       <div class="field"><label class="lbl">Exam Title</label><input class="inp" id="exam-title" placeholder="Model Test 1"></div>
@@ -206,20 +206,20 @@ td{border:1px solid var(--line);padding:9px 12px;}
     <div class="grid-2">
       <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="exam-pass" placeholder="e.g. fec123 (Optional)"></div>
       <div class="field">
-  <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <label class="lbl">Allowed Students (select)</label>
   <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center; flex-wrap:wrap;">
-    <button type="button" onclick="selectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ সবাই</button>
-    <button type="button" onclick="deselectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ কেউ না</button>
-    <span style="font-size:11px; color:#64748b;">← কেউ না = সবার জন্য Open</span>
+    <button type="button" onclick="selectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ All</button>
+    <button type="button" onclick="deselectAllStudents('builder-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ None</button>
+    <span style="font-size:11px; color:#64748b;">← None = Open for everyone</span>
   </div>
   <div id="builder-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
      <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
   </div>
-  <div style="font-size: 11px; color: #f59e0b; margin-top: 5px; background:#fffbeb; padding:5px 8px; border-radius:5px; border:1px solid #fde68a;">⚠️ পরে নতুন student add হলে তাকে দেখাতে <b>"কেউ না"</b> করে Save করুন (সবার জন্য Open হবে)।</div>
+  <div style="font-size: 11px; color: #f59e0b; margin-top: 5px; background:#fffbeb; padding:5px 8px; border-radius:5px; border:1px solid #fde68a;">⚠️ If a new student is added later, click <b>"None"</b> then Save to show it to them (this makes it Open for everyone).</div>
 </div>
     </div>
     <div id="questions-container"></div>
-    <button class="btn btn-gray" style="width:100%;justify-content:center;margin-bottom:16px;border-style:dashed;" onclick="addQ()"><i class="fas fa-plus"></i> প্রশ্ন যোগ করুন</button>
+    <button class="btn btn-gray" style="width:100%;justify-content:center;margin-bottom:16px;border-style:dashed;" onclick="addQ()"><i class="fas fa-plus"></i> Add Question</button>
     <div style="display:flex;justify-content:flex-end;">
       <button class="btn btn-blue" onclick="saveExam()"><i class="fas fa-cloud-upload-alt"></i> Save & Publish</button>
     </div>
@@ -227,7 +227,7 @@ td{border:1px solid var(--line);padding:9px 12px;}
 
   <div class="panel" id="edit-panel" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-pen"></i></div> Exam Edit করুন</div>
+      <div class="panel-title" style="margin:0;"><div class="ico"><i class="fas fa-pen"></i></div> Edit Exam</div>
       <button class="btn btn-gray" onclick="closeEdit()"><i class="fas fa-arrow-left"></i> Back</button>
     </div>
     <div class="grid-2">
@@ -237,11 +237,11 @@ td{border:1px solid var(--line);padding:9px 12px;}
     <div class="grid-2">
       <div class="field"><label class="lbl">Exam Password</label><input class="inp" id="edit-pass" placeholder="Optional"></div>
       <div class="field">
-  <label class="lbl">Allowed Students (সিলেক্ট করুন)</label>
+  <label class="lbl">Allowed Students (select)</label>
   <div style="display:flex; gap:6px; margin-bottom:7px; align-items:center; flex-wrap:wrap;">
-    <button type="button" onclick="selectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ সবাই</button>
-    <button type="button" onclick="deselectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ কেউ না</button>
-    <span style="font-size:11px; color:#64748b;">← কেউ না = সবার জন্য Open</span>
+    <button type="button" onclick="selectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:5px; cursor:pointer; font-weight:600;">✓ All</button>
+    <button type="button" onclick="deselectAllStudents('edit-student-list')" style="font-size:11px; padding:3px 9px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:5px; cursor:pointer; font-weight:600;">✗ None</button>
+    <span style="font-size:11px; color:#64748b;">← None = Open for everyone</span>
   </div>
   <div id="edit-student-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--r); padding: 10px; background: var(--surface);">
      <div style="color:var(--muted); font-size:12px; text-align:center;">Loading students...</div>
@@ -249,12 +249,12 @@ td{border:1px solid var(--line);padding:9px 12px;}
 </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 10px;">
-      <div class="panel-title" style="margin:0;font-size:13px;"><i class="fas fa-list-ol" style="color:var(--blue);margin-right:6px;"></i>প্রশ্নসমূহ</div>
-      <button class="btn btn-gray btn-sm" onclick="addEditQ()"><i class="fas fa-plus"></i> প্রশ্ন যোগ</button>
+      <div class="panel-title" style="margin:0;font-size:13px;"><i class="fas fa-list-ol" style="color:var(--blue);margin-right:6px;"></i>Questions</div>
+      <button class="btn btn-gray btn-sm" onclick="addEditQ()"><i class="fas fa-plus"></i> Add Question</button>
     </div>
     <div id="edit-questions-container"></div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
-      <button class="btn btn-gray" onclick="closeEdit()">বাতিল</button>
+      <button class="btn btn-gray" onclick="closeEdit()">Cancel</button>
       <button class="btn btn-blue" onclick="saveEdit()"><i class="fas fa-cloud-upload-alt"></i> Save Changes</button>
     </div>
   </div>
@@ -266,11 +266,11 @@ td{border:1px solid var(--line);padding:9px 12px;}
 <div class="modal" id="confirm-modal">
   <div class="modal-box">
     <div style="font-size:40px;margin-bottom:12px;">⚠️</div>
-    <h3 id="modal-title">নিশ্চিত করুন</h3>
-    <p id="modal-msg">আপনি কি নিশ্চিত?</p>
+    <h3 id="modal-title">Confirm</h3>
+    <p id="modal-msg">Are you sure?</p>
     <div class="modal-btns">
-      <button class="btn btn-gray" style="flex:1;" onclick="closeModal()">বাতিল</button>
-      <button class="btn btn-red" style="flex:1;" id="modal-confirm-btn" onclick="">হ্যাঁ, মুছুন</button>
+      <button class="btn btn-gray" style="flex:1;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-red" style="flex:1;" id="modal-confirm-btn" onclick="">Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -281,10 +281,10 @@ td{border:1px solid var(--line);padding:9px 12px;}
 const OWNER='shaikh800', REPO='shaikh800.github.io', FILE='civil_data.json', BRANCH='main';
 let fullData={semesters:{},notices:[],exams:[],updated:''};
 let qCount=0;
-let globalStudents=[]; // GAS থেকে আনা students
-let allResults=[]; // stats admin_panel-এ — এখানে শুধু compat-এর জন্য
+let globalStudents=[]; // students fetched from GAS
+let allResults=[]; // stats live in admin_panel — kept here only for compat
 
-// Stats admin_panel.html-এ শিফট হয়েছে, এখানে stub
+// Stats moved to admin_panel.html — this is just a stub here
 function updateStats(){}
 
 // ── Utils ──
@@ -321,7 +321,7 @@ async function syncAll(){
     }
   }catch(e){ toast('GitHub load failed'); }
 
-  // GAS থেকে Student List আনো
+  // Fetch the Student List from GAS
   const url=gasUrl();
   if(url){
     try{
@@ -336,7 +336,7 @@ async function syncAll(){
   document.getElementById('loader-inner').style.display='none';
   renderList(fullData.exams);
 
-  // ── Draft Detection: question-builder থেকে এলে auto-open ──
+  // ── Draft Detection: auto-open when arriving from question-builder ──
   const rawDraft = localStorage.getItem('draft_exam_data');
   if(rawDraft){
     try{
@@ -352,12 +352,12 @@ async function syncAll(){
 function renderList(exams){
   const list=document.getElementById('exam-list');
   if(!exams||exams.length===0){
-    list.innerHTML=`<p style="text-align:center;color:var(--muted);padding:20px;">কোনো Exam নেই।</p>`;
+    list.innerHTML=`<p style="text-align:center;color:var(--muted);padding:20px;">No exams yet.</p>`;
     return;
   }
   list.innerHTML=exams.map(ex=>{
     const dateStr=ex.date ? new Date(ex.date).toLocaleDateString('bn-BD') : '';
-    // লাইভ স্ট্যাটাস চেক (ডিফল্টভাবে true)
+    // Check live status (defaults to true)
     const isLive = ex.live !== false; 
     const liveBadge = isLive 
         ? `<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:12px; font-size:10px; font-weight:bold; margin-left:8px;">🟢 Live</span>`
@@ -370,7 +370,7 @@ function renderList(exams){
           <h3 style="display:flex; align-items:center;">${ex.examData.title} ${liveBadge}</h3>
           <p style="margin-top:6px;">
             <i class="far fa-clock"></i> ${ex.examData.duration} &nbsp;|&nbsp;
-            <i class="fas fa-list-ol"></i> ${ex.examData.questions.length} প্রশ্ন &nbsp;|&nbsp;
+            <i class="fas fa-list-ol"></i> ${ex.examData.questions.length} Questions &nbsp;|&nbsp;
             <i class="fas fa-code"></i> <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;font-size:11px;">${ex.id}</code>
             ${dateStr?`&nbsp;|&nbsp;<i class="far fa-calendar"></i> ${dateStr}`:''}
           </p>
@@ -391,19 +391,19 @@ function renderList(exams){
 // ── Toggle Live Status ──
 async function toggleLiveStatus(id) {
   const tok = token(); 
-  if(!tok) return toast('GitHub Token দিন!');
+  if(!tok) return toast('Enter a GitHub Token!');
   
   const exIdx = fullData.exams.findIndex(e => e.id === id);
   if (exIdx === -1) return;
 
-  // স্ট্যাটাস পরিবর্তন করা হচ্ছে
+  // Changing status
   const currentStatus = fullData.exams[exIdx].live !== false;
   fullData.exams[exIdx].live = !currentStatus;
 
-  toast('Status Update হচ্ছে...', 2000);
+  toast('Updating status...', 2000);
   const ok = await pushGitHub(tok, `Toggle live status for exam ${id}`);
   if(ok) {
-    toast(fullData.exams[exIdx].live ? 'Exam Live করা হয়েছে! 🟢' : 'Exam Pause করা হয়েছে! 🔴');
+    toast(fullData.exams[exIdx].live ? 'Exam set to Live! 🟢' : 'Exam Paused! 🔴');
   }
 }
 
@@ -420,7 +420,7 @@ function searchExam(){
   if(!code){ renderList(fullData.exams); return; }
   const found=fullData.exams.filter(e=>e.id===code||e.examData.title.toLowerCase().includes(code.toLowerCase()));
   if(found.length===0){
-    document.getElementById('exam-list').innerHTML=`<p style="color:#dc2626;text-align:center;padding:20px;">কোনো Exam পাওয়া যায়নি: "${code}"</p>`;
+    document.getElementById('exam-list').innerHTML=`<p style="color:#dc2626;text-align:center;padding:20px;">No exam found: "${code}"</p>`;
   } else {
     renderList(found);
     // Auto-expand if single result
@@ -429,9 +429,9 @@ function searchExam(){
 }
 
 // Refresh a single exam's results from GAS
-// refreshExamResults: results এখন admin_panel.html-এ — এখানে শুধু redirect করে
+// refreshExamResults: results now live in admin_panel.html — this just redirects
 function refreshExamResults(examId){
-  toast('Results দেখতে Admin Panel ব্যবহার করুন।', 4000);
+  toast('Use the Admin Panel to view results.', 4000);
 }
 
 // ── Copy Link ──
@@ -442,7 +442,7 @@ function copyLink(id){
 function populateStudentCheckboxes(containerId, selectedIds = []) {
   const container = document.getElementById(containerId);
   if (!globalStudents || globalStudents.length === 0) {
-     container.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">কোনো স্টুডেন্ট পাওয়া যায়নি। Sync করুন বা Admin Panel থেকে স্টুডেন্ট অ্যাড করুন।</div>';
+     container.innerHTML = '<div style="color:var(--muted); font-size:13px; text-align:center;">No students found. Sync, or add students from the Admin Panel.</div>';
      return;
   }
   
@@ -470,7 +470,7 @@ function selectAllStudents(containerId) {
 function deselectAllStudents(containerId) {
   document.querySelectorAll(`.student-cb-${containerId}`).forEach(cb => cb.checked = false);
 }
-// ── Open Builder with pre-filled draft (question-builder.html থেকে) ──
+// ── Open Builder with pre-filled draft (from question-builder.html) ──
 function _openBuilderWithDraft(draft){
   document.getElementById('dashboard-panel').style.display='none';
   document.getElementById('builder-panel').style.display='block';
@@ -486,7 +486,7 @@ function _openBuilderWithDraft(draft){
     // Show the green banner
     const banner = document.getElementById('draft-banner');
     if(banner) banner.style.display='flex';
-    toast(`✅ ${qs.length}টি প্রশ্ন লোড হয়েছে! Password ও Student permission সেট করে Publish করুন।`,6000);
+    toast(`✅ ${qs.length} question(s) loaded! Set the Password and Student permissions, then Publish.`,6000);
   } else {
     addQ();
   }
@@ -503,16 +503,16 @@ function addQPrefilled(q){
   const opts=q.opts||['','','',''];
   const ans=parseInt(q.ans)||0;
   d.innerHTML=`
-    <h4>প্রশ্ন ${qCount}</h4>
+    <h4>Question ${qCount}</h4>
     <button class="rmv-q" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
-    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp q-txt" value="${_e(q.q||'')}" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="field"><label class="lbl">Question Text</label><input class="inp q-txt" value="${_e(q.q||'')}" placeholder="Enter the question..."></div>
     <div class="opts-grid">
       <input class="inp opt-0" value="${_e(opts[0]||'')}" placeholder="Option A (0)">
       <input class="inp opt-1" value="${_e(opts[1]||'')}" placeholder="Option B (1)">
       <input class="inp opt-2" value="${_e(opts[2]||'')}" placeholder="Option C (2)">
       <input class="inp opt-3" value="${_e(opts[3]||'')}" placeholder="Option D (3)">
     </div>
-    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+    <div class="field"><label class="lbl">Correct Answer</label>
     <select class="inp correct-ans">
       <option value="0" ${ans===0?'selected':''}>Option A (0)</option>
       <option value="1" ${ans===1?'selected':''}>Option B (1)</option>
@@ -546,16 +546,16 @@ function addQ(){
   const d=document.createElement('div');
   d.className='q-block'; d.id=`qb-${qCount}`;
   d.innerHTML=`
-    <h4>প্রশ্ন ${qCount}</h4>
+    <h4>Question ${qCount}</h4>
     <button class="rmv-q" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
-    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp q-txt" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="field"><label class="lbl">Question Text</label><input class="inp q-txt" placeholder="Enter the question..."></div>
     <div class="opts-grid">
       <input class="inp opt-0" placeholder="Option A (0)">
       <input class="inp opt-1" placeholder="Option B (1)">
       <input class="inp opt-2" placeholder="Option C (2)">
       <input class="inp opt-3" placeholder="Option D (3)">
     </div>
-    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+    <div class="field"><label class="lbl">Correct Answer</label>
     <select class="inp correct-ans">
       <option value="0">Option A (0)</option><option value="1">Option B (1)</option>
       <option value="2">Option C (2)</option><option value="3">Option D (3)</option>
@@ -565,12 +565,12 @@ function addQ(){
 }
 
 async function saveExam(){
-  const tok=token(); if(!tok){return toast('GitHub Token দিন!');}
+  const tok=token(); if(!tok){return toast('Enter a GitHub Token!');}
   const title=document.getElementById('exam-title').value.trim();
   const dur=document.getElementById('exam-duration').value.trim();
   const pass=document.getElementById('exam-pass').value.trim();
   const allowedIds = getSelectedStudents('builder-student-list');
-  if(!title) return toast('Title দিন!');
+  if(!title) return toast('Enter a Title!');
 
   const qBlocks=document.querySelectorAll('#questions-container .q-block');
   let questions=[]; let valid=true;
@@ -581,23 +581,23 @@ async function saveExam(){
     if(!q||opts.some(o=>!o)) valid=false;
     questions.push({q,opts,ans,stmts:null});
   });
-  if(!valid) return toast('সব option পূরণ করুন!');
-  if(questions.length===0) return toast('কমপক্ষে ১টি প্রশ্ন লাগবে!');
+  if(!valid) return toast('Fill in all the options!');
+  if(questions.length===0) return toast('At least 1 question is required!');
 
   const newExam={id:genId(),date:new Date().toISOString(),examData:{title,duration:dur+' minutes',password:pass,allowedIds,questions}};
   fullData.exams.unshift(newExam);
   await pushGitHub(tok,'New exam added from builder');
   closeBuilder();
-  toast('Exam publish হয়েছে! ✅');
+  toast('Exam published! ✅');
 }
 
 // ── Delete Exam ──
 function deleteExam(id){
-  confirmAction('delete', 'এই Exam মুছে ফেলবেন?', async () => {
-    const tok=token(); if(!tok) return toast('Token দিন!');
+  confirmAction('delete', 'Delete this exam?', async () => {
+    const tok=token(); if(!tok) return toast('Enter a Token!');
     fullData.exams=fullData.exams.filter(e=>e.id!==id);
     await pushGitHub(tok,'Delete exam');
-    toast('Exam মুছে ফেলা হয়েছে।');
+    toast('Exam deleted.');
   });
 }
 
@@ -628,35 +628,35 @@ function confirmAction(type, msg, fn){
 function closeModal(){ document.getElementById('confirm-modal').style.display='none'; pendingAction=null; }
 
 async function clearGitHub(){
-  const tok=token(); if(!tok) return toast('Token দিন!');
+  const tok=token(); if(!tok) return toast('Enter a Token!');
   toast('GitHub clearing...', 5000);
   fullData.exams=[];
   const ok=await pushGitHub(tok,'Clear all exams');
-  if(ok) toast('GitHub-এর সব Exam মুছে ফেলা হয়েছে! ✅');
+  if(ok) toast('All GitHub Exams deleted! ✅');
 }
 
 async function clearGAS(){
-  const url=gasUrl(); if(!url) return toast('GAS URL দিন!');
+  const url=gasUrl(); if(!url) return toast('Enter a GAS URL!');
   toast('GAS clearing...', 5000);
   try{
     const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
     const d=await r.json();
-    if(d.status==='success'){ allResults=[]; updateStats(); toast('Google Sheet সব data মুছে ফেলা হয়েছে! ✅'); }
-    else if(d.status==='unauthorized'){ toast('⏱️ Session শেষ! আবার login করুন।'); setTimeout(()=>location.reload(),1500); }
+    if(d.status==='success'){ allResults=[]; updateStats(); toast('All Google Sheet data deleted! ✅'); }
+    else if(d.status==='unauthorized'){ toast('⏱️ Session expired! Please log in again.'); setTimeout(()=>location.reload(),1500); }
     else toast('GAS error: '+(d.message||'failed'));
   }catch(e){ toast('GAS connection failed!'); }
 }
 
 async function clearAll(){
-  toast('সব মুছছি... ⏳', 8000);
+  toast('Deleting everything... ⏳', 8000);
   await clearGitHub();
   const gasOk = await clearGASsilent();
-  if(gasOk) toast('GitHub + GAS — সব ডেটা মুছে ফেলা হয়েছে! 🧹');
-  else toast('GitHub মুছেছে ✅ কিন্তু GAS token ভুল — GAS মোছা হয়নি ❌');
+  if(gasOk) toast('GitHub + GAS — all data deleted! 🧹');
+  else toast('GitHub deleted ✅ but the GAS token was wrong — GAS was not cleared ❌');
 }
 
 async function clearGASsilent(){
-  const url=gasUrl(); if(!url){ toast('GAS URL দিন!'); return false; }
+  const url=gasUrl(); if(!url){ toast('Enter a GAS URL!'); return false; }
   try{
     const r=await fetch(url,{method:'POST',body:JSON.stringify({action:'clearData',token:ctrlToken()}),headers:{'Content-Type':'text/plain'}});
     const d=await r.json();
@@ -671,7 +671,7 @@ let editQCount = 0;
 
 function openEdit(id) {
   const ex = fullData.exams.find(e => e.id === id);
-  if (!ex) return toast('Exam পাওয়া যায়নি!');
+  if (!ex) return toast('Exam not found!');
   editingExamId = id;
 
   document.getElementById('dashboard-panel').style.display = 'none';
@@ -711,17 +711,17 @@ function addEditQ(prefill) {
   const ans = prefill ? prefill.ans : 0;
   d.innerHTML = `
     <h4 style="display:flex;justify-content:space-between;align-items:center;">
-      <span>প্রশ্ন ${editQCount}</span>
-      <button class="rmv-q" onclick="this.closest('.q-block').remove(); renumberEditQ();" title="মুছুন"><i class="fas fa-times"></i></button>
+      <span>Question ${editQCount}</span>
+      <button class="rmv-q" onclick="this.closest('.q-block').remove(); renumberEditQ();" title="Delete"><i class="fas fa-times"></i></button>
     </h4>
-    <div class="field"><label class="lbl">প্রশ্নের টেক্সট</label><input class="inp eq-txt" value="${escHtml(qTxt)}" placeholder="প্রশ্ন লিখুন..."></div>
+    <div class="field"><label class="lbl">Question Text</label><input class="inp eq-txt" value="${escHtml(qTxt)}" placeholder="Enter the question..."></div>
     <div class="opts-grid">
       <input class="inp eopt-0" value="${escHtml(opts[0]||'')}" placeholder="Option A">
       <input class="inp eopt-1" value="${escHtml(opts[1]||'')}" placeholder="Option B">
       <input class="inp eopt-2" value="${escHtml(opts[2]||'')}" placeholder="Option C">
       <input class="inp eopt-3" value="${escHtml(opts[3]||'')}" placeholder="Option D">
     </div>
-    <div class="field"><label class="lbl">সঠিক উত্তর</label>
+    <div class="field"><label class="lbl">Correct Answer</label>
       <select class="inp ecorrect-ans">
         <option value="0" ${ans===0?'selected':''}>Option A (0)</option>
         <option value="1" ${ans===1?'selected':''}>Option B (1)</option>
@@ -739,24 +739,24 @@ function escHtml(str) {
 
 function renumberEditQ() {
   document.querySelectorAll('#edit-questions-container .q-block h4 span').forEach((s, i) => {
-    s.textContent = 'প্রশ্ন ' + (i + 1);
+    s.textContent = 'Question ' + (i + 1);
   });
 }
 
 async function saveEdit() {
   const tok = token();
-  if (!tok) return toast('GitHub Token দিন!');
+  if (!tok) return toast('Enter a GitHub Token!');
   if (!editingExamId) return;
 
   const exIdx = fullData.exams.findIndex(e => e.id === editingExamId);
-  if (exIdx === -1) return toast('Exam খুঁজে পাওয়া যায়নি!');
+  if (exIdx === -1) return toast('Exam not found!');
 
   const title = document.getElementById('edit-title').value.trim();
   const dur = document.getElementById('edit-duration').value.trim();
   const pass = document.getElementById('edit-pass').value.trim();
   const allowedIds = getSelectedStudents('edit-student-list');
 
-  if (!title) return toast('Title দিন!');
+  if (!title) return toast('Enter a Title!');
 
   // Collect questions
   const qBlocks = document.querySelectorAll('#edit-questions-container .q-block');
@@ -769,8 +769,8 @@ async function saveEdit() {
     if (!q || opts.some(o => !o)) valid = false;
     questions.push({ q, opts, ans, stmts: null });
   });
-  if (!valid) return toast('সব option পূরণ করুন!');
-  if (questions.length === 0) return toast('কমপক্ষে ১টি প্রশ্ন লাগবে!');
+  if (!valid) return toast('Fill in all the options!');
+  if (questions.length === 0) return toast('At least 1 question is required!');
 
   // Update exam
   fullData.exams[exIdx].examData = {
@@ -792,19 +792,19 @@ async function saveEdit() {
   saveBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save Changes';
 
   if (ok) {
-    toast('✅ Exam আপডেট হয়েছে!');
+    toast('✅ Exam updated!');
     closeEdit();
   }
 }
 
 // ── Controller Gate — session-based (GAS auth) ──
-// ⚠️ CTRL_GATE_PW hardcode সম্পূর্ণ সরানো হয়েছে — GAS Script Properties-এ থাকে
+// ⚠️ CTRL_GATE_PW hardcode fully removed — it lives in GAS Script Properties
 const CTRL_SESSION_TOKEN_KEY  = 'shaikh_ctrl_token_v1';
 const CTRL_SESSION_EXPIRY_KEY = 'shaikh_ctrl_expiry_v1';
-const CTRL_GH_TOKEN_KEY  = 'shaikh_gh_token_v1';       // admin_panel এর মতোই একই key
+const CTRL_GH_TOKEN_KEY  = 'shaikh_gh_token_v1';       // same key as in admin_panel
 const CTRL_GAS_URL_KEY   = 'shaikh_gas_url_v1';
 
-// Config helpers — localStorage ব্যবহার করে (device-এ persist হয়)
+// Config helpers — uses localStorage (persists on the device)
 function token(){
   const v = document.getElementById('gh-token').value.trim();
   if(v) localStorage.setItem(CTRL_GH_TOKEN_KEY, v);
@@ -815,12 +815,12 @@ function gasUrl(){
   if(v) localStorage.setItem(CTRL_GAS_URL_KEY, v);
   return v || localStorage.getItem(CTRL_GAS_URL_KEY) || '';
 }
-// Session token — localStorage থেকে আসে (expiry check সহ)
+// Session token — comes from localStorage (with an expiry check)
 function ctrlToken(){
   return localStorage.getItem(CTRL_SESSION_TOKEN_KEY) || '';
 }
 
-// Saved values দিয়ে inputs ভরো
+// Fill the inputs with saved values
 function loadSavedInputs(){
   const ghTok = localStorage.getItem(CTRL_GH_TOKEN_KEY);
   const gasU  = localStorage.getItem(CTRL_GAS_URL_KEY);
@@ -833,13 +833,13 @@ async function gateUnlock() {
   const errEl = document.getElementById('gate-err');
   const btn = document.querySelector('.gate-btn');
 
-  if (!pw) { errEl.textContent = '❌ পাসওয়ার্ড দিন!'; return; }
+  if (!pw) { errEl.textContent = '❌ Enter a password!'; return; }
 
   const url = document.getElementById('gas-url-hdr').value.trim();
-  if (!url) { errEl.textContent = '❌ GAS URL সেট করুন (Header-এ)!'; return; }
+  if (!url) { errEl.textContent = '❌ Set the GAS URL (in the Header)!'; return; }
 
   btn.disabled  = true;
-  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> যাচাই হচ্ছে...';
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Verifying...';
   errEl.textContent = '';
 
   try {
@@ -858,21 +858,21 @@ async function gateUnlock() {
       loadSavedInputs();
       syncAll();
     } else {
-      errEl.textContent = '❌ ' + (data.message || 'ভুল পাসওয়ার্ড!');
+      errEl.textContent = '❌ ' + (data.message || 'Incorrect password!');
       document.getElementById('gate-pw-input').value = '';
       document.getElementById('gate-pw-input').focus();
       setTimeout(() => { errEl.textContent = ''; }, 3000);
     }
   } catch(e) {
-    errEl.textContent = '❌ সার্ভারে সংযোগ হচ্ছে না।';
+    errEl.textContent = '❌ Could not connect to the server.';
   }
 
   btn.disabled  = false;
-  btn.innerHTML = '<i class="fas fa-unlock"></i> প্রবেশ করুন';
+  btn.innerHTML = '<i class="fas fa-unlock"></i> Enter';
 }
 
 function ctrlLogout(){
-  // Session token clear — কিন্তু GH Token ও GAS URL রেখে দাও (পরের বার password দিলেই হবে)
+  // Clear the session token — but keep the GH Token and GAS URL (just enter the password again next time)
   localStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
   localStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
   location.reload();
@@ -887,13 +887,14 @@ window.onload=()=>{
     loadSavedInputs();
     syncAll();
   } else {
-    // Expired বা নেই — session token clear, কিন্তু GH/GAS URL রাখো
+    // Expired or missing — clear the session token, but keep the GH/GAS URL
     localStorage.removeItem(CTRL_SESSION_TOKEN_KEY);
     localStorage.removeItem(CTRL_SESSION_EXPIRY_KEY);
     document.getElementById('ctrl-gate').style.display = 'flex';
-    loadSavedInputs(); // GH token ও GAS URL pre-fill করো
+    // pre-fill the GH token and GAS URL
+    loadSavedInputs();
     document.getElementById('exam-list').innerHTML =
-      `<p style="color:var(--muted);text-align:center;padding:20px;">GitHub Token ও GAS URL দিয়ে Sync করুন।</p>`;
+      `<p style="color:var(--muted);text-align:center;padding:20px;">Sync with a GitHub Token and GAS URL.</p>`;
     setTimeout(() => document.getElementById('gate-pw-input').focus(), 100);
   }
 };

@@ -724,6 +724,11 @@
       .stimulus-image-block .stimulus-block-label { display: block; margin: 0 0 4px; }
       .stimulus-image-block .mcq-image { margin: 0; max-width: 100%; }
       .stimulus-group-wrap { margin-bottom: var(--mcq-gap); break-inside: avoid; page-break-inside: avoid; }
+      /* Data table inside a stimulus (e.g. a time/velocity table) — built by formatStimulusHtml() */
+      .stimulus-data-table { width: 100%; max-width: 100%; margin: 4px 0 2px; border-collapse: collapse; font-style: normal; font-size: calc(var(--mcq-font-size) * 0.92); table-layout: auto; }
+      .stimulus-data-table th, .stimulus-data-table td { border: 1px solid #555; padding: 2px 6px; text-align: center; vertical-align: middle; overflow-wrap: anywhere; }
+      .stimulus-data-table th { font-weight: 700; background: #eef1f4; white-space: nowrap; }
+      .cq-stimulus .stimulus-data-table { text-align: left; }
       .stimulus-instruction { font-size: var(--mcq-font-size); font-style: italic; font-weight: 700; color: #333; margin-bottom: 3px; text-align: var(--stimulus-align, left); }
       .stmt-list { padding-left: 18px; margin: 2px 0 2px; font-size: var(--mcq-font-size); line-height: var(--body-line-height); }
       .stmt-item { display: flex; gap: 4px; }
@@ -821,11 +826,11 @@
             <label class="switch"><input type="checkbox" id="showHeaderControl"><span class="slider"></span></label>
           </div>
           <div class="toggle-wrapper" style="margin-top: 8px">
-            <label for="showHeaderDateControl" class="toggle-text">Header-এর উপরে তারিখ দেখাও</label>
+            <label for="showHeaderDateControl" class="toggle-text">Show date above Header</label>
             <label class="switch"><input type="checkbox" id="showHeaderDateControl"><span class="slider"></span></label>
           </div>
           <div class="toggle-wrapper" style="margin-top: 8px">
-            <label for="showFooterMetaControl" class="toggle-text">Footer-এ বিষয় ও তারিখ দেখাও</label>
+            <label for="showFooterMetaControl" class="toggle-text">Show subject & date in Footer</label>
             <label class="switch"><input type="checkbox" id="showFooterMetaControl"><span class="slider"></span></label>
           </div>
         </div>
@@ -873,11 +878,11 @@
           </div>
           <div class="row">
           <div class="field">
-            <label for="subjectLine">Line 1 (Chapter নিচে)</label
+            <label for="subjectLine">Line 1 (Chapter below)</label
             ><input id="subjectLine" type="text" />
           </div>
           <div class="field">
-            <label for="codeLine">Line 2 (তার নিচে)</label
+            <label for="codeLine">Line 2 (below that)</label
             ><input id="codeLine" type="text" />
           </div>
         </div>
@@ -905,7 +910,7 @@
           <h2 class="section-title">Bulk MCQ Import</h2>
           <div class="field bulk-box">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-            <label for="bulkInput" style="margin-bottom: 0;">সব MCQ একবারে Paste করো</label>
+            <label for="bulkInput" style="margin-bottom: 0;">Paste all MCQs at once</label>
             <button type="button" class="icon-btn" onclick="copyAiPrompt('mcq', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
           </div>
           <textarea
@@ -925,7 +930,7 @@
           </div>
           
           <div class="tiny-hint">
-            <i>i</i> Normal, বহুপদী (i/ii/iii statements সহ), এবং উদ্দীপকসহ MCQ — সব auto-detect হয়। উদ্দীপকের জন্য প্রশ্নের আগে নতুন লাইনে <b>{উদ্দীপকের টেক্সট}</b> (তৃতীয় বন্ধনী) অথবা <b>উদ্দীপক: [টেক্সট]</b> লেখো।
+            <i>i</i> Normal, multi-statement (with i/ii/iii statements), and MCQ with stimulus — all auto-detect. For a stimulus, write <b>{stimulus text}</b> (curly braces) or <b>stimulus: [text]</b> on a new line before the question.
           </div>
         </div>
         </div>
@@ -1135,10 +1140,10 @@
             <div class="toggle-wrapper"><label for="questionNumberBoldControl" class="toggle-text">Question Number Bold</label><label class="switch"><input type="checkbox" id="questionNumberBoldControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <div class="toggle-wrapper"><label for="questionShowNumberControl" class="toggle-text">Question Number দেখাও</label><label class="switch"><input type="checkbox" id="questionShowNumberControl"><span class="slider"></span></label></div>
+            <div class="toggle-wrapper"><label for="questionShowNumberControl" class="toggle-text">Show Question Number</label><label class="switch"><input type="checkbox" id="questionShowNumberControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <div class="toggle-wrapper"><label for="questionShowMarkControl" class="toggle-text">Question Mark দেখাও</label><label class="switch"><input type="checkbox" id="questionShowMarkControl"><span class="slider"></span></label></div>
+            <div class="toggle-wrapper"><label for="questionShowMarkControl" class="toggle-text">Show Question Mark</label><label class="switch"><input type="checkbox" id="questionShowMarkControl"><span class="slider"></span></label></div>
           </div>
           <div class="field" style="margin-bottom: 0">
             <label for="questionImageWidthControl">Question Image Width %</label
@@ -2072,6 +2077,67 @@
         const text = esc(displayText(v));
         return text.replace(/\n/g, "<br>");
       }
+      // উদ্দীপকের একটা লাইন "লেবেল : মান১ | মান২ | মান৩ ..." প্যাটার্নে লেখা হলে সেটাকে
+      // তথ্য-ছকের (data table) একটা row হিসেবে ধরা হয় — যেমন "সময় (sec) : 0 | 10 | 20"।
+      function parseStimulusTableRow(line) {
+        const m = String(line || "").match(/^([^:：ঃ|]{1,60})[:：ঃ]\s*(.+)$/u);
+        if (!m) return null;
+        const label = m[1].trim();
+        const valuePart = m[2].trim();
+        if (!label || !valuePart.includes("|")) return null;
+        const values = valuePart.split("|").map((v) => v.trim());
+        if (values.length < 2 || values.some((v) => v === "")) return null;
+        return { label: label, values: values };
+      }
+      function buildStimulusTableHtml(rows) {
+        const maxCols = rows.reduce((m, r) => Math.max(m, r.values.length), 0);
+        const trs = rows
+          .map((r) => {
+            const tds = r.values.map((v) => `<td>${esc(displayText(v))}</td>`).join("");
+            const pad = maxCols - r.values.length;
+            const padTds = pad > 0 ? "<td></td>".repeat(pad) : "";
+            return `<tr><th>${esc(displayText(r.label))}</th>${tds}${padTds}</tr>`;
+          })
+          .join("");
+        return `<table class="stimulus-data-table">${trs}</table>`;
+      }
+      // উদ্দীপক/CQ-stimulus রেন্ডারের জন্য formatText-এর বদলে এটা ব্যবহার হয়: সাধারণ টেক্সট
+      // আগের মতোই থাকে, কিন্তু table-row প্যাটার্নের পরপর লাইনগুলো আসল টেবিল হয়ে যায়।
+      function formatStimulusHtml(v) {
+        const raw = String(v ?? "");
+        if (!raw.trim()) return "";
+        const lines = raw.split("\n");
+        const parts = [];
+        let textBuf = [];
+        const flushText = () => {
+          if (textBuf.length) {
+            parts.push(esc(displayText(textBuf.join("\n"))).replace(/\n/g, "<br>"));
+            textBuf = [];
+          }
+        };
+        let i = 0;
+        while (i < lines.length) {
+          const row = parseStimulusTableRow(lines[i]);
+          if (row) {
+            const rows = [row];
+            let j = i + 1;
+            while (j < lines.length) {
+              const nextRow = parseStimulusTableRow(lines[j]);
+              if (!nextRow) break;
+              rows.push(nextRow);
+              j++;
+            }
+            flushText();
+            parts.push(buildStimulusTableHtml(rows));
+            i = j;
+          } else {
+            textBuf.push(lines[i]);
+            i++;
+          }
+        }
+        flushText();
+        return parts.join("");
+      }
       function renderImageControls(kind, idx, images, defaultWidth, defaultHeight) {
         const label = kind === "mcq" ? "MCQ Images" : kind === "cq" ? "CQ Images" : "Question Images";
         const prefix = kind === "mcq" ? "qimg" : kind === "cq" ? "cqimg" : "oqimg";
@@ -2114,7 +2180,7 @@
     </div>
     ${Array.isArray(images) && images.length
       ? `<div class="tiny">${images.length} image(s) added</div>`
-      : `<div class="tiny">Upload থেকে crop করো, অথবা URL সরাসরি paste করো।</div>`}
+      : `<div class="tiny">Crop from upload, or paste a URL directly.</div>`}
     ${imgCards}
   </div>`;
       }
@@ -2437,14 +2503,14 @@
               const qtype = q.type || "normal";
               const stmts = Array.isArray(q.statements) ? q.statements : [];
               const stimTxt = q.stimulusText || "";
-              const typeLabel = qtype === "multistatement" ? "বহুপদী" : qtype === "stimulus" ? "উদ্দীপকসহ" : "Normal";
+              const typeLabel = qtype === "multistatement" ? "Multi-statement" : qtype === "stimulus" ? "With Stimulus" : "Normal";
               const isOpen = lastOpenedEditor.type === "mcq" && lastOpenedEditor.index === idx ? "open" : "";
               const stimBox = qtype === "stimulus"
-                ? '<div class="stimulus-group-box"><div class="stimulus-group-label">উদ্দীপক (এই প্রশ্নের জন্য)</div><div class="field" style="margin-bottom:0"><textarea data-type="qstimtext" data-index="' + idx + '" placeholder="উদ্দীপকের টেক্সট লেখো...">' + esc(stimTxt) + '</textarea></div></div>'
+                ? '<div class="stimulus-group-box"><div class="stimulus-group-label">Stimulus (for this question)</div><div class="field" style="margin-bottom:0"><textarea data-type="qstimtext" data-index="' + idx + '" placeholder="উদ্দীপকের টেক্সট লেখো...">' + esc(stimTxt) + '</textarea></div></div>'
                 : "";
               const stmtRows = stmts.map(function(s, si) {
                 const labels = ["i","ii","iii","iv","v"];
-                return '<div class="stmt-row"><input data-type="qstmt" data-index="' + idx + '" data-si="' + si + '" value="' + esc(s) + '" placeholder="(' + (labels[si]||"statement") + ') লেখো"><button type="button" class="stmt-del-btn" onclick="deleteStatement(' + idx + ',' + si + ')">✕</button></div>';
+                return '<div class="stmt-row"><input data-type="qstmt" data-index="' + idx + '" data-si="' + si + '" value="' + esc(s) + '" placeholder="Write (' + (labels[si]||"statement") + ')"><button type="button" class="stmt-del-btn" onclick="deleteStatement(' + idx + ',' + si + ')">✕</button></div>';
               }).join("");
               const stmtBox = qtype === "multistatement"
                 ? '<div><label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:#334;">Statements (i, ii, iii...)</label><div id="stmts-' + idx + '">' + stmtRows + '</div><button type="button" class="add-stmt-btn" onclick="addStatement(' + idx + ')">+ Statement যোগ করো</button></div>'
@@ -2457,8 +2523,8 @@
                 + '<div class="editor-grid">'
                 + '<div><div class="mcq-type-tabs">'
                 + '<button type="button" class="mcq-type-tab ' + (qtype==="normal"?"active":"") + '" onclick="setMcqType(' + idx + ',\'normal\')">Normal</button>'
-                + '<button type="button" class="mcq-type-tab ' + (qtype==="multistatement"?"active":"") + '" onclick="setMcqType(' + idx + ',\'multistatement\')">বহুপদী</button>'
-                + '<button type="button" class="mcq-type-tab ' + (qtype==="stimulus"?"active":"") + '" onclick="setMcqType(' + idx + ',\'stimulus\')">উদ্দীপকসহ</button>'
+                + '<button type="button" class="mcq-type-tab ' + (qtype==="multistatement"?"active":"") + '" onclick="setMcqType(' + idx + ',\'multistatement\')">Multi-statement</button>'
+                + '<button type="button" class="mcq-type-tab ' + (qtype==="stimulus"?"active":"") + '" onclick="setMcqType(' + idx + ',\'stimulus\')">With Stimulus</button>'
                 + '</div>' + stimBox + '</div>'
                 + '<div class="field"><label>Question</label><textarea data-type="qtext" data-index="' + idx + '">' + esc(q.text || "") + '</textarea></div>'
                 + stmtBox
@@ -2508,7 +2574,7 @@
               </div>
               <div class="field">
                 <label style="display:flex; justify-content:space-between; align-items:center;">
-                  <span>Stimulus / উদ্দীপক</span>
+                  <span>Stimulus</span>
                   <select data-type="cqstimalign" data-index="${idx}" style="width: auto; padding: 2px 6px; font-size: 11px; height: 22px; cursor:pointer;">
                     <option value="" ${!c.stimAlign ? 'selected' : ''}>Global Align</option>
                     <option value="left" ${c.stimAlign === 'left' ? 'selected' : ''}>Left</option>
@@ -2578,7 +2644,7 @@
                 ).join("");
                 return subRows;
               })()}
-              <button type="button" class="add-stmt-btn" onclick="addSubQuestion(${idx})">+ Sub-question যোগ করো</button>
+              <button type="button" class="add-stmt-btn" onclick="addSubQuestion(${idx})">+ Add Sub-question</button>
               <div class="field"><label>Mark${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (auto-computed)" : ""}</label><input data-type="oqmark" data-index="${idx}" value="${esc(
               q.mark || "1"
             )}" ${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? 'readonly style="background:#f1f5f9;color:#64748b;cursor:not-allowed;"' : ""}></div>
@@ -3382,7 +3448,7 @@
           ? ""
           : `<span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>`;
         const stimulusHtml = (qtype === "stimulus" && stimTxt)
-          ? `${groupInstruction ? `<div class="stimulus-instruction">${formatText(groupInstruction)}</div>` : ""}<div class="stimulus-block">${stimulusLabelHtml}${formatText(stimTxt)}</div>`
+          ? `${groupInstruction ? `<div class="stimulus-instruction">${formatText(groupInstruction)}</div>` : ""}<div class="stimulus-block">${stimulusLabelHtml}${formatStimulusHtml(stimTxt)}</div>`
           : "";
 
         const statementsHtml = (qtype === "multistatement" && stmts.length)
@@ -3448,7 +3514,7 @@
         const numberSpan = `<span style="font-weight: var(--question-number-weight); margin-right: 5px; flex-shrink: 0;">${bn(idx + 1)}${questionStop()}</span>`;
 
         const stimulusSpan = stimulusLine
-          ? `<span class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign}; display: block; width: 100%;` : ''}">${formatText(stimulusLine)}</span>`
+          ? `<span class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign}; display: block; width: 100%;` : ''}">${formatStimulusHtml(stimulusLine)}</span>`
           : "";
 
         // ছবি থাকলে: প্রশ্নের নম্বর ছবির লেভেলে বসবে (একই row-এ), উদ্দীপক টেক্সট ছবির নিচে আলাদাভাবে
@@ -3466,7 +3532,7 @@
         ${state.layout.showCqMeta !== false ? `<div class="cq-meta">${formatText(c.time || textByLang("২০ মিনিট", "20 minutes"))} | ${formatText(c.totalMarks || "১০")} ${textByLang("নম্বর", "marks")}</div>` : ""}
       </div>
       ${hasImages && stimulusLine
-        ? `<div class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign};` : ''} margin-top: 2px;">${formatText(stimulusLine)}</div>`
+        ? `<div class="cq-stimulus" style="${c.stimAlign ? `text-align: ${c.stimAlign};` : ''} margin-top: 2px;">${formatStimulusHtml(stimulusLine)}</div>`
         : ""
       }
       ${["ক", "খ", "গ", "ঘ"]
@@ -4321,19 +4387,19 @@
           lastSaveAt = new Date();
           setSaveStatus("Draft saved.", "status-save", false);
           startSaveAgeUpdates();
-          if (showAlert) alert("Browser-এ save হয়েছে।");
+          if (showAlert) alert("Saved to Browser.");
           return true;
         } catch (err) {
           console.error(err);
           setSaveStatus("Save failed. Your draft is still in memory.", "status-warning", true);
-          if (showAlert) alert("Save করা যায়নি।");
+          if (showAlert) alert("Could not save.");
           return false;
         }
       }
       function loadData(silent = false) {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (!saved) {
-          if (!silent) alert("Saved data পাওয়া যায়নি।");
+          if (!silent) alert("Could not find saved data.");
           return false;
         }
         try {
@@ -4347,7 +4413,7 @@
           return imported;
         } catch (err) {
           console.error(err);
-          if (!silent) alert("Saved data load করা যায়নি।");
+          if (!silent) alert("Could not load saved data.");
           setSaveStatus("Saved draft exists but could not be loaded.", "status-warning", true);
           return false;
         }
@@ -4359,7 +4425,7 @@
           return applyImportedState(parsed || {});
         } catch (err) {
           console.error("Incoming builder state import failed:", err);
-          if (!silent) alert("Incoming builder state load করা যায়নি।");
+          if (!silent) alert("Could not load incoming builder state.");
           return false;
         }
       }
@@ -4459,6 +4525,12 @@
         const letterMatch = raw.match(/[ABCDabcdকখগঘ]/u);
         return normalizeAnswerToken(letterMatch ? letterMatch[0] : "");
       }
+            // উদ্দীপকের ভেতরের line break (table/ছক-এর row সহ) সংরক্ষণের জন্য placeholder —
+            // normalizeBulkQuestionText-এ ব্যবহার হয়, parseBlock-এ আবার \n-এ ফেরত আসে।
+            const STIM_NL = '\x00NL\x00';
+            function restoreStimulusNewlines(s) {
+              return String(s || '').split(STIM_NL).join('\n');
+            }
             function normalizeBulkQuestionText(text) {
   let s = String(text || "").replace(/\r/g, "");
 
@@ -4469,9 +4541,17 @@
     return '\x00MATH' + (mathSlots.length - 1) + '\x00';
   });
 
-  // { } তৃতীয় বন্ধনীর মধ্যে উদ্দীপক detect করে → "উদ্দীপক: ..." format-এ convert
+  // { } তৃতীয় বন্ধনীর মধ্যে উদ্দীপক detect করে → "উদ্দীপক: ..." format-এ convert।
+  // ভেতরের line break (table/ছক-এর row সহ) নষ্ট না করে STIM_NL placeholder-এ রাখা হয়,
+  // যাতে নিচের লাইন-ভিত্তিক parsing অক্ষত থাকে; stimulusText আসলে বের করার সময়
+  // placeholder আবার \n-এ ফিরিয়ে দেওয়া হয় (restoreStimulusNewlines, দেখো নিচে)।
   s = s.replace(/\{([^{}]+)\}/gs, function(_, content) {
-    return 'উদ্দীপক: ' + content.trim().replace(/\n+/g, ' ').replace(/\s+/g, ' ');
+    const normalized = content
+      .split(/\n/)
+      .map(function (l) { return l.replace(/[ \t]+/g, ' ').trim(); })
+      .filter(function (l) { return l !== ''; })
+      .join(STIM_NL);
+    return 'উদ্দীপক: ' + normalized;
   });
 
   s = s
@@ -4549,7 +4629,7 @@ function splitIntoQuestionBlocks(text) {
           const afterAnswer = allLines.slice(answerLineIdx + 1);
           const stimLine = afterAnswer.find(l => /^(উদ্দীপক|stimulus)\s*[:：-]/i.test(l));
           if (stimLine) {
-            trailingStimulus = stimLine.replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim();
+            trailingStimulus = restoreStimulusNewlines(stimLine.replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim());
             allLines.splice(answerLineIdx + 1);
           }
         }
@@ -4562,7 +4642,7 @@ function splitIntoQuestionBlocks(text) {
 
         let stimulusText = "";
         if (lines.length && /^(উদ্দীপক|stimulus)\s*[:：-]/i.test(lines[0])) {
-          stimulusText = lines.shift().replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim();
+          stimulusText = restoreStimulusNewlines(lines.shift().replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim());
         }
 
         const firstLine = stripQuestionPrefix(lines.shift() || "");
@@ -4624,7 +4704,7 @@ function splitIntoQuestionBlocks(text) {
         for (const l of lines) {
           if (/^(নিচের\s*(উদ্দীপক|প্রশ্ন|অনুচ্ছেদ)|উদ্দীপকটি\s*পড়ে|নং\s*প্রশ্নের\s*উত্তর\s*দাও)/iu.test(l)) continue;
           if (/^(উদ্দীপক|stimulus)\s*[:：-]/i.test(l)) {
-            contentLines.push(l.replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim());
+            contentLines.push(restoreStimulusNewlines(l.replace(/^(উদ্দীপক|stimulus)\s*[:：-]\s*/i, "").trim()));
             continue;
           }
           contentLines.push(l);
@@ -4639,7 +4719,7 @@ function splitIntoQuestionBlocks(text) {
         let globalPreambleStimulus = "";
         let mainText = rawClean;
         if (firstNumIdx > 0) {
-          const preamble = rawClean.slice(0, firstNumIdx).trim();
+          const preamble = normalizeBulkQuestionText(rawClean.slice(0, firstNumIdx).trim());
           globalPreambleStimulus = extractStimulusFromLines(
             preamble.split("\n").map(l => l.trim()).filter(Boolean)
           );
@@ -4647,7 +4727,7 @@ function splitIntoQuestionBlocks(text) {
         }
 
         const blocks = splitIntoQuestionBlocks(mainText);
-        if (!blocks.length) throw new Error("কোনো question পাওয়া যায়নি।");
+        if (!blocks.length) throw new Error("No question found.");
 
         const parsed = blocks.map(parseBlock).filter(Boolean);
         const result = [];
@@ -4718,7 +4798,7 @@ function splitIntoQuestionBlocks(text) {
       function applyBulkPaste() {
         const text = bulkInput.value.trim();
         if (!text) {
-          alert("আগে MCQ paste করো।");
+          alert("Paste the MCQs first.");
           return;
         }
         try {
@@ -4727,7 +4807,7 @@ function splitIntoQuestionBlocks(text) {
           initEditors();
           renderAll();
         } catch (err) {
-          alert(err.message || "parse করা যায়নি।");
+          alert(err.message || "Could not parse.");
         }
       }
       function loadSamplePaste() {
@@ -4852,14 +4932,14 @@ function splitIntoQuestionBlocks(text) {
       }
       function parseCQBulkText(text) {
         const blocks = splitIntoCQBlocks(text);
-        if (!blocks.length) throw new Error("কোনো CQ পাওয়া যায়নি।");
+        if (!blocks.length) throw new Error("No CQ found.");
         return blocks.map(parseCQBlock).filter(Boolean);
       }
       function applyCQBulkPaste() {
         const el = document.getElementById("cqBulkInput");
         const text = el ? el.value.trim() : "";
         if (!text) {
-          alert("আগে CQ paste করো।");
+          alert("Paste the CQs first.");
           return;
         }
         try {
@@ -4867,7 +4947,7 @@ function splitIntoQuestionBlocks(text) {
           initEditors();
           renderAll();
         } catch (err) {
-          alert(err.message || "CQ parse করা যায়নি।");
+          alert(err.message || "Could not parse the CQ.");
         }
       }
       function loadSampleCQPaste() {
@@ -4909,14 +4989,14 @@ function splitIntoQuestionBlocks(text) {
       }
       function parseOnlyQuestionBulkText(text) {
         const blocks = splitIntoQuestionBlocks(text);
-        if (!blocks.length) throw new Error("কোনো question পাওয়া যায়নি।");
+        if (!blocks.length) throw new Error("No question found.");
         return blocks.map(parseOnlyQuestionBlock).filter(Boolean);
       }
       function applyOnlyQuestionBulkPaste() {
         const el = document.getElementById("onlyQuestionBulkInput");
         const text = el ? el.value.trim() : "";
         if (!text) {
-          alert("আগে question paste করো।");
+          alert("Paste the questions first.");
           return;
         }
         try {
@@ -4924,7 +5004,7 @@ function splitIntoQuestionBlocks(text) {
           initEditors();
           renderAll();
         } catch (err) {
-          alert(err.message || "Question parse করা যায়নি।");
+          alert(err.message || "Could not parse the question.");
         }
       }
       function loadSampleOnlyQuestionPaste() {
@@ -5069,7 +5149,7 @@ function splitIntoQuestionBlocks(text) {
                 const parts = dataUrl.split(",");
 
                 if (parts.length < 2) {
-                  reject(new Error("Canvas image তৈরি করা যায়নি"));
+                  reject(new Error("Could not create canvas image"));
                   return;
                 }
 
@@ -5199,12 +5279,12 @@ function splitIntoQuestionBlocks(text) {
 
       async function generatePdfBlob() {
         if (typeof html2canvas !== "function") {
-          throw new Error("html2canvas লোড হয়নি। অনুগ্রহ করে ইন্টারনেট কানেকশন দেখুন বা ব্রাউজারটি রিলোড করুন।");
+          throw new Error("html2canvas did not load. Please check your internet connection or reload the browser.");
         }
         await renderAllAndWait();
         const pages = [...document.querySelectorAll(".page")];
         if (!pages.length) {
-          throw new Error("কোনো পৃষ্ঠা পাওয়া যায়নি। PDF তৈরি করা যাচ্ছে না।");
+          throw new Error("No page found. Cannot create the PDF.");
         }
         const images = [];
         for (const page of pages) {
@@ -5218,7 +5298,7 @@ function splitIntoQuestionBlocks(text) {
           images.push(result);
         }
         if (!images.length) {
-          throw new Error("PDF তৈরির জন্য কোন ইমেজ পাওয়া যায়নি।");
+          throw new Error("No image found to create the PDF.");
         }
         return buildPdfFromJpegs(images);
       }
@@ -5270,7 +5350,7 @@ function splitIntoQuestionBlocks(text) {
         setTimeout(() => URL.revokeObjectURL(url), 1500);
         if (!clicked) {
           alert(
-            "ডাউনলোড শুরু করা যায়নি। যদি আপনি ফাইল:// থেকে খুলছেন, তাহলে ব্রাউজারে এই পাতা http:// সার্ভার থেকে চালান বা PDF previews থেকে Save করুন।"
+            "Could not start the download. If you're opening this from file://, run this page from an http:// server in the browser, or use Save from the PDF preview."
           );
         }
       }
@@ -5299,7 +5379,7 @@ function splitIntoQuestionBlocks(text) {
         } catch (err) {
           console.error(err);
           alert(
-            "PDF download failed. ব্রাউজার কনসোল চেক করুন, অথবা Print থেকে Save as PDF ব্যবহার করুন।"
+            "PDF download failed. Check the browser console, or use Save as PDF from Print."
           );
           try {
             window.print();
@@ -5311,7 +5391,7 @@ function splitIntoQuestionBlocks(text) {
         }
       }
       async function sharePDFDirect(btnEl) {
-        alert("সঠিক লেআউট এবং সর্বোচ্চ কোয়ালিটি পেতে '↓ Direct PDF' বাটনে ক্লিক করে Save as PDF করুন এবং সেই ফাইলটি শেয়ার করুন।");
+        alert("For the correct layout and best quality, click the '↓ Direct PDF' button, use Save as PDF, and share that file.");
       }
       async function downloadAsImagesZipLike(btnEl) {
         const btn = btnEl || document.querySelector('[onclick*="downloadAsImagesZipLike"]');
@@ -5319,7 +5399,7 @@ function splitIntoQuestionBlocks(text) {
           await renderAllAndWait();
           const pages = [...document.querySelectorAll(".page")];
           if (!pages.length) {
-            throw new Error("কোনো পৃষ্ঠা পাওয়া যায়নি। Page PNG তৈরি করা যাচ্ছে না।");
+            throw new Error("No page found. Cannot create the Page PNG.");
           }
           setButtonLoading(btn, true, `⏳ 0/${pages.length}`);
           for (let i = 0; i < pages.length; i++) {
@@ -5339,13 +5419,13 @@ function splitIntoQuestionBlocks(text) {
           }
         } catch (err) {
           console.error(err);
-          alert("Page image export করা যায়নি।");
+          alert("Could not export the page image.");
         } finally {
           setButtonLoading(btn, false);
         }
       }
       async function blobToBase64(blob) {
-        if (!blob) throw new Error("Blob পাওয়া যায়নি");
+        if (!blob) throw new Error("Blob not found");
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => {
@@ -5369,7 +5449,7 @@ function splitIntoQuestionBlocks(text) {
           resetHistory();
           return true;
         } catch (err) {
-          console.error("Incoming builder state load করা যায়নি:", err);
+          console.error("Could not load incoming builder state:", err);
           return false;
         }
       }
@@ -5453,7 +5533,7 @@ function splitIntoQuestionBlocks(text) {
       function addImageFromUrl(kind, idx, fieldId, rowId) {
         const input = document.getElementById(fieldId);
         const url = input ? input.value.trim() : "";
-        if (!url) { alert("Image URL দাও।"); return; }
+        if (!url) { alert("Enter an Image URL."); return; }
 
         let target, defaultWidth, defaultHeight;
         if (kind === "mcq") {
@@ -5556,7 +5636,7 @@ function splitIntoQuestionBlocks(text) {
 function generateOnlineExamHTML() {
   const mcqs = state.questions.filter(isMcqMeaningful);
   if (mcqs.length === 0) {
-      alert("কোনো MCQ নেই! আগে MCQ যোগ করুন।");
+      alert("No MCQs! Add an MCQ first.");
       return;
   }
 
@@ -5652,14 +5732,14 @@ function goToExamController() {
   <div id="onlineExamModal">
     <div class="oe-modal-box">
       <div class="oe-modal-icon">🌐</div>
-      <h3>প্রশ্নগুলো তৈরি হয়েছে!</h3>
-      <p>এখন পাসওয়ার্ড ও পারমিশন সেট করার জন্য কন্ট্রোল প্যানেলে নিয়ে যাওয়া হচ্ছে...</p>
-      <button type="button" class="oe-modal-btn" onclick="goToExamController()">কন্ট্রোল প্যানেলে যান →</button>
+      <h3>Questions Created!</h3>
+      <p>Taking you to the Control Panel now to set the password and permissions...</p>
+      <button type="button" class="oe-modal-btn" onclick="goToExamController()">Go to Control Panel →</button>
     </div>
   </div>
   <div id="cropperModal">
   <div class="cropper-content">
-    <h3>✂ Image Crop করুন</h3>
+    <h3>✂ Crop Image</h3>
     <div class="cropper-wrap">
       <img id="cropperImg" alt="crop target">
     </div>

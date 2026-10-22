@@ -309,10 +309,10 @@ th { background-color: #f8fafc; }
   <div class="overlay" id="custom-confirm">
     <div class="alert-box" id="confirm-inner">
       <div class="alert-icon">⚠️</div>
-      <div class="alert-msg" id="confirm-msg">আপনি কি নিশ্চিত?</div>
+      <div class="alert-msg" id="confirm-msg">Are you sure?</div>
       <div class="flex-btns">
-        <button class="alert-btn" style="background:#dc2626;" onclick="executeConfirm()">হ্যাঁ, মুছুন</button>
-        <button class="alert-btn" style="background:#64748b;" onclick="closeConfirm()">না</button>
+        <button class="alert-btn" style="background:#dc2626;" onclick="executeConfirm()">Yes, Delete</button>
+        <button class="alert-btn" style="background:#64748b;" onclick="closeConfirm()">No</button>
       </div>
     </div>
   </div>
@@ -320,7 +320,7 @@ th { background-color: #f8fafc; }
   <div class="overlay" id="admin-login-modal">
     <div class="alert-box" id="admin-login-box" style="max-width:420px;">
       <div class="alert-icon">🔐</div>
-      <div class="alert-msg">এডমিন পাসওয়ার্ড দিন</div>
+      <div class="alert-msg">Enter Admin Password</div>
       <input type="password" id="admin-password" class="input-f" placeholder="Password">
       <button class="alert-btn" onclick="unlockAdmin()">Unlock Admin</button>
       <button class="alert-btn" style="background:#64748b; margin-top:10px;" onclick="closeAdminModal()">Cancel</button>
@@ -331,17 +331,17 @@ th { background-color: #f8fafc; }
     <div class="panel-row" style="margin-bottom:26px;">
       <div>
         <div class="section-eyebrow">⚙️ Control Panel</div>
-        <h2 style="margin-bottom:6px;">এডমিন প্যানেল</h2>
-        <p>পরীক্ষার সেটিংস, সময় এবং স্টুডেন্ট লিস্ট এক জায়গা থেকে নিয়ন্ত্রণ করুন।</p>
+        <h2 style="margin-bottom:6px;">Admin Panel</h2>
+        <p>Control exam settings, time, and the student list, all in one place.</p>
       </div>
       <span class="admin-badge">🔓 Admin Mode</span>
     </div>
 
     <div class="admin-card" id="share-link-card" style="display:none; border-color:var(--blue);">
       <div class="admin-card-head">
-        <h3><span class="icon" style="background:var(--blue); color:#fff;">📤</span> শেয়ার লিংক</h3>
+        <h3><span class="icon" style="background:var(--blue); color:#fff;">📤</span> Share Link</h3>
       </div>
-      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">স্টুডেন্টদের পরীক্ষা দেওয়ার জন্য নিচের লিংকটি কপি করে শেয়ার করুন।</p>
+      <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">Copy the link below and share it with students so they can take the exam.</p>
       <div style="display:flex; gap:10px;">
         <input type="text" id="share-url-input" class="input-f" readonly style="background:#fff; cursor:text;">
         <button class="btn secondary" onclick="copyShareLink()">📋 Copy</button>
@@ -350,51 +350,51 @@ th { background-color: #f8fafc; }
 
     <div class="admin-card">
       <div class="admin-card-head">
-        <h3><span class="icon">🔗</span> সার্ভার কনফিগারেশন</h3>
+        <h3><span class="icon">🔗</span> Server Configuration</h3>
       </div>
       <div class="form-group">
-        <label>GitHub Token (স্টুডেন্ট লিস্ট সিঙ্ক করার জন্য)</label>
+        <label>GitHub Token (for syncing the student list)</label>
         <input type="password" id="gh-token" class="input-f" placeholder="ghp_...">
       </div>
       <div class="form-group">
-        <label>Google Apps Script URL (ঐচ্ছিক - রেজাল্ট সংরক্ষণের জন্য)</label>
+        <label>Google Apps Script URL (optional - for storing results)</label>
         <input type="text" id="gas-url" class="input-f" placeholder="https://script.google.com/macros/s/...">
       </div>
       <div class="form-group">
-        <label>GAS Admin Token (clearData / updateStudents এর জন্য)</label>
-        <input type="password" id="gas-admin-token" class="input-f" placeholder="exam_gas.js-এ যে ADMIN_TOKEN দিয়েছেন">
+        <label>GAS Admin Token (for clearData / updateStudents)</label>
+        <input type="password" id="gas-admin-token" class="input-f" placeholder="The ADMIN_TOKEN you set in exam_gas.js">
       </div>
       <div class="form-row">
         <div class="form-group" style="margin-bottom:0;">
-          <label>পরীক্ষার পাসওয়ার্ড (সবার জন্য)</label>
-          <input type="text" id="exam-pass" class="input-f" placeholder="যেমন: exam2024">
+          <label>Exam Password (for everyone)</label>
+          <input type="text" id="exam-pass" class="input-f" placeholder="e.g. exam2024">
         </div>
         <div class="form-group" style="margin-bottom:0;">
-          <label>পরীক্ষার সময় (মিনিট)</label>
-          <input type="number" id="admin-time" class="input-f" placeholder="যেমন: 30">
+          <label>Exam Duration (minutes)</label>
+          <input type="number" id="admin-time" class="input-f" placeholder="e.g. 30">
         </div>
       </div>
     </div>
     
     <div class="admin-card">
       <div class="admin-card-head">
-        <h3><span class="icon">🌍</span> পাবলিক এক্সেস মোড</h3>
+        <h3><span class="icon">🌍</span> Public Access Mode</h3>
       </div>
       <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0;">
         <input type="checkbox" id="public-mode-toggle" style="width:18px; height:18px; cursor:pointer;" onchange="togglePublicMode()">
-        <span style="font-weight:600; color:var(--ink);">যে কেউ এই লিংক দিয়ে পরীক্ষা দিতে পারবে</span>
+        <span style="font-weight:600; color:var(--ink);">Anyone can take the exam using this link</span>
       </label>
-      <p style="font-size:12px; color:var(--muted); margin:8px 0 0; line-height:1.5;">অন্যদের জন্য স্টুডেন্ট লিস্ট অক্ষম হবে। শুধু পাসওয়ার্ড দরকার হবে।</p>
+      <p style="font-size:12px; color:var(--muted); margin:8px 0 0; line-height:1.5;">The student list will be disabled for others. Only a password will be required.</p>
     </div>
 
     <div class="admin-card" id="student-section" style="display:block;">
       <div class="admin-card-head">
-        <h3><span class="icon">👤</span> স্টুডেন্ট সেকশন</h3>
+        <h3><span class="icon">👤</span> Student Section</h3>
       </div>
       <div class="form-row" style="margin-bottom:14px; align-items:flex-end;">
         <div class="form-group" style="margin-bottom:0;">
-          <label>নতুন স্টুডেন্ট আইডি (অটোমেটিক আইডি বসাতে পারেন)</label>
-          <input type="text" id="new-sid" class="input-f" placeholder="যেমন: 101">
+          <label>New Student ID (you can set an automatic ID)</label>
+          <input type="text" id="new-sid" class="input-f" placeholder="e.g. 101">
         </div>
         <button class="btn btn-w" onclick="addStudentRow()" style="min-height:42px;">+ Add Student</button>
       </div>
@@ -408,30 +408,30 @@ th { background-color: #f8fafc; }
     
     <div class="admin-card" id="attendance-card">
       <div class="admin-card-head">
-        <h3><span class="icon">📊</span> উপস্থিতি ও ফলাফল</h3>
+        <h3><span class="icon">📊</span> Attendance & Results</h3>
         <button class="btn secondary" style="font-size:12px; min-height:32px; padding:0 14px;" onclick="fetchResults()">🔄 Refresh</button>
       </div>
-      <p style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.6;">কোন স্টুডেন্ট পরীক্ষা দিয়েছে আর কে দেয়নি তা এখানে দেখা যাবে। Google Sheet-এও এই লিস্ট সিঙ্ক থাকবে।</p>
+      <p style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.6;">See here which students have taken the exam and which haven't. This list stays synced with the Google Sheet too.</p>
       <div id="att-no-url" style="text-align:center; padding:14px; color:var(--muted); font-size:13px; background:var(--surface-soft); border-radius:var(--radius);">
-        ⚠️ ফলাফল দেখতে Google Apps Script URL সেভ করুন।
+        ⚠️ Save the Google Apps Script URL to see results.
       </div>
       <div id="att-loading" style="display:none; text-align:center; padding:16px; color:var(--muted);">
-        <i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...
+        <i class="fas fa-spinner fa-spin"></i> Loading...
       </div>
       <div id="att-summary" style="display:none; gap:16px; flex-wrap:wrap; margin-bottom:12px; font-size:13px; font-weight:700;"></div>
       <table class="student-table" id="att-table" style="display:none;">
         <thead>
           <tr>
             <th>Student ID</th>
-            <th>নাম</th>
-            <th style="text-align:center; width:90px;">স্কোর</th>
-            <th style="text-align:center; width:120px;">স্ট্যাটাস</th>
+            <th>Name</th>
+            <th style="text-align:center; width:90px;">Score</th>
+            <th style="text-align:center; width:120px;">Status</th>
           </tr>
         </thead>
         <tbody id="att-list"></tbody>
       </table>
       <div id="att-empty" style="display:none; text-align:center; padding:14px; color:var(--muted); font-size:13px; background:var(--surface-soft); border-radius:var(--radius);">
-        এখনো কোনো সাবমিশন পাওয়া যায়নি।
+        No submissions yet.
       </div>
     </div>
     
@@ -445,11 +445,11 @@ th { background-color: #f8fafc; }
   <div id="loading-screen" class="panel" style="text-align: center; padding: 50px 20px;">
     <div id="loading-state">
       <h2 style="color: var(--blue);"><i class="fas fa-spinner fa-spin"></i> Loading Exam Data...</h2>
-      <p>অনুগ্রহ করে অপেক্ষা করুন।</p>
+      <p>Please wait.</p>
     </div>
     <div id="no-id-state" style="display:none;">
-      <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> কোনো Exam ID পাওয়া যায়নি!</h3>
-      <p style="margin-bottom:20px; color:var(--muted);">পরীক্ষা দিতে আপনার Exam ID টি নিচে প্রবেশ করান অথবা সঠিক লিংকে ক্লিক করুন।</p>
+      <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> No Exam ID found!</h3>
+      <p style="margin-bottom:20px; color:var(--muted);">Enter your Exam ID below to take the exam, or click the correct link.</p>
       <div style="max-width:320px; margin:0 auto; display:flex; gap:10px;">
          <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam ID (ex: kx2a9m)">
          <button class="btn primary" onclick="manualLoadExam()">Load</button>
@@ -457,36 +457,36 @@ th { background-color: #f8fafc; }
     </div>
   </div>
 
-  <div id="resume-banner"><span><i class="fas fa-redo" style="margin-right:6px;"></i>আগের অসমাপ্ত পরীক্ষা পাওয়া গেছে! রিজিউম করবেন?</span><button class="btn primary" style="padding:7px 16px; font-size:13px;" onclick="resumeExam()">রিজিউম করুন</button></div>
-  <div id="refresh-note"><i class="fas fa-info-circle"></i> আপনার উত্তর অটোসেভ হবে। Refresh করলে আবার ঢুকলে Resume ব্যানার দেখাবে; পরীক্ষার সময় পেজ বন্ধ করলে সাবমিট হবে না।</div>
+  <div id="resume-banner"><span><i class="fas fa-redo" style="margin-right:6px;"></i>An earlier unfinished exam was found! Resume it?</span><button class="btn primary" style="padding:7px 16px; font-size:13px;" onclick="resumeExam()">Resume</button></div>
+  <div id="refresh-note"><i class="fas fa-info-circle"></i> Your answers will be auto-saved. If you refresh and come back, a Resume banner will appear; closing the page during the exam will not submit it.</div>
 <div id="login-screen" class="panel">
     <div class="panel-row" style="align-items:flex-start;">
       <div>
-        <h2>পরীক্ষায় লগইন করুন</h2>
-        <p id="login-desc">নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম ও মোবাইল নম্বর দিন।</p>
+        <h2>Log In to the Exam</h2>
+        <p id="login-desc">Enter your name and mobile number to securely access the exam.</p>
       </div>
     </div>
     <div class="form-row single" style="gap:12px;">
-      <input type="text" id="uname" class="input-f" placeholder="আপনার নাম">
-      <input type="tel" id="umobile" class="input-f" placeholder="মোবাইল নম্বর (১১ ডিজিট)">
-      <div id="pass-field-wrap" style="display:none;"><input type="password" id="upass" class="input-f" placeholder="পরীক্ষার পাসওয়ার্ড"></div>
+      <input type="text" id="uname" class="input-f" placeholder="Your name">
+      <input type="tel" id="umobile" class="input-f" placeholder="Mobile number (11 digits)">
+      <div id="pass-field-wrap" style="display:none;"><input type="password" id="upass" class="input-f" placeholder="Exam password"></div>
     </div>
-    <button class="btn primary" id="login-btn" onclick="startExam()">পরীক্ষা শুরু করুন</button>
+    <button class="btn primary" id="login-btn" onclick="startExam()">Start Exam</button>
   </div>
 
   <div id="exam-screen">
   <div class="top-bar">
-      <span class="time-left">সময় বাকি: <span id="timer">00:00</span></span>
-      <button class="btn" id="submit-btn" style="margin:0; padding:10px 20px; width:auto;" onclick="submitExam()">জমা দিন</button>
+      <span class="time-left">Time Left: <span id="timer">00:00</span></span>
+      <button class="btn" id="submit-btn" style="margin:0; padding:10px 20px; width:auto;" onclick="submitExam()">Submit</button>
     </div>
     <div id="progress-wrap">
       <div id="progress-track"><div id="progress-fill"></div></div>
       <div id="progress-text">
-        <span>উত্তর দেওয়া হয়েছে: <span id="prog-done">০</span></span>
-        <span>বাকি আছে: <span id="prog-left">০</span></span>
+        <span>Answered: <span id="prog-done">0</span></span>
+        <span>Remaining: <span id="prog-left">0</span></span>
       </div>
     </div>
-    <div id="autosave-banner"><i class="fas fa-check-circle"></i> অটোসেভ হয়েছে</div>
+    <div id="autosave-banner"><i class="fas fa-check-circle"></i> Auto-saved</div>
     <div id="q-nav-wrap"></div>
     <div class="pdf-container">
       <div id="pdf-wrap">
@@ -494,7 +494,7 @@ th { background-color: #f8fafc; }
           <div class="exam-header">
             <div id="pdf-dummy-space" style="display:none; width:80px;"></div>
             <div class="exam-header-center">
-              <h1 id="main-title">পরীক্ষা</h1>
+              <h1 id="main-title">Exam</h1>
               <p id="main-meta"></p>
               <div id="student-name-display" class="student-badge"></div>
             </div>
@@ -518,11 +518,11 @@ th { background-color: #f8fafc; }
 
   <div id="summary-screen" class="summary-box">
     <div class="panel" style="text-align:center;">
-      <h2 style="color:#10b981; margin-bottom: 20px;"><i class="fas fa-trophy"></i> পরীক্ষার ফলাফল</h2>
+      <h2 style="color:#10b981; margin-bottom: 20px;"><i class="fas fa-trophy"></i> Exam Results</h2>
       <div class="stat-flex">
-        <div class="stat-c">সঠিক: <span id="s-c">0</span></div>
-        <div class="stat-w">ভুল: <span id="s-w">0</span></div>
-        <div>স্কিপড: <span id="s-s">0</span></div>
+        <div class="stat-c">Correct: <span id="s-c">0</span></div>
+        <div class="stat-w">Wrong: <span id="s-w">0</span></div>
+        <div>Skipped: <span id="s-s">0</span></div>
       </div>
       <div class="score-circle-wrap">
         <div class="score-circle">
@@ -533,8 +533,8 @@ th { background-color: #f8fafc; }
       </div>
       <p id="status-text" style="color:var(--muted); font-size:16px; margin-bottom:24px;"></p>
       <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:20px;">
-        <button class="btn btn-w" onclick="reviewWithPdf()">ভুলগুলো দেখুন (PDF সহ)</button>
-        <button class="btn" style="background:#64748b;" onclick="dlPdf()">শুধু PDF ডাউনলোড করুন</button>
+        <button class="btn btn-w" onclick="reviewWithPdf()">View Mistakes (with PDF)</button>
+        <button class="btn" style="background:#64748b;" onclick="dlPdf()">Download PDF Only</button>
       </div>
     </div>
   </div>
@@ -602,7 +602,7 @@ let studentsList = [];
 let userAnswers = {};
 let isPublicMode = false;
 let examId = new URLSearchParams(window.location.search).get('examId');
-// Student Portal থেকে আসা URL params
+// URL params coming from Student Portal
 const _sp = new URLSearchParams(window.location.search);
 let portalStudentId     = _sp.get('studentId')   ? String(_sp.get('studentId'))   : null;
 let portalStudentName   = _sp.get('studentName')  ? decodeURIComponent(_sp.get('studentName'))  : null;
@@ -695,7 +695,7 @@ window.onload = async function() {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('no-id-state').innerHTML = `
         <h3 style='color:#ef4444; margin-bottom:10px;'>Exam Not Found</h3>
-        <p style='color:var(--muted); margin-bottom:20px;'>এই আইডি দিয়ে কোনো পরীক্ষা পাওয়া যায়নি। আইডিটি সঠিক কি না চেক করুন।</p>
+        <p style='color:var(--muted); margin-bottom:20px;'>No exam found with this ID. Check whether the ID is correct.</p>
         <button class='btn secondary' onclick='window.location.href="model_test.html"'>Back</button>
       `;
       document.getElementById('no-id-state').style.display = 'block';
@@ -709,8 +709,8 @@ window.onload = async function() {
     if (!isLive && !isPracticeMode) {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('no-id-state').innerHTML = `
-        <h3 style='color:#ef4444; margin-bottom:10px;'><i class="fas fa-lock"></i> পরীক্ষা বন্ধ আছে!</h3>
-        <p style='color:var(--muted); margin-bottom:20px;'>এই পরীক্ষাটি বর্তমানে বন্ধ রয়েছে। কর্তৃপক্ষ আবার লাইভ করলে আপনি অংশ নিতে পারবেন।</p>
+        <h3 style='color:#ef4444; margin-bottom:10px;'><i class="fas fa-lock"></i> Exam is Closed!</h3>
+        <p style='color:var(--muted); margin-bottom:20px;'>This exam is currently closed. You can take part once it is made live again.</p>
         <button class='btn secondary' onclick='window.location.href="academy.html"'>Back to Academy</button>
       `;
       document.getElementById('no-id-state').style.display = 'block';
@@ -737,7 +737,7 @@ window.onload = async function() {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('no-id-state').innerHTML = `
         <h3 style='color:#ef4444; margin-bottom:10px;'>Network Error</h3>
-        <p style='color:var(--muted); margin-bottom:20px;'>সার্ভার থেকে ডেটা লোড করা যাচ্ছে না। আপনার ইন্টারনেট কানেকশন চেক করুন।</p>
+        <p style='color:var(--muted); margin-bottom:20px;'>Could not load data from the server. Check your internet connection.</p>
         <button class='btn secondary' onclick='window.location.reload()'>Reload</button>
       `;
     document.getElementById('no-id-state').style.display = 'block';
@@ -746,14 +746,14 @@ window.onload = async function() {
 
 function manualLoadExam() {
   const val = document.getElementById('manual-exam-id').value.trim();
-  if(!val) return showAlert("দয়া করে একটি Exam ID দিন!", "⚠️");
+  if(!val) return showAlert("Please enter an Exam ID!", "⚠️");
   window.location.href = "?examId=" + val;
 }
 
 function initializeExamUI() {
   document.getElementById("main-title").innerText = examData.title;
   document.title = examData.title;
-  document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+  document.getElementById("main-meta").innerText = `Total Marks: ${totalQ} | Time: ${finalDuration} minutes`;
   document.getElementById("s-total-disp").innerText = totalQ;
   document.getElementById("pdf-s-total-disp").innerText = totalQ;
   document.getElementById("timer").innerText = `${finalDuration}:00`;
@@ -768,7 +768,7 @@ function initializeExamUI() {
   if(passWrap) passWrap.style.display = (examData.password && examData.password.trim()) ? 'block' : 'none';
 
   document.getElementById('prog-left').textContent = totalQ;
-  document.getElementById('prog-done').textContent = '০';
+  document.getElementById('prog-done').textContent = '0';
   document.getElementById('progress-fill').style.width = '0%';
 
   document.querySelectorAll('#sec1-q input[type="radio"], #sec2-q input[type="radio"]').forEach(r => {
@@ -803,7 +803,7 @@ function prefillFromPortal() {
   }
   const desc = document.getElementById('login-desc');
   if (desc && portalStudentId) {
-    desc.innerHTML = `স্বাগতম, <strong>${portalStudentName}</strong>! আপনার স্টুডেন্ট আইডি: <strong>${portalStudentId}</strong>`;
+    desc.innerHTML = `Welcome, <strong>${portalStudentName}</strong>! Your Student ID: <strong>${portalStudentId}</strong>`;
   }
 }
 
@@ -853,7 +853,7 @@ function closeAdminModal() {
 async function unlockAdmin() {
   const entered = document.getElementById('admin-password').value.trim();
   if (!entered) {
-    showAlert('পাসওয়ার্ড দিন!', '⚠️');
+    showAlert('Enter a password!', '⚠️');
     return;
   }
   const result = await siteAdminLogin(entered);
@@ -862,7 +862,7 @@ async function unlockAdmin() {
     closeAdminModal();
     showAdminScreen();
   } else {
-    showAlert(result.message || 'ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', '❌');
+    showAlert(result.message || 'Incorrect password! Please try again.', '❌');
   }
 }
 function showAdminScreen() {
@@ -909,9 +909,9 @@ function copyShareLink() {
   input.select();
   input.setSelectionRange(0, 99999); 
   navigator.clipboard.writeText(input.value).then(() => {
-    showAlert('পরীক্ষার লিংক কপি করা হয়েছে!', '✅');
+    showAlert('Exam link copied!', '✅');
   }).catch(() => {
-    showAlert('লিংক কপি করা যায়নি!', '❌');
+    showAlert('Could not copy the link!', '❌');
   });
 }
 
@@ -923,7 +923,7 @@ function exitAdmin() {
         checkResumeBanner();
     updateLoginScreen();
     finalDuration = localStorage.getItem('admin_time') ? parseInt(localStorage.getItem('admin_time')) : builderDurationMin;
-    document.getElementById("main-meta").innerText = `পূর্ণমান: ${totalQ} | সময়: ${finalDuration} মিনিট`;
+    document.getElementById("main-meta").innerText = `Total Marks: ${totalQ} | Time: ${finalDuration} minutes`;
     document.getElementById("timer").innerText = `${finalDuration}:00`;
   } else {
     document.getElementById('loading-screen').style.display = 'block';
@@ -937,7 +937,7 @@ function togglePublicMode() {
   const studentSection = document.getElementById('student-section');
   studentSection.style.display = isPublicMode ? 'none' : 'block';
   updateLoginScreen();
-  showAlert(isPublicMode ? '✅ পাবলিক মোড চালু হয়েছে। যে কেউ পাসওয়ার্ড দিয়ে পরীক্ষা দিতে পারবে।' : '✅ প্রাইভেট মোড চালু হয়েছে। শুধু লিস্টে থাকা স্টুডেন্টরা পরীক্ষা দিতে পারবে।', '⚙️');
+  showAlert(isPublicMode ? '✅ Public mode enabled. Anyone can take the exam with a password.' : '✅ Private mode enabled. Only students on the list can take the exam.', '⚙️');
 }
 
 function updateLoginScreen() {
@@ -946,18 +946,18 @@ function updateLoginScreen() {
   
   if(isPublicMode) {
     mobileField.style.display = 'none';
-    descField.innerText = 'পাসওয়ার্ড দিয়ে পরীক্ষায় প্রবেশ করুন।';
+    descField.innerText = 'Enter the exam with a password.';
     mobileField.value = '';
   } else {
     mobileField.style.display = 'block';
-    descField.innerText = 'নিরাপদভাবে পরীক্ষায় প্রবেশ করতে আপনার নাম, মোবাইল নম্বর ও পাসওয়ার্ড দিন।';
+    descField.innerText = 'Enter your name, mobile number, and password to securely access the exam.';
   }
 }
 
 function addStudentRow() {
   const id = document.getElementById('new-sid').value.trim();
-  if(!id) return showAlert('স্টুডেন্ট আইডি দিন!', '⚠️');
-  if(studentsList.some(s => s.id === id)) return showAlert('এই আইডিটি ইতিমধ্যে লিস্টে আছে!', '⚠️');
+  if(!id) return showAlert('Enter a Student ID!', '⚠️');
+  if(studentsList.some(s => s.id === id)) return showAlert('This ID is already on the list!', '⚠️');
   studentsList.push({id}); 
   renderStudents();
   document.getElementById('new-sid').value = '';
@@ -979,7 +979,7 @@ async function saveAdminConfig() {
   const time = document.getElementById('admin-time').value.trim();
   const token = document.getElementById('gh-token').value.trim();
 
-  if(!token) return showAlert('স্টুডেন্ট লিস্ট সিঙ্ক করার জন্য GitHub Token দিতে হবে!', '🔑');
+  if(!token) return showAlert('A GitHub Token is required to sync the student list!', '🔑');
   
   sessionStorage.setItem('civil_gh_token', token);
   if(url) localStorage.setItem('gas_url', url);
@@ -996,7 +996,7 @@ async function saveAdminConfig() {
   if (!targetId || !examData) {
     btn.innerText = "💾 Save & Update Server";
     btn.disabled = false;
-    return showAlert('লোকাল সেটিংস সেভ হয়েছে!\n\n(কোনো Exam লোড না থাকায় GitHub আপডেট হয়নি। MCQ Builder থেকে Exam লোড করুন।)', '✅');
+    return showAlert('Local settings saved!\n\n(GitHub was not updated since no exam is loaded. Load an exam from the MCQ Builder.)', '✅');
   }
 
   if (targetId && examData) {
@@ -1039,7 +1039,7 @@ async function saveAdminConfig() {
     });
 
     if(put.ok) {
-      showAlert('সেটিংস এবং স্টুডেন্ট লিস্ট সফলভাবে সেভ হয়েছে!', '✅');
+      showAlert('Settings and student list saved successfully!', '✅');
       sessionStorage.setItem('mt_exam_id', examId);
       sessionStorage.setItem('mt_exam_data', JSON.stringify(examData));
       history.replaceState(null, '', '?examId=' + examId);
@@ -1062,10 +1062,10 @@ async function saveAdminConfig() {
         setTimeout(() => fetchResults(), 800);
       }
     } else {
-      showAlert('GitHub এ সেভ হতে সমস্যা হয়েছে!', '❌');
+      showAlert('Failed to save to GitHub!', '❌');
     }
   } catch(e) {
-    showAlert('Network Error! ইন্টারনেট চেক করুন।', '⚠️');
+    showAlert('Network Error! Check your internet.', '⚠️');
   }
 
   btn.innerText = "💾 Save & Update Server";
@@ -1112,7 +1112,7 @@ async function fetchResults() {
     }
   } catch(e) {
     loading.style.display = 'none';
-    empty.innerText = '⚠️ ফলাফল লোড করতে সমস্যা হয়েছে! GAS URL ও ইন্টারনেট চেক করুন।';
+    empty.innerText = '⚠️ Failed to load results! Check the GAS URL and your internet.';
     empty.style.display = 'block';
   }
 }
@@ -1147,7 +1147,7 @@ function renderAttendance(results) {
           <td style="font-weight:600;">${id}</td>
           <td>${name}</td>
           <td style="text-align:center; font-weight:700; color:#166534;">${score}/${totalQ}</td>
-          <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ দিয়েছে</span></td>
+          <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ Submitted</span></td>
         </tr>`;
       } else {
         absentCount++;
@@ -1155,7 +1155,7 @@ function renderAttendance(results) {
           <td style="font-weight:600;">${id}</td>
           <td style="color:var(--muted);">—</td>
           <td style="text-align:center; color:var(--muted);">—</td>
-          <td style="text-align:center;"><span style="background:#fee2e2; color:#991b1b; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">❌ দেয়নি</span></td>
+          <td style="text-align:center;"><span style="background:#fee2e2; color:#991b1b; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">❌ Not submitted</span></td>
         </tr>`;
       }
     });
@@ -1168,7 +1168,7 @@ function renderAttendance(results) {
           <td style="font-weight:600;">${id} <span style="font-size:10px; color:var(--muted);">(unlisted)</span></td>
           <td>${name}</td>
           <td style="text-align:center; font-weight:700; color:#166534;">${score}/${totalQ}</td>
-          <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ দিয়েছে</span></td>
+          <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ Submitted</span></td>
         </tr>`;
       }
     });
@@ -1186,7 +1186,7 @@ function renderAttendance(results) {
         <td style="font-weight:600;">${id}</td>
         <td>${name}</td>
         <td style="text-align:center; font-weight:700; color:#166534;">${score}/${totalQ}</td>
-        <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ দিয়েছে</span></td>
+        <td style="text-align:center;"><span style="background:#dcfce7; color:#166534; padding:3px 12px; border-radius:20px; font-size:12px; font-weight:700;">✅ Submitted</span></td>
       </tr>`;
     });
   }
@@ -1198,17 +1198,17 @@ function renderAttendance(results) {
     const total = totalInList || presentCount;
     summary.style.display = 'flex';
     summary.innerHTML = `
-      <span style="background:#f1f5f9; padding:5px 14px; border-radius:20px; color:var(--ink);">মোট: <b>${total}</b></span>
-      <span style="background:#dcfce7; padding:5px 14px; border-radius:20px; color:#166534;">উপস্থিত: <b>${presentCount}</b></span>
-      ${absentCount > 0 ? `<span style="background:#fee2e2; padding:5px 14px; border-radius:20px; color:#991b1b;">অনুপস্থিত: <b>${absentCount}</b></span>` : ''}
+      <span style="background:#f1f5f9; padding:5px 14px; border-radius:20px; color:var(--ink);">Total: <b>${total}</b></span>
+      <span style="background:#dcfce7; padding:5px 14px; border-radius:20px; color:#166534;">Present: <b>${presentCount}</b></span>
+      ${absentCount > 0 ? `<span style="background:#fee2e2; padding:5px 14px; border-radius:20px; color:#991b1b;">Absent: <b>${absentCount}</b></span>` : ''}
     `;
   }
 }
 
 function clearDatabase() {
   const url = getGasUrl();
-  if(!url) return showAlert('আগে Google Apps Script URL দিন!', '🔗');
-  showConfirm('Google Sheet এর সব ডেটা এবং রেজাল্ট মুছে যাবে। আপনি কি নিশ্চিত?', async () => {
+  if(!url) return showAlert('First enter the Google Apps Script URL!', '🔗');
+  showConfirm('All data and results in the Google Sheet will be deleted. Are you sure?', async () => {
     const btn = document.getElementById('clear-db-btn');
     btn.innerText = "Clearing...";
     btn.disabled = true;
@@ -1220,7 +1220,7 @@ function clearDatabase() {
       });
       let out = await res.json();
       if(out.status === 'success') {
-        showAlert('সার্ভারের সব ডেটা মুছে ফেলা হয়েছে!', '🗑️');
+        showAlert('All server data has been deleted!', '🗑️');
       } else {
         showAlert(out.message, '❌');
       }
@@ -1237,14 +1237,14 @@ async function startExam(){
   const umobile = document.getElementById("umobile").value.trim();
   const upass = document.getElementById("upass").value.trim();
 
-  if(!uname) return showAlert("আপনার নামটি লিখুন!", "👤");
-  if(!isPublicMode && !umobile) return showAlert("আপনার মোবাইল নম্বর দিন!", "📱");
+  if(!uname) return showAlert("Enter your name!", "👤");
+  if(!isPublicMode && !umobile) return showAlert("Enter your mobile number!", "📱");
 
   const targetPass = examData.password || "";
-  // password set থাকলেই শুধু check করুন
+  // only check if a password is set
   if(targetPass) {
-    if(!upass) return showAlert("পরীক্ষার পাসওয়ার্ড দিন!", "🔑");
-    if(upass !== targetPass) return showAlert("পরীক্ষার পাসওয়ার্ড ভুল হয়েছে!", "❌");
+    if(!upass) return showAlert("Enter the exam password!", "🔑");
+    if(upass !== targetPass) return showAlert("Incorrect exam password!", "❌");
   }
 
   const btn = document.getElementById('login-btn');
@@ -1254,15 +1254,15 @@ async function startExam(){
   let studentId = "Guest";
 
   if(!isPublicMode) {
-    // Student Portal থেকে আসলে GAS call লাগবে না
+    // no GAS call needed when coming from Student Portal
     if (portalStudentId && portalStudentMobile && umobile === portalStudentMobile) {
       studentId = String(portalStudentId);
     } else {
       const url = getGasUrl();
       if(!url) {
-         btn.innerText = "পরীক্ষা শুরু করুন";
+         btn.innerText = "Start Exam";
          btn.disabled = false;
-         return showAlert("সার্ভার লিংক (GAS URL) যুক্ত করা হয়নি! এডমিনকে জানান।", "⚠️");
+         return showAlert("Server link (GAS URL) is not set up! Let the admin know.", "⚠️");
       }
       
       try {
@@ -1280,9 +1280,9 @@ async function startExam(){
         } else {
           const allowedIds = examData.allowedIds || [];
           if (allowedIds.length > 0) {
-            btn.innerText = "পরীক্ষা শুরু করুন";
+            btn.innerText = "Start Exam";
             btn.disabled = false;
-            return showAlert("এই মোবাইল নম্বরটি আগে রেজিস্টার করা হয়নি বা অনুমোদিত নয়। মোবাইল নম্বর ঠিক করে আবার চেষ্টা করুন।", "⚠️");
+            return showAlert("This mobile number hasn't been registered before, or isn't authorized. Fix the number and try again.", "⚠️");
           }
 
           // No allowed list configured, allow new student registration
@@ -1295,43 +1295,43 @@ async function startExam(){
           if(regData.status === 'success') {
              studentId = String(regData.id);
           } else {
-             btn.innerText = "পরীক্ষা শুরু করুন";
+             btn.innerText = "Start Exam";
              btn.disabled = false;
-             return showAlert("রেজিস্ট্রেশনে সমস্যা হয়েছে: " + regData.message, "❌");
+             return showAlert("Registration failed: " + regData.message, "❌");
           }
         }
       } catch(e) {
-         btn.innerText = "পরীক্ষা শুরু করুন";
+         btn.innerText = "Start Exam";
          btn.disabled = false;
-         return showAlert("সার্ভারে কানেক্ট করা যাচ্ছে না। ইন্টারনেট চেক করুন।", "⚠️");
+         return showAlert("Could not connect to the server. Check your internet.", "⚠️");
       }
     }
 
 
     const allowedIds = examData.allowedIds || [];
     if(allowedIds.length > 0 && !allowedIds.map(String).includes(String(studentId))) {
-        btn.innerText = "পরীক্ষা শুরু করুন";
+        btn.innerText = "Start Exam";
         btn.disabled = false;
-        return showAlert(`আপনার আইডি: ${studentId}\nদুঃখিত, আপনাকে এই পরীক্ষার জন্য অনুমতি দেওয়া হয়নি! এডমিনকে এই আইডিটি দিয়ে অনুমতি নিন।`, "🚫");
+        return showAlert(`Your ID: ${studentId}\nSorry, you are not authorized for this exam! Ask the admin to authorize this ID.`, "🚫");
     }
     
-    // Practice Mode Check & একবার পরীক্ষা দেওয়ার চেক
+    // Practice Mode Check & check for a single exam attempt
     const isPractice = new URLSearchParams(window.location.search).get('practice') === '1';
     
     if(localStorage.getItem(`exam_done_${examId}_${studentId}`)) {
       if(isPractice) {
-          showAlert(`আপনার আইডি: ${studentId}\nএই পরীক্ষাটি আপনি আগেই দিয়েছেন। এটি প্র্যাকটিস মোডে চালু হচ্ছে, নতুন করে রেজাল্ট সেভ হবে না।`, "ℹ️", () => {
+          showAlert(`Your ID: ${studentId}\nYou've already taken this exam. It's starting in Practice Mode — no new result will be saved.`, "ℹ️", () => {
              proceedToExamScreen(studentId, uname);
           });
           return;
       } else {
-          btn.innerText = "পরীক্ষা শুরু করুন";
+          btn.innerText = "Start Exam";
           btn.disabled = false;
-          return showAlert(`আপনার আইডি: ${studentId}\nএই আইডি থেকে ইতোমধ্যে পরীক্ষা দেওয়া হয়েছে! ড্যাশবোর্ড থেকে Practice Mode এ ট্রাই করুন।`, "🚫");
+          return showAlert(`Your ID: ${studentId}\nAn exam has already been taken with this ID! Try Practice Mode from the dashboard.`, "🚫");
       }
     }
     
-    showAlert(`আপনার স্টুডেন্ট আইডি: ${studentId}\n\nএটি মনে রাখুন! পরবর্তী পরীক্ষার জন্যও এটি কাজে লাগবে।`, "✅", () => {
+    showAlert(`Your Student ID: ${studentId}\n\nRemember this! You'll need it for future exams too.`, "✅", () => {
        proceedToExamScreen(studentId, uname);
     });
   } else {
@@ -1341,7 +1341,7 @@ async function startExam(){
 
 function proceedToExamScreen(studentId, uname, remainingSeconds) {
   activeStudentId = studentId;
-  document.getElementById("student-name-display").innerText = `নাম: ${uname}` + (studentId !== "Guest" ? ` | আইডি: ${studentId}` : '');
+  document.getElementById("student-name-display").innerText = `Name: ${uname}` + (studentId !== "Guest" ? ` | ID: ${studentId}` : '');
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("exam-screen").style.display = "block";
   document.getElementById("refresh-note").style.display = "flex";
@@ -1380,11 +1380,11 @@ async function submitExam(){
         w++;
         const wrongLbl = document.getElementById(`lbl-${i}-${v}`);
         if(wrongLbl) wrongLbl.classList.add("ans-w");
-        wrongDetails.push(`Q${i+1} (দেওয়া: ${q.opts[v] || 'N/A'} | সঠিক: ${q.opts[q.ans] || 'N/A'})`);
+        wrongDetails.push(`Q${i+1} (Given: ${q.opts[v] || 'N/A'} | Correct: ${q.opts[q.ans] || 'N/A'})`);
       }
     } else {
       s++;
-      wrongDetails.push(`Q${i+1} (এড়িয়ে গেছেন)`);
+      wrongDetails.push(`Q${i+1} (Skipped)`);
     }
     document.getElementsByName(`q${i}`).forEach(r => r.disabled = true);
   });
@@ -1403,7 +1403,7 @@ async function submitExam(){
   
   document.getElementById("s-score-disp").innerText = c;
   document.getElementById("pdf-s-score-disp").innerText = c; 
-  document.getElementById("status-text").innerText = `মোট ${total}টি প্রশ্নের মধ্যে আপনার সঠিক উত্তর হয়েছে ${c}টি।`;
+  document.getElementById("status-text").innerText = `You got ${c} out of ${total} questions correct.`;
 
   const url = getGasUrl();
   const uname = document.getElementById("uname").value.trim();
@@ -1560,7 +1560,7 @@ function renderQNav() {
     btn.className = 'q-nav-btn';
     btn.id = 'qnav-' + i;
     btn.textContent = i + 1;
-    btn.title = `প্রশ্ন ${i+1} এ যান`;
+    btn.title = `Go to Question ${i+1}`;
     btn.onclick = () => scrollToQuestion(i);
     wrap.appendChild(btn);
   }
@@ -1595,7 +1595,7 @@ let examInProgress = false;
 window.addEventListener('beforeunload', (e) => {
   if (examInProgress) {
     e.preventDefault();
-    e.returnValue = 'পরীক্ষা চলমান! পেজ বন্ধ করলে অগ্রগতি হারাতে পারেন।';
+    e.returnValue = 'Exam in progress! Closing the page may lose your progress.';
     return e.returnValue;
   }
 });
