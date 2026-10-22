@@ -179,8 +179,56 @@ h1,h2,h3,h4{font-family:'Inter Tight','Inter',Arial,sans-serif;letter-spacing:-.
   font-size:13.5px;background:var(--surface);color:var(--ink);text-decoration:none;
 }
 .hm-socials a:hover{border-color:var(--muted);}
-.hm-photo{position:relative;max-width:400px;margin-left:auto;}
-.hm-photo img{width:100%;height:auto;border-radius:var(--radius-lg);display:block;}
+/* ───── composite hero photo ──────────────────────────────── */
+.hm-photo{
+  position:relative;align-self:center;
+  width:min(100%,520px);aspect-ratio:1/1;margin-left:auto;
+}
+.hm-photo .cutout{             /* the person on top of everything else */
+  position:absolute;left:50%;bottom:0;transform:translateX(-48%);
+  height:95%;width:auto;border-radius:0;z-index:3;
+  filter:drop-shadow(0 24px 32px rgba(23,22,15,.14));
+}
+.hm-photo .blob{               /* the big tan circle */
+  position:absolute;left:38%;top:48%;transform:translate(-50%,-50%);
+  width:88%;aspect-ratio:1/1;border-radius:50%;background:var(--tan);
+  z-index:1;
+}
+.hm-photo .blob-sm{            /* small floating circle top-right */
+  position:absolute;top:16%;right:14%;width:52px;height:52px;border-radius:50%;
+  background:var(--tan);opacity:.75;z-index:2;
+}
+.hm-photo .sketch{             /* architectural line drawing behind the circle */
+  position:absolute;inset:0;width:100%;height:100%;z-index:2;
+  pointer-events:none;color:var(--accent);
+}
+.hm-photo .sketch path,.hm-photo .sketch line{
+  fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;
+  stroke-linejoin:round;opacity:.42;
+}
+.hm-photo .swoosh{             /* orange wavy curve under the shoulders */
+  position:absolute;left:-6%;right:-4%;bottom:10%;width:112%;height:30%;
+  z-index:4;pointer-events:none;color:var(--accent);
+}
+.hm-photo .swoosh path{
+  fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;opacity:.65;
+}
+.hm-photo .dots{               /* small 3×3 dot grid, top-right */
+  position:absolute;top:14%;right:-2%;width:56px;height:56px;z-index:2;
+  background-image:radial-gradient(var(--muted) 1.6px, transparent 1.8px);
+  background-size:14px 14px;opacity:.55;
+}
+.hm-photo .script{             /* handwritten "Build Better Tomorrow" */
+  position:absolute;top:34%;right:-10%;z-index:4;
+  font-family:'Caveat','Segoe Script',cursive;font-weight:600;
+  font-size:clamp(20px,2vw,26px);line-height:1.05;
+  color:var(--accent);text-align:center;transform:rotate(-6deg);
+}
+.hm-script-line{               /* short underline stroke under the script */
+  display:block;width:52px;height:8px;margin:4px auto 0;
+}
+.hm-script-line path{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;}
+
 .hm-avatar{object-fit:cover;}
 .hm-badge{
   position:absolute;left:14px;top:14px;background:var(--surface);
@@ -263,6 +311,7 @@ h1,h2,h3,h4{font-family:'Inter Tight','Inter',Arial,sans-serif;letter-spacing:-.
   .hm-grid{grid-template-columns:repeat(2,1fr);}
   .hm-about{grid-template-columns:1fr;}
 }
+.hm-photo .cutout{display:block;}
 @media (max-width:620px){
   .hm-grid{gap:12px;}
   .hm-card{padding:17px;}

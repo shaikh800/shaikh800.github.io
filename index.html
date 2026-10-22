@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="assets/site.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css">
   <link rel="manifest" href="site.webmanifest">
   <meta name="theme-color" content="#f3f1ec">
@@ -93,9 +93,7 @@
             <a href="research.html#account">My Account</a>
           </div>
         </div>
-              <div class="nav-actions">
-          <a class="act-ghost" href="assets/cv.pdf" download><i class="fas fa-arrow-down"></i> CV</a>
-          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+              <div class="nav-actions">          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
         </div>
 </nav>
       <div class="nav-scrim" id="navScrim"></div>
@@ -122,7 +120,7 @@
           </div>
 
           <div class="hm-ctas">
-            <a class="btn primary" href="#explore">View my work <i class="fas fa-arrow-right"></i></a>
+            <a class="btn primary" href="#about">View my work <i class="fas fa-arrow-right"></i></a>
             <a class="btn secondary" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Email me</a>
           </div>
 
@@ -134,57 +132,44 @@
         </div>
 
         <div class="hm-photo reveal">
-          <img src="assets/images/portrait-tall.png" alt="Md. Shaikh Alam" width="900" height="960">
-          <span class="hm-badge"><span class="ic"><i class="fas fa-map-pin"></i></span>Faridpur, BD</span>
+          <!-- big tan circle behind the subject -->
+          <span class="blob"></span>
+          <!-- small floating circle, top-right of the main circle -->
+          <span class="blob-sm"></span>
+          <!-- dot grid, further right -->
+          <span class="dots"></span>
+          <!-- architectural line drawing: a truss on the left, a building sketch on the right -->
+          <svg class="sketch" viewBox="0 0 520 520" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+            <!-- left: Howe truss cross-section -->
+            <path d="M 20 420 L 220 420 L 120 320 Z"/>
+            <path d="M 20 420 L 120 320 M 220 420 L 120 320 M 70 420 L 120 370 L 170 420 M 70 420 L 95 395 M 170 420 L 145 395"/>
+            <line x1="20" y1="420" x2="220" y2="420"/>
+            <!-- building columns under the truss, dashed = ground line -->
+            <path d="M 50 420 L 50 500 M 90 420 L 90 500 M 130 420 L 130 500 M 170 420 L 170 500 M 210 420 L 210 500"/>
+            <!-- right: tall building elevation -->
+            <path d="M 410 110 L 410 500 L 500 500 L 500 110 Z"/>
+            <path d="M 410 110 L 455 60 L 500 110"/>
+            <path d="M 410 170 L 500 170 M 410 230 L 500 230 M 410 290 L 500 290 M 410 350 L 500 350 M 410 410 L 500 410 M 410 470 L 500 470"/>
+            <path d="M 455 170 L 455 500"/>
+            <!-- cross-brace detail -->
+            <path d="M 420 230 L 445 200 L 450 230 M 465 230 L 490 200 L 495 230"/>
+          </svg>
+          <!-- handwritten tagline, offset to the right -->
+          <span class="script">Build Better<br>Tomorrow
+            <svg class="hm-script-line" viewBox="0 0 52 8"><path d="M 2 4 Q 18 1 32 5 T 50 3"/></svg>
+          </span>
+          <!-- cutout person -->
+          <img class="cutout" src="assets/images/shaikh-cutout.png" alt="Md. Shaikh Alam" width="1000" height="914">
+          <!-- orange wavy swoosh under the shoulders -->
+          <svg class="swoosh" viewBox="0 0 580 160" aria-hidden="true" preserveAspectRatio="none">
+            <path d="M 10 110 C 110 150, 230 60, 340 90 S 540 140, 575 70"/>
+          </svg>
         </div>
       </div>
     </section>
 
-    <!-- ── FOUR SECTIONS ─────────────────────────────────── -->
-    <section class="section" id="explore" aria-labelledby="explore-title">
-      <div class="section-head reveal">
-        <p class="eyebrow">Explore</p>
-        <h2 id="explore-title">Four sections</h2>
-        <p>Everything on this site sits in one of these. Pick where you want to go.</p>
-      </div>
-
-      <div class="hm-grid reveal-grid">
-        <a class="hm-card" href="civil.html">
-          <span class="hm-ic"><i class="fas fa-helmet-safety"></i></span>
-          <span class="hm-tag">Civil Engineering</span>
-          <h3>Truss Analyzer</h3>
-          <p>Place joints, load them, read member forces live.</p>
-          <span class="hm-foot"><span class="hm-pill">3 tools</span><i class="fas fa-arrow-right"></i></span>
-        </a>
-
-        <a class="hm-card" href="modeling.html">
-          <span class="hm-ic"><i class="fas fa-cube"></i></span>
-          <span class="hm-tag">3D Modeling</span>
-          <h3>Swordfish Ship</h3>
-          <p>An anime-inspired sci-fi hover craft, built in Blender.</p>
-          <span class="hm-foot"><span class="hm-pill">5 renders</span><i class="fas fa-arrow-right"></i></span>
-        </a>
-
-        <a class="hm-card" href="academy.html">
-          <span class="hm-ic"><i class="fas fa-graduation-cap"></i></span>
-          <span class="hm-tag">Academy</span>
-          <h3>Online Exam System</h3>
-          <p>Runs live model tests for the batches I teach.</p>
-          <span class="hm-foot"><span class="hm-pill">5 tools</span><i class="fas fa-arrow-right"></i></span>
-        </a>
-
-        <a class="hm-card" href="research.html">
-          <span class="hm-ic"><i class="fas fa-lock"></i></span>
-          <span class="hm-tag">Research Hub</span>
-          <h3>Thesis workspace</h3>
-          <p>Satellite rainfall data and basin maps, kept private.</p>
-          <span class="hm-foot"><span class="hm-pill">Approval only</span><i class="fas fa-arrow-right"></i></span>
-        </a>
-      </div>
-    </section>
-
     <!-- ── ABOUT ─────────────────────────────────────────── -->
-    <section class="section" aria-labelledby="about-title">
+    <section class="section" id="about" aria-labelledby="about-title">
       <div class="hm-about reveal">
         <div>
           <p class="eyebrow">About</p>
