@@ -32,15 +32,6 @@
       "role": "member",
       "view": true,
       "download": true
-    },
-    {
-      "id": 1792645594828,
-      "name": "naimur03rahman@gmail.com",
-      "email": "naimur03rahman@gmail.com",
-      "initials": "NA",
-      "role": "member",
-      "view": true,
-      "download": true
     }
   ],
   "notices": [
@@ -67,11 +58,14 @@
   "geminiPayments": {
     "md.shaikh.alam.007@gmail.com": {
       "2026-10": 100
+    },
+    "rafat.u.sifat@gmail.com": {
+      "2026-10": 100
     }
   },
   "pendingRequests": [],
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-22T05:06:45.952Z"
+  "updated": "2026-10-22T05:07:21.813Z"
 }
