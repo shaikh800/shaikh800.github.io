@@ -177,14 +177,6 @@ body::after {
 }
 .nav-sub a:hover, .nav-sub a.is-active { color: var(--blue); background: rgba(37, 99, 235, 0.08); }
 .nav-sub a i { width: 14px; text-align: center; opacity: .7; font-size: 12px; }
-/* small non-interactive heading splitting a dropdown into groups
-   (e.g. Civil: resources vs. standalone tools) */
-.nav-sub-label {
-  display: block; margin: 6px 0 2px 36px;
-  font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--muted); opacity: .65;
-}
-
 /* [hidden] must always win, even over classes that set their own
    display (e.g. .contact-strip { display:flex }) — otherwise toggling
    the hidden attribute/property on them silently does nothing. */
