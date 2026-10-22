@@ -342,7 +342,15 @@ h1 { margin-bottom: 16px; font-size: clamp(40px, 6vw, 68px); line-height: 1.05; 
 
 /* ─── FOOTER ─────────────────────────────────────────────── */
 .site-footer { border-top: 1px solid var(--line); padding: 30px 0; color: var(--muted); font-size: 13px; }
-.footer-shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.footer-shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+/* small, low-key entry point to admin_panel.html -- deliberately easy to miss for a regular visitor */
+.footer-admin-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  color: var(--muted); opacity: .4; font-size: 11px; text-decoration: none;
+  transition: opacity .15s ease, color .15s ease;
+}
+.footer-admin-link:hover { opacity: 1; color: var(--ink); }
 
 /* ─── MOBILE RESPONSIVENESS ──────────────────────────────── */
 @media (max-width: 900px) {

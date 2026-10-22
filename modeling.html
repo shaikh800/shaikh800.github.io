@@ -422,13 +422,15 @@
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
       <span>Built with GitHub Pages</span>
+      <span class="footer-gh-sync admin-actions">
+        <input type="password" id="footer-gh-token" placeholder="GitHub sync token" autocomplete="off" title="GitHub Personal Access Token — needed for saves to sync to the live site">
+      </span>
+      <a href="admin_panel.html" class="footer-admin-link" title="Admin"><i class="fas fa-lock"></i></a>
     </div>
   </footer>
 
 
   <div id="toast-wrap"></div>
-
-  <button class="admin-fab" id="admin-fab"><i class="fas fa-lock" id="admin-fab-icon"></i></button>
 
   <!-- ── MODAL: ADD / EDIT WORK ─────────────────────────── -->
   <div class="modal-overlay" id="modal-work">
@@ -542,35 +544,6 @@
       <div class="modal-footer">
         <button class="btn secondary sm" data-close="modal-work">Cancel</button>
         <button class="btn primary sm" id="save-work-btn"><i class="fas fa-check"></i> Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── MODAL: ADMIN LOGIN ─────────────────────────────── -->
-  <div class="modal-overlay" id="modal-admin">
-    <div class="modal-box" style="max-width:380px;">
-      <div class="modal-head">
-        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
-        <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom:0;">
-          <label>Password</label>
-          <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
-        </div>
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:4px;">Incorrect password.</p>
-
-        <details style="margin-top:16px;">
-          <summary style="cursor:pointer;font-size:11px;color:var(--muted);user-select:none;font-weight:600;">Advanced: GitHub Sync Token (Optional)</summary>
-          <div class="form-group" style="margin-top:10px;margin-bottom:0;">
-            <input type="password" id="admin-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
-            <p style="font-size:10px;color:var(--muted);margin-top:5px;line-height:1.4;">GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read &amp; Write</b></p>
-          </div>
-        </details>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
-        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
       </div>
     </div>
   </div>
@@ -821,49 +794,22 @@
     function saveWorks(arr) { localStorage.setItem(STORE_KEY, JSON.stringify(arr)); pushToGitHub(); }
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
-    /* ── ADMIN MODE — shared, server-checked session (assets/site-auth.js) ── */
+    /* ── ADMIN MODE — shared, server-checked session (assets/site-auth.js).
+       Logging in/out happens on admin_panel.html (linked from the footer);
+       this page just reflects that shared session. ── */
     let adminMode = siteIsAdmin();
-    function applyAdmin() {
-      document.body.classList.toggle('admin-mode', adminMode);
-      const fab = document.getElementById('admin-fab');
-      const ic  = document.getElementById('admin-fab-icon');
-      fab.classList.toggle('active', adminMode);
-      ic.className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
-    }
-    applyAdmin();
+    document.body.classList.toggle('admin-mode', adminMode);
 
-    document.getElementById('admin-fab').addEventListener('click', () => {
-      if (adminMode) { adminMode = false; siteAdminLogout(); applyAdmin(); toast('Admin mode off', 'info'); return; }
-      openModal('modal-admin');
-      document.getElementById('admin-pass').value = '';
-      document.getElementById('admin-error').style.display = 'none';
-      // GitHub token persists in localStorage once entered (shared with the other
-      // pages), so it doesn't need to be retyped at every admin login.
-      document.getElementById('admin-gh-token').value = localStorage.getItem('site_gh_token') || '';
-      setTimeout(() => document.getElementById('admin-pass').focus(), 300);
-    });
-    document.getElementById('admin-login-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('admin-login-btn');
-      const pw = document.getElementById('admin-pass').value;
-      if (!pw) { document.getElementById('admin-error').textContent = 'Enter the admin password.'; document.getElementById('admin-error').style.display = 'block'; return; }
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking...';
-      const result = await siteAdminLogin(pw);
-      btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock';
-      if (result.ok) {
-        adminMode = true;
-        const ghToken = document.getElementById('admin-gh-token').value.trim();
-        if (ghToken) localStorage.setItem('site_gh_token', ghToken);
-        applyAdmin(); closeModal('modal-admin');
-        toast(ghToken ? 'Admin mode on 🔓 · GitHub sync active' : 'Admin mode on 🔓', 'success');
-      } else {
-        document.getElementById('admin-error').textContent = result.message;
-        document.getElementById('admin-error').style.display = 'block';
-        document.getElementById('admin-pass').select();
-      }
-    });
-    document.getElementById('admin-pass').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('admin-login-btn').click();
-    });
+    // GitHub Sync Token -- admin_panel.html keeps its own separate token for
+    // its own purposes, so this stays here: it's what modeling.html's own
+    // save/sync functions read via localStorage.
+    const footerGhToken = document.getElementById('footer-gh-token');
+    if (footerGhToken) {
+      footerGhToken.value = localStorage.getItem('site_gh_token') || '';
+      footerGhToken.addEventListener('input', e => {
+        localStorage.setItem('site_gh_token', e.target.value.trim());
+      });
+    }
 
     /* ── MODAL ── */
     function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
@@ -871,7 +817,7 @@
     document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
     document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') ['modal-work','modal-admin','modal-img'].forEach(closeModal);
+      if (e.key === 'Escape') ['modal-work','modal-img'].forEach(closeModal);
     });
 
     /* ── FILTER ── */

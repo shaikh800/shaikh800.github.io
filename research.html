@@ -33,8 +33,8 @@
     .page-title h1 { font-size: clamp(30px, 5vw, 48px); margin-bottom: 8px; }
     .page-title .lead { margin-bottom: 0; }
     /* ── Phone polish: Shared Files look like the Semester list; no empty band above panels ── */
+    .research-tabs-row:not(:has(.switch-view:not([hidden]):not([style*="display: none"]))) { display: none; }
     @media (max-width: 640px) {
-      .research-tabs-row:not(:has(.switch-view:not([hidden]):not([style*="display: none"]))) { display: none; }
       .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
       #mainSection, #pendingView { margin-top: 0; padding-top: 12px; border-top: 0; }
       #fileTable { display: block; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
@@ -357,9 +357,6 @@
 </head>
 <body>
 
-  <!-- Admin access — lock icon, matches civil.html / modeling.html -->
-  <button class="admin-fab" id="admin-fab" title="Admin login"><i class="fas fa-lock" id="admin-fab-icon"></i></button>
-
   <div class="toast-wrap" id="toast-wrap"></div>
 
   <!-- ══════════════ ENTRY GATE — shown first, every visit ══════════════ -->
@@ -385,23 +382,6 @@
       <div class="gate-denied" id="gateDenied">
         <div class="gd-box" id="gateDeniedText"></div>
         <button class="btn secondary" style="width:100%;justify-content:center;" id="gateDeniedBackBtn"><i class="fas fa-rotate-left"></i> Try again</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modal-admin">
-    <div class="modal-box" style="max-width:360px;">
-      <div class="modal-head">
-        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
-        <button class="modal-close" onclick="closeModal('modal-admin')"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);">
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:8px;">Incorrect password.</p>
-      </div>
-      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
-        <button class="btn secondary sm" onclick="closeModal('modal-admin')">Cancel</button>
-        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
       </div>
     </div>
   </div>
@@ -844,6 +824,7 @@
     <div class="footer-shell">
       <span style="font-weight:700;color:var(--ink);">Md. Shaikh Alam</span>
       <span>Built with GitHub Pages · Faridpur, Bangladesh</span>
+      <a href="admin_panel.html" class="footer-admin-link" title="Admin"><i class="fas fa-lock"></i></a>
     </div>
   </footer>
 
@@ -1978,44 +1959,9 @@
     document.getElementById('memberFormBtn').addEventListener('click', submitMemberForm);
     document.getElementById('memberPass').addEventListener('keydown', e => { if (e.key === 'Enter') submitMemberForm(); });
 
-    /* ── Admin login — lock icon + modal (matches civil.html / modeling.html) ── */
-    function applyAdminFab() {
-      const fab = document.getElementById('admin-fab');
-      const active = role === 'admin';
-      fab.classList.toggle('active', active);
-      document.getElementById('admin-fab-icon').className = active ? 'fas fa-lock-open' : 'fas fa-lock';
-    }
-    document.getElementById('admin-fab').addEventListener('click', () => {
-      if (role === 'admin') {
-        // Route through the one shared exitToGate() instead of duplicating its
-        // steps here -- a separate copy had been leaving the "admin-mode" body
-        // class stuck on, which left admin-only UI visible after logging out.
-        exitToGate();
-        return;
-      }
-      document.getElementById('admin-pass').value = '';
-      document.getElementById('admin-error').style.display = 'none';
-      openModal('modal-admin');
-      setTimeout(() => document.getElementById('admin-pass').focus(), 300);
-    });
-    document.getElementById('admin-login-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('admin-login-btn');
-      const pw = document.getElementById('admin-pass').value;
-      const errEl = document.getElementById('admin-error');
-      if (!pw) { errEl.textContent = 'Enter the admin password.'; errEl.style.display = 'block'; return; }
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking...';
-      const result = await siteAdminLogin(pw);
-      btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock';
-      if (result.ok) {
-        closeModal('modal-admin');
-        enterAs('admin');
-      } else {
-        errEl.textContent = result.message;
-        errEl.style.display = 'block';
-        document.getElementById('admin-pass').select();
-      }
-    });
-    document.getElementById('admin-pass').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('admin-login-btn').click(); });
+    /* ── Admin mode — shared, server-checked session (assets/site-auth.js).
+       Logging in/out happens on admin_panel.html (linked from the footer);
+       this page just reflects that shared session (see role handling below). ── */
 
     function enterAs(r) {
       role = r;
@@ -2023,7 +1969,6 @@
       applyRole();
     }
     function applyRole() {
-      applyAdminFab();
       // Compute uploadOnly state from current user's member record
       const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
       const myMember = myEmail ? members.find(m => (m.email || '').toLowerCase() === myEmail) : null;
@@ -2129,7 +2074,6 @@
       gateUser = null;
       role = null;
       document.body.classList.remove('admin-mode');
-      applyAdminFab();
       showGateOptions();
       gateEl.style.display = 'flex';
     }

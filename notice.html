@@ -356,32 +356,11 @@
     <div class="footer-shell">
       <span style="font-weight:700;color:var(--ink);">Md. Shaikh Alam</span>
       <span>Civil Engineering · FEC Batch 10</span>
+      <a href="admin_panel.html" class="footer-admin-link" title="Admin"><i class="fas fa-lock"></i></a>
     </div>
   </footer>
 
-  <button class="admin-fab" id="admin-fab"><i class="fas fa-lock" id="admin-fab-icon"></i></button>
-
   <div class="toast-wrap" id="toast-wrap"></div>
-
-  <div class="modal-overlay" id="modal-admin">
-    <div class="modal-box" style="max-width:360px;">
-      <div class="modal-head">
-        <h3><i class="fas fa-lock" style="color:var(--blue);margin-right:8px;"></i>Admin Login</h3>
-        <button class="modal-close" data-close="modal-admin"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group" style="margin-bottom: 0;">
-          <label>Password</label>
-          <input type="password" id="admin-pass" placeholder="Enter admin password" autocomplete="current-password">
-        </div>
-        <p id="admin-error" style="color:#ef4444;font-size:13px;display:none;margin-top:4px;">Incorrect password.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn secondary sm" data-close="modal-admin">Cancel</button>
-        <button class="btn primary sm" id="admin-login-btn"><i class="fas fa-unlock"></i> Unlock</button>
-      </div>
-    </div>
-  </div>
 
   <script src="assets/site-auth.js"></script>
   <script src="assets/site.js"></script>
@@ -403,45 +382,11 @@
     function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
     document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
     document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) closeModal(ov.id); }));
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && document.getElementById('modal-admin').classList.contains('open')) closeModal('modal-admin');
-    });
-
-    /* ── Admin mode — shared, server-checked session (assets/site-auth.js) ── */
+    /* ── Admin mode — shared, server-checked session (assets/site-auth.js).
+       Logging in/out happens on admin_panel.html (linked from the footer);
+       this page just reflects that shared session. ── */
     let adminMode = siteIsAdmin();
-    function applyAdmin() {
-      document.body.classList.toggle('admin-mode', adminMode);
-      const fab = document.getElementById('admin-fab');
-      fab.classList.toggle('active', adminMode);
-      document.getElementById('admin-fab-icon').className = adminMode ? 'fas fa-lock-open' : 'fas fa-lock';
-    }
-    applyAdmin();
-
-    document.getElementById('admin-fab').addEventListener('click', () => {
-      if (adminMode) { adminMode = false; siteAdminLogout(); applyAdmin(); toast('Admin mode off', 'info'); return; }
-      document.getElementById('admin-pass').value = '';
-      document.getElementById('admin-error').style.display = 'none';
-      openModal('modal-admin');
-      setTimeout(() => document.getElementById('admin-pass').focus(), 300);
-    });
-    document.getElementById('admin-login-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('admin-login-btn');
-      const pw = document.getElementById('admin-pass').value;
-      if (!pw) { document.getElementById('admin-error').textContent = 'Enter the admin password.'; document.getElementById('admin-error').style.display = 'block'; return; }
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking...';
-      const result = await siteAdminLogin(pw);
-      btn.disabled = false; btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock';
-      if (result.ok) {
-        adminMode = true;
-        applyAdmin(); closeModal('modal-admin');
-        toast('Admin mode on 🔓', 'success');
-      } else {
-        document.getElementById('admin-error').textContent = result.message;
-        document.getElementById('admin-error').style.display = 'block';
-        document.getElementById('admin-pass').select();
-      }
-    });
-    document.getElementById('admin-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('admin-login-btn').click(); });
+    document.body.classList.toggle('admin-mode', adminMode);
 
     /* ════════════════════════════════════════════════════════
        EXAM SCHEDULE TRACKER — live DU engineering-colleges feed
