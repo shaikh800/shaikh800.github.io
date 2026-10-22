@@ -31,7 +31,8 @@
       "initials": "RA",
       "role": "member",
       "view": true,
-      "download": true
+      "download": true,
+      "whatsapp": "01748232140"
     },
     {
       "id": 1792645460676,
@@ -73,5 +74,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-22T05:04:35.879Z"
+  "updated": "2026-10-22T05:05:29.253Z"
 }
