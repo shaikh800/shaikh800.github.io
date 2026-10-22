@@ -49,8 +49,16 @@ document.querySelectorAll(".nav-caret").forEach((btn) => {
     toggleNavGroup(btn.closest(".nav-group"));
   });
 });
+// On the desktop flat nav (>=901px) a group's label (Civil / 3D / Academy /
+// Research) IS the only way to reach that page -- there's no caret/dropdown
+// visible there (theme.css hides .nav-caret/.nav-sub at that width), so the
+// link must navigate normally. Only inside the mobile slide-in drawer does
+// tapping the label open its accordion instead of jumping straight to the
+// first sub-item.
+const mobileNavQuery = window.matchMedia("(max-width: 900px)");
 document.querySelectorAll(".nav-group-head > .nav-link").forEach((link) => {
   link.addEventListener("click", (e) => {
+    if (!mobileNavQuery.matches) return;
     e.preventDefault();
     toggleNavGroup(link.closest(".nav-group"));
   });
