@@ -85,8 +85,7 @@ h1,h2,h3,h4{font-family:'Inter Tight','Inter',Arial,sans-serif;letter-spacing:-.
     padding:0;margin-left:auto;transform:none;
     background:transparent;box-shadow:none;border:0;
   }
-  .site-nav .nav-sub,.site-nav .nav-caret{display:none;}
-  .nav-group{flex-direction:row;}
+  .nav-group{flex-direction:row;position:relative;}
   .site-nav a{
     min-height:auto;padding:5px 0;border-radius:0;
     background:transparent;color:var(--ink);opacity:.6;
@@ -103,6 +102,34 @@ h1,h2,h3,h4{font-family:'Inter Tight','Inter',Arial,sans-serif;letter-spacing:-.
   .site-nav .nav-actions a{flex:none;min-height:38px;font-size:12.5px;padding:0 15px;}
   .nav-shell{gap:16px;}
   .brand small{display:none;}      /* keep the bar on one line */
+
+  /* ── group label dropdown, desktop version ────────────────
+     Same .nav-sub markup as the mobile drawer -- here it floats as a
+     card below the group label instead of expanding inline. Clicking
+     Civil/3D/Academy/Research opens this instead of navigating away;
+     the first link inside is always that page's own overview. */
+  .site-nav .nav-caret{
+    display:inline-flex;width:14px;min-height:auto;padding:0;margin-left:4px;
+    color:inherit;opacity:.5;background:none;border-radius:0;
+  }
+  .site-nav .nav-caret i{font-size:10px;}
+  .site-nav .nav-sub{
+    display:flex;flex-direction:column;
+    position:absolute;top:calc(100% + 16px);left:50%;
+    transform:translate(-50%,4px);
+    width:max-content;min-width:210px;max-height:none;overflow:visible;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);padding:8px;margin:0;
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity .18s ease,transform .18s ease,visibility .18s;
+    z-index:60;
+  }
+  .nav-group.is-open .nav-sub{
+    opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0);
+  }
+  .site-nav .nav-sub a{color:var(--ink);opacity:.72;font-size:13.5px;}
+  .site-nav .nav-sub a:hover{opacity:1;background:var(--surface-soft);}
+  .site-nav .nav-sub a i{display:inline-flex;}   /* re-show tool icons inside the dropdown */
 }
 
 /* ─── TYPE ───────────────────────────────────────────────── */

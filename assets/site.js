@@ -32,15 +32,31 @@ if (navToggle && siteNav) {
   });
 }
 
-/* ── NAV ACCORDION (Civil / 3D / Academy / Research sub-menus) ──
+/* ── NAV ACCORDION / DROPDOWN (Civil / 3D / Academy / Research sub-menus) ──
    A group's own label (Civil, 3D, Academy, Research) only opens its
-   dropdown — it never jumps straight into the first sub-item. Picking
-   where to go is always a second, deliberate tap on one of the sub-links. */
+   sub-menu — it never jumps straight into the first sub-item. Picking
+   where to go is always a second, deliberate tap on one of the sub-links
+   (the first of which is always an "overview" link to that page itself,
+   so the full page is still one tap away). On mobile this expands inline
+   inside the slide-in drawer; on desktop (>=901px) theme.css turns the
+   same .nav-sub markup into a floating dropdown panel instead — same
+   markup, same JS, different CSS presentation per breakpoint. */
+function closeNavGroup(group) {
+  group.classList.remove("is-open");
+  const caret = group.querySelector(".nav-caret");
+  if (caret) caret.setAttribute("aria-expanded", "false");
+}
 function toggleNavGroup(group) {
   if (!group) return;
-  const isOpen = group.classList.toggle("is-open");
+  const willOpen = !group.classList.contains("is-open");
+  // Only one dropdown/accordion open at a time -- opening a new one closes
+  // any sibling that was already open.
+  document.querySelectorAll(".nav-group.is-open").forEach((g) => {
+    if (g !== group) closeNavGroup(g);
+  });
+  group.classList.toggle("is-open", willOpen);
   const caret = group.querySelector(".nav-caret");
-  if (caret) caret.setAttribute("aria-expanded", String(isOpen));
+  if (caret) caret.setAttribute("aria-expanded", String(willOpen));
 }
 document.querySelectorAll(".nav-caret").forEach((btn) => {
   btn.addEventListener("click", (e) => {
@@ -49,19 +65,30 @@ document.querySelectorAll(".nav-caret").forEach((btn) => {
     toggleNavGroup(btn.closest(".nav-group"));
   });
 });
-// On the desktop flat nav (>=901px) a group's label (Civil / 3D / Academy /
-// Research) IS the only way to reach that page -- there's no caret/dropdown
-// visible there (theme.css hides .nav-caret/.nav-sub at that width), so the
-// link must navigate normally. Only inside the mobile slide-in drawer does
-// tapping the label open its accordion instead of jumping straight to the
-// first sub-item.
-const mobileNavQuery = window.matchMedia("(max-width: 900px)");
 document.querySelectorAll(".nav-group-head > .nav-link").forEach((link) => {
   link.addEventListener("click", (e) => {
-    if (!mobileNavQuery.matches) return;
     e.preventDefault();
     toggleNavGroup(link.closest(".nav-group"));
   });
+});
+// Clicking anywhere outside an open group (its label, caret or dropdown)
+// closes it -- desktop only: that's the floating-dropdown presentation,
+// which has no scrim behind it the way the mobile drawer has. Inside the
+// mobile drawer this same rule would be wrong -- e.g. tapping the hamburger
+// to OPEN the drawer is itself a click "outside" any nav-group, which would
+// instantly collapse the current page's pre-expanded accordion before the
+// drawer even finished opening. Mobile already closes everything together
+// via the drawer's own scrim/outside-click handling above.
+document.addEventListener("click", (e) => {
+  if (mobileNavQuery.matches) return;
+  document.querySelectorAll(".nav-group.is-open").forEach((g) => {
+    if (!g.contains(e.target)) closeNavGroup(g);
+  });
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    document.querySelectorAll(".nav-group.is-open").forEach(closeNavGroup);
+  }
 });
 
 /* ── HASH-TO-SECTION SCROLL ──────────────────────────────────
@@ -90,6 +117,10 @@ document.querySelectorAll(".nav-group-head > .nav-link").forEach((link) => {
 })();
 
 
+// True only inside the mobile slide-in drawer's breakpoint -- used below
+// to keep desktop's floating dropdowns closed until a visitor opens one.
+const mobileNavQuery = window.matchMedia("(max-width: 900px)");
+
 /* ── ACTIVE NAV LINK ─────────────────────────────────────── */
 const pagePath = window.location.pathname.split("/").pop() || "index.html";
 document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
@@ -97,8 +128,13 @@ document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
   if (isCurrent) {
     link.classList.add("is-active");
     link.setAttribute("aria-current", "page");
+    // Pre-expand the current page's group so it reads as "you are here"
+    // the moment the mobile drawer opens. Desktop skips this: there
+    // .is-open drives the floating dropdown, and auto-popping that open
+    // on every page load (covering the hero) would be the opposite of
+    // helpful -- the underlined label already marks the active page there.
     const group = link.closest(".nav-group");
-    if (group) {
+    if (group && mobileNavQuery.matches) {
       group.classList.add("is-open");
       const caret = group.querySelector(".nav-caret");
       if (caret) caret.setAttribute("aria-expanded", "true");
