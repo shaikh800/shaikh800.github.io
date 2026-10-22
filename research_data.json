@@ -25,22 +25,13 @@
       "uploadOnly": true
     },
     {
-      "id": 1792645284972,
+      "id": 1792645380197,
       "name": "rafat.u.sifat@gmail.com",
       "email": "rafat.u.sifat@gmail.com",
       "initials": "RA",
       "role": "member",
       "view": true,
-      "download": true
-    },
-    {
-      "id": 1792645316396,
-      "name": "naimur03rahman@gmail.com",
-      "email": "naimur03rahman@gmail.com",
-      "initials": "NA",
-      "role": "member",
-      "view": true,
-      "download": true
+      "download": false
     }
   ],
   "notices": [
@@ -73,5 +64,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-22T05:02:22.384Z"
+  "updated": "2026-10-22T05:03:00.200Z"
 }
