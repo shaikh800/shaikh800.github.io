@@ -9,7 +9,11 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/home.css">
   <link rel="manifest" href="site.webmanifest">
   <meta name="theme-color" content="#2563eb">
   <link rel="apple-touch-icon" href="favicon.svg">
@@ -20,21 +24,7 @@
   <meta property="og:url" content="https://mdshaikh.me/">
   <meta name="twitter:card" content="summary">
   <style>
-    /* ── 3-col card grid for featured section ── */
-    .card-grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 20px;
-    }
-    @media (max-width: 900px) {
-      .card-grid-3 { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 560px) {
-      .card-grid-3 { grid-template-columns: 1fr; }
-    }
-
-    /* ── profile card responsive override ──
-       site.css hides it at 900px, keep it visible until 700px */
+    /* profile card responsive override — site.css hides it at 900px, keep it visible until 700px */
     @media (min-width: 700px) and (max-width: 900px) {
       .profile-card { display: block; }
     }
@@ -108,16 +98,28 @@
   <main class="page">
 
     <section class="intro" aria-labelledby="intro-title">
+      <svg class="hero-blueprint" viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="230" cy="230" r="180" stroke="#2563eb" stroke-width="1" stroke-dasharray="2 6"/>
+        <circle cx="230" cy="230" r="120" stroke="#2563eb" stroke-width="1"/>
+        <path d="M230 50 L230 20 M230 410 L230 440 M50 230 L20 230 M410 230 L440 230" stroke="#2563eb" stroke-width="1.2"/>
+        <path d="M70 330 L170 230 L230 270 L390 110" stroke="#2563eb" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="170" cy="230" r="4" fill="#2563eb"/>
+        <circle cx="230" cy="270" r="4" fill="#2563eb"/>
+        <circle cx="390" cy="110" r="4" fill="#2563eb"/>
+        <text x="250" y="275" font-family="monospace" font-size="11" fill="#2563eb">M3</text>
+        <text x="120" y="245" font-family="monospace" font-size="11" fill="#2563eb">M1</text>
+      </svg>
+
       <div class="intro-content">
-        <p class="eyebrow">Civil engineering student and maker</p>
+        <p class="eyebrow">Civil engineering student &amp; tool builder</p>
         <h1 id="intro-title">Md. Shaikh Alam</h1>
-        <p class="lead">I build small, useful tools for study and engineering workflows — academic document utilities, Blender modeling and cleaner web interfaces.</p>
+        <p class="lead">I build small, useful tools for study and engineering workflows — academic document utilities, live exam systems and a Google-Drive-backed research hub. Outside of that, I model and animate in Blender.</p>
 
         <div class="actions">
           <a class="btn primary" href="civil.html"><i class="fas fa-helmet-safety"></i> Civil Section</a>
           <a class="btn secondary" href="academy.html"><i class="fas fa-graduation-cap"></i> Academy Tools</a>
         </div>
-        <div class="civil-quick-strip" style="margin-bottom:28px;">
+        <div class="home-quicklinks">
           <a class="civil-quick-link" href="cover-page-maker.html"><i class="fas fa-file-lines"></i> Cover Page</a>
           <a class="civil-quick-link" href="lab-index.html"><i class="fas fa-table-list"></i> Lab Index</a>
           <a class="civil-quick-link" href="truss-analyzer.html"><i class="fas fa-diagram-project"></i> Truss Analyzer</a>
@@ -148,40 +150,81 @@
         <div class="pc-row"><i class="fas fa-map-pin"></i><span>Faridpur, Bangladesh</span></div>
         <div class="pc-row"><i class="fas fa-envelope"></i><span>md.shaikh.alam.007@gmail.com</span></div>
         <div class="pc-row"><i class="fab fa-facebook"></i><span>facebook.com/shaikh.069</span></div>
+        <div class="pc-badge live"><span>Actively building</span></div>
       </aside>
     </section>
 
     <section class="section" aria-labelledby="featured-title">
       <div class="section-head reveal">
         <h2 id="featured-title">Featured Work</h2>
-        <p>Sections I'm actively building and maintaining.</p>
+        <p>Four sections, each a real tool people actually use — not just mockups.</p>
       </div>
 
-      <div class="card-grid reveal-grid">
-        <a class="civil-hero-card" href="civil.html">
-          <span class="card-icon"><i class="fas fa-helmet-safety"></i></span>
-          <h3>Civil Engineering Section</h3>
-          <p>Tools, semester resources, notice board and academic utilities — all in one place for FEC Batch 10 students.</p>
-          <div class="hero-tools">
-            <span class="civil-tool-chip"><i class="fas fa-file-lines"></i> Cover Page</span>
-            <span class="civil-tool-chip"><i class="fas fa-table-list"></i> Lab Index</span>
-            <span class="civil-tool-chip"><i class="fas fa-diagram-project"></i> Truss Analyzer</span>
-            <span class="civil-tool-chip"><i class="fas fa-book-open"></i> Semester Files</span>
+      <div class="showcase-grid reveal-grid">
+        <a class="showcase-card" href="civil.html">
+          <div class="showcase-thumb">
+            <img src="assets/images/thumb-civil.jpg" alt="Truss Analyzer tool showing a solved truss diagram with load and dimensions" loading="lazy">
+            <span class="showcase-thumb-badge"><i class="fas fa-helmet-safety"></i></span>
           </div>
-          <span class="card-meta" style="margin-top:18px;">Open civil section →</span>
+          <div class="showcase-body">
+            <h3>Civil Engineering Section</h3>
+            <p>Cover page maker, lab index generator and a real-time truss analyzer &amp; solver — built for FEC Batch 10 coursework.</p>
+            <span class="showcase-meta">Open civil section <i class="fas fa-arrow-right"></i></span>
+          </div>
         </a>
-        <a class="project-card" href="academy.html">
-          <span class="card-icon"><i class="fas fa-graduation-cap"></i></span>
-          <h3>Academy Hub</h3>
-          <p>Question banks, online model tests, exam control and a student portal — all in one place.</p>
-          <span class="card-meta">Open Academy →</span>
+
+        <a class="showcase-card" href="modeling.html">
+          <div class="showcase-thumb">
+            <img src="assets/images/thumb-modeling.jpg" alt="Blender 3D renders — a car animation and a robot character" loading="lazy">
+            <span class="showcase-thumb-badge"><i class="fas fa-cube"></i></span>
+          </div>
+          <div class="showcase-body">
+            <h3>3D Modeling &amp; Animation</h3>
+            <p>Blender renders, rigging and short animations — from hard-surface sci-fi props to stylised characters.</p>
+            <span class="showcase-meta">View 3D work <i class="fas fa-arrow-right"></i></span>
+          </div>
         </a>
-        <a class="project-card" href="modeling.html">
-          <span class="card-icon"><i class="fas fa-dice-d20"></i></span>
-          <h3>3D Modeling</h3>
-          <p>Blender practice, rigging, animation and visual experiments.</p>
-          <span class="card-meta">View 3D work →</span>
+
+        <a class="showcase-card" href="academy.html">
+          <div class="showcase-thumb">
+            <img src="assets/images/thumb-academy.jpg" alt="Academy Hub exam tools — Question Builder, Online Exam System and Exam Controller" loading="lazy">
+            <span class="showcase-thumb-badge"><i class="fas fa-graduation-cap"></i></span>
+          </div>
+          <div class="showcase-body">
+            <h3>Academy Hub</h3>
+            <p>Question Builder, a live online exam system with timers, and a student portal — used to run real tuition batches.</p>
+            <span class="showcase-meta">Open Academy <i class="fas fa-arrow-right"></i></span>
+          </div>
         </a>
+
+        <a class="showcase-card is-locked" href="research.html">
+          <span class="locked-pill"><i class="fas fa-lock"></i> Members only</span>
+          <div class="showcase-thumb">
+            <span class="showcase-icon"><i class="fas fa-flask"></i></span>
+          </div>
+          <div class="showcase-body">
+            <h3>Research Hub</h3>
+            <p>A private team workspace synced to Google Drive, with its own sign-up → admin-approval flow and a live file browser.</p>
+            <span class="showcase-meta">Request access <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="stack-title">
+      <div class="section-head reveal">
+        <p class="section-tag">Under the hood</p>
+        <h2 id="stack-title">Tools &amp; tech</h2>
+        <p>What these sections are actually built with.</p>
+      </div>
+      <div class="stack-row reveal">
+        <span class="stack-chip"><i class="fab fa-html5"></i> HTML &amp; CSS</span>
+        <span class="stack-chip"><i class="fab fa-js"></i> JavaScript</span>
+        <span class="stack-chip"><i class="fas fa-code"></i> Google Apps Script</span>
+        <span class="stack-chip"><i class="fab fa-google-drive"></i> Google Drive API</span>
+        <span class="stack-chip"><i class="fas fa-cloud"></i> Cloudflare Workers</span>
+        <span class="stack-chip"><i class="fab fa-github"></i> GitHub Pages</span>
+        <span class="stack-chip"><i class="fas fa-cube"></i> Blender 4.2</span>
       </div>
     </section>
 
@@ -198,7 +241,13 @@
           </ul>
         </div>
         <div class="media-note">
-          <img src="assets/images/Faridpur_Engineering_College.jpg" alt="Faridpur Engineering College logo" loading="lazy" width="600" height="600">
+          <div class="affiliation-card">
+            <img src="assets/images/Faridpur_Engineering_College.jpg" alt="Faridpur Engineering College crest">
+            <div>
+              <div class="aff-name">Faridpur Engineering College</div>
+              <div class="aff-dept">Dept. of Civil Engineering</div>
+            </div>
+          </div>
           <h3>Engineering background</h3>
           <p>Academic tools are built around Faridpur Engineering College's format and requirements — especially civil engineering reports, indexes, and printable documents.</p>
         </div>
