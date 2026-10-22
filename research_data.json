@@ -51,9 +51,15 @@
       "2026-10": 100
     }
   },
-  "pendingRequests": [],
+  "pendingRequests": [
+    {
+      "email": "rafat.u.sifat@gmail.com",
+      "name": "rafat.u.sifat",
+      "requestedAt": "2026-10-22T04:58:34.416Z"
+    }
+  ],
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-21T15:07:49.426Z"
+  "updated": "2026-10-22T04:58:34.416Z"
 }
