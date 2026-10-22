@@ -1532,6 +1532,7 @@
 11. প্রতিটি MCQ-এর মাঝে একটি ফাঁকা লাইন রাখো।
 12. ছবিতে উত্তর না থাকলে সবচেয়ে সম্ভাব্য সঠিক উত্তর দাও।
 13. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
+14. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের সাথে ফিগারটা সম্পর্কিত তার ঠিক আগে, {উদ্দীপক}-এর মতোই, নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। একই ফিগার একাধিক প্রশ্নে লাগলে প্রতিটি প্রশ্নের আগে আলাদাভাবে লেখো। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।
 
 এখন ছবি দাও — আমি সব MCQ extract করে দেব।`;
         } else if (type === 'cq') {
@@ -1560,6 +1561,7 @@
 6. হুবহু বইয়ের টেক্সট — কিছু যোগ/বাদ নয়।
 7. শুধু formatted CQ output — কোনো ব্যাখ্যা নয়।
 8. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
+9. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের উদ্দীপকের সাথে ফিগারটা সম্পর্কিত, তার ঠিক আগে নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।
 
 এখন ছবি দাও — আমি সব CQ extract করে দেব।`;
         } else if (type === 'question') {
@@ -1582,6 +1584,7 @@
 4. হুবহু বইয়ের টেক্সট — কোনো উত্তর বা ব্যাখ্যা নয়।
 5. শুধু formatted প্রশ্ন output করো।
 6. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
+7. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের সাথে ফিগারটা সম্পর্কিত তার ঠিক আগে নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।
 
 এখন ছবি দাও — আমি সব প্রশ্ন extract করে দেব।`;
         }
@@ -4712,6 +4715,69 @@ function splitIntoQuestionBlocks(text) {
         return contentLines.join("\n").trim();
       }
 
+      // ── AI figure extraction: turns an AI-drawn [FIGURE]<svg>...</svg>[/FIGURE]
+      // block (see copyAiPrompt) into an actual image attached to the question/CQ it
+      // precedes, the same way {stimulus text} attaches to the question it precedes.
+      function svgToDataUri(svgMarkup) {
+        const cleaned = String(svgMarkup || "").trim();
+        try {
+          return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(cleaned)));
+        } catch (e) {
+          return "data:image/svg+xml;utf8," + encodeURIComponent(cleaned);
+        }
+      }
+      function cleanExtractedSvg(raw) {
+        let s = String(raw || "").trim();
+        s = s.replace(/^```[a-zA-Z]*\s*/, "").replace(/```\s*$/, "").trim();
+        const svgMatch = s.match(/<svg[\s\S]*?<\/svg>/i);
+        return svgMatch ? svgMatch[0] : s;
+      }
+      function extractFigureBlocks(rawText) {
+        const text = String(rawText || "");
+        const figureRe = /\[\s*FIGURE\s*\]([\s\S]*?)\[\s*\/\s*FIGURE\s*\]/gi;
+        const qNumRe = /(?:^|\n)[ \t]*[০-৯0-9]{1,3}[ \t]*[.)।:-]+/g;
+
+        const figureSpans = [];
+        const markers = [];
+        let m;
+        while ((m = figureRe.exec(text))) {
+          const start = m.index;
+          const end = start + m[0].length;
+          figureSpans.push([start, end]);
+          const svg = cleanExtractedSvg(m[1]);
+          if (/<svg[\s>]/i.test(svg)) markers.push({ type: "figure", index: start, svg });
+        }
+        while ((m = qNumRe.exec(text))) {
+          const insideFigure = figureSpans.some(([s, e]) => m.index >= s && m.index < e);
+          if (!insideFigure) markers.push({ type: "qnum", index: m.index });
+        }
+        markers.sort((a, b) => a.index - b.index);
+
+        const figures = [];
+        let qCount = 0;
+        for (const mk of markers) {
+          if (mk.type === "qnum") qCount++;
+          else figures.push({ svg: mk.svg, forIndex: qCount });
+        }
+
+        const cleanedText = text.replace(figureRe, "\n").replace(/\n{3,}/g, "\n\n");
+        return { cleanedText, figures };
+      }
+      function attachFiguresToList(list, figures, defaultWidth, defaultHeight) {
+        if (!Array.isArray(list) || !figures.length) return;
+        figures.forEach((f) => {
+          const target = list[f.forIndex];
+          if (!target) return;
+          if (!Array.isArray(target.images)) target.images = [];
+          target.images.push({
+            src: svgToDataUri(f.svg),
+            align: "center",
+            width: String(defaultWidth),
+            height: String(defaultHeight),
+          });
+        });
+      }
+
       function parseBulkText(text) {
         const rawClean = String(text || "").replace(/\r/g, "").trim();
 
@@ -4802,7 +4868,9 @@ function splitIntoQuestionBlocks(text) {
           return;
         }
         try {
-          state.questions = parseBulkText(text);
+          const { cleanedText, figures } = extractFigureBlocks(text);
+          state.questions = parseBulkText(cleanedText);
+          attachFiguresToList(state.questions, figures, state.layout.mcqImageWidth, state.layout.mcqImageHeight);
           syncNumbers();
           initEditors();
           renderAll();
@@ -4943,7 +5011,9 @@ function splitIntoQuestionBlocks(text) {
           return;
         }
         try {
-          state.cqs = parseCQBulkText(text);
+          const { cleanedText, figures } = extractFigureBlocks(text);
+          state.cqs = parseCQBulkText(cleanedText);
+          attachFiguresToList(state.cqs, figures, state.layout.cqImageWidth, state.layout.cqImageHeight);
           initEditors();
           renderAll();
         } catch (err) {
@@ -5000,7 +5070,9 @@ function splitIntoQuestionBlocks(text) {
           return;
         }
         try {
-          state.onlyQuestions = parseOnlyQuestionBulkText(text);
+          const { cleanedText, figures } = extractFigureBlocks(text);
+          state.onlyQuestions = parseOnlyQuestionBulkText(cleanedText);
+          attachFiguresToList(state.onlyQuestions, figures, state.layout.questionImageWidth, state.layout.questionImageHeight);
           initEditors();
           renderAll();
         } catch (err) {
