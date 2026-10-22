@@ -64,67 +64,29 @@ document.querySelectorAll(".nav-group-head > .nav-link").forEach((link) => {
   });
 });
 
-/* ── SECTION FOCUS MODE (sidebar sub-links open just that one section) ──
-   When the page is reached via a hash that matches one of main.page's
-   direct <section id="..."> children (the way every sidebar dropdown
-   sub-link points), every other top-level section — including the page
-   hero — is hidden, so only that section's content shows.
-   Civil / 3D / Academy declare data-default-section on <main.page>, so
-   they have no standalone "overview" page at all: a bare visit (no hash)
-   jumps straight into that default section instead, and there's no back
-   link, since there's no full page to go back to — only the sidebar's
-   sub-links move between sections. Pages without that attribute (Notice,
-   Research, Home) keep the old behaviour: show everything by default,
-   and offer a back link once a hash focuses one section. ───────────── */
+/* ── HASH-TO-SECTION SCROLL ──────────────────────────────────
+   A sidebar dropdown sub-link points at a hash matching one of
+   main.page's direct <section id="..."> children. The page always
+   shows ALL of its sections -- this just smooth-scrolls to the one
+   the hash names, so a sub-link reads as "jump to" rather than
+   "show only this and hide the rest of the page". ───────────── */
 (function () {
   const main = document.querySelector("main.page");
   if (!main) return;
   const sections = Array.from(main.children).filter((el) => el.tagName === "SECTION");
   if (sections.length < 2) return;
 
-  // Pages that opt in (civil/modeling/academy) set data-default-section on
-  // <main.page>: with no hash, they jump straight into that section instead
-  // of showing an overview/menu — there is no "main page" to land on, only
-  // the sidebar's sub-links. Pages that don't opt in (notice/research/index)
-  // keep the old behaviour — show everything unless a hash targets one.
-  const defaultSection = main.dataset.defaultSection || null;
-
-  let backBar = null;
-  if (!defaultSection) {
-    backBar = document.createElement("div");
-    backBar.className = "focus-backbar";
-    backBar.hidden = true;
-    backBar.innerHTML = '<a class="back-link" href="#"><i class="fas fa-arrow-left"></i> <span>Back to full page</span></a>';
-    main.insertBefore(backBar, main.firstChild);
-    backBar.querySelector("a").addEventListener("click", (e) => {
-      e.preventDefault();
-      history.pushState("", document.title, window.location.pathname + window.location.search);
-      applySectionFocus();
-      window.scrollTo(0, 0);
-    });
-  }
-
-  function applySectionFocus() {
-    let hash = (window.location.hash || "").slice(1);
-    if (!hash && defaultSection) {
-      hash = defaultSection;
-      history.replaceState("", document.title, window.location.pathname + window.location.search + "#" + hash);
-    }
-    const target = hash && sections.find((sec) => sec.id === hash);
-    sections.forEach((sec) => {
-      // Elements marked data-keep-hidden (e.g. a page's own hero that a newer,
-      // page-specific tab system has permanently retired) should never be forced
-      // back open by this generic fallback -- only an explicit matching hash may
-      // reveal them.
-      if (!target && sec.hasAttribute('data-keep-hidden')) return;
-      sec.hidden = Boolean(target) && sec !== target;
-    });
-    if (backBar) backBar.hidden = !target;
+  function scrollToHashSection() {
+    const hash = (window.location.hash || "").slice(1);
+    if (!hash) return;
+    // data-keep-hidden marks a page's own retired hero (e.g. research.html's) --
+    // never scroll to / reveal it, even if something somehow linked its id.
+    const target = sections.find((sec) => sec.id === hash && !sec.hasAttribute("data-keep-hidden"));
     if (target) target.scrollIntoView({ block: "start" });
   }
 
-  window.addEventListener("hashchange", applySectionFocus);
-  applySectionFocus();
+  window.addEventListener("hashchange", scrollToHashSection);
+  scrollToHashSection();
 })();
 
 
