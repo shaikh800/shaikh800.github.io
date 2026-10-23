@@ -5804,6 +5804,45 @@ function splitIntoQuestionBlocks(text) {
           );
         }
       }
+
+// ── Wizard Step System ──
+const WIZ_MAP = {
+  1: ['wizGuideBox', 'globalLangField', 'sheetOptionsSection', 'basicExamInfoSection'],
+  2: ['bulkMcqImportSection', 'sectionTitlesWrap', 'mcqSectionHeaderWrap', 'mcqMgmtBar', 'mcqEditorList'],
+  3: ['cqSectionMount', 'cqEditorList'],
+  4: ['onlyQuestionSectionMount', 'onlyQuestionEditorList'],
+  5: ['wizSettingsZone'],
+  6: ['wizNavZone', 'wizHistZone', 'wizExportZone', 'wizHr'],
+};
+const WIZ_LABELS = { 1:'Header', 2:'MCQ', 3:'CQ', 4:'Questions', 5:'Settings', 6:'Export' };
+let activeWizStep = 1;
+
+function switchStep(n) {
+  const allIds = Object.values(WIZ_MAP).flat();
+  allIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('wiz-hidden');
+  });
+  (WIZ_MAP[n] || []).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('wiz-hidden');
+  });
+  activeWizStep = n;
+  // Update stepper buttons
+  document.querySelectorAll('.wiz-btn').forEach(function(btn) {
+    var s = +btn.dataset.step;
+    btn.classList.toggle('active', s === n);
+    btn.classList.toggle('done', s < n);
+  });
+  // Update progress bar (0% at step 1, 100% at step 6)
+  var prog = document.getElementById('wizProgress');
+  if (prog) prog.style.width = Math.round(((n - 1) / 5) * 100) + '%';
+  // Update subtitle
+  var sub = document.getElementById('wizSubtitle');
+  if (sub) sub.textContent = WIZ_LABELS[n] || '';
+  try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
+}
+
       // ── Wizard step restore on load ──
       (function() {
         var saved = 1;
@@ -6063,43 +6102,6 @@ function confirmCrop() {
   initEditors();
 }
 
-// ── Wizard Step System ──
-const WIZ_MAP = {
-  1: ['wizGuideBox', 'globalLangField', 'sheetOptionsSection', 'basicExamInfoSection'],
-  2: ['bulkMcqImportSection', 'sectionTitlesWrap', 'mcqSectionHeaderWrap', 'mcqMgmtBar', 'mcqEditorList'],
-  3: ['cqSectionMount', 'cqEditorList'],
-  4: ['onlyQuestionSectionMount', 'onlyQuestionEditorList'],
-  5: ['wizSettingsZone'],
-  6: ['wizNavZone', 'wizHistZone', 'wizExportZone', 'wizHr'],
-};
-const WIZ_LABELS = { 1:'Header', 2:'MCQ', 3:'CQ', 4:'Questions', 5:'Settings', 6:'Export' };
-let activeWizStep = 1;
-
-function switchStep(n) {
-  const allIds = Object.values(WIZ_MAP).flat();
-  allIds.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.add('wiz-hidden');
-  });
-  (WIZ_MAP[n] || []).forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.classList.remove('wiz-hidden');
-  });
-  activeWizStep = n;
-  // Update stepper buttons
-  document.querySelectorAll('.wiz-btn').forEach(function(btn) {
-    var s = +btn.dataset.step;
-    btn.classList.toggle('active', s === n);
-    btn.classList.toggle('done', s < n);
-  });
-  // Update progress bar (0% at step 1, 100% at step 6)
-  var prog = document.getElementById('wizProgress');
-  if (prog) prog.style.width = Math.round(((n - 1) / 5) * 100) + '%';
-  // Update subtitle
-  var sub = document.getElementById('wizSubtitle');
-  if (sub) sub.textContent = WIZ_LABELS[n] || '';
-  try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
-}
 
 </script>
 </body>
