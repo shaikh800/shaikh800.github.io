@@ -824,6 +824,7 @@
 
   <script src="assets/site.js"></script>
   <script src="assets/site-auth.js"></script>
+  <script src="assets/site-data.js"></script>
   <script>
     /* ═══════════════ SHARED STATE — synced via GitHub, same pattern as the Civil page ═══════════════ */
     let role = null; // 'admin' | 'member' — set by the gate
@@ -999,21 +1000,16 @@
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       const token = localStorage.getItem('site_gh_token');
       if (!token) return { ok: false, reason: 'no-token' };
-      try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-        let sha = null;
-        const g = await fetch(apiUrl, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } });
-        if (g.status === 401) return { ok: false, reason: 'bad-token' };
-        if (g.ok) { const j = await g.json(); sha = j.sha; }
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-        const put = await fetch(apiUrl, {
-          method: 'PUT',
-          headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
-          body: JSON.stringify({ message: 'Update research hub data', content, ...(sha ? { sha } : {}) })
-        });
-        if (put.status === 401 || put.status === 403) return { ok: false, reason: 'bad-token' };
-        return { ok: put.ok, reason: put.ok ? null : 'push-failed' };
-      } catch (e) { return { ok: false, reason: 'network' }; }
+      // Re-reads the latest research_data.json right before writing (so changes made by members
+      // through the sync Worker in the meantime are seen) and refuses a save that would wipe
+      // several items at once.
+      const r = await siteDataUpdate(token, d => {
+        Object.keys(d).forEach(k => { delete d[k]; });
+        Object.assign(d, data);
+      }, 'Update research hub data', { file: GITHUB_FILE });
+      if (r.ok) return { ok: true, reason: null };
+      if (/\((401|403)\)/.test(r.error || '')) return { ok: false, reason: 'bad-token' };
+      return { ok: false, reason: 'push-failed', message: r.error };
     }
 
     // Writes one specific, limited change through the sync Worker -- for anyone without

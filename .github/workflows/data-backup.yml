@@ -1,0 +1,29 @@
+# Keeps a dated copy of the live data files every day (kept for 30 days), so a
+# bad save can always be undone by copying a file back from data_backup/.
+name: Daily data backup
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy data files
+        run: |
+          d=$(date -u +%F)
+          mkdir -p data_backup
+          for f in civil_data.json research_data.json modeling_data.json; do
+            [ -f "$f" ] && cp "$f" "data_backup/${f%.json}_$d.json"
+          done
+          find data_backup -name '*.json' -mtime +30 -delete
+      - name: Commit
+        run: |
+          git config user.name  "data-backup"
+          git config user.email "data-backup@users.noreply.github.com"
+          git add data_backup
+          git diff --cached --quiet || git commit -m "Daily data backup"
+          git push

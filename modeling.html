@@ -558,6 +558,7 @@
   <!-- ── SCRIPTS ────────────────────────────────────────── -->
   <script src="assets/site.js"></script>
   <script src="assets/site-auth.js"></script>
+  <script src="assets/site-data.js"></script>
   <script>
   (() => {
     /* ── CONFIG ── */
@@ -586,23 +587,11 @@
       const token = localStorage.getItem('site_gh_token');
       if (!token) return;
       setSyncStatus(false, true);
-      const data = { works: loadWorks(), updated: new Date().toISOString() };
-      try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-        let sha = null;
-        try {
-          const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }});
-          if (g.ok) { const j = await g.json(); sha = j.sha; }
-        } catch {}
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-        const put = await fetch(apiUrl, {
-          method: 'PUT',
-          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-          body: JSON.stringify({ message: 'Update modeling works', content, ...(sha ? {sha} : {}) })
-        });
-        if (put.ok) { setSyncStatus(true); toast('Synced to GitHub ✓', 'success', 2000); }
-        else { setSyncStatus(false); toast('GitHub sync failed — locally saved', 'error'); }
-      } catch { setSyncStatus(false); toast('GitHub sync error — locally saved', 'error'); }
+      const works = loadWorks();
+      // Re-reads the latest file first and refuses a save that would wipe several works at once.
+      const r = await siteDataUpdate(token, d => { d.works = works; }, 'Update modeling works', { file: GITHUB_FILE });
+      if (r.ok) { setSyncStatus(true); toast('Synced to GitHub ✓', 'success', 2000); }
+      else { setSyncStatus(false); toast(r.error || 'GitHub sync failed — locally saved', 'error', 5000); }
     }
 
     function setSyncStatus(ok, saving=false) {

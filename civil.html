@@ -627,6 +627,7 @@
 
   <script src="assets/site.js"></script>
   <script src="assets/site-auth.js"></script>
+  <script src="assets/site-data.js"></script>
   <script>
   (() => {
     /* ════════════════════════════════════════
@@ -644,38 +645,45 @@
     const GITHUB_FILE   = 'civil_data.json';
     const GITHUB_BRANCH = 'main';
 
+    function _countItems(o){ let n=0; Object.values(o||{}).forEach(v=>{ if(Array.isArray(v)) n+=v.length; }); return n; }
+
+    /* Loads the shared data. Visitors always mirror GitHub. On the admin's own
+       device, an EMPTY GitHub copy never wipes resources/notices that are still
+       saved in this browser (that is how the 6th-semester file was lost) -- the
+       browser copy is kept, and re-synced to GitHub below. The previous local
+       copy is also kept under *_prev so nothing is ever unrecoverable. */
+    let _needsHeal = false;
     async function fetchFromGitHub() {
-      const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`;
+      const data = await siteDataFetchPublic();
+      if (!data) return false;
+      const admin = siteIsAdmin();
       try {
-        const res = await fetch(url);
-        if (!res.ok) return false;
-        const data = await res.json();
-        if (data.semesters) localStorage.setItem(STORE_KEY, JSON.stringify(data.semesters));
-        if (data.notices)   localStorage.setItem(NOTICE_KEY, JSON.stringify(data.notices));
-        return true;
-      } catch { return false; }
+        const remoteSemN = _countItems(data.semesters), localSems = loadSems(), localSemN = _countItems(localSems);
+        const remoteNotN = data.notices.length,        localNots = loadNotices(), localNotN = localNots.length;
+
+        if (JSON.stringify(localSems) !== JSON.stringify(data.semesters) && localSemN > 0)
+          localStorage.setItem(STORE_KEY + '_prev', JSON.stringify(localSems));
+        if (JSON.stringify(localNots) !== JSON.stringify(data.notices) && localNotN > 0)
+          localStorage.setItem(NOTICE_KEY + '_prev', JSON.stringify(localNots));
+
+        if (admin && remoteSemN === 0 && localSemN > 0) _needsHeal = true;          // keep local
+        else localStorage.setItem(STORE_KEY, JSON.stringify(data.semesters));
+
+        if (admin && remoteNotN === 0 && localNotN > 0) _needsHeal = true;
+        else localStorage.setItem(NOTICE_KEY, JSON.stringify(data.notices));
+      } catch {}
+      return true;
     }
 
+    /* Saves ONLY semesters + notices, on top of the latest GitHub copy, so exams
+       (and anything else in the file) are never touched. */
     async function pushToGitHub() {
       const token = localStorage.getItem('site_gh_token');
-      if (!token) return;
-      const data = { semesters: loadSems(), notices: loadNotices(), updated: new Date().toISOString() };
-      try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-        let sha = null;
-        try {
-          const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }});
-          if (g.ok) { const j = await g.json(); sha = j.sha; }
-        } catch {}
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-        const put = await fetch(apiUrl, {
-          method: 'PUT',
-          headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-          body: JSON.stringify({ message: 'Update civil resources', content, ...(sha ? {sha} : {}) })
-        });
-        if (put.ok) toast('Synced to GitHub ✓', 'success', 2000);
-        else toast('GitHub sync failed — locally saved', 'error');
-      } catch { toast('GitHub sync error — locally saved', 'error'); }
+      if (!token) { toast('Saved on this device only — add the GitHub sync token in the footer to publish', 'info', 4000); return; }
+      const sems = loadSems(), nots = loadNotices();
+      const r = await siteDataUpdate(token, d => { d.semesters = sems; d.notices = nots; }, 'Update civil resources');
+      if (r.ok) toast('Synced to GitHub ✓', 'success', 2000);
+      else toast(r.error || 'GitHub sync failed — locally saved', 'error', 5000);
     }
 
     /* ── IndexedDB ─────────────────────────── */
@@ -1459,6 +1467,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       if (!ok) console.warn('GitHub fetch failed — using local cache.');
       renderAllSems();
       buildSemList();
+      if (_needsHeal && siteIsAdmin()) pushToGitHub();   // restore what this browser still has
     }).catch(() => {
       renderAllSems();
       buildSemList();

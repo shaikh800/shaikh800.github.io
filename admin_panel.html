@@ -345,6 +345,7 @@
       onkeydown="if(event.key==='Enter') gateUnlock()" autocomplete="off">
     <button class="gate-btn" onclick="gateUnlock()"><i class="fas fa-unlock"></i> Enter</button>
     <div class="gate-err" id="gate-err"></div>
+    <a id="gate-back" href="academy.html" style="display:none; color:#94a3b8; font-size:13px; text-decoration:none; margin-top:10px;"><i class="fas fa-arrow-left"></i> Back</a>
     <p style="color:#475569; font-size:12px; margin-top:16px;">🔒 Admin-only. Don't share this URL.</p>
   </div>
 </div>
@@ -361,7 +362,7 @@
       </span>
       <button class="hdr-btn blue" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
       <button class="hdr-btn ghost" onclick="adminLogout()" title="Logout from this device"><i class="fas fa-sign-out-alt"></i> Logout</button>
-      <a href="academy.html" class="hdr-btn ghost"><i class="fas fa-arrow-left"></i> Back</a>
+      <a href="academy.html" id="back-btn" class="hdr-btn ghost"><i class="fas fa-arrow-left"></i> Back</a>
     </div>
   </div>
 
@@ -648,6 +649,7 @@
   </div>
 </div>
 
+<script src="assets/site-data.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
 //  CONFIG
@@ -659,6 +661,18 @@ const GH_FILE   = 'civil_data.json';
 const GH_BRANCH = 'main';
 
 // Session token keys — sessionStorage (auto-cleared when the browser closes)
+// Where the admin came from (set by the footer lock on Civil / 3D / Notice / Research).
+// Only plain page names of this site are accepted.
+const _RETURN_PAGES = ['index.html','civil.html','modeling.html','notice.html','research.html','academy.html'];
+const _qs   = new URLSearchParams(location.search);
+const _from = _RETURN_PAGES.includes(_qs.get('from')) ? _qs.get('from') : null;
+const _wantReturn = !!_from && _qs.get('login') === '1';
+document.addEventListener('DOMContentLoaded', () => {
+  if (_from) {
+    document.getElementById('back-btn').href = _from;
+    const gb = document.getElementById('gate-back'); gb.href = _from; gb.style.display = 'inline-block';
+  }
+});
 const SESSION_TOKEN_KEY  = 'shaikh_admin_token_v1';
 const SESSION_EXPIRY_KEY = 'shaikh_admin_expiry_v1';
 
@@ -723,6 +737,7 @@ async function gateUnlock() {
     if (data.status === 'success' && data.token) {
       sessionStorage.setItem(SESSION_TOKEN_KEY,  data.token);
       sessionStorage.setItem(SESSION_EXPIRY_KEY, String(data.expiry));
+      if (_wantReturn) { location.replace(_from); return; }   // back to the page the admin came from
       document.getElementById('ctrl-gate').style.display = 'none';
       loadSavedToken();
       loadAll();
@@ -752,6 +767,7 @@ function adminLogout() {
   const token  = sessionStorage.getItem(SESSION_TOKEN_KEY);
   const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);
   if (token && expiry && Date.now() < parseInt(expiry)) {
+    if (_wantReturn) { location.replace(_from); return; }
     document.getElementById('ctrl-gate').style.display = 'none';
     document.addEventListener('DOMContentLoaded', () => { loadSavedToken(); loadAll(); });
   }
@@ -1229,30 +1245,16 @@ async function clearExamGASResults(examId, title) {
 // ════════════════════════════════════════════════════════
 //  GITHUB PUSH
 // ════════════════════════════════════════════════════════
-async function pushGitHub(tok, msg = 'Update') {
+async function pushGitHub(tok, msg = 'Update', opts) {
   startLoad();
-  try {
-    const api = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
-    const headers = { 'Authorization': `token ${tok}`, 'Content-Type': 'application/json' };
-
-    let sha = null;
-    const getRes = await fetch(api, { headers });
-    if (getRes.ok) { const j = await getRes.json(); sha = j.sha; }
-
-    examFullData.updated = new Date().toISOString();
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(examFullData, null, 2))));
-    const body    = { message: msg, content, ...(sha ? { sha } : {}) };
-
-    const putRes = await fetch(api, { method: 'PUT', headers, body: JSON.stringify(body) });
-    stopLoad();
-    if (putRes.ok) return true;
-    toast('❌ GitHub push failed!');
-    return false;
-  } catch (e) {
-    stopLoad();
-    toast('❌ Network error!');
-    return false;
-  }
+  // Re-reads the latest civil_data.json and replaces ONLY the exams list, so the semester
+  // resources / notices in the same file can never be overwritten from here.
+  const exams = examFullData.exams;
+  const r = await siteDataUpdate(tok, d => { d.exams = exams; }, msg, opts);
+  stopLoad();
+  if (r.ok) { examFullData = r.data; return true; }
+  toast('❌ ' + (r.error || 'GitHub push failed!'));
+  return false;
 }
 
 // ════════════════════════════════════════════════════════
@@ -1298,7 +1300,7 @@ async function clearAllGitHubExams() {
   if (!tok) return;
   if (!await askConfirm('⚠️ Delete all exams on GitHub? This cannot be undone.')) return;
   examFullData.exams = [];
-  const ok = await pushGitHub(tok, 'Clear all exams');
+  const ok = await pushGitHub(tok, 'Clear all exams', { allowShrink: ['exams'] });
   if (ok) toast('✅ All GitHub Exams deleted!');
 }
 
@@ -1314,7 +1316,7 @@ async function clearEverything() {
 
   examFullData.exams = [];
   const [ghOk] = await Promise.all([
-    pushGitHub(tok, 'Clear everything'),
+    pushGitHub(tok, 'Clear everything', { allowShrink: ['exams'] }),
     gasCall('clearData')
   ]);
 

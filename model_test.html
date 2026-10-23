@@ -541,6 +541,7 @@ th { background-color: #f8fafc; }
 </div>
 
 <script src="assets/site-auth.js"></script>
+<script src="assets/site-data.js"></script>
 <script>
 const SCRIPT_GAS_URL = "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
 
@@ -999,44 +1000,28 @@ async function saveAdminConfig() {
     return showAlert('Local settings saved!\n\n(GitHub was not updated since no exam is loaded. Load an exam from the MCQ Builder.)', '✅');
   }
 
+  let examPackage = null;
   if (targetId && examData) {
       examData.password = pass;
       examData.duration = time + " minutes";
       examData.allowedIds = isPublicMode ? [] : studentsList.map(s => s.id);
 
-      if (!fullGithubData.exams) {
-          fullGithubData.exams = [];
-      }
-      
-      const exIndex = fullGithubData.exams.findIndex(e => e.id === targetId);
-      
-      const examPackage = {
+      examPackage = {
           id: targetId,
           date: new Date().toISOString(),
           examData: examData
       };
-
-      if(exIndex > -1) {
-          fullGithubData.exams[exIndex] = examPackage;
-      } else {
-          fullGithubData.exams.unshift(examPackage);
-      }
   }
 
-  fullGithubData.updated = new Date().toISOString();
 
   try {
-    const apiUrl = `https://api.github.com/repos/shaikh800/shaikh800.github.io/contents/civil_data.json`;
-    let sha = null;
-    const g = await fetch(apiUrl, { headers: { 'Authorization': `token ${token}` } });
-    if(g.ok) { const j = await g.json(); sha = j.sha; }
-
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(fullGithubData, null, 2))));
-    const put = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Update Exam & Settings via Admin Panel', content, ...(sha ? { sha } : {}) })
-    });
+    // Re-reads the latest file and changes ONLY this exam, so resources/notices/other exams are never touched.
+    const saved = await siteDataUpdate(token, d => {
+      const i = d.exams.findIndex(e => e.id === targetId);
+      if (i > -1) d.exams[i] = examPackage; else d.exams.unshift(examPackage);
+    }, 'Update Exam & Settings via Admin Panel');
+    if (saved.ok) fullGithubData = saved.data;
+    const put = { ok: saved.ok };
 
     if(put.ok) {
       showAlert('Settings and student list saved successfully!', '✅');
@@ -1062,7 +1047,7 @@ async function saveAdminConfig() {
         setTimeout(() => fetchResults(), 800);
       }
     } else {
-      showAlert('Failed to save to GitHub!', '❌');
+      showAlert('Failed to save to GitHub!\n' + (saved.error || ''), '❌');
     }
   } catch(e) {
     showAlert('Network Error! Check your internet.', '⚠️');
