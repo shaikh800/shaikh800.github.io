@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Online Exam</title>
+<title>Model Test</title>
 <!-- Resource Hints for Performance -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -289,10 +289,10 @@ th { background-color: #f8fafc; }
 <div id="app">
   <div class="site-header">
     <div class="site-brand">
-      <div class="site-brand-icon" style="background:#2563eb; padding:0; overflow:hidden;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="50" height="50"><rect width="512" height="512" rx="100" fill="#2563eb"/><path d="M 360 140 L 152 140 L 152 256 L 360 256 L 360 372 L 152 372" fill="none" stroke="#ffffff" stroke-width="64" stroke-linejoin="miter" stroke-linecap="square"/><path d="M 360 140 L 360 180" fill="none" stroke="#10b981" stroke-width="64" stroke-linecap="square"/><path d="M 152 372 L 152 332" fill="none" stroke="#10b981" stroke-width="64" stroke-linecap="square"/></svg></div>
+      <img src="favicon.svg" width="50" height="50" alt="Logo" style="border-radius:16px; display:block;">
       <div class="site-brand-text">
-        <h1>Online Exam</h1>
-        <p>Login, admin settings and result review in a cleaner interface.</p>
+        <h1>Model Test</h1>
+        <p>Enter your exam code to start your timed test.</p>
       </div>
     </div>
     <button class="admin-fab" id="admin-fab" onclick="openAdmin()" title="Admin panel" style="display:none;">⚙️</button>
@@ -448,10 +448,10 @@ th { background-color: #f8fafc; }
       <p>Please wait.</p>
     </div>
     <div id="no-id-state" style="display:none;">
-      <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> No Exam ID found!</h3>
-      <p style="margin-bottom:20px; color:var(--muted);">Enter your Exam ID below to take the exam, or click the correct link.</p>
+      <h3 style="color:#ef4444; margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> No Exam Code found!</h3>
+      <p style="margin-bottom:20px; color:var(--muted);">Enter your exam code below to take the exam, or click the correct link.</p>
       <div style="max-width:320px; margin:0 auto; display:flex; gap:10px;">
-         <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam ID (ex: kx2a9m)">
+         <input type="text" id="manual-exam-id" class="input-f" placeholder="Enter Exam Code (ex: kx2a9m)">
          <button class="btn primary" onclick="manualLoadExam()">Load</button>
       </div>
     </div>
@@ -747,7 +747,7 @@ window.onload = async function() {
 
 function manualLoadExam() {
   const val = document.getElementById('manual-exam-id').value.trim();
-  if(!val) return showAlert("Please enter an Exam ID!", "⚠️");
+  if(!val) return showAlert("Please enter an Exam Code!", "⚠️");
   window.location.href = "?examId=" + val;
 }
 
