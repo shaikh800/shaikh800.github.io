@@ -702,6 +702,13 @@
       .guide-content li { margin-bottom: 4px; }
       
       .tiny-hint { display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; font-size: 11px; color: #475569; line-height: 1.4; background: #f8fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+      .tiny-hint-details { margin-top: 6px; font-size: 11px; color: #475569; }
+      .tiny-hint-summary { display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; font-size: 11px; color: #64748b; font-weight: 600; list-style: none; width: fit-content; }
+      .tiny-hint-summary::-webkit-details-marker { display: none; }
+      .tiny-hint-summary::after { content: "▾"; font-size: 10px; transition: transform 0.15s; }
+      details[open].tiny-hint-details > .tiny-hint-summary::after { transform: rotate(-180deg); }
+      .tiny-hint-icon { font-style: normal; background: #64748b; color: #fff; width: 13px; height: 13px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+      .tiny-hint-body { margin-top: 5px; font-size: 10.5px; color: #475569; line-height: 1.5; background: #f8fafc; padding: 7px 9px; border-radius: 5px; border: 1px solid #e2e8f0; }
       .tiny-hint i { font-style: normal; background: #1e293b; color: #fff; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 9px; font-weight: bold; flex-shrink: 0; }
 
       .mcq-type-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
@@ -717,8 +724,8 @@
       .add-stmt-btn:hover { background: #e2e8f0; }
       .stimulus-group-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
       /* MCQ tile grid */
-      .mcq-tile-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-      .mcq-tile { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px solid #cbd5e1; background: #f8fafc; color: #475569; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; user-select: none; line-height: 1; flex-shrink: 0; }
+      .mcq-tile-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+      .mcq-tile { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #475569; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s; user-select: none; line-height: 1; flex-shrink: 0; }
       .mcq-tile:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
       .mcq-tile.active { border-color: #2563eb; background: #2563eb; color: #fff; }
       .mcq-tile-editor { border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px; background: #f8fafc; margin-bottom: 8px; }
@@ -946,9 +953,10 @@
             </button>
           </div>
           
-          <div class="tiny-hint">
-            <i>i</i> Normal, multi-statement (with i/ii/iii statements), and MCQ with stimulus — all auto-detect. For a stimulus, write <b>{stimulus text}</b> (curly braces) or <b>stimulus: [text]</b> on a new line before the question.
-          </div>
+          <details class="tiny-hint-details">
+            <summary class="tiny-hint-summary"><span class="tiny-hint-icon">i</span> Format help</summary>
+            <div class="tiny-hint-body">Normal, multi-statement (with i/ii/iii statements), and MCQ with stimulus — all auto-detect. For a stimulus, write <b>{stimulus text}</b> (curly braces) or <b>stimulus: [text]</b> on a new line before the question.</div>
+          </details>
         </div>
         </div>
 
@@ -1489,17 +1497,17 @@
       function selectMcqTile(idx) {
         lastFocusedSection = "mcqFlowSection";
         lastOpenedEditor = { type: "mcq", index: idx };
-        debouncedRenderAll(false);
+        initEditors();
       }
       function selectCqTile(idx) {
         lastFocusedSection = "cqFlowSection";
         lastOpenedEditor = { type: "cq", index: idx };
-        debouncedRenderAll(false);
+        initEditors();
       }
       function selectQuestionTile(idx) {
         lastFocusedSection = "onlyQuestionFlowSection";
         lastOpenedEditor = { type: "question", index: idx };
-        debouncedRenderAll(false);
+        initEditors();
       }
 
             function copyAiPrompt(type, btn, variant) {
