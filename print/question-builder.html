@@ -2016,15 +2016,17 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           .filter(Boolean)
           .forEach((node) => panelLegacyStash.appendChild(node));
       }
-      function buildPanelFlowSection(id, title, nodes, isOpen = false) {
+      function buildPanelFlowSection(id, title, nodes, isOpen = false, wizStep = null) {
         const section = document.createElement("details");
         section.className = "panel-flow-section";
         section.id = id;
         section.open = isOpen;
+        if (wizStep !== null) section.dataset.wizStep = String(wizStep);
         section.innerHTML = `<summary>${title}</summary><div class="panel-flow-body"></div>`;
         const body = section.querySelector(".panel-flow-body");
         nodes.filter(Boolean).forEach((node) => body.appendChild(node));
         panelSectionsMount.appendChild(section);
+        return section;
       }
       function buildUniformCard(title, nodes, gridClass = "uniform-grid-two") {
         const card = document.createElement("div");
@@ -2038,15 +2040,11 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         const section = document.createElement("details");
         section.className = "panel-flow-section";
         section.id = "uniformFlowSection";
+        section.dataset.wizStep = "5";
         section.open = true;
-        section.innerHTML = `<summary>⚙ Uniform Settings</summary><div class="panel-flow-body"></div>`;
+        section.innerHTML = `<summary>⚙ Settings</summary><div class="panel-flow-body"></div>`;
         const body = section.querySelector(".panel-flow-body");
         body.appendChild(buildUniformCard("Aa Typography", uniformTextNodes));
-        body.appendChild(buildUniformCard("▦ MCQ Layout", uniformMcqNodes));
-        body.appendChild(buildUniformCard("◪ CQ Layout", uniformCqNodes));
-        body.appendChild(
-          buildUniformCard("◧ Question Layout", uniformQuestionNodes)
-        );
         body.appendChild(
           buildUniformCard("▤ Header & Box", uniformHeaderNodes)
         );
@@ -2105,31 +2103,45 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           "headerFlowSection",
           "✎ Make Header",
           panelHeaderNodes,
-          true
+          true,
+          1
         );
+        sectionTitlesWrap.dataset.wizStep = "2,3,4";
         panelSectionsMount.appendChild(sectionTitlesWrap);
         if (hasCqSection) {
-          buildPanelFlowSection(
+          const cqSec = buildPanelFlowSection(
             "cqFlowSection",
             "◪ CQ Builder",
             [cqSectionMount, cqEditorList],
-            lastFocusedSection === "cqFlowSection"
+            lastFocusedSection === "cqFlowSection",
+            3
+          );
+          cqSec.querySelector(".panel-flow-body").appendChild(
+            buildUniformCard("◪ CQ Layout", uniformCqNodes)
           );
         }
         if (hasMcqSection) {
-          buildPanelFlowSection(
+          const mcqSec = buildPanelFlowSection(
             "mcqFlowSection",
             "◫ MCQ Builder",
             [mcqSectionHeaderWrap, panelMcqToolbar, panelMcqBulkNode, mcqEditorList],
-            lastFocusedSection === "mcqFlowSection"
+            lastFocusedSection === "mcqFlowSection",
+            2
+          );
+          mcqSec.querySelector(".panel-flow-body").appendChild(
+            buildUniformCard("▦ MCQ Layout", uniformMcqNodes)
           );
         }
         if (hasOnlyQuestionSection) {
-          buildPanelFlowSection(
+          const qSec = buildPanelFlowSection(
             "onlyQuestionFlowSection",
             "◧ Question Builder",
             [onlyQuestionSectionMount, onlyQuestionEditorList],
-            lastFocusedSection === "onlyQuestionFlowSection"
+            lastFocusedSection === "onlyQuestionFlowSection",
+            4
+          );
+          qSec.querySelector(".panel-flow-body").appendChild(
+            buildUniformCard("◧ Question Layout", uniformQuestionNodes)
           );
         }
         if (hasAnySection) {
@@ -2138,9 +2150,20 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           buildPanelFlowSection(
             "finalizeFlowSection",
             "⇲ Finalize",
-            panelFinalizeNodes
+            panelFinalizeNodes,
+            false,
+            6
           );
         }
+        applyWizToPanel(activeWizStep);
+      }
+
+      function applyWizToPanel(step) {
+        if (!panelSectionsMount) return;
+        panelSectionsMount.querySelectorAll(':scope > [data-wiz-step]').forEach(function(el) {
+          var steps = el.dataset.wizStep.split(',').map(Number);
+          el.classList.toggle('wiz-hidden', !steps.includes(step));
+        });
       }
 
       function esc(v) {
@@ -5840,6 +5863,7 @@ function switchStep(n) {
   // Update subtitle
   var sub = document.getElementById('wizSubtitle');
   if (sub) sub.textContent = WIZ_LABELS[n] || '';
+  applyWizToPanel(n);
   try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
 }
 
