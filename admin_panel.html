@@ -357,7 +357,7 @@
   <div class="header-card">
     <h1><i class="fas fa-user-shield"></i> Academy Admin Panel</h1>
     <div class="hdr-btns">
-      <span id="hdr-spinner" style="display:none; color:rgba(255,255,255,.6); font-size:14px;">
+      <span id="hdr-spinner" style="display:inline-flex; visibility:hidden; width:96px; justify-content:flex-end; align-items:center; gap:6px; color:rgba(255,255,255,.6); font-size:14px; white-space:nowrap;">
         <i class="fas fa-circle-notch spin"></i> Loading...
       </span>
       <button class="hdr-btn blue" onclick="loadAll()"><i class="fas fa-sync"></i> Refresh</button>
@@ -807,13 +807,13 @@ let loadCount = 0;
 function startLoad() {
   loadCount++;
   document.getElementById('page-loader').style.display = 'block';
-  document.getElementById('hdr-spinner').style.display = 'flex';
+  document.getElementById('hdr-spinner').style.visibility = 'visible';
 }
 function stopLoad() {
   loadCount = Math.max(0, loadCount - 1);
   if (loadCount === 0) {
     document.getElementById('page-loader').style.display = 'none';
-    document.getElementById('hdr-spinner').style.display = 'none';
+    document.getElementById('hdr-spinner').style.visibility = 'hidden';
   }
 }
 
