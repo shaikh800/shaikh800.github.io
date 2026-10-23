@@ -43,13 +43,13 @@
       "download": true
     },
     {
-      "id": 1792776014475,
+      "id": 1792776038204,
       "name": "protiksahapial",
       "email": "protiksahapial@gmail.com",
       "initials": "PR",
       "role": "member",
       "view": true,
-      "download": true
+      "download": false
     }
   ],
   "notices": [
@@ -85,5 +85,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-23T17:20:17.822Z"
+  "updated": "2026-10-23T17:20:39.455Z"
 }
