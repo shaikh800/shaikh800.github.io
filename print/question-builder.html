@@ -2041,6 +2041,12 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           buildUniformCard("⌁ Footer & Answer", uniformFooterNodes)
         );
         body.appendChild(buildUniformCard("▣ Page Margin", uniformMarginNodes));
+        if (state.questions.length > 0)
+          body.appendChild(buildUniformCard("▦ MCQ Layout", uniformMcqNodes));
+        if (state.cqs.length > 0)
+          body.appendChild(buildUniformCard("◪ CQ Layout", uniformCqNodes));
+        if (state.onlyQuestions.length > 0)
+          body.appendChild(buildUniformCard("◧ Question Layout", uniformQuestionNodes));
         body.appendChild(
           buildUniformCard(
             "⟲ Presets & Status",
@@ -2106,9 +2112,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             true,
             3
           );
-          cqSec.querySelector(".panel-flow-body").appendChild(
-            buildUniformCard("◪ CQ Layout", uniformCqNodes)
-          );
+
         }
         if (hasMcqSection) {
           const mcqSec = buildPanelFlowSection(
@@ -2118,9 +2122,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             true,
             2
           );
-          mcqSec.querySelector(".panel-flow-body").appendChild(
-            buildUniformCard("▦ MCQ Layout", uniformMcqNodes)
-          );
+
         }
         if (hasOnlyQuestionSection) {
           const qSec = buildPanelFlowSection(
@@ -2130,9 +2132,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             true,
             4
           );
-          qSec.querySelector(".panel-flow-body").appendChild(
-            buildUniformCard("◧ Question Layout", uniformQuestionNodes)
-          );
+
         }
         if (hasAnySection) {
           mcqImageFieldNodes.forEach((node) => node.classList.add("hidden"));
@@ -2878,9 +2878,6 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           details.addEventListener("toggle", () => {
             if (!details.open) return;
             if (typeof onOpen === "function") onOpen(details, idx);
-            items.forEach((other) => {
-              if (other !== details) other.open = false;
-            });
           });
         });
       }
@@ -2891,14 +2888,13 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
       }
 
       function reopenMainSection() {
-        if (!lastFocusedSection) return;
         const sections = Array.from(
           document.querySelectorAll(
             "#panelSectionsMount > details.panel-flow-section"
           )
         );
         sections.forEach((section) => {
-          section.open = section.id === lastFocusedSection;
+          section.open = true;
         });
       }
 
