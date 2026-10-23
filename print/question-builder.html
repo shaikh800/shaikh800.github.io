@@ -2664,9 +2664,6 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           const selIdx = (lastOpenedEditor.type === "mcq" && lastOpenedEditor.index >= 0 && lastOpenedEditor.index < state.questions.length)
             ? lastOpenedEditor.index
             : (state.questions.length > 0 ? 0 : -1);
-          if (selIdx >= 0 && lastOpenedEditor.type !== "mcq") {
-            lastOpenedEditor = { type: "mcq", index: selIdx };
-          }
           if (hasMcqSection) {
             const tilesHtml = state.questions.map(function(q, idx) {
               const isActive = idx === selIdx;
@@ -2740,9 +2737,6 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           const cqSelIdx = (lastOpenedEditor.type === "cq" && lastOpenedEditor.index >= 0 && lastOpenedEditor.index < state.cqs.length)
             ? lastOpenedEditor.index
             : (state.cqs.length > 0 ? 0 : -1);
-          if (cqSelIdx >= 0 && lastOpenedEditor.type !== "cq") {
-            lastOpenedEditor = { type: "cq", index: cqSelIdx };
-          }
           if (hasCqSection) {
             const cqTilesHtml = state.cqs.map(function(c, idx) {
               return '<button type="button" class="mcq-tile' + (idx === cqSelIdx ? ' active' : '') + '" onclick="selectCqTile(' + idx + ')" title="CQ ' + bn(idx+1) + '">' + bn(idx+1) + '</button>';
@@ -2804,9 +2798,6 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           const qSelIdx = (lastOpenedEditor.type === "question" && lastOpenedEditor.index >= 0 && lastOpenedEditor.index < state.onlyQuestions.length)
             ? lastOpenedEditor.index
             : (state.onlyQuestions.length > 0 ? 0 : -1);
-          if (qSelIdx >= 0 && lastOpenedEditor.type !== "question") {
-            lastOpenedEditor = { type: "question", index: qSelIdx };
-          }
           if (hasOnlyQuestionSection) {
             const qTilesHtml = state.onlyQuestions.map(function(q, idx) {
               return '<button type="button" class="mcq-tile' + (idx === qSelIdx ? ' active' : '') + '" onclick="selectQuestionTile(' + idx + ')" title="Q' + bn(idx+1) + '">' + bn(idx+1) + '</button>';
