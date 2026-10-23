@@ -998,7 +998,7 @@
         </div>
         </div>
 
-        <div id="wizSettingsZone">
+        <div id="wizSettingsZone" data-wiz-step="5">
         <div class="control-grid">
           <div class="field" style="margin-bottom: 0">
             <label for="bodyFontControl">Master Font Size</label>
@@ -2006,16 +2006,16 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           .filter(Boolean)
           .forEach((node) => panelLegacyStash.appendChild(node));
       }
-      function buildPanelFlowSection(id, title, nodes, isOpen = false, wizStep = null) {
+      function buildPanelFlowSection(id, title, nodes, isOpen = true, wizStep = null) {
         const section = document.createElement("details");
         section.className = "panel-flow-section";
         section.id = id;
-        section.open = isOpen;
         if (wizStep !== null) section.dataset.wizStep = String(wizStep);
         section.innerHTML = `<summary>${title}</summary><div class="panel-flow-body"></div>`;
         const body = section.querySelector(".panel-flow-body");
         nodes.filter(Boolean).forEach((node) => body.appendChild(node));
         panelSectionsMount.appendChild(section);
+        section.open = isOpen;
         return section;
       }
       function buildUniformCard(title, nodes, gridClass = "uniform-grid-two") {
@@ -2031,7 +2031,6 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         section.className = "panel-flow-section";
         section.id = "uniformFlowSection";
         section.dataset.wizStep = "5";
-        section.open = true;
         section.innerHTML = `<summary>⚙ Settings</summary><div class="panel-flow-body"></div>`;
         const body = section.querySelector(".panel-flow-body");
         body.appendChild(buildUniformCard("Aa Typography", uniformTextNodes));
@@ -2050,6 +2049,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           )
         );
         panelSectionsMount.appendChild(section);
+        section.open = true;
       }
       function renderPanelFlow() {
         setupPanelFlow();
@@ -2103,7 +2103,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             "cqFlowSection",
             "◪ CQ Builder",
             [cqSectionMount, cqEditorList],
-            lastFocusedSection === "cqFlowSection",
+            true,
             3
           );
           cqSec.querySelector(".panel-flow-body").appendChild(
@@ -2115,7 +2115,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             "mcqFlowSection",
             "◫ MCQ Builder",
             [mcqSectionHeaderWrap, panelMcqToolbar, panelMcqBulkNode, mcqEditorList],
-            lastFocusedSection === "mcqFlowSection",
+            true,
             2
           );
           mcqSec.querySelector(".panel-flow-body").appendChild(
@@ -2127,7 +2127,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             "onlyQuestionFlowSection",
             "◧ Question Builder",
             [onlyQuestionSectionMount, onlyQuestionEditorList],
-            lastFocusedSection === "onlyQuestionFlowSection",
+            true,
             4
           );
           qSec.querySelector(".panel-flow-body").appendChild(
@@ -2141,7 +2141,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             "finalizeFlowSection",
             "⇲ Finalize",
             panelFinalizeNodes,
-            false,
+            true,
             6
           );
         }
