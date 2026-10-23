@@ -716,6 +716,19 @@
       .add-stmt-btn { background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; font-size: 12px; padding: 6px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 8px; }
       .add-stmt-btn:hover { background: #e2e8f0; }
       .stimulus-group-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+      /* MCQ tile grid */
+      .mcq-tile-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+      .mcq-tile { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px solid #cbd5e1; background: #f8fafc; color: #475569; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; user-select: none; line-height: 1; flex-shrink: 0; }
+      .mcq-tile:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+      .mcq-tile.active { border-color: #2563eb; background: #2563eb; color: #fff; }
+      .mcq-tile-editor { border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px; background: #f8fafc; margin-bottom: 8px; }
+      .mcq-tile-editor-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+      .mcq-tile-editor-label { font-size: 13px; font-weight: 700; color: #1e293b; }
+      .mcq-tile-editor-actions { display: flex; gap: 6px; }
+      /* 3-variant prompt buttons */
+      .ai-prompt-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+      .ai-prompt-btn { font-size: 10.5px; padding: 4px 7px; font-weight: 700; color: #2563eb; border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 5px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+      .ai-prompt-btn:hover { background: #dbeafe; border-color: #93c5fd; }
       .stimulus-group-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
 
       .stimulus-block { margin-bottom: 5px; padding: 4px 6px; border-left: 2px solid #555; background: #f9f9f9; font-style: italic; font-size: var(--mcq-font-size); line-height: var(--body-line-height); text-align: var(--stimulus-align, left); }
@@ -911,7 +924,11 @@
           <div class="field bulk-box">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
             <label for="bulkInput" style="margin-bottom: 0;">Paste all MCQs at once</label>
-            <button type="button" class="icon-btn" onclick="copyAiPrompt('mcq', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
+            <div class="ai-prompt-btns">
+              <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('mcq',this,'with_figure')">🖼️ With Figure</button>
+              <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('mcq',this,'without_figure')">📋 No Figure</button>
+              <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('mcq',this,'figure_blank')">□ Blank Space</button>
+            </div>
           </div>
           <textarea
             id="bulkInput"
@@ -1469,7 +1486,14 @@
         return `<div class="page-footer-meta"><span>${subjText}</span><span>${dateText}</span></div>`;
       }
 
-      function copyAiPrompt(type, btn) {
+      function selectMcqTile(idx) {
+        lastFocusedSection = "mcqFlowSection";
+        lastOpenedEditor = { type: "mcq", index: idx };
+        debouncedRenderAll(false);
+      }
+
+            function copyAiPrompt(type, btn, variant) {
+        variant = variant || 'with_figure';
         let promptText = "";
         if (type === 'mcq') {
           promptText = `তুমি একটি MCQ extraction বিশেষজ্ঞ। আমি তোমাকে একটি গাইড বা বইয়ের পৃষ্ঠার ছবি দেব। ছবিতে থাকা সব MCQ হুবহু extract করে নিচের নিয়ম মেনে output দাও।
@@ -1532,7 +1556,7 @@
 11. প্রতিটি MCQ-এর মাঝে একটি ফাঁকা লাইন রাখো।
 12. ছবিতে উত্তর না থাকলে সবচেয়ে সম্ভাব্য সঠিক উত্তর দাও।
 13. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
-14. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের সাথে ফিগারটা সম্পর্কিত তার ঠিক আগে, {উদ্দীপক}-এর মতোই, নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। একই ফিগার একাধিক প্রশ্নে লাগলে প্রতিটি প্রশ্নের আগে আলাদাভাবে লেখো। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।
+${variant === 'with_figure' ? `14. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের সাথে ফিগারটা সম্পর্কিত তার ঠিক আগে, {উদ্দীপক}-এর মতোই, নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। একই ফিগার একাধিক প্রশ্নে লাগলে প্রতিটি প্রশ্নের আগে আলাদাভাবে লেখো। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।` : variant === 'without_figure' ? `14. ছবিতে কোনো ডায়াগ্রাম বা ফিগার থাকলেও সেটা skip করো — output-এ কোনো SVG বা figure ব্লক লিখো না।` : `14. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে সেটা SVG-তে আঁকার বদলে একটা blank space placeholder দাও। ঠিক এভাবে লেখো: [FIGURE_SPACE][/FIGURE_SPACE] (নতুন লাইনে, যে প্রশ্নের আগে ফিগারটা লাগবে সেখানে)। এই blank space-টি প্রিন্টে একটা আঁকার জায়গা হিসেবে থাকবে।`}
 
 এখন ছবি দাও — আমি সব MCQ extract করে দেব।`;
         } else if (type === 'cq') {
@@ -1561,7 +1585,7 @@
 6. হুবহু বইয়ের টেক্সট — কিছু যোগ/বাদ নয়।
 7. শুধু formatted CQ output — কোনো ব্যাখ্যা নয়।
 8. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
-9. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের উদ্দীপকের সাথে ফিগারটা সম্পর্কিত, তার ঠিক আগে নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।
+${variant === 'with_figure' ? `9. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের উদ্দীপকের সাথে ফিগারটা সম্পর্কিত, তার ঠিক আগে নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।` : variant === 'without_figure' ? `9. ছবিতে কোনো ডায়াগ্রাম বা ফিগার থাকলেও সেটা skip করো — output-এ কোনো SVG বা figure ব্লক লিখো না।` : `9. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে সেটা SVG-তে আঁকার বদলে একটা blank space placeholder দাও: [FIGURE_SPACE][/FIGURE_SPACE] (উদ্দীপকের আগে নতুন লাইনে)। এই blank space প্রিন্টে আঁকার জায়গা হিসেবে থাকবে।`}
 
 এখন ছবি দাও — আমি সব CQ extract করে দেব।`;
         } else if (type === 'question') {
@@ -1584,7 +1608,7 @@
 4. হুবহু বইয়ের টেক্সট — কোনো উত্তর বা ব্যাখ্যা নয়।
 5. শুধু formatted প্রশ্ন output করো।
 6. ছবিতে প্রশ্নের সোর্স (যেমন: বোর্ডের নাম, সাল — উদাহরণ: রা. বো. ২৪, ঢা. বো. ২৩, [রা. বো. ২৪]) থাকলে সেটা output-এ রাখবে না।
-7. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের সাথে ফিগারটা সম্পর্কিত তার ঠিক আগে নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।
+${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে (শুধু লেখা বা সংখ্যার টেবিল নয়, আসল আঁকা ছবি), সেটা পরিষ্কার SVG কোডে আবার এঁকে দাও। SVG অবশ্যই self-contained হতে হবে (কোনো external image/font লাগবে না), একটা viewBox দাও, এবং সাদা-কালো প্রিন্টের উপযোগী রাখো (stroke="black", হালকা বা কোনো fill)। যে প্রশ্নের সাথে ফিগারটা সম্পর্কিত তার ঠিক আগে নতুন লাইনে লেখো: [FIGURE]<svg ...>...</svg>[/FIGURE] — শুধু এই ট্যাগের ভেতরে SVG কোড, আর কিছু না। ছবিতে কোনো ডায়াগ্রাম না থাকলে এই ব্লক একদমই লিখো না।` : variant === 'without_figure' ? `7. ছবিতে কোনো ডায়াগ্রাম বা ফিগার থাকলেও সেটা skip করো — output-এ কোনো SVG বা figure ব্লক লিখো না।` : `7. ছবিতে কোনো ডায়াগ্রাম/ফিগার/গ্রাফ/চিত্র থাকলে সেটা SVG-তে আঁকার বদলে একটা blank space placeholder দাও: [FIGURE_SPACE][/FIGURE_SPACE] (প্রশ্নের আগে নতুন লাইনে)। এই blank space প্রিন্টে আঁকার জায়গা হিসেবে থাকবে।`}
 
 এখন ছবি দাও — আমি সব প্রশ্ন extract করে দেব।`;
         }
@@ -2429,7 +2453,11 @@
     <div class="field bulk-box">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <label for="cqBulkInput" style="margin-bottom: 0;">Bulk Import CQs</label>
-        <button type="button" class="icon-btn" onclick="copyAiPrompt('cq', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
+        <div class="ai-prompt-btns">
+          <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('cq',this,'with_figure')">🖼️ With Figure</button>
+          <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('cq',this,'without_figure')">📋 No Figure</button>
+          <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('cq',this,'figure_blank')">□ Blank Space</button>
+        </div>
       </div>
       <textarea id="cqBulkInput" placeholder="1. উদ্দীপক: ...&#10;ক. ...&#10;খ. ...&#10;গ. ...&#10;ঘ. ...&#10;সময়: ২০ মিনিট&#10;মান: ১০"></textarea>
       <div class="toolbar three" style="margin-top:10px;">
@@ -2465,7 +2493,11 @@
     <div class="field bulk-box">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <label for="onlyQuestionBulkInput" style="margin-bottom: 0;">Bulk Import Questions</label>
-        <button type="button" class="icon-btn" onclick="copyAiPrompt('question', this)" style="font-size: 11px; padding: 4px 8px; font-weight: 700; color: #2563eb; border-color: #bfdbfe; background: #eff6ff;">🤖 Copy AI Prompt</button>
+        <div class="ai-prompt-btns">
+          <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('question',this,'with_figure')">🖼️ With Figure</button>
+          <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('question',this,'without_figure')">📋 No Figure</button>
+          <button type="button" class="ai-prompt-btn" onclick="copyAiPrompt('question',this,'figure_blank')">□ Blank Space</button>
+        </div>
       </div>
       <textarea id="onlyQuestionBulkInput" placeholder="1. প্রথম প্রশ্ন...&#10;2. দ্বিতীয় প্রশ্ন..."></textarea>
       <div class="toolbar three" style="margin-top:10px;">
@@ -2499,30 +2531,48 @@
         const hasCqSection = state.cqs.length > 0;
         const hasOnlyQuestionSection = state.onlyQuestions.length > 0;
 
-        mcqEditorList.innerHTML = hasMcqSection
-          ? `
-      <div class="editor-grid">
-        ${state.questions.map(function(q, idx) {
+        {
+          const selIdx = (lastOpenedEditor.type === "mcq" && lastOpenedEditor.index >= 0 && lastOpenedEditor.index < state.questions.length)
+            ? lastOpenedEditor.index
+            : (state.questions.length > 0 ? 0 : -1);
+          if (selIdx >= 0 && lastOpenedEditor.type !== "mcq") {
+            lastOpenedEditor = { type: "mcq", index: selIdx };
+          }
+          if (hasMcqSection) {
+            const tilesHtml = state.questions.map(function(q, idx) {
+              const isActive = idx === selIdx;
+              return '<button type="button" class="mcq-tile' + (isActive ? ' active' : '') + '" onclick="selectMcqTile(' + idx + ')" title="MCQ ' + bn(q.no) + '">' + bn(q.no) + '</button>';
+            }).join("");
+
+            let editorHtml = "";
+            if (selIdx >= 0) {
+              const q = state.questions[selIdx];
+              const idx = selIdx;
               const qtype = q.type || "normal";
               const stmts = Array.isArray(q.statements) ? q.statements : [];
               const stimTxt = q.stimulusText || "";
               const typeLabel = qtype === "multistatement" ? "Multi-statement" : qtype === "stimulus" ? "With Stimulus" : "Normal";
-              const isOpen = lastOpenedEditor.type === "mcq" && lastOpenedEditor.index === idx ? "open" : "";
               const stimBox = qtype === "stimulus"
-                ? '<div class="stimulus-group-box"><div class="stimulus-group-label">Stimulus (for this question)</div><div class="field" style="margin-bottom:0"><textarea data-type="qstimtext" data-index="' + idx + '" placeholder="উদ্দীপকের টেক্সট লেখো...">' + esc(stimTxt) + '</textarea></div></div>'
+                ? '<div class="stimulus-group-box"><div class="stimulus-group-label">Stimulus (for this question)</div><div class="field" style="margin-bottom:0"><textarea data-type="qstimtext" data-index="' + idx + '" placeholder="\u09C1\u09A6\u09CD\u09A6\u09C0\u09AA\u0995\u09C7\u09B0 \u099F\u09C7\u0995\u09CD\u09B8\u099F \u09B2\u09C7\u0996\u09CB...">' + esc(stimTxt) + '</textarea></div></div>'
                 : "";
               const stmtRows = stmts.map(function(s, si) {
                 const labels = ["i","ii","iii","iv","v"];
-                return '<div class="stmt-row"><input data-type="qstmt" data-index="' + idx + '" data-si="' + si + '" value="' + esc(s) + '" placeholder="Write (' + (labels[si]||"statement") + ')"><button type="button" class="stmt-del-btn" onclick="deleteStatement(' + idx + ',' + si + ')">✕</button></div>';
+                return '<div class="stmt-row"><input data-type="qstmt" data-index="' + idx + '" data-si="' + si + '" value="' + esc(s) + '" placeholder="Write (' + (labels[si]||"statement") + ')"><button type="button" class="stmt-del-btn" onclick="deleteStatement(' + idx + ',' + si + ')">\u2715</button></div>';
               }).join("");
               const stmtBox = qtype === "multistatement"
-                ? '<div><label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:#334;">Statements (i, ii, iii...)</label><div id="stmts-' + idx + '">' + stmtRows + '</div><button type="button" class="add-stmt-btn" onclick="addStatement(' + idx + ')">+ Statement যোগ করো</button></div>'
+                ? '<div><label style="display:block;font-weight:600;font-size:13px;margin-bottom:6px;color:#334;">Statements (i, ii, iii...)</label><div id="stmts-' + idx + '">' + stmtRows + '</div><button type="button" class="add-stmt-btn" onclick="addStatement(' + idx + ')">+ Statement \u09AF\u09CB\u0997 \u0995\u09B0\u09CB</button></div>'
                 : "";
               const radioButtons = ["A","B","C","D"].map(function(letter, i) {
                 return '<label><input type="radio" data-index="' + idx + '" name="ans-' + idx + '" value="' + letter + '" ' + (q.answer === letter ? "checked" : "") + '> ' + optionLabel(i) + '</label>';
               }).join("");
-              return '<details ' + isOpen + '>'
-                + '<summary><span class="summary-row"><span>MCQ ' + bn(q.no) + ' <small style="font-weight:400;color:#64748b;">[' + typeLabel + ']</small></span><span class="summary-actions"><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveQuestion(' + idx + ',-1)">▲</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveQuestion(' + idx + ',1)">▼</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); deleteQuestion(' + idx + ')">✕</button></span></span></summary>'
+              editorHtml = '<div class="mcq-tile-editor">'
+                + '<div class="mcq-tile-editor-top">'
+                + '<span class="mcq-tile-editor-label">MCQ ' + bn(q.no) + ' <small style="font-weight:400;color:#64748b;">[' + typeLabel + ']</small></span>'
+                + '<div class="mcq-tile-editor-actions">'
+                + '<button type="button" class="icon-btn" onclick="moveQuestion(' + idx + ',-1)">\u25b2</button>'
+                + '<button type="button" class="icon-btn" onclick="moveQuestion(' + idx + ',1)">\u25bc</button>'
+                + '<button type="button" class="icon-btn" onclick="deleteQuestion(' + idx + ')">\u2715</button>'
+                + '</div></div>'
                 + '<div class="editor-grid">'
                 + '<div><div class="mcq-type-tabs">'
                 + '<button type="button" class="mcq-type-tab ' + (qtype==="normal"?"active":"") + '" onclick="setMcqType(' + idx + ',\'normal\')">Normal</button>'
@@ -2537,15 +2587,21 @@
                 + '<div class="field"><label>Option ' + optionLabel(2) + '</label><input data-type="qopt" data-opt="2" data-index="' + idx + '" value="' + esc(q.options?.[2] || "") + '"></div>'
                 + '<div class="field"><label>Option ' + optionLabel(3) + '</label><input data-type="qopt" data-opt="3" data-index="' + idx + '" value="' + esc(q.options?.[3] || "") + '"></div>'
                 + '<div><label>Correct Answer</label><div class="answer-buttons">' + radioButtons + '</div></div>'
-                + '</div></details>';
-            }).join("")}
-        <div class="toolbar three">
-          <button type="button" class="secondary" onclick="addQuestion()">Add MCQ</button>
-          <button type="button" class="secondary" onclick="trimEmptyQuestions()">Trim Empty MCQ</button>
-          <button type="button" class="danger" onclick="removeMCQPart()">Remove MCQ Part</button>
-        </div>
-      </div>`
-          : "";
+                + '</div></div>';
+            }
+
+            mcqEditorList.innerHTML = '<div class="editor-grid">'
+              + '<div class="mcq-tile-grid">' + tilesHtml + '</div>'
+              + editorHtml
+              + '<div class="toolbar three">'
+              + '<button type="button" class="secondary" onclick="addQuestion()">Add MCQ</button>'
+              + '<button type="button" class="secondary" onclick="trimEmptyQuestions()">Trim Empty MCQ</button>'
+              + '<button type="button" class="danger" onclick="removeMCQPart()">Remove MCQ Part</button>'
+              + '</div></div>';
+          } else {
+            mcqEditorList.innerHTML = "";
+          }
+        }
 
         // Show/hide Zone 6 MCQ management bar
         const mcqMgmtBar = document.getElementById("mcqMgmtBar");
@@ -2701,14 +2757,7 @@
             lastOpenedEditor = { type: "cq", index: idx };
           }
         );
-        bindAccordionWithin(
-          mcqEditorList,
-          ":scope .editor-grid > details",
-          (details, idx) => {
-            lastFocusedSection = "mcqFlowSection";
-            lastOpenedEditor = { type: "mcq", index: idx };
-          }
-        );
+        // MCQ uses tile grid — bindAccordion not needed for MCQ
         bindAccordionWithin(
           onlyQuestionEditorList,
           ":scope .editor-grid > details",
@@ -2758,7 +2807,7 @@
         if (lastOpenedEditor.type === "cq") {
           selector = "#cqEditorList .editor-grid > details";
         } else if (lastOpenedEditor.type === "mcq") {
-          selector = "#mcqEditorList .editor-grid > details";
+          return; // MCQ tile grid highlights itself during render
         } else if (lastOpenedEditor.type === "question") {
           selector = "#onlyQuestionEditorList .editor-grid > details";
         }
