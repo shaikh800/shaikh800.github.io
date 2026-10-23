@@ -846,19 +846,31 @@
               <div class="wiz-circle">02</div>
               <span class="wiz-label">MCQ</span>
             </button>
-            <button class="wiz-btn" data-step="3" onclick="switchStep(3)" title="CQ">
+            <button class="wiz-btn" data-step="3" onclick="switchStep(3)" title="MCQ Layout">
+              <div class="wiz-circle">⚙</div>
+              <span class="wiz-label">MCQ ⚙</span>
+            </button>
+            <button class="wiz-btn" data-step="4" onclick="switchStep(4)" title="CQ">
               <div class="wiz-circle">03</div>
               <span class="wiz-label">CQ</span>
             </button>
-            <button class="wiz-btn" data-step="4" onclick="switchStep(4)" title="Questions">
+            <button class="wiz-btn" data-step="5" onclick="switchStep(5)" title="CQ Layout">
+              <div class="wiz-circle">⚙</div>
+              <span class="wiz-label">CQ ⚙</span>
+            </button>
+            <button class="wiz-btn" data-step="6" onclick="switchStep(6)" title="Questions">
               <div class="wiz-circle">04</div>
               <span class="wiz-label">Q</span>
             </button>
-            <button class="wiz-btn" data-step="5" onclick="switchStep(5)" title="Settings">
+            <button class="wiz-btn" data-step="7" onclick="switchStep(7)" title="Question Layout">
+              <div class="wiz-circle">⚙</div>
+              <span class="wiz-label">Q ⚙</span>
+            </button>
+            <button class="wiz-btn" data-step="8" onclick="switchStep(8)" title="Settings">
               <div class="wiz-circle">05</div>
               <span class="wiz-label">Settings</span>
             </button>
-            <button class="wiz-btn" data-step="6" onclick="switchStep(6)" title="Export">
+            <button class="wiz-btn" data-step="9" onclick="switchStep(9)" title="Export">
               <div class="wiz-circle">06</div>
               <span class="wiz-label">Export</span>
             </button>
@@ -998,7 +1010,7 @@
         </div>
         </div>
 
-        <div id="wizSettingsZone" data-wiz-step="5">
+        <div id="wizSettingsZone" data-wiz-step="8">
         <div class="control-grid">
           <div class="field" style="margin-bottom: 0">
             <label for="bodyFontControl">Master Font Size</label>
@@ -2030,7 +2042,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         const section = document.createElement("details");
         section.className = "panel-flow-section";
         section.id = "uniformFlowSection";
-        section.dataset.wizStep = "5";
+        section.dataset.wizStep = "8";
         section.innerHTML = `<summary>⚙ Settings</summary><div class="panel-flow-body"></div>`;
         const body = section.querySelector(".panel-flow-body");
         body.appendChild(buildUniformCard("Aa Typography", uniformTextNodes));
@@ -2041,12 +2053,6 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           buildUniformCard("⌁ Footer & Answer", uniformFooterNodes)
         );
         body.appendChild(buildUniformCard("▣ Page Margin", uniformMarginNodes));
-        if (state.questions.length > 0)
-          body.appendChild(buildUniformCard("▦ MCQ Layout", uniformMcqNodes));
-        if (state.cqs.length > 0)
-          body.appendChild(buildUniformCard("◪ CQ Layout", uniformCqNodes));
-        if (state.onlyQuestions.length > 0)
-          body.appendChild(buildUniformCard("◧ Question Layout", uniformQuestionNodes));
         body.appendChild(
           buildUniformCard(
             "⟲ Presets & Status",
@@ -2104,35 +2110,44 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         );
         sectionTitlesWrap.dataset.wizStep = "1";
         panelSectionsMount.appendChild(sectionTitlesWrap);
-        if (hasCqSection) {
-          const cqSec = buildPanelFlowSection(
-            "cqFlowSection",
-            "◪ CQ Builder",
-            [cqSectionMount, cqEditorList],
-            true,
-            3
-          );
-
-        }
         if (hasMcqSection) {
-          const mcqSec = buildPanelFlowSection(
+          buildPanelFlowSection(
             "mcqFlowSection",
             "◫ MCQ Builder",
             [mcqSectionHeaderWrap, panelMcqToolbar, panelMcqBulkNode, mcqEditorList],
             true,
             2
           );
-
+          const mcqLayoutSec = buildPanelFlowSection("mcqLayoutSection", "⚙ MCQ Layout", [], true, 3);
+          mcqLayoutSec.querySelector(".panel-flow-body").appendChild(
+            buildUniformCard("▦ MCQ Layout", uniformMcqNodes)
+          );
+        }
+        if (hasCqSection) {
+          buildPanelFlowSection(
+            "cqFlowSection",
+            "◪ CQ Builder",
+            [cqSectionMount, cqEditorList],
+            true,
+            4
+          );
+          const cqLayoutSec = buildPanelFlowSection("cqLayoutSection", "⚙ CQ Layout", [], true, 5);
+          cqLayoutSec.querySelector(".panel-flow-body").appendChild(
+            buildUniformCard("◪ CQ Layout", uniformCqNodes)
+          );
         }
         if (hasOnlyQuestionSection) {
-          const qSec = buildPanelFlowSection(
+          buildPanelFlowSection(
             "onlyQuestionFlowSection",
             "◧ Question Builder",
             [onlyQuestionSectionMount, onlyQuestionEditorList],
             true,
-            4
+            6
           );
-
+          const qLayoutSec = buildPanelFlowSection("questionLayoutSection", "⚙ Question Layout", [], true, 7);
+          qLayoutSec.querySelector(".panel-flow-body").appendChild(
+            buildUniformCard("◧ Question Layout", uniformQuestionNodes)
+          );
         }
         if (hasAnySection) {
           mcqImageFieldNodes.forEach((node) => node.classList.add("hidden"));
@@ -2142,14 +2157,14 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             "⇲ Finalize",
             panelFinalizeNodes,
             true,
-            6
+            9
           );
         }
         // Auto-fallback: if active step has no content, go to step 1
         var _hasMcq = state.questions.length > 0;
         var _hasCq = state.cqs.length > 0;
         var _hasQ = state.onlyQuestions.length > 0;
-        if ((activeWizStep === 2 && !_hasMcq) || (activeWizStep === 3 && !_hasCq) || (activeWizStep === 4 && !_hasQ)) {
+        if ((activeWizStep === 2 && !_hasMcq) || (activeWizStep === 3 && !_hasMcq) || (activeWizStep === 4 && !_hasCq) || (activeWizStep === 5 && !_hasCq) || (activeWizStep === 6 && !_hasQ) || (activeWizStep === 7 && !_hasQ)) {
           activeWizStep = 1;
         }
         applyWizToPanel(activeWizStep);
@@ -2179,7 +2194,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         var hasCq = state.cqs.length > 0;
         var hasQ = state.onlyQuestions.length > 0;
         var anyContent = hasMcq || hasCq || hasQ;
-        var show = { 1: true, 2: hasMcq, 3: hasCq, 4: hasQ, 5: anyContent, 6: true };
+        var show = { 1: true, 2: hasMcq, 3: hasMcq, 4: hasCq, 5: hasCq, 6: hasQ, 7: hasQ, 8: anyContent, 9: true };
         document.querySelectorAll('.wiz-btn[data-step]').forEach(function(btn) {
           var s = +btn.dataset.step;
           btn.hidden = !show[s];
@@ -2535,9 +2550,9 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
               <button type="button" class="secondary${hasMcqSection ? ' done-step' : ''}"
                 onclick="addQuestion();switchStep(2)">+ MCQ</button>
               <button type="button" class="secondary${hasCqSection ? ' done-step' : ''}"
-                onclick="addCQ();switchStep(3)">+ CQ</button>
+                onclick="addCQ();switchStep(4)">+ CQ</button>
               <button type="button" class="secondary${hasOnlyQuestionSection ? ' done-step' : ''}"
-                onclick="addOnlyQuestion();switchStep(4)">+ Question</button>
+                onclick="addOnlyQuestion();switchStep(6)">+ Question</button>
             </div>
           </div>`;
       }
@@ -5834,13 +5849,9 @@ function splitIntoQuestionBlocks(text) {
 // ── Wizard Step System ──
 const WIZ_MAP = {
   1: ['wizGuideBox', 'globalLangField'],
-  2: [],
-  3: [],
-  4: [],
-  5: [],
-  6: [],
+  2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []
 };
-const WIZ_LABELS = { 1:'Header', 2:'MCQ', 3:'CQ', 4:'Questions', 5:'Settings', 6:'Export' };
+const WIZ_LABELS = { 1:'Header', 2:'MCQ', 3:'MCQ ⚙', 4:'CQ', 5:'CQ ⚙', 6:'Questions', 7:'Q ⚙', 8:'Settings', 9:'Export' };
 let activeWizStep = 1;
 
 function switchStep(n) {
@@ -5862,7 +5873,7 @@ function switchStep(n) {
   });
   // Update progress bar (0% at step 1, 100% at step 6)
   var prog = document.getElementById('wizProgress');
-  if (prog) prog.style.width = Math.round(((n - 1) / 5) * 100) + '%';
+  if (prog) prog.style.width = Math.round(((n - 1) / 8) * 100) + '%';
   // Update subtitle
   var sub = document.getElementById('wizSubtitle');
   if (sub) sub.textContent = WIZ_LABELS[n] || '';
@@ -5892,7 +5903,7 @@ function switchStep(n) {
       (function() {
         var saved = 1;
         try { saved = parseInt(localStorage.getItem('qb_wiz_step')) || 1; } catch(e) {}
-        switchStep(Math.min(Math.max(saved || 1, 1), 6));
+        switchStep(Math.min(Math.max(saved || 1, 1), 9));
       })();
 
       // ==========================================
