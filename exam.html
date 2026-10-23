@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exam | Academy</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+  <link rel="stylesheet" href="assets/site.css">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="assets/portal.css">
+  <style>
+    body.exam-running .site-header, body.exam-running .mobile-tabbar { display: none !important; }
+    .center-card { max-width: 560px; margin: 40px auto 0; text-align: center; }
+    .center-card .big-ico { font-size: 40px; margin-bottom: 12px; }
+    .facts { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 18px 0; }
+    .facts .stat-box { min-width: 120px; }
+    ul.rules { text-align: left; margin: 0 auto 20px; max-width: 420px; padding-left: 20px; color: var(--muted); font-size: 13.5px; line-height: 1.9; }
+  </style>
+</head>
+<body class="portal-body">
+
+<div id="g-loader"><div class="loader-card"><div class="spin-ring"></div><div class="loader-txt" id="loader-txt">Please wait…</div></div></div>
+
+<header class="site-header">
+  <div class="nav-shell">
+    <a class="brand" href="index.html"><img src="favicon.svg" alt="Logo"><span>Academy<small>Online Exam</small></span></a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><i class="fas fa-bars"></i></button>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
+      <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+      <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
+      <a href="academy.html" data-page="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
+      <a href="research.html" data-page="research.html"><i class="fas fa-flask"></i> Research</a>
+      <div class="nav-actions"><a class="act-dark" href="student_portal.html"><i class="fas fa-user-graduate"></i> Student Portal</a></div>
+    </nav>
+  </div>
+</header>
+
+<!-- loading -->
+<main id="view-load" class="portal-wrap"><div class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></main>
+
+<!-- message (errors, not-approved, no code) -->
+<main id="view-msg" class="portal-wrap hide">
+  <div class="panel center-card">
+    <div class="big-ico" id="msg-ico">⚠️</div>
+    <h2 id="msg-title" style="margin:0 0 8px;font-size:20px;"></h2>
+    <p class="sub" id="msg-text" style="margin:0 0 20px;"></p>
+    <div id="msg-actions" class="row" style="justify-content:center;"></div>
+    <div id="msg-code" class="code-box hide" style="margin-top:20px;">
+      <input class="inp" id="code-in" maxlength="8" placeholder="Enter exam code" onkeydown="if(event.key==='Enter') goCode()">
+      <button class="btn primary" onclick="goCode()"><i class="fas fa-play"></i> Go</button>
+    </div>
+  </div>
+</main>
+
+<!-- intro -->
+<main id="view-intro" class="portal-wrap hide">
+  <div class="panel center-card">
+    <div class="big-ico">📝</div>
+    <h2 id="in-title" style="margin:0 0 6px;font-size:22px;"></h2>
+    <p class="sub" id="in-teacher" style="margin:0;"></p>
+    <div class="facts">
+      <div class="stat-box"><b id="in-q">0</b><small>Questions</small></div>
+      <div class="stat-box"><b id="in-dur">0</b><small>Minutes</small></div>
+      <div class="stat-box"><b id="in-who" style="font-size:15px;"></b><small>Student</small></div>
+    </div>
+    <div id="in-resume" class="alert al-warn hide" style="text-align:left;"><i class="fas fa-rotate-right"></i><span>You already started this exam. Your saved answers will come back and the timer continues.</span></div>
+    <ul class="rules">
+      <li>Once you press Start, the timer begins and cannot be paused.</li>
+      <li>Your answers are saved automatically. If your internet drops you can reopen this page and continue.</li>
+      <li>You can submit only once. When time ends your answers are submitted automatically.</li>
+      <li>After you submit you will see your score, rank and the full paper with correct answers.</li>
+    </ul>
+    <button class="btn primary full" id="start-btn" onclick="startExam()"><i class="fas fa-play"></i> <span id="start-txt">Start Exam</span></button>
+    <p style="margin:14px 0 0;"><a class="link-btn" href="student_portal.html">← Back to portal</a></p>
+  </div>
+</main>
+
+<!-- running -->
+<div id="view-run" class="hide">
+  <div class="exam-bar">
+    <div class="in">
+      <div class="ttl" id="run-title">Exam</div>
+      <div class="sub" id="run-count" style="font-family:'Inter',sans-serif;font-weight:700;">0 / 0</div>
+      <div class="timer" id="timer">--:--</div>
+    </div>
+    <div class="prog"><i id="prog-fill"></i></div>
+  </div>
+  <div class="exam-layout">
+    <div id="run-list"></div>
+    <aside class="qnav"><h4>Questions</h4><div class="g" id="run-nav"></div>
+      <p class="sub" style="margin:12px 0 0;font-size:12px;"><span style="display:inline-block;width:10px;height:10px;background:var(--ink);border-radius:3px;margin-right:5px;"></span>Answered</p>
+    </aside>
+  </div>
+  <div class="submit-bar"><div class="in">
+    <span class="save-note" id="save-note">Answers save automatically</span>
+    <button class="btn primary" id="submit-btn" onclick="askSubmit()"><i class="fas fa-paper-plane"></i> Submit exam</button>
+  </div></div>
+</div>
+
+<!-- result / review -->
+<main id="view-result" class="portal-wrap wide hide">
+  <div class="panel" style="text-align:center;">
+    <p class="sub" id="rs-exam" style="margin:0 0 4px;"></p>
+    <h2 style="margin:0 0 6px;font-size:22px;" id="rs-title">Result</h2>
+    <p class="sub" id="rs-name" style="margin:0 0 6px;"></p>
+    <div class="hero-ring"><b id="rs-score">0</b><i></i><span id="rs-total">0</span></div>
+    <div class="stat-row">
+      <div class="stat-box" style="border-color:#86efac;"><b style="color:#166534;" id="rs-c">0</b><small>Correct</small></div>
+      <div class="stat-box" style="border-color:#fca5a5;"><b style="color:#b91c1c;" id="rs-w">0</b><small>Wrong</small></div>
+      <div class="stat-box"><b id="rs-s">0</b><small>Skipped</small></div>
+      <div class="stat-box"><b id="rs-rank">—</b><small>Rank</small></div>
+      <div class="stat-box"><b id="rs-time" style="font-size:16px;">—</b><small>Time</small></div>
+    </div>
+    <div class="row no-print" style="justify-content:center;">
+      <button class="btn secondary" onclick="window.print()"><i class="fas fa-print"></i> Print / Save PDF</button>
+      <a class="btn secondary" href="student_portal.html"><i class="fas fa-arrow-left"></i> Back to portal</a>
+    </div>
+  </div>
+
+  <div class="chips no-print" id="rs-tabs">
+    <button class="chip-btn active" data-v="review" onclick="showResultTab('review')"><i class="fas fa-list-check"></i> Full paper</button>
+    <button class="chip-btn" data-v="ranking" onclick="showResultTab('ranking')"><i class="fas fa-ranking-star"></i> Ranking</button>
+  </div>
+
+  <div id="rs-review">
+    <div class="chips no-print" id="rs-filters"></div>
+    <div class="exam-layout" style="padding:0;">
+      <div id="rv-list"></div>
+      <aside class="qnav"><h4>Questions</h4><div class="g" id="rv-nav"></div></aside>
+    </div>
+  </div>
+  <div id="rs-ranking" class="hide"></div>
+</main>
+
+<div class="modal-overlay" id="modal-submit">
+  <div class="modal-box" style="max-width:420px;text-align:center;">
+    <div style="font-size:38px;margin-bottom:8px;">📤</div>
+    <h3 style="margin:0 0 8px;">Submit your exam?</h3>
+    <p class="sub" id="submit-msg" style="margin:0 0 20px;"></p>
+    <div class="row" style="justify-content:center;">
+      <button class="btn secondary" onclick="closeModal('modal-submit')">Keep working</button>
+      <button class="btn primary" id="confirm-submit" onclick="doSubmit(false)">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/site.js"></script>
+<script src="assets/exam-common.js"></script>
+<script>
+const P = new URLSearchParams(location.search);
+const CODE = (P.get('code') || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const EXAMID = P.get('examId') || '';
+const REVIEW = P.get('review') || '';
+const SESSION = acadSession.get('student');
+
+let examId = '', questions = [], answers = [], endAt = 0, timerInt = null, saveTimer = null, dirty = false, running = false, submitting = false;
+let reviewData = null, rvFilter = 'all', rankingLoaded = false;
+
+function $(id) { return document.getElementById(id); }
+function showOnly(id) { ['view-load', 'view-msg', 'view-intro', 'view-run', 'view-result'].forEach(v => $(v).classList.toggle('hide', v !== id)); document.body.classList.toggle('exam-running', id === 'view-run'); window.scrollTo(0, 0); }
+function showLoader(m) { if (m) $('loader-txt').innerHTML = m; $('g-loader').style.display = 'flex'; }
+function hideLoader() { $('g-loader').style.display = 'none'; }
+function closeModal(id) { $(id).classList.remove('open'); }
+
+function message(ico, title, text, actions, withCode) {
+  $('msg-ico').textContent = ico; $('msg-title').textContent = title; $('msg-text').innerHTML = text;
+  $('msg-actions').innerHTML = actions || '';
+  $('msg-code').classList.toggle('hide', !withCode);
+  showOnly('view-msg');
+}
+function goCode() {
+  const c = $('code-in').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (c.length < 4) return acadToast('Enter the exam code', 'err');
+  location.href = 'exam.html?code=' + encodeURIComponent(c);
+}
+function backBtn() { return '<a class="btn secondary" href="student_portal.html"><i class="fas fa-arrow-left"></i> Back to portal</a>'; }
+
+/* ───────── entry ───────── */
+(async function init() {
+  if (!SESSION) {
+    const here = 'exam.html' + location.search;
+    location.replace('student_portal.html?next=' + encodeURIComponent(here));
+    return;
+  }
+  if (REVIEW) return loadReview(REVIEW);
+  if (!CODE && !EXAMID) return message('🔑', 'Enter your exam code', 'Type the code your teacher gave you to start the exam.', backBtn(), true);
+  try {
+    const d = await studentCall('examInfo', CODE ? { code: CODE } : { examId: EXAMID });
+    handleGateError(d, true);
+    if (d.status !== 'success') return;
+    examId = d.exam.id;
+    $('in-title').textContent = d.exam.title;
+    $('in-teacher').innerHTML = '<i class="fas fa-chalkboard-user"></i> ' + esc(d.exam.teacherName);
+    $('in-q').textContent = d.exam.qCount; $('in-dur').textContent = d.exam.durationMin;
+    $('in-who').textContent = (SESSION.user && SESSION.user.name) || '';
+    $('in-resume').classList.toggle('hide', !d.resume);
+    $('start-txt').textContent = d.resume ? 'Continue Exam (' + fmtClock(d.remainingSec) + ' left)' : 'Start Exam';
+    showOnly('view-intro');
+  } catch (e) { message('📡', 'Network error', 'Could not reach the server. Check your internet and try again.', '<button class="btn primary" onclick="location.reload()">Reload</button>'); }
+})();
+
+/* returns true if it handled an error */
+function handleGateError(d, fromInfo) {
+  if (d.status === 'success') return false;
+  if (d.status === 'unauthorized') { acadSession.clear('student'); location.replace('student_portal.html?next=' + encodeURIComponent('exam.html' + location.search)); return true; }
+  if (d.code === 'already-done') { location.replace('exam.html?review=' + encodeURIComponent(d.examId || examId)); return true; }
+  if (d.code === 'not-approved') {
+    message('🔒', 'Not approved yet', esc(d.message) + '<br>Send a request to this teacher — you can start once they approve you.',
+      `<button class="btn primary" onclick="applyTo('${esc(d.teacher.id)}')"><i class="fas fa-paper-plane"></i> Apply to ${esc(d.teacher.name)}</button>${backBtn()}`);
+    return true;
+  }
+  message(d.code === 'closed' ? '⏸️' : d.code === 'not-found' ? '🔍' : '🚫', d.code === 'closed' ? 'Exam is closed' : d.code === 'not-found' ? 'Exam not found' : 'Cannot start', esc(d.message || 'Something went wrong'), backBtn(), d.code === 'not-found');
+  return true;
+}
+async function applyTo(tid) {
+  const d = await studentCall('applyTeacher', { teacherId: tid });
+  if (d.status === 'unauthorized') return handleGateError(d);
+  message(d.status === 'success' ? '✅' : 'ℹ️', d.status === 'success' ? 'Request sent' : 'Notice', esc(d.message || ''), backBtn());
+}
+
+/* ───────── start / run ───────── */
+async function startExam() {
+  $('start-btn').disabled = true;
+  showLoader('Starting your exam…');
+  try {
+    const d = await studentCall('examStart', { examId });
+    hideLoader();
+    if (handleGateError(d)) return;
+    questions = d.questions; answers = d.saved && d.saved.length === questions.length ? d.saved.slice() : questions.map(() => -1);
+    try { // merge a local backup if the server copy is empty (e.g. offline before)
+      const bk = JSON.parse(localStorage.getItem('acad_draft_' + examId) || 'null');
+      if (bk && bk.length === answers.length) bk.forEach((v, i) => { if (answers[i] === -1 && v >= 0) answers[i] = v; });
+    } catch (e) {}
+    endAt = Date.now() + d.remainingSec * 1000;
+    $('run-title').textContent = d.exam.title;
+    buildRun();
+    showOnly('view-run');
+    running = true;
+    tick(); timerInt = setInterval(tick, 500);
+    updateProgress();
+    acadTypeset($('run-list'));
+  } catch (e) { hideLoader(); $('start-btn').disabled = false; acadToast('Network error — try again', 'err'); }
+}
+function buildRun() {
+  $('run-list').innerHTML = questions.map((q, i) => `
+    <div class="q-card" id="q-${i}">${renderQuestionBody(q, i)}
+      <div class="opts">${q.opts.map((o, j) => `<label class="opt${answers[i] === j ? ' sel' : ''}" id="o-${i}-${j}"><input type="radio" name="q${i}" value="${j}" ${answers[i] === j ? 'checked' : ''} onchange="pick(${i},${j})"><span>${sanitizeHtml(o)}</span></label>`).join('')}</div>
+    </div>`).join('');
+  $('run-nav').innerHTML = questions.map((_, i) => `<a href="#q-${i}" id="n-${i}" class="${answers[i] >= 0 ? 'done' : ''}">${i + 1}</a>`).join('');
+}
+function pick(i, j) {
+  answers[i] = j;
+  questions[i].opts.forEach((_, k) => $('o-' + i + '-' + k).classList.toggle('sel', k === j));
+  $('n-' + i).classList.add('done');
+  updateProgress();
+  try { localStorage.setItem('acad_draft_' + examId, JSON.stringify(answers)); } catch (e) {}
+  dirty = true;
+  clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 4000);
+}
+function updateProgress() {
+  const done = answers.filter(a => a >= 0).length;
+  $('run-count').textContent = done + ' / ' + questions.length + ' answered';
+  $('prog-fill').style.width = (questions.length ? done / questions.length * 100 : 0) + '%';
+}
+function tick() {
+  const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+  const t = $('timer'); t.textContent = fmtClock(left); t.classList.toggle('low', left <= 60);
+  if (left <= 0 && running && !submitting) { clearInterval(timerInt); doSubmit(true); }
+}
+async function saveNow() {
+  if (!running || !dirty) return;
+  dirty = false;
+  const note = $('save-note');
+  try {
+    const d = await studentCall('examSave', { examId, answers });
+    if (d.status === 'success') {
+      note.textContent = 'Saved ✓'; note.classList.remove('err');
+      const srv = Date.now() + d.remainingSec * 1000;
+      if (Math.abs(srv - endAt) > 3000) endAt = srv;     // stay in step with the server clock
+    } else if (d.status === 'unauthorized') { note.textContent = 'Session expired — keep going, then log in again to submit'; note.classList.add('err'); }
+    else { dirty = true; note.textContent = 'Could not save — will retry'; note.classList.add('err'); }
+  } catch (e) { dirty = true; note.textContent = 'Offline — answers are kept on this device'; note.classList.add('err'); clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 8000); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && running && dirty && SESSION) {
+    try { fetch(ACAD_GAS_URL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'examSave', token: (acadSession.get('student') || {}).token, examId, answers }) }); dirty = false; } catch (e) {}
+  }
+});
+window.addEventListener('beforeunload', e => { if (running && !submitting) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ───────── submit ───────── */
+function askSubmit() {
+  const left = answers.filter(a => a < 0).length;
+  $('submit-msg').innerHTML = left ? `You have <b>${left}</b> unanswered question${left > 1 ? 's' : ''}. You cannot change anything after submitting.` : 'All questions are answered. You cannot change anything after submitting.';
+  $('modal-submit').classList.add('open');
+}
+async function doSubmit(auto) {
+  if (submitting) return;
+  submitting = true; closeModal('modal-submit');
+  clearTimeout(saveTimer);
+  showLoader(auto ? 'Time is up — submitting your answers…' : 'Submitting…');
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const d = await studentCall('examSubmit', { examId, answers });
+      if (d.status === 'success') {
+        hideLoader(); running = false; clearInterval(timerInt);
+        try { localStorage.removeItem('acad_draft_' + examId); } catch (e) {}
+        reviewData = d; renderResult(true); return;
+      }
+      if (d.status === 'unauthorized') { hideLoader(); submitting = false; running = true; return message('🔐', 'Session expired', 'Your answers are saved on this device. Log in again, then reopen this exam page and submit.', '<a class="btn primary" href="student_portal.html?next=' + encodeURIComponent('exam.html' + location.search) + '">Log in</a>'); }
+      hideLoader(); submitting = false; acadToast(d.message || 'Could not submit', 'err'); return;
+    } catch (e) { await new Promise(r => setTimeout(r, 1500 * (attempt + 1))); }
+  }
+  hideLoader(); submitting = false; running = true;
+  acadToast('No internet — your answers are safe on this device. Press Submit again when you are online.', 'err');
+  if (!auto) return;
+  $('submit-btn').textContent = 'Retry submit';
+}
+
+/* ───────── result / review ───────── */
+async function loadReview(id) {
+  examId = id;
+  try {
+    const d = await studentCall('examReview', { examId: id });
+    if (d.status === 'unauthorized') return handleGateError(d);
+    if (d.status !== 'success') return message('🔍', 'Result not found', esc(d.message || ''), backBtn());
+    reviewData = d; renderResult(false);
+  } catch (e) { message('📡', 'Network error', 'Could not load your result.', '<button class="btn primary" onclick="location.reload()">Reload</button>'); }
+}
+function renderResult(justSubmitted) {
+  const d = reviewData, r = d.result;
+  document.title = d.exam.title + ' — Result';
+  $('rs-exam').innerHTML = '<i class="fas fa-chalkboard-user"></i> ' + esc(d.exam.teacherName);
+  $('rs-title').textContent = d.exam.title;
+  $('rs-name').textContent = r.name || '';
+  $('rs-score').textContent = r.score; $('rs-total').textContent = r.total || (d.questions ? d.questions.length : '');
+  $('rs-c').textContent = d.questions ? r.correct : '—'; $('rs-w').textContent = d.questions ? r.wrong : '—'; $('rs-s').textContent = d.questions ? r.skipped : '—';
+  $('rs-rank').textContent = r.rank ? '#' + r.rank + ' / ' + r.participants : '—';
+  $('rs-time').textContent = r.timeSec ? fmtDur(r.timeSec) : '—';
+  showOnly('view-result');
+  rankingLoaded = false; rvFilter = 'all';
+  showResultTab('review');
+  drawReview();
+  if (justSubmitted) acadToast('Submitted ✓', 'ok');
+}
+function showResultTab(v) {
+  document.querySelectorAll('#rs-tabs .chip-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+  $('rs-review').classList.toggle('hide', v !== 'review');
+  $('rs-ranking').classList.toggle('hide', v !== 'ranking');
+  if (v === 'ranking' && !rankingLoaded) loadRanking();
+}
+function statusOf(i) {
+  const a = reviewData.answers[i], q = reviewData.questions[i];
+  return a === -1 ? 'skip' : (a === q.ans ? 'ok' : 'bad');
+}
+function drawReview() {
+  const d = reviewData;
+  if (!d.questions) { // result from the old system: only the mistake summary exists
+    $('rs-filters').innerHTML = '';
+    $('rv-nav').innerHTML = '';
+    const items = String(d.details || '').split(', ').filter(Boolean);
+    $('rv-list').innerHTML = '<div class="q-card"><div class="q-text">Mistakes</div>' + (d.details === 'Perfect Score' ? '<p>Perfect score! 🏆</p>' : '<ul>' + items.map(m => '<li style="margin-bottom:8px;">' + sanitizeHtml(m) + '</li>').join('') + '</ul>') + '<p class="sub">This exam was taken before the full-paper review existed.</p></div>';
+    acadTypeset($('rv-list')); return;
+  }
+  const st = d.questions.map((_, i) => statusOf(i));
+  const cnt = k => st.filter(x => x === k).length;
+  const F = [['all', 'All', st.length], ['bad', 'Wrong', cnt('bad')], ['skip', 'Skipped', cnt('skip')], ['ok', 'Correct', cnt('ok')]];
+  $('rs-filters').innerHTML = F.map(f => `<button class="chip-btn${rvFilter === f[0] ? ' active' : ''}" onclick="setFilter('${f[0]}')">${f[1]} (${f[2]})</button>`).join('');
+  const LBL = { ok: 'Correct', bad: 'Wrong', skip: 'Skipped' };
+  $('rv-list').innerHTML = d.questions.map((q, i) => {
+    if (rvFilter !== 'all' && st[i] !== rvFilter) return '';
+    const a = d.answers[i];
+    return `<div class="q-card" id="r-${i}"><span class="q-status ${st[i]}">${LBL[st[i]]}</span>${renderQuestionBody(q, i)}
+      <div class="opts">${q.opts.map((o, j) => {
+        const isC = j === q.ans, isMine = j === a;
+        const cls = isC ? 'correct' : (isMine ? 'wrong' : '');
+        const tag = isC ? (isMine ? 'Your answer · Correct' : 'Correct answer') : (isMine ? 'Your answer' : '');
+        return `<div class="opt static ${cls}"><span>${sanitizeHtml(o)}</span>${tag ? `<span class="tag">${tag}</span>` : ''}</div>`;
+      }).join('')}</div>
+      ${a === -1 ? '<p class="sub" style="margin:10px 0 0;">You did not answer this question.</p>' : ''}
+      ${q.exp ? `<div class="q-exp"><b>Explanation:</b> ${sanitizeHtml(q.exp)}</div>` : ''}</div>`;
+  }).join('') || '<div class="empty-st"><i class="fas fa-circle-check"></i><p>Nothing in this filter.</p></div>';
+  $('rv-nav').innerHTML = st.map((s, i) => `<a href="#r-${i}" class="${s}">${i + 1}</a>`).join('');
+  acadTypeset($('rv-list'));
+}
+function setFilter(f) { rvFilter = f; drawReview(); }
+
+async function loadRanking() {
+  const box = $('rs-ranking');
+  box.innerHTML = '<div class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading ranking…</div>';
+  try {
+    const d = await studentCall('examRanking', { examId });
+    if (d.status !== 'success') { box.innerHTML = '<div class="empty-st"><p>' + esc(d.message || 'Not available') + '</p></div>'; return; }
+    rankingLoaded = true;
+    box.innerHTML = '<div class="table-wrap"><table class="d-table"><thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr></thead><tbody>' +
+      d.ranking.map(r => `<tr class="${r.me ? 'me' : ''}"><td><span class="rank-pill r${r.rank <= 3 ? r.rank : ''}">${r.rank}</span></td><td>${esc(r.name)}${r.me ? ' <span class="chip ok">You</span>' : ''}</td><td><b>${r.score}</b>/${r.total}</td><td class="muted">${fmtDur(r.timeSec)}</td></tr>`).join('') +
+      '</tbody></table></div>';
+  } catch (e) { box.innerHTML = '<div class="empty-st"><p>Network error</p></div>'; }
+}
+</script>
+</body>
+</html>

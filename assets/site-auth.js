@@ -47,7 +47,7 @@ function siteAdminLogout() {
    - logged in  : shows "Admin ✓", a link to the Admin Panel (whose Back
                   button returns here) and a Logout button
    ══════════════════════════════════════════════════════════════ */
-const SITE_RETURN_PAGES = ['index.html', 'civil.html', 'modeling.html', 'notice.html', 'research.html', 'academy.html'];
+const SITE_RETURN_PAGES = ['index.html', 'civil.html', 'modeling.html', 'notice.html', 'research.html', 'academy.html', 'teacher_panel.html'];
 
 /* Only plain page names of this site are accepted -- never an outside URL. */
 function siteSafeReturn(name) {

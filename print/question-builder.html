@@ -5791,22 +5791,22 @@ function generateOnlineExamHTML() {
 function showOnlineExamModal() {
   const modal = document.getElementById("onlineExamModal");
   if (!modal) {
-      window.location.href = "../exam_controller.html";
+      window.location.href = "../teacher_panel.html";
       return;
   }
   modal.style.display = "flex";
 }
 
 function goToExamController() {
-  window.location.href = "../exam_controller.html";
+  window.location.href = "../teacher_panel.html";
 }
     </script>
   <div id="onlineExamModal">
     <div class="oe-modal-box">
       <div class="oe-modal-icon">🌐</div>
       <h3>Questions Created!</h3>
-      <p>Taking you to the Control Panel now to set the password and permissions...</p>
-      <button type="button" class="oe-modal-btn" onclick="goToExamController()">Go to Control Panel →</button>
+      <p>Open the Teacher Panel to choose who can take it and publish the exam.</p>
+      <button type="button" class="oe-modal-btn" onclick="goToExamController()">Go to Teacher Panel →</button>
     </div>
   </div>
   <div id="cropperModal">

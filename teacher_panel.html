@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Panel | Academy</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+  <link rel="stylesheet" href="assets/site.css">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="assets/portal.css">
+  <style>
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .toolbar .inp { max-width: 280px; }
+    .exam-row { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); margin-bottom: 10px; }
+    .exam-row h3 { margin: 0 0 4px; font-size: 16px; }
+    .exam-row .meta { font-size: 12.5px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+    .exam-row .right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .live-lbl { font-size: 12px; font-weight: 800; font-family: 'Inter', sans-serif; }
+    @media (max-width: 700px) { .exam-row { grid-template-columns: 1fr; } .exam-row .right { justify-content: flex-start; } }
+    .radio-card { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; margin-bottom: 8px; background: var(--surface); }
+    .radio-card.on { border-color: var(--ink); background: var(--surface-soft); }
+    .radio-card input { margin-top: 4px; accent-color: var(--ink); }
+    .radio-card b { display: block; font-size: 14px; }
+    .radio-card span { font-size: 12.5px; color: var(--muted); }
+  </style>
+</head>
+<body class="portal-body">
+
+<div id="g-loader"><div class="loader-card"><div class="spin-ring"></div><div class="loader-txt" id="loader-txt">Please wait…</div></div></div>
+
+<header class="site-header">
+  <div class="nav-shell">
+    <a class="brand" href="index.html"><img src="favicon.svg" alt="Logo"><span>Academy<small>Teacher Panel</small></span></a>
+    <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><i class="fas fa-bars"></i></button>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html" data-page="index.html"><i class="fas fa-house"></i> Home</a>
+      <a href="civil.html" data-page="civil.html"><i class="fas fa-helmet-safety"></i> Civil</a>
+      <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
+      <a href="academy.html" data-page="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
+      <a href="research.html" data-page="research.html"><i class="fas fa-flask"></i> Research</a>
+      <div class="nav-actions"><a class="act-dark" href="student_portal.html"><i class="fas fa-user-graduate"></i> Student Portal</a></div>
+    </nav>
+  </div>
+</header>
+
+<main class="portal-wrap wide">
+
+  <!-- ═════════ AUTH ═════════ -->
+  <div id="auth-section" class="hide" style="max-width:560px;margin:0 auto;">
+    <div class="panel">
+      <h2 class="panel-title"><i class="fas fa-chalkboard-user"></i> Teacher Panel</h2>
+      <div class="seg" style="margin-bottom:18px;"><button class="active" id="seg-login" onclick="authMode('login')">Log in</button><button id="seg-signup" onclick="authMode('signup')">Sign up as teacher</button></div>
+
+      <div id="form-login">
+        <div class="field"><label>Mobile Number</label><input type="tel" id="l-mobile" class="inp" placeholder="01XXXXXXXXX" maxlength="11"></div>
+        <div class="field"><label>Password</label><input type="password" id="l-pass" class="inp" onkeydown="if(event.key==='Enter') doLogin()"></div>
+        <button class="forgot-btn" onclick="forgot()"><i class="fas fa-key"></i> Forgot your password?</button>
+        <div id="l-msg" class="alert al-error hide"></div>
+        <button class="btn primary full" id="l-btn" onclick="doLogin()">Log in <i class="fas fa-arrow-right"></i></button>
+      </div>
+
+      <div id="form-signup" class="hide">
+        <p class="sub" style="margin:0 0 14px;">Create a teacher account. The admin will review your request; once approved you can log in, approve your own students and run exams.</p>
+        <div class="field"><label>Full Name *</label><input type="text" id="s-name" class="inp"></div>
+        <div class="grid-2">
+          <div class="field"><label>Mobile Number *</label><input type="tel" id="s-mobile" class="inp" maxlength="11" placeholder="01XXXXXXXXX"></div>
+          <div class="field"><label>Password *</label><input type="password" id="s-pass" class="inp" placeholder="min 4 characters"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Subject</label><input type="text" id="s-subject" class="inp" placeholder="e.g. Mathematics"></div>
+          <div class="field"><label>Institution</label><input type="text" id="s-inst" class="inp" placeholder="optional"></div>
+        </div>
+        <div id="s-msg" class="alert al-error hide"></div>
+        <button class="btn primary full" id="s-btn" onclick="doSignup()">Send request <i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+    <div class="alert al-info"><i class="fas fa-user-tie"></i><span>Site admin? <a href="admin_panel.html?from=teacher_panel.html&login=1" style="font-weight:700;text-decoration:underline;">Log in through the Admin Panel</a> — you will come straight back here.</span></div>
+  </div>
+
+  <!-- ═════════ DASHBOARD ═════════ -->
+  <div id="dash" class="hide">
+    <div class="user-banner">
+      <div class="u-info">
+        <h3 id="b-name">—</h3>
+        <p id="b-sub">—</p>
+      </div>
+      <div class="row">
+        <a class="btn secondary sm hide" id="b-admin" href="admin_panel.html#teachers"><i class="fas fa-user-tie"></i> Admin Panel</a>
+        <button class="btn secondary sm" id="b-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log out</button>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:20px 24px 26px;">
+      <div class="toolbar hide" id="scope-bar">
+        <span class="sub" style="font-weight:700;">Showing:</span>
+        <div class="seg"><button class="active" id="sc-mine" onclick="setScope('mine')">My students &amp; exams</button><button id="sc-all" onclick="setScope('all')">All teachers</button></div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="students" onclick="switchTab('students')"><i class="fas fa-users"></i> Students <span class="dot hide" id="dot-pending">0</span></button>
+        <button class="tab-btn" data-tab="exams" onclick="switchTab('exams')"><i class="fas fa-file-pen"></i> Exams</button>
+        <button class="tab-btn" data-tab="results" onclick="switchTab('results')"><i class="fas fa-ranking-star"></i> Results</button>
+      </div>
+
+      <!-- Students -->
+      <div id="tab-students" class="tab-pane active">
+        <div id="pending-box" class="hide" style="margin-bottom:24px;">
+          <div class="exams-section-head">Waiting for your approval <span class="sh-count" id="pending-n">0</span></div>
+          <div class="list" id="pending-list"></div>
+        </div>
+        <div class="toolbar">
+          <input class="inp" id="stu-search" placeholder="Search students…" oninput="renderStudents()">
+          <span class="sub" id="stu-count"></span>
+        </div>
+        <div id="stu-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
+        <div class="table-wrap hide" id="stu-wrap">
+          <table class="d-table"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>School</th><th>Class</th><th class="col-teacher hide">Teacher</th><th></th></tr></thead><tbody id="stu-body"></tbody></table>
+        </div>
+        <div class="empty-st hide" id="stu-empty"><i class="fas fa-user-graduate"></i><p>No approved students yet. Students apply to you from their Student Portal.</p></div>
+      </div>
+
+      <!-- Exams -->
+      <div id="tab-exams" class="tab-pane">
+        <div id="exam-list-view">
+          <div class="toolbar">
+            <button class="btn primary" onclick="newExam()"><i class="fas fa-plus"></i> New exam</button>
+            <a class="btn secondary" href="print/question-builder.html"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</a>
+            <button class="btn secondary hide" id="import-btn" onclick="importLegacy()"><i class="fas fa-file-import"></i> Import old exams</button>
+          </div>
+          <div id="ex-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
+          <div id="ex-list"></div>
+          <div class="empty-st hide" id="ex-empty"><i class="fas fa-file-circle-plus"></i><p>No exams yet. Create your first exam.</p></div>
+        </div>
+
+        <!-- builder -->
+        <div id="builder-view" class="hide">
+          <div class="row between" style="margin-bottom:16px;">
+            <h3 style="margin:0;font-size:19px;" id="bd-title">New exam</h3>
+            <button class="btn secondary sm" onclick="closeBuilder()"><i class="fas fa-arrow-left"></i> Back</button>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label>Exam name *</label><input class="inp" id="bd-name" placeholder="e.g. Chapter 3 Model Test"></div>
+            <div class="field"><label>Duration (minutes) *</label><input class="inp" type="number" id="bd-dur" min="1" max="600" value="30"></div>
+          </div>
+          <div class="field">
+            <label>Who can take this exam</label>
+            <label class="radio-card on" id="rc-approved"><input type="radio" name="allow" value="approved" checked onchange="allowChanged()"><div><b>All my approved students</b><span>Anyone approved under you can take it with the exam code.</span></div></label>
+            <label class="radio-card" id="rc-selected"><input type="radio" name="allow" value="selected" onchange="allowChanged()"><div><b>Only selected students</b><span>Pick exactly who is allowed.</span></div></label>
+            <div id="pick-wrap" class="hide">
+              <div class="row" style="margin:8px 0;"><button class="btn secondary sm" onclick="pickAll(true)">Select all</button><button class="btn secondary sm" onclick="pickAll(false)">None</button><span class="sub" id="pick-count"></span></div>
+              <div class="student-pick" id="pick-list"></div>
+            </div>
+          </div>
+
+          <div class="row between" style="margin:22px 0 10px;">
+            <h3 style="margin:0;font-size:16px;"><i class="fas fa-list-ol"></i> Questions <span class="chip" id="q-count">0</span></h3>
+            <div class="row">
+              <button class="btn secondary sm" onclick="toggleImport()"><i class="fas fa-paste"></i> Paste JSON</button>
+              <button class="btn secondary sm" onclick="addQ()"><i class="fas fa-plus"></i> Add question</button>
+            </div>
+          </div>
+          <div id="import-box" class="hide" style="margin-bottom:14px;">
+            <textarea class="inp" id="import-text" rows="6" placeholder='[{"q":"Question text","opts":["A","B","C","D"],"ans":1}]  — ans = 0..3 (or "A".."D")'></textarea>
+            <div class="row" style="margin-top:8px;"><button class="btn primary sm" onclick="doImport()">Add these questions</button><span class="sub">Tip: use $x^2$ for math. HTML like &lt;b&gt;, &lt;img&gt; works too.</span></div>
+          </div>
+          <div id="q-list"></div>
+
+          <div class="row between" style="margin-top:18px;">
+            <span class="sub">Students never see the correct answers until they submit.</span>
+            <div class="row">
+              <button class="btn secondary" onclick="previewExam()"><i class="fas fa-eye"></i> Preview</button>
+              <button class="btn secondary" onclick="saveExam(false)"><i class="fas fa-floppy-disk"></i> Save (keep closed)</button>
+              <button class="btn primary" onclick="saveExam(true)"><i class="fas fa-bolt"></i> Save &amp; go live</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="tab-results" class="tab-pane">
+        <div class="toolbar">
+          <select class="inp" id="res-exam" onchange="loadResults()" style="max-width:420px;"></select>
+          <button class="btn secondary sm" onclick="loadResults()"><i class="fas fa-rotate"></i> Refresh</button>
+          <button class="btn secondary sm" onclick="exportCsv()"><i class="fas fa-file-csv"></i> Export CSV</button>
+        </div>
+        <div id="res-body"><div class="empty-st"><i class="fas fa-ranking-star"></i><p>Choose an exam to see its ranking.</p></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal: paper -->
+<div class="modal-overlay" id="modal-paper">
+  <div class="modal-box big">
+    <div class="modal-hd"><h3 id="paper-title"><i class="fas fa-file-lines"></i> Paper</h3><button class="modal-close" onclick="closeModal('modal-paper')"><i class="fas fa-times"></i></button></div>
+    <div id="paper-body"></div>
+  </div>
+</div>
+
+
+<script src="assets/site.js"></script>
+<script src="assets/site-auth.js"></script>
+<script src="assets/site-data.js"></script>
+<script src="assets/exam-common.js"></script>
+<script>
+let ME = null;                 // { role:'admin'|'teacher', teacher:{...} }
+let scope = 'mine';
+let students = [], exams = [], editingId = null, qs = [], resData = null;
+
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id).classList.remove('hide'); }
+function hide(id) { $(id).classList.add('hide'); }
+function showLoader(m) { if (m) $('loader-txt').innerHTML = m; $('g-loader').style.display = 'flex'; }
+function hideLoader() { $('g-loader').style.display = 'none'; }
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
+const isAdmin = () => ME && ME.role === 'admin';
+
+/* ═════════ auth ═════════ */
+function authMode(m) {
+  $('seg-login').classList.toggle('active', m === 'login'); $('seg-signup').classList.toggle('active', m === 'signup');
+  $('form-login').classList.toggle('hide', m !== 'login'); $('form-signup').classList.toggle('hide', m !== 'signup');
+}
+function msg(id, text, kind) { const e = $(id); e.className = 'alert ' + (kind || 'al-error') + (text ? '' : ' hide'); e.innerHTML = text ? esc(text) : ''; }
+async function doLogin() {
+  const mobile = $('l-mobile').value.trim(), password = $('l-pass').value;
+  msg('l-msg', '');
+  if (!mobile || !password) return msg('l-msg', 'মোবাইল ও পাসওয়ার্ড দিন');
+  $('l-btn').disabled = true;
+  try {
+    const d = await acadRaw({ action: 'teacherLogin', mobile, password });
+    if (d.status === 'success') { acadSession.set('teacher', { token: d.token, expiry: d.expiry, user: d.teacher }); await enter(); }
+    else if (d.status === 'pending') msg('l-msg', d.message, 'al-warn');
+    else msg('l-msg', d.message || 'Login failed');
+  } catch (e) { msg('l-msg', 'Network error — check your connection'); }
+  $('l-btn').disabled = false;
+}
+async function doSignup() {
+  const name = $('s-name').value.trim(), mobile = $('s-mobile').value.trim(), password = $('s-pass').value;
+  msg('s-msg', '');
+  if (!name || !mobile || !password) return msg('s-msg', 'নাম, মোবাইল ও পাসওয়ার্ড আবশ্যক');
+  if (!/^\d{10,11}$/.test(mobile)) return msg('s-msg', 'সঠিক মোবাইল নম্বর দিন');
+  $('s-btn').disabled = true;
+  try {
+    const d = await acadRaw({ action: 'teacherRegister', name, mobile, password, subject: $('s-subject').value.trim(), institution: $('s-inst').value.trim() });
+    if (d.status === 'success') { msg('s-msg', d.message, 'al-success'); $('l-mobile').value = mobile; }
+    else msg('s-msg', d.message || 'Failed');
+  } catch (e) { msg('s-msg', 'Network error'); }
+  $('s-btn').disabled = false;
+}
+async function forgot() {
+  const mobile = $('l-mobile').value.trim();
+  if (!mobile) return msg('l-msg', 'আগে মোবাইল নম্বর লিখুন');
+  const d = await acadRaw({ action: 'teacherRequestReset', mobile });
+  msg('l-msg', d.message, d.status === 'success' ? 'al-success' : 'al-error');
+}
+function logout() {
+  if (isAdmin() && !acadSession.get('teacher')) { location.href = 'admin_panel.html'; return; }
+  acadSession.clear('teacher'); location.reload();
+}
+
+async function enter() {
+  showLoader('Loading your panel…');
+  let d;
+  try { d = await teacherCall('teacherMe'); } catch (e) { hideLoader(); show('auth-section'); return msg('l-msg', 'Network error'); }
+  hideLoader();
+  if (!d || d.status !== 'success') { hide('dash'); show('auth-section'); return; }
+  ME = { role: d.role, teacher: d.teacher };
+  hide('auth-section'); show('dash');
+  $('b-name').innerHTML = esc(d.teacher.name) + ' <span class="chip ' + (isAdmin() ? 'live' : 'ok') + '">' + (isAdmin() ? 'Admin' : 'Teacher') + '</span>';
+  $('b-sub').textContent = isAdmin() ? 'You can see every teacher, student and exam.' : [d.teacher.subject, d.teacher.institution, d.teacher.mobile].filter(Boolean).join(' · ');
+  $('b-admin').classList.toggle('hide', !isAdmin());
+  $('scope-bar').classList.toggle('hide', !isAdmin());
+  $('import-btn').classList.toggle('hide', !isAdmin());
+  document.querySelectorAll('.col-teacher').forEach(c => c.classList.toggle('hide', !(isAdmin() && scope === 'all')));
+  await Promise.all([loadStudents(), loadExams()]);
+  // a draft handed over from the Question Builder?
+  try {
+    const raw = localStorage.getItem('draft_exam_data');
+    if (raw) { localStorage.removeItem('draft_exam_data'); switchTab('exams'); openBuilder(JSON.parse(raw)); acadToast('Questions loaded from the Question Builder ✓', 'ok'); }
+  } catch (e) {}
+}
+function setScope(s) {
+  scope = s;
+  $('sc-mine').classList.toggle('active', s === 'mine'); $('sc-all').classList.toggle('active', s === 'all');
+  document.querySelectorAll('.col-teacher').forEach(c => c.classList.toggle('hide', s !== 'all'));
+  loadStudents(); loadExams();
+}
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  $('tab-' + name).classList.add('active');
+  if (name === 'results') fillResExams();
+}
+function guard(d) {
+  if (d && d.status === 'unauthorized') { acadSession.clear('teacher'); acadToast('Session expired — please log in again', 'err'); setTimeout(() => location.reload(), 900); return true; }
+  return false;
+}
+
+/* ═════════ students ═════════ */
+async function loadStudents() {
+  show('stu-loader'); hide('stu-wrap'); hide('stu-empty');
+  const d = await teacherCall('teacherStudents', { scope });
+  if (guard(d)) return;
+  students = d.students || [];
+  hide('stu-loader'); renderStudents();
+}
+function renderStudents() {
+  const pend = students.filter(s => s.status === 'pending');
+  $('pending-box').classList.toggle('hide', !pend.length);
+  $('pending-n').textContent = pend.length;
+  const dot = $('dot-pending'); dot.textContent = pend.length; dot.classList.toggle('hide', !pend.length);
+  const showT = isAdmin() && scope === 'all';
+  $('pending-list').innerHTML = pend.map(s => `<div class="item"><div class="ico"><i class="fas fa-user-clock"></i></div><div class="grow"><div class="t">${esc(s.name)} <span class="muted" style="font-weight:600;">#${esc(s.studentId)}</span></div><div class="s">${esc(s.mobile)}${s.school ? ' · ' + esc(s.school) : ''}${s.studentClass ? ' · ' + esc(s.studentClass) : ''}${showT ? ' · to ' + esc(s.teacherName) : ''}</div></div>
+    <div class="acts"><button class="btn good sm" onclick="linkOp('${esc(s.studentId)}','approve','${esc(s.teacherId)}')"><i class="fas fa-check"></i> Approve</button><button class="btn danger sm" onclick="linkOp('${esc(s.studentId)}','reject','${esc(s.teacherId)}')">Reject</button></div></div>`).join('');
+  const q = ($('stu-search').value || '').toLowerCase();
+  const ok = students.filter(s => s.status === 'approved' && (!q || (s.name + s.mobile + s.school + s.studentId).toLowerCase().includes(q)));
+  $('stu-count').textContent = ok.length + ' approved student' + (ok.length === 1 ? '' : 's');
+  $('stu-body').innerHTML = ok.map(s => `<tr><td>${esc(s.studentId)}</td><td style="font-weight:700;">${esc(s.name)}</td><td>${esc(s.mobile)}</td><td>${esc(s.school || '—')}</td><td>${esc(s.studentClass || '—')}</td><td class="col-teacher${showT ? '' : ' hide'}">${esc(s.teacherName || '')}</td><td style="text-align:right;"><button class="btn danger sm" onclick="linkOp('${esc(s.studentId)}','remove','${esc(s.teacherId)}')">Remove</button></td></tr>`).join('');
+  $('stu-wrap').classList.toggle('hide', !ok.length); $('stu-empty').classList.toggle('hide', !!ok.length || !!q);
+}
+async function linkOp(sid, op, tid) {
+  if (op === 'remove' && !confirm('Remove this student from your class? Their past results stay.')) return;
+  const d = await teacherCall('teacherLink', { studentId: sid, op, teacherId: tid });
+  if (guard(d)) return;
+  acadToast(d.status === 'success' ? 'Done' : (d.message || 'Failed'), d.status === 'success' ? 'ok' : 'err');
+  loadStudents();
+}
+
+/* ═════════ exams list ═════════ */
+async function loadExams() {
+  show('ex-loader');
+  const d = await teacherCall('teacherExams', { scope });
+  if (guard(d)) return;
+  exams = d.exams || [];
+  hide('ex-loader'); renderExams();
+}
+function renderExams() {
+  const showT = isAdmin() && scope === 'all';
+  $('ex-list').innerHTML = exams.map(e => `
+    <div class="exam-row">
+      <div>
+        <h3>${esc(e.title)} ${e.live ? '<span class="chip live">LIVE</span>' : '<span class="chip off">Closed</span>'}</h3>
+        <div class="meta"><span><i class="far fa-clock"></i> ${e.durationMin} min</span><span><i class="fas fa-list-ol"></i> ${e.qCount} questions</span><span><i class="fas fa-users"></i> ${e.allowMode === 'selected' ? e.allowedIds.length + ' selected' : 'All my students'}</span><span><i class="fas fa-flag-checkered"></i> ${e.participants} submitted</span>${showT ? `<span><i class="fas fa-chalkboard-user"></i> ${esc(e.teacherName)}</span>` : ''}</div>
+      </div>
+      <div class="right">
+        <span class="big-code" title="Exam code">${esc(e.code)}<button onclick="copyText('${esc(e.code)}')" title="Copy code"><i class="far fa-copy"></i></button></span>
+        <label class="switch" title="Live / Closed"><input type="checkbox" ${e.live ? 'checked' : ''} onchange="toggleLive('${esc(e.id)}',this.checked)"><span class="sl"></span></label>
+        <button class="btn secondary sm" onclick="copyLink('${esc(e.code)}')"><i class="fas fa-link"></i> Link</button>
+        <button class="btn secondary sm" onclick="openResults('${esc(e.id)}')"><i class="fas fa-ranking-star"></i> Results</button>
+        <button class="btn secondary sm" onclick="editExam('${esc(e.id)}')"><i class="fas fa-pen"></i> Edit</button>
+        <button class="btn danger sm" onclick="deleteExam('${esc(e.id)}')"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+  $('ex-empty').classList.toggle('hide', !!exams.length);
+}
+function copyText(t) { navigator.clipboard.writeText(t).then(() => acadToast('Copied: ' + t, 'ok')).catch(() => acadToast(t)); }
+function copyLink(code) { copyText(location.origin + location.pathname.replace(/[^/]*$/, '') + 'exam.html?code=' + code); }
+async function toggleLive(id, on) {
+  const d = await teacherCall('teacherExamLive', { examId: id, live: on });
+  if (guard(d)) return;
+  acadToast(on ? 'Exam is LIVE — students can start with the code' : 'Exam closed', 'ok'); loadExams();
+}
+async function deleteExam(id) {
+  const e = exams.find(x => x.id === id);
+  if (!confirm('Delete "' + e.title + '"?\nAll its results will be deleted too. This cannot be undone.')) return;
+  showLoader('Deleting…'); const d = await teacherCall('teacherExamDelete', { examId: id }); hideLoader();
+  if (guard(d)) return;
+  acadToast(d.status === 'success' ? 'Deleted' : (d.message || 'Failed'), d.status === 'success' ? 'ok' : 'err'); loadExams();
+}
+async function importLegacy() {
+  if (!confirm('Copy the exams from the old system (civil_data.json) into the new secure system?\nOld results stay linked. Already-imported exams are skipped.')) return;
+  showLoader('Importing old exams…');
+  try {
+    const r = await fetch('https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json?_=' + Date.now());
+    const j = await r.json();
+    const d = await teacherCall('adminImportExams', { exams: j.exams || [] });
+    hideLoader();
+    if (guard(d)) return;
+    acadToast(d.status === 'success' ? `Imported ${d.added}, skipped ${d.skipped}` : (d.message || 'Failed'), d.status === 'success' ? 'ok' : 'err'); loadExams();
+  } catch (e) { hideLoader(); acadToast('Could not read the old exam file', 'err'); }
+}
+
+/* ═════════ builder ═════════ */
+function newExam() { editingId = null; openBuilder(); }
+async function editExam(id) {
+  showLoader('Loading exam…'); const d = await teacherCall('teacherExamGet', { examId: id }); hideLoader();
+  if (guard(d)) return;
+  if (d.status !== 'success') return acadToast(d.message || 'Failed', 'err');
+  editingId = id;
+  openBuilder({ title: d.exam.title, duration: d.exam.durationMin, allowMode: d.exam.allowMode, allowedIds: d.exam.allowedIds, questions: d.questions });
+}
+function openBuilder(draft) {
+  draft = draft || {};
+  $('bd-title').textContent = editingId ? 'Edit exam' : 'New exam';
+  $('bd-name').value = draft.title || ''; $('bd-dur').value = draft.duration || 30;
+  qs = (draft.questions || []).map(normQ);
+  if (!qs.length) qs = [blankQ()];
+  const mode = draft.allowMode === 'selected' ? 'selected' : 'approved';
+  document.querySelector('input[name=allow][value=' + mode + ']').checked = true;
+  buildPick(draft.allowedIds || []);
+  allowChanged(); drawQs();
+  hide('exam-list-view'); show('builder-view');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function closeBuilder() { hide('builder-view'); show('exam-list-view'); editingId = null; }
+function blankQ() { return { q: '', opts: ['', '', '', ''], ans: 0, stim: '', exp: '', stmts: null }; }
+function letterToIdx(a) { if (typeof a === 'number') return a; const s = String(a || '').trim().toUpperCase(); return 'ABCD'.indexOf(s[0]) >= 0 && isNaN(+s) ? 'ABCD'.indexOf(s[0]) : (parseInt(s, 10) || 0); }
+function normQ(x) {
+  const opts = (x.opts || x.options || ['', '', '', '']).map(String);
+  while (opts.length < 4) opts.push('');
+  return { q: String(x.q || x.question || ''), opts: opts.slice(0, Math.max(opts.length, 2)), ans: letterToIdx(x.ans != null ? x.ans : x.answer), stim: x.stim || '', exp: x.exp || x.explanation || '', stmts: x.stmts || null };
+}
+function buildPick(sel) {
+  const ok = students.filter(s => s.status === 'approved' && String(s.teacherId) === String(ME.teacher.id));
+  const seen = {}; const uniq = ok.filter(s => !seen[s.studentId] && (seen[s.studentId] = 1));
+  $('pick-list').innerHTML = uniq.length ? uniq.map(s => `<label><input type="checkbox" value="${esc(s.studentId)}" ${sel.map(String).includes(String(s.studentId)) ? 'checked' : ''} onchange="countPick()"> ${esc(s.name)} <span class="muted" style="font-weight:500;">#${esc(s.studentId)} · ${esc(s.mobile)}</span></label>`).join('') : '<div class="sub" style="padding:10px;">No approved students yet.</div>';
+  countPick();
+}
+function pickAll(on) { document.querySelectorAll('#pick-list input').forEach(c => c.checked = on); countPick(); }
+function countPick() { $('pick-count').textContent = document.querySelectorAll('#pick-list input:checked').length + ' selected'; }
+function allowChanged() {
+  const sel = document.querySelector('input[name=allow]:checked').value === 'selected';
+  $('pick-wrap').classList.toggle('hide', !sel);
+  $('rc-approved').classList.toggle('on', !sel); $('rc-selected').classList.toggle('on', sel);
+}
+
+/* question editor */
+function syncQs() {
+  document.querySelectorAll('#q-list .q-edit').forEach((el, i) => {
+    const q = qs[i]; if (!q) return;
+    q.q = el.querySelector('.f-q').value; q.stim = el.querySelector('.f-stim').value; q.exp = el.querySelector('.f-exp').value;
+    q.opts = Array.from(el.querySelectorAll('.f-opt')).map(x => x.value);
+    const r = el.querySelector('input[type=radio]:checked'); q.ans = r ? parseInt(r.value, 10) : 0;
+  });
+}
+function drawQs() {
+  $('q-count').textContent = qs.length;
+  $('q-list').innerHTML = qs.map((q, i) => `
+    <div class="q-edit" data-i="${i}">
+      <div class="qh"><span>Question ${i + 1}</span><span class="sp"></span>
+        <button class="mini" title="Move up" onclick="moveQ(${i},-1)"><i class="fas fa-arrow-up"></i></button>
+        <button class="mini" title="Move down" onclick="moveQ(${i},1)"><i class="fas fa-arrow-down"></i></button>
+        <button class="mini" title="Duplicate" onclick="dupQ(${i})"><i class="far fa-clone"></i></button>
+        <button class="mini" title="Delete" onclick="delQ(${i})"><i class="fas fa-trash"></i></button></div>
+      <div class="field"><label>Question</label><textarea class="inp f-q" rows="2" placeholder="Type the question — use $x^2$ for math">${esc(q.q)}</textarea></div>
+      <details ${q.stim ? 'open' : ''} style="margin-bottom:12px;"><summary class="sub" style="cursor:pointer;font-weight:700;">Passage / stimulus (optional)</summary><textarea class="inp f-stim" rows="2" style="margin-top:8px;">${esc(q.stim)}</textarea></details>
+      ${q.opts.map((o, j) => `<div class="opt-row"><input type="radio" name="ans${i}" value="${j}" ${q.ans === j ? 'checked' : ''} title="Correct answer"><span class="lbl">${'ABCD'[j] || j + 1}</span><input class="inp f-opt" value="${esc(o)}" placeholder="Option ${'ABCD'[j] || j + 1}"></div>`).join('')}
+      <p class="sub" style="margin:2px 0 10px;font-size:12px;">● Tick the circle beside the correct option.</p>
+      <div class="field" style="margin:0;"><label>Explanation (optional — shown after submit)</label><textarea class="inp f-exp" rows="2">${esc(q.exp)}</textarea></div>
+    </div>`).join('');
+}
+function addQ() { syncQs(); qs.push(blankQ()); drawQs(); const l = $('q-list').lastElementChild; if (l) l.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+function delQ(i) { syncQs(); if (qs.length === 1) { qs = [blankQ()]; } else qs.splice(i, 1); drawQs(); }
+function dupQ(i) { syncQs(); qs.splice(i + 1, 0, JSON.parse(JSON.stringify(qs[i]))); drawQs(); }
+function moveQ(i, d) { syncQs(); const j = i + d; if (j < 0 || j >= qs.length) return; [qs[i], qs[j]] = [qs[j], qs[i]]; drawQs(); }
+function toggleImport() { $('import-box').classList.toggle('hide'); }
+function doImport() {
+  try {
+    let j = JSON.parse($('import-text').value);
+    if (!Array.isArray(j)) j = j.questions || [];
+    if (!j.length) throw new Error('empty');
+    syncQs();
+    if (qs.length === 1 && !qs[0].q.trim()) qs = [];
+    qs = qs.concat(j.map(normQ)); drawQs(); $('import-text').value = ''; hide('import-box');
+    acadToast(j.length + ' questions added', 'ok');
+  } catch (e) { acadToast('That is not valid JSON — expected a list of {q, opts, ans}', 'err'); }
+}
+function trimOpts(list) { const o = list.map(x => x.trim()); while (o.length > 2 && !o[o.length - 1]) o.pop(); return o; }
+function collectExam(live) {
+  syncQs();
+  const allow = document.querySelector('input[name=allow]:checked').value;
+  return {
+    id: editingId || undefined, title: $('bd-name').value.trim(), durationMin: parseInt($('bd-dur').value, 10), live: !!live, allowMode: allow,
+    allowedIds: allow === 'selected' ? Array.from(document.querySelectorAll('#pick-list input:checked')).map(c => c.value) : [],
+    questions: qs.map(q => ({ q: q.q.trim(), opts: trimOpts(q.opts), ans: q.ans, stim: (q.stim || '').trim() || undefined, exp: (q.exp || '').trim() || undefined, stmts: q.stmts || undefined }))
+  };
+}
+async function saveExam(live, force) {
+  const ex = collectExam(live);
+  if (!ex.title) return acadToast('Give the exam a name', 'err');
+  if (!(ex.durationMin >= 1)) return acadToast('Set the duration in minutes', 'err');
+  for (let i = 0; i < ex.questions.length; i++) {
+    const q = ex.questions[i];
+    if (!q.q) return acadToast('Question ' + (i + 1) + ' has no text', 'err');
+    if (q.opts.length < 2 || q.opts.some(o => !o)) return acadToast('Question ' + (i + 1) + ': fill every option', 'err');
+    if (q.ans >= q.opts.length) return acadToast('Question ' + (i + 1) + ': choose the correct answer', 'err');
+  }
+  showLoader('Saving…');
+  const d = await teacherCall('teacherExamSave', { exam: ex, force: !!force });
+  hideLoader();
+  if (guard(d)) return;
+  if (d.code === 'has-results') {
+    if (confirm(d.message + '\n\nSave anyway? (Old scores will not be recalculated.)')) return saveExam(live, true);
+    return;
+  }
+  if (d.status !== 'success') return acadToast(d.message || 'Failed', 'err');
+  // "go live" on an existing exam: flip the switch too
+  if (live && editingId && !d.exam.live) await teacherCall('teacherExamLive', { examId: d.exam.id, live: true });
+  acadToast(live ? 'Saved — exam is LIVE. Code: ' + d.exam.code : 'Saved (closed)', 'ok');
+  closeBuilder(); loadExams();
+}
+function previewExam() {
+  syncQs();
+  $('paper-title').innerHTML = '<i class="fas fa-eye"></i> Preview — how students see it';
+  $('paper-body').innerHTML = qs.map((q, i) => `<div class="q-card">${renderQuestionBody(q, i)}<div class="opts">${q.opts.filter((o, k) => o || k < 2).map((o, j) => `<div class="opt static ${q.ans === j ? 'correct' : ''}"><span>${sanitizeHtml(o)}</span>${q.ans === j ? '<span class="tag">Correct</span>' : ''}</div>`).join('')}</div>${q.exp ? `<div class="q-exp"><b>Explanation:</b> ${sanitizeHtml(q.exp)}</div>` : ''}</div>`).join('');
+  openModal('modal-paper'); acadTypeset($('paper-body'));
+}
+
+/* ═════════ results ═════════ */
+function fillResExams(sel) {
+  const el = $('res-exam'), cur = sel || el.value;
+  el.innerHTML = '<option value="">— choose an exam —</option>' + exams.map(e => `<option value="${esc(e.id)}">${esc(e.title)} (${esc(e.code)}) · ${e.participants} submitted</option>`).join('');
+  if (cur && exams.some(e => e.id === cur)) el.value = cur;
+}
+function openResults(id) { switchTab('results'); fillResExams(id); loadResults(); }
+async function loadResults() {
+  const id = $('res-exam').value;
+  if (!id) { $('res-body').innerHTML = '<div class="empty-st"><i class="fas fa-ranking-star"></i><p>Choose an exam to see its ranking.</p></div>'; resData = null; return; }
+  $('res-body').innerHTML = '<div class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+  const d = await teacherCall('examRanking', { examId: id });
+  if (guard(d)) return;
+  if (d.status !== 'success') { $('res-body').innerHTML = '<div class="empty-st"><p>' + esc(d.message || 'Failed') + '</p></div>'; return; }
+  resData = d;
+  const rk = d.ranking, sc = rk.map(r => r.score), tot = rk.length ? rk[0].total : d.exam.qCount;
+  const avg = rk.length ? (sc.reduce((a, b) => a + b, 0) / rk.length).toFixed(1) : '—';
+  $('res-body').innerHTML = `
+    <div class="stats-strip">
+      <div class="stat-box"><b>${rk.length}</b><small>Submitted</small></div>
+      <div class="stat-box"><b>${avg}</b><small>Average / ${tot}</small></div>
+      <div class="stat-box"><b>${rk.length ? Math.max.apply(null, sc) : '—'}</b><small>Highest</small></div>
+      <div class="stat-box"><b>${rk.length ? Math.min.apply(null, sc) : '—'}</b><small>Lowest</small></div>
+      <div class="stat-box"><b>${d.inProgress.length}</b><small>In progress</small></div>
+    </div>
+    ${rk.length ? `<div class="table-wrap"><table class="d-table"><thead><tr><th>Rank</th><th>Student</th><th>Score</th><th>Time</th><th>Submitted</th><th></th></tr></thead><tbody>
+    ${rk.map(r => `<tr><td><span class="rank-pill r${r.rank <= 3 ? r.rank : ''}">${r.rank}</span></td><td style="font-weight:700;">${esc(r.name)} <span class="muted" style="font-weight:500;">#${esc(r.studentId)}</span></td><td><b>${r.score}</b>/${r.total}</td><td class="muted">${fmtDur(r.timeSec)}</td><td class="muted" style="font-size:12px;">${esc(r.time)}</td>
+      <td style="text-align:right;white-space:nowrap;"><button class="btn-mis" onclick="viewPaper('${esc(id)}','${esc(r.studentId)}')">View paper</button> <button class="btn-mis" style="color:#b91c1c;" onclick="clearResult('${esc(id)}','${esc(r.studentId)}','${esc(r.name)}')">Allow retake</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty-st"><i class="fas fa-hourglass-half"></i><p>No one has submitted yet.</p></div>'}
+    ${d.inProgress.length ? `<p class="sub" style="margin-top:14px;"><b>Currently writing:</b> ${d.inProgress.map(p => esc(p.name)).join(', ')}</p>` : ''}`;
+}
+async function viewPaper(examId, sid) {
+  showLoader('Loading paper…'); const d = await teacherCall('examReview', { examId, studentId: sid }); hideLoader();
+  if (guard(d)) return;
+  if (d.status !== 'success') return acadToast(d.message || 'Failed', 'err');
+  const r = d.result;
+  $('paper-title').innerHTML = `<i class="fas fa-file-lines"></i> ${esc(r.name)} — ${r.score}/${r.total}` + (r.rank ? ` · Rank #${r.rank}` : '');
+  if (!d.questions) { $('paper-body').innerHTML = '<div class="q-card"><b>Mistakes (old format)</b><p>' + sanitizeHtml(d.details || '') + '</p></div>'; openModal('modal-paper'); acadTypeset($('paper-body')); return; }
+  $('paper-body').innerHTML = `<div class="stat-row" style="margin-top:0;"><div class="stat-box"><b style="color:#166534;">${r.correct}</b><small>Correct</small></div><div class="stat-box"><b style="color:#b91c1c;">${r.wrong}</b><small>Wrong</small></div><div class="stat-box"><b>${r.skipped}</b><small>Skipped</small></div></div>` +
+    d.questions.map((q, i) => {
+      const a = d.answers[i], st = a === -1 ? 'skip' : a === q.ans ? 'ok' : 'bad';
+      return `<div class="q-card"><span class="q-status ${st}">${{ ok: 'Correct', bad: 'Wrong', skip: 'Skipped' }[st]}</span>${renderQuestionBody(q, i)}<div class="opts">${q.opts.map((o, j) => `<div class="opt static ${j === q.ans ? 'correct' : j === a ? 'wrong' : ''}"><span>${sanitizeHtml(o)}</span>${j === q.ans ? `<span class="tag">${j === a ? 'Chosen · Correct' : 'Correct'}</span>` : j === a ? '<span class="tag">Chosen</span>' : ''}</div>`).join('')}</div>${q.exp ? `<div class="q-exp"><b>Explanation:</b> ${sanitizeHtml(q.exp)}</div>` : ''}</div>`;
+    }).join('');
+  openModal('modal-paper'); acadTypeset($('paper-body'));
+}
+async function clearResult(examId, sid, name) {
+  if (!confirm('Delete ' + name + "'s result so they can take this exam again?")) return;
+  const d = await teacherCall('teacherDeleteResult', { examId, studentId: sid });
+  if (guard(d)) return;
+  acadToast(d.message || 'Done', d.status === 'success' ? 'ok' : 'err'); loadResults(); loadExams();
+}
+function exportCsv() {
+  if (!resData || !resData.ranking.length) return acadToast('Nothing to export', 'err');
+  const rows = [['Rank', 'Student ID', 'Name', 'Score', 'Total', 'Time (sec)', 'Submitted']].concat(resData.ranking.map(r => [r.rank, r.studentId, r.name, r.score, r.total, r.timeSec, r.time]));
+  const csv = '﻿' + rows.map(r => r.map(c => '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = (resData.exam.title || 'results').replace(/[^\wঀ-৿-]+/g, '_') + '.csv'; a.click();
+}
+
+/* ═════════ start ═════════ */
+(async function init() {
+  const hasSession = !!acadSession.get('teacher') || acadAdminTokens().length > 0;
+  if (hasSession) { await enter(); if (!ME) { /* enter() already showed the auth card */ } }
+  else show('auth-section');
+  if (location.hash === '#signup') authMode('signup');
+})();
+</script>
+</body>
+</html>

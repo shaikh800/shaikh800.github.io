@@ -419,6 +419,9 @@
     <button class="tab-btn" onclick="switchTab('results',this)">
       <i class="fas fa-poll"></i> Exam Results
     </button>
+    <button class="tab-btn" id="tabbtn-teachers" onclick="switchTab('teachers',this)">
+      <i class="fas fa-chalkboard-user"></i> Teachers <span class="badge danger" id="teachers-badge" style="display:none;margin-left:4px;">0</span>
+    </button>
     <button class="tab-btn" onclick="switchTab('exams',this)">
       <i class="fas fa-list-check"></i> Exam Management
     </button>
@@ -449,6 +452,29 @@
             <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--muted);">
               <i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> Loading...
             </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: Teachers ─── -->
+  <div id="tab-teachers" class="tab-pane">
+    <div class="panel">
+      <div class="panel-head">
+        <h2><i class="fas fa-chalkboard-user" style="color:var(--blue);"></i> Teachers</h2>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:13px; color:var(--muted);">Teachers sign up on their own page; you approve them here.</span>
+          <a class="act-btn act-view" href="teacher_panel.html" style="text-decoration:none;"><i class="fas fa-arrow-up-right-from-square"></i> Open Teacher Panel</a>
+        </div>
+      </div>
+      <div class="t-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>ID</th><th>Teacher</th><th>Subject / Institution</th><th>Status</th><th>Students</th><th>Exams</th><th style="text-align:right;">Actions</th></tr>
+          </thead>
+          <tbody id="teacher-tbody">
+            <tr><td colspan="7" style="text-align:center; padding:30px; color:var(--muted);"><i class="fas fa-circle-notch spin" style="margin-right:8px;"></i> Loading...</td></tr>
           </tbody>
         </table>
       </div>
@@ -826,8 +852,69 @@ async function gasCall(action, payload = {}) {
 //  LOAD ALL DATA
 // ════════════════════════════════════════════════════════
 async function loadAll() {
-  await Promise.all([ loadStudents(), loadResults() ]);
+  await Promise.all([ loadStudents(), loadResults(), loadTeachers() ]);
+  if (location.hash === '#teachers') switchTab('teachers', document.getElementById('tabbtn-teachers'));
 }
+// ════════════════════════════════════════════════════════
+//  TEACHERS (approve / suspend / reset / delete)
+// ════════════════════════════════════════════════════════
+let teachersData = [];
+async function loadTeachers() {
+  const data = await gasCall('adminListTeachers');
+  const tb = document.getElementById('teacher-tbody');
+  if (!data || data.status !== 'success') {
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:20px;color:#ef4444;">❌ Could not load teachers. Deploy the new Apps Script version (exam_gas.js v4).</td></tr>`;
+    return;
+  }
+  teachersData = data.teachers || [];
+  renderTeachers();
+}
+function renderTeachers() {
+  const tb = document.getElementById('teacher-tbody');
+  const order = { pending: 0, approved: 1, suspended: 2, rejected: 3 };
+  const list = [...teachersData].sort((a, b) => (order[a.status] - order[b.status]) || (b.resetRequest - a.resetRequest));
+  const waiting = teachersData.filter(t => t.status === 'pending' || t.resetRequest).length;
+  const badge = document.getElementById('teachers-badge');
+  badge.textContent = waiting; badge.style.display = waiting ? 'inline-block' : 'none';
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="7" class="empty-box" style="border:none;"><i class="fas fa-chalkboard-user"></i><p>No teachers yet. They can sign up from the Teacher Panel.</p></td></tr>`;
+    return;
+  }
+  const ST = { pending: '<span class="badge warn">Waiting</span>', approved: '<span class="badge success">Approved</span>', suspended: '<span class="badge gray">Suspended</span>', rejected: '<span class="badge danger">Rejected</span>' };
+  tb.innerHTML = list.map(t => {
+    let acts = '';
+    if (t.status === 'pending') acts += `<button class="act-btn act-approve" onclick="teacherOp('${t.id}','approve')">✓ Approve</button><button class="act-btn act-reject" onclick="teacherOp('${t.id}','reject')">✕ Reject</button>`;
+    else if (t.status === 'approved') acts += `<button class="act-btn act-warn" onclick="teacherOp('${t.id}','suspend')">Suspend</button>`;
+    else acts += `<button class="act-btn act-approve" onclick="teacherOp('${t.id}','approve')">Re-approve</button>`;
+    acts += `<button class="act-btn act-gray" onclick="teacherResetPw('${t.id}')"><i class="fas fa-key"></i></button><button class="act-btn act-reject" onclick="teacherOp('${t.id}','delete')"><i class="fas fa-trash"></i></button>`;
+    return `<tr>
+      <td><strong>${esc(t.id)}</strong></td>
+      <td><strong>${esc(t.name)}</strong><br><span style="font-size:12px;color:var(--muted);"><i class="fas fa-phone"></i> ${esc(t.mobile)}</span>${t.resetRequest ? '<br><span class="badge danger"><i class="fas fa-key"></i> Password reset requested</span>' : ''}</td>
+      <td style="font-size:13px;">${esc(t.subject || '—')}<br><span style="color:var(--muted);">${esc(t.institution || '')}</span></td>
+      <td>${ST[t.status] || esc(t.status)}</td>
+      <td>${t.students}${t.pendingStudents ? ` <span class="badge warn">+${t.pendingStudents} pending</span>` : ''}</td>
+      <td>${t.exams}</td>
+      <td style="text-align:right;white-space:nowrap;"><div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">${acts}</div></td>
+    </tr>`;
+  }).join('');
+}
+async function teacherOp(id, op) {
+  const t = teachersData.find(x => x.id === id);
+  const msg = { approve: 'Approve', reject: 'Reject', suspend: 'Suspend', delete: 'DELETE' }[op] + ' teacher "' + (t ? t.name : id) + '"?' +
+    (op === 'delete' ? '\nTheir exams move to you; their student links are removed.' : '');
+  if (!await askConfirm(msg)) return;
+  const res = await gasCall('adminTeacherOp', { id, op });
+  if (res?.status === 'success') { toast('✅ ' + res.message); loadTeachers(); }
+  else toast('❌ ' + (res?.message || 'Failed'));
+}
+async function teacherResetPw(id) {
+  const pw = prompt('New password for this teacher (min 4 characters):');
+  if (!pw) return;
+  const res = await gasCall('adminTeacherOp', { id, op: 'resetPassword', newPassword: pw.trim() });
+  if (res?.status === 'success') { toast('🔐 Password updated!'); loadTeachers(); }
+  else toast('❌ ' + (res?.message || 'Failed'));
+}
+
 
 async function loadStudents() {
   const data = await gasCall('adminGetStudents');

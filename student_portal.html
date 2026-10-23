@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Portal | Academy</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <!-- Resource Hints for Performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
@@ -13,296 +12,12 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
   <link rel="stylesheet" href="assets/site.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css">
-  <style>
-    body { font-family: 'Noto Serif Bengali', 'Inter', sans-serif; }
-
-    /* ── GLOBAL LOADER ── */
-    #g-loader {
-      position: fixed; inset: 0;
-      background: rgba(15,23,42,0.55);
-      display: none; align-items: center; justify-content: center;
-      z-index: 9999; backdrop-filter: blur(4px);
-    }
-    .loader-card {
-      background: #fff; border-radius: 16px;
-      padding: 36px 44px; text-align: center;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
-      max-width: 320px; width: 90%;
-    }
-    .spin-ring {
-      width: 52px; height: 52px; margin: 0 auto 18px;
-      border: 4px solid #e2e8f0; border-top-color: var(--blue);
-      border-radius: 50%; animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-txt { font-size: 14px; color: var(--muted); font-weight: 600; line-height: 1.6; }
-
-    /* ── LAYOUT ── */
-    .portal-wrap {
-      max-width: 800px; margin: 0 auto;
-      padding: 32px 20px 100px;
-    }
-
-    /* ── PANEL ── */
-    .panel {
-      background: var(--surface); border: 1px solid var(--line);
-      border-radius: var(--radius-lg); padding: 28px;
-      box-shadow: var(--shadow); margin-bottom: 20px;
-      animation: fadeSlideUp .35s var(--ease-out) both;
-    }
-    .panel-title {
-      margin: 0 0 22px; font-size: 20px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .panel-title i { color: var(--blue); }
-
-    /* ── FORM ── */
-    .field { margin-bottom: 14px; }
-    .field label {
-      display: block; font-size: 11px; font-weight: 800;
-      color: var(--muted); text-transform: uppercase;
-      letter-spacing: .06em; margin-bottom: 6px;
-    }
-    .inp {
-      width: 100%; padding: 12px 16px;
-      border: 1px solid var(--line); border-radius: var(--radius);
-      background: var(--surface-soft); font-family: inherit;
-      font-size: 15px; color: var(--ink); transition: .2s;
-    }
-    .inp:focus {
-      outline: none; border-color: var(--blue);
-      background: #fff; box-shadow: 0 0 0 3px rgba(23,22,15,.1);
-    }
-
-    /* ── ALERT BOXES ── */
-    .alert {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 12px 16px; border-radius: var(--radius);
-      font-size: 14px; margin-bottom: 14px; line-height: 1.6;
-    }
-    .al-success { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
-    .al-error   { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
-    .al-info    { background:#dbeafe; color:#1e40af; border:1px solid #bfdbfe; }
-
-    /* ── MOBILE DISPLAY ROW ── */
-    .mobile-row {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      background: var(--surface-soft); border: 1px solid var(--line);
-      border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px;
-    }
-    .mobile-row span { font-size: 14px; font-weight: 600; }
-    .mobile-row button {
-      background: none; border: none; color: var(--blue);
-      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
-    }
-
-    /* ── FORGOT LINK ── */
-    .forgot-btn {
-      display: block; text-align: right; margin: -6px 0 14px;
-      background: none; border: none; color: var(--blue);
-      font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
-    }
-    .forgot-btn:hover { text-decoration: underline; }
-
-    /* ── USER BANNER ── */
-    .user-banner {
-      background: var(--ink); color: #fff;
-      border-radius: var(--radius-lg); padding: 22px 26px;
-      margin-bottom: 20px; display: flex;
-      justify-content: space-between; align-items: center;
-      gap: 16px; flex-wrap: wrap; box-shadow: var(--shadow-lg);
-      animation: fadeSlideUp .35s var(--ease-out) both;
-    }
-    .u-info h3 {
-      margin: 0 0 6px; font-size: 19px; color: #fff;
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-    .u-info p { margin: 0; color: rgba(255,255,255,.6); font-size: 13px; }
-    .u-info p+p { margin-top: 4px; font-size: 12px; }
-    .id-badge {
-      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-      border-radius: 10px; padding: 10px 18px; text-align: center; flex-shrink: 0;
-    }
-    .id-badge .id-lbl { font-size: 10px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; }
-    .id-badge .id-val { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
-    .btn-edit-profile {
-      background: rgba(255,255,255,.15); border: none; color: rgba(255,255,255,.9);
-      padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
-      font-weight: 700; font-family: inherit; transition: .2s;
-    }
-    .btn-edit-profile:hover { background: rgba(255,255,255,.25); }
-
-    /* ── TABS ── */
-    .tabs {
-      display: flex; gap: 4px; border-bottom: 2px solid var(--line);
-      margin-bottom: 24px; overflow-x: auto; scrollbar-width: none;
-    }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab-btn {
-      background: none; border: none;
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
-      padding: 10px 16px; font-size: 14px; font-weight: 700;
-      color: var(--muted); cursor: pointer; transition: .2s;
-      white-space: nowrap; flex-shrink: 0; font-family: inherit;
-    }
-    .tab-btn:hover { color: var(--blue); }
-    .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
-    .tab-pane { display: none; animation: fadeIn .25s ease; }
-    .tab-pane.active { display: block; }
-
-    /* ── EXAM GRID ── */
-    .exam-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-      gap: 14px;
-    }
-    .exam-card {
-      border: 1px solid var(--line); border-radius: var(--radius);
-      padding: 18px; background: var(--surface-soft);
-      position: relative; transition: .2s;
-    }
-    .exam-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-2px); }
-    .exam-card h3 { margin: 0 0 8px; font-size: 16px; padding-right: 64px; }
-    .exam-meta { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-    .exam-meta span { display: flex; align-items: center; gap: 6px; }
-    .exam-meta i { color: var(--blue); width: 14px; text-align: center; }
-    .ekbadge {
-      position: absolute; top: 14px; right: 14px;
-      font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px;
-    }
-    .eb-new  { background: #dbeafe; color: #1e40af; }
-    .eb-done { background: #dcfce7; color: #166534; }
-
-    /* ── EXAM SECTIONS ── */
-    .exams-section { margin-bottom: 24px; }
-    .exams-section-head {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 13px; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .6px;
-      margin-bottom: 12px; padding-bottom: 8px;
-      border-bottom: 2px solid var(--line);
-    }
-    .exams-section-head .sh-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-    }
-    .sh-dot-pending { background: #3b82f6; }
-    .sh-dot-done    { background: #22c55e; }
-    .sh-count {
-      margin-left: auto; background: var(--surface-soft);
-      border: 1px solid var(--line); border-radius: 100px;
-      font-size: 11px; padding: 1px 8px; color: var(--text);
-    }
-
-    /* ── HISTORY TABLE ── */
-    .h-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .h-table th {
-      text-align: left; padding: 10px 12px;
-      background: var(--surface-soft); border-bottom: 2px solid var(--line);
-      color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em;
-    }
-    .h-table td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-    .h-table tr:hover td { background: var(--surface-soft); }
-    .s-hi { color: #166534; font-weight: 800; }
-    .s-lo { color: #dc2626; font-weight: 800; }
-    .btn-mis {
-      background: rgba(23,22,15,.1); color: var(--blue); border: none;
-      padding: 5px 12px; border-radius: 6px; font-size: 12px;
-      font-weight: 700; cursor: pointer; font-family: inherit; transition: .2s;
-    }
-    .btn-mis:hover { background: rgba(23,22,15,.2); }
-
-    /* ── LOADER INLINE ── */
-    .pane-loader { text-align: center; padding: 48px 20px; color: var(--muted); }
-    .pane-loader i { font-size: 28px; display: block; margin-bottom: 12px; }
-
-    /* ── EMPTY STATE ── */
-    .empty-st {
-      text-align: center; padding: 48px 20px; color: var(--muted);
-      border: 2px dashed var(--line); border-radius: var(--radius);
-    }
-    .empty-st i { font-size: 32px; display: block; margin-bottom: 14px; opacity: .45; }
-    .empty-st p { margin: 0; font-size: 14px; }
-
-    /* ── MODAL ── */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.6); display: none;
-      align-items: center; justify-content: center;
-      z-index: 1000; padding: 20px; backdrop-filter: blur(4px);
-    }
-    .modal-box {
-      background: var(--surface); width: 100%; max-width: 500px;
-      border-radius: var(--radius-lg); padding: 24px;
-      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);
-      animation: fadeSlideUp .3s var(--ease-out) both;
-    }
-    .modal-hd {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 18px;
-    }
-    .modal-hd h3 { margin: 0; font-size: 17px; display: flex; align-items: center; gap: 8px; }
-    .modal-close {
-      background: none; border: none; font-size: 18px;
-      color: var(--muted); cursor: pointer; padding: 4px 8px;
-      border-radius: 6px; transition: .2s;
-    }
-    .modal-close:hover { background: var(--surface-soft); }
-
-    /* ── MOBILE ── */
-    @media (max-width: 600px) {
-      .portal-wrap { padding: 16px 12px 90px; }
-      .panel { padding: 18px 16px; }
-      .panel-title { font-size: 18px; }
-      .user-banner { padding: 16px; }
-      .u-info h3 { font-size: 16px; }
-      .id-badge .id-val { font-size: 18px; }
-      .inp { font-size: 16px; min-height: 50px; }
-      .btn.primary, .btn.secondary { min-height: 50px; font-size: 15px; }
-      .exam-grid { grid-template-columns: 1fr; }
-      .h-table { font-size: 12px; }
-      .h-table th, .h-table td { padding: 9px 8px; }
-      .tab-btn { padding: 10px 12px; font-size: 13px; }
-    }
-  </style>
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      },
-      svg: { fontCache: 'none' },
-      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
-    };
-  </script>
-  <script>
-    /* Load MathJax only when a page actually needs to typeset math (saves a big download on every visit). */
-    window.ensureMathJax = function (src) {
-      if (window.MathJax && MathJax.typesetPromise) return Promise.resolve(window.MathJax);
-      if (!window.__mjLoading) {
-        window.__mjLoading = new Promise(function (resolve, reject) {
-          var s = document.createElement('script');
-          s.src = src;
-          s.async = true;
-          s.onload = function () {
-            var ready = window.MathJax && MathJax.startup && MathJax.startup.promise;
-            (ready || Promise.resolve()).then(function () { resolve(window.MathJax); });
-          };
-          s.onerror = function () { window.__mjLoading = null; reject(new Error('MathJax failed to load')); };
-          document.head.appendChild(s);
-        });
-      }
-      return window.__mjLoading;
-    };
-  </script>
+  <link rel="stylesheet" href="assets/portal.css">
 </head>
-<body>
+<body class="portal-body">
 
-<!-- ══ GLOBAL LOADER ══ -->
 <div id="g-loader">
   <div class="loader-card">
     <div class="spin-ring"></div>
@@ -310,7 +25,6 @@
   </div>
 </div>
 
-<!-- ══ HEADER ══ -->
 <header class="site-header">
   <div class="nav-shell">
     <a class="brand" href="index.html">
@@ -326,713 +40,386 @@
       <a href="modeling.html" data-page="modeling.html"><i class="fas fa-cube"></i> 3D</a>
       <a href="academy.html" data-page="academy.html" class="is-active"><i class="fas fa-graduation-cap"></i> Academy</a>
       <a href="research.html" data-page="research.html"><i class="fas fa-flask"></i> Research</a>
-            <div class="nav-actions">          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
-        </div>
-</nav>
+      <div class="nav-actions"><a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a></div>
+    </nav>
   </div>
 </header>
 
 <main class="portal-wrap">
 
-  <!-- ══════════ AUTH SECTION ══════════ -->
+  <!-- ══════════ AUTH ══════════ -->
   <div id="auth-section">
     <div class="panel">
       <h2 class="panel-title"><i class="fas fa-user-graduate"></i> Enter the Portal</h2>
 
-      <!-- Step 1: Mobile number -->
       <div id="step-1">
-        <p style="margin:0 0 20px; color:var(--muted); font-size:14px; line-height:1.8;">
-          Enter your mobile number. The system will check the database and tell you whether you're a new or existing user.
-        </p>
+        <p class="sub" style="margin:0 0 20px;">Enter your mobile number. The system will check the database and tell you whether you're a new or existing user.</p>
         <div class="field">
           <label>Mobile Number</label>
-          <input type="tel" id="auth-mobile" class="inp"
-            placeholder="01XXXXXXXXX" maxlength="11"
-            onkeydown="if(event.key==='Enter') checkMobile()">
+          <input type="tel" id="auth-mobile" class="inp" placeholder="01XXXXXXXXX" maxlength="11" onkeydown="if(event.key==='Enter') checkMobile()">
         </div>
-        <div id="s1-error" class="alert al-error" style="display:none;"></div>
-        <button class="btn primary" style="width:100%;" id="s1-btn" onclick="checkMobile()">
-          Next <i class="fas fa-arrow-right"></i>
-        </button>
+        <div id="s1-error" class="alert al-error hide"></div>
+        <button class="btn primary full" id="s1-btn" onclick="checkMobile()">Next <i class="fas fa-arrow-right"></i></button>
       </div>
 
-      <!-- Step 2: Password (+ new user fields) -->
-      <div id="step-2" style="display:none;">
-
-        <!-- Mobile display -->
+      <div id="step-2" class="hide">
         <div class="mobile-row">
-          <span><i class="fas fa-phone" style="color:var(--blue); margin-right:6px;"></i><span id="mobile-disp"></span></span>
-          <button onclick="goBack()"><i class="fas fa-pencil"></i> Change</button>
+          <span><i class="fas fa-phone" style="margin-right:6px;"></i><span id="mobile-disp"></span></span>
+          <button class="link-btn" onclick="goBack()"><i class="fas fa-pencil"></i> Change</button>
+        </div>
+        <div id="msg-exist" class="alert al-success hide"><i class="fas fa-check-circle"></i><span>Welcome back, <b id="exist-name"></b>! Enter with your password.</span></div>
+        <div id="msg-new" class="alert al-info hide"><i class="fas fa-user-plus"></i><span>New user! Fill in the details below.</span></div>
+
+        <div id="new-fields" class="hide">
+          <div class="field"><label>Full Name <span style="color:#ef4444;">*</span></label><input type="text" id="reg-name" class="inp" placeholder="Enter your full name"></div>
+          <div class="field"><label>School / College Name</label><input type="text" id="reg-school" class="inp" placeholder="Institution name (optional)"></div>
+          <div class="field"><label>Class / Year</label><input type="text" id="reg-class" class="inp" placeholder="e.g. Class 10, 2nd Year (optional)"></div>
         </div>
 
-        <!-- Existing user welcome -->
-        <div id="msg-exist" class="alert al-success" style="display:none;">
-          <i class="fas fa-check-circle fa-lg"></i>
-          <span>Welcome back, <b id="exist-name"></b>! Enter with your password.</span>
-        </div>
-
-        <!-- New user notice -->
-        <div id="msg-new" class="alert al-info" style="display:none;">
-          <i class="fas fa-user-plus fa-lg"></i>
-          <span>New user! Fill in the details below.</span>
-        </div>
-
-        <!-- New user fields -->
-        <div id="new-fields" style="display:none;">
-          <div class="field">
-            <label>Full Name <span style="color:#ef4444;">*</span></label>
-            <input type="text" id="reg-name" class="inp" placeholder="Enter your full name">
-          </div>
-          <div class="field">
-            <label>School / College Name</label>
-            <input type="text" id="reg-school" class="inp" placeholder="Institution name (optional)">
-          </div>
-          <div class="field">
-            <label>Class / Year</label>
-            <input type="text" id="reg-class" class="inp" placeholder="e.g. Class 10, 2nd Year (optional)">
-          </div>
-        </div>
-
-        <!-- Password -->
         <div class="field">
           <label>Password <span style="color:#ef4444;">*</span></label>
-          <input type="password" id="auth-pass" class="inp" placeholder="Enter a password"
-            onkeydown="if(event.key==='Enter') handleLogin()">
+          <input type="password" id="auth-pass" class="inp" placeholder="Enter a password" onkeydown="if(event.key==='Enter') handleLogin()">
         </div>
-
-        <!-- Forgot password -->
-        <button id="forgot-btn" class="forgot-btn" style="display:none;" onclick="requestReset()">
-          <i class="fas fa-key"></i> Forgot your password?
-        </button>
-
-        <div id="s2-error"   class="alert al-error"   style="display:none;"></div>
-        <div id="s2-success" class="alert al-success"  style="display:none;"></div>
-
-        <button class="btn primary" style="width:100%;" id="auth-btn" onclick="handleLogin()">
-          <span id="auth-btn-txt">Login</span> <i class="fas fa-arrow-right"></i>
-        </button>
+        <button id="forgot-btn" class="forgot-btn hide" onclick="requestReset()"><i class="fas fa-key"></i> Forgot your password?</button>
+        <div id="s2-error" class="alert al-error hide"></div>
+        <div id="s2-success" class="alert al-success hide"></div>
+        <button class="btn primary full" id="auth-btn" onclick="handleLogin()"><span id="auth-btn-txt">Login</span> <i class="fas fa-arrow-right"></i></button>
       </div>
+    </div>
+
+    <div class="alert al-info" style="margin-top:6px;">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <span>Are you a teacher? <a href="teacher_panel.html" style="font-weight:700;text-decoration:underline;">Open the Teacher Panel</a></span>
     </div>
   </div>
 
-  <!-- ══════════ DASHBOARD SECTION ══════════ -->
-  <div id="dashboard-section" style="display:none;">
-
-    <!-- User Banner -->
+  <!-- ══════════ DASHBOARD ══════════ -->
+  <div id="dashboard-section" class="hide">
     <div class="user-banner">
       <div class="u-info">
-        <h3 id="d-name">
-          —
-          <button class="btn-edit-profile" onclick="openEditProfile()">
-            <i class="fas fa-pen"></i> Edit
-          </button>
-        </h3>
+        <h3 id="d-name">—</h3>
         <p><i class="fas fa-phone" style="margin-right:5px;"></i><span id="d-mobile">—</span></p>
-        <p>
-          <i class="fas fa-school" style="margin-right:4px;"></i><span id="d-school">—</span>
-          &nbsp;·&nbsp;
-          <i class="fas fa-book" style="margin-right:4px;"></i><span id="d-class">—</span>
-        </p>
+        <p><i class="fas fa-school" style="margin-right:4px;"></i><span id="d-school">—</span> &nbsp;·&nbsp; <i class="fas fa-book" style="margin-right:4px;"></i><span id="d-class">—</span></p>
       </div>
-      <div class="id-badge">
-        <div class="id-lbl">Student ID</div>
-        <div class="id-val" id="d-id">—</div>
-      </div>
+      <div class="id-badge"><div class="id-lbl">Student ID</div><div class="id-val" id="d-id">—</div></div>
     </div>
 
-    <!-- Panel with tabs -->
-    <div class="panel" style="padding:20px 28px 28px;">
+    <div class="panel" style="padding:20px 24px 26px;">
       <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('exams',this)">
-          <i class="fas fa-list-check"></i> Exams
-        </button>
-        <button class="tab-btn" onclick="switchTab('history',this)">
-          <i class="fas fa-clock-rotate-left"></i> My History
-        </button>
-        <button class="tab-btn" style="margin-left:auto; color:#ef4444;" onclick="logout()">
-          <i class="fas fa-sign-out-alt"></i> Log Out
-        </button>
+        <button class="tab-btn active" data-tab="exams" onclick="switchTab('exams',this)"><i class="fas fa-list-check"></i> Exams</button>
+        <button class="tab-btn" data-tab="teachers" onclick="switchTab('teachers',this)"><i class="fas fa-chalkboard-user"></i> My Teachers</button>
+        <button class="tab-btn" data-tab="history" onclick="switchTab('history',this)"><i class="fas fa-clock-rotate-left"></i> My History</button>
+        <button class="tab-btn" style="margin-left:auto;color:#b91c1c;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
       </div>
 
-      <!-- Tab: Exams -->
+      <!-- Exams -->
       <div id="tab-exams" class="tab-pane active">
-        <div id="exams-loader" class="pane-loader">
-          <i class="fas fa-circle-notch fa-spin"></i>
-          Loading exam list...
+        <div class="code-box">
+          <input class="inp" id="exam-code" maxlength="8" placeholder="Enter exam code" autocomplete="off" onkeydown="if(event.key==='Enter') goCode()">
+          <button class="btn primary" onclick="goCode()"><i class="fas fa-play"></i> Start with code</button>
         </div>
-        <div id="exams-container" style="display:none;">
-          <!-- Pending section -->
-          <div id="section-pending" class="exams-section" style="display:none;">
-            <div class="exams-section-head">
-              <span class="sh-dot sh-dot-pending"></span>
-              Pending Exams
-              <span class="sh-count" id="pending-count">0</span>
-            </div>
+        <div id="exams-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading exam list...</div>
+        <div id="exams-container" class="hide">
+          <div id="section-pending" class="exams-section hide">
+            <div class="exams-section-head">Available Exams <span class="sh-count" id="pending-count">0</span></div>
             <div id="grid-pending" class="exam-grid"></div>
           </div>
-          <!-- Completed section -->
-          <div id="section-done" class="exams-section" style="display:none;">
-            <div class="exams-section-head">
-              <span class="sh-dot sh-dot-done"></span>
-              Completed Exams
-              <span class="sh-count" id="done-count">0</span>
-            </div>
+          <div id="section-done" class="exams-section hide">
+            <div class="exams-section-head">Completed <span class="sh-count" id="done-count">0</span></div>
             <div id="grid-done" class="exam-grid"></div>
           </div>
         </div>
-        <div id="exams-empty" class="empty-st" style="display:none;">
+        <div id="exams-empty" class="empty-st hide">
           <i class="fas fa-folder-open"></i>
-          <p>There are no exams for you right now.</p>
+          <p id="exams-empty-msg">There are no exams for you right now.</p>
         </div>
       </div>
 
-      <!-- Tab: History -->
+      <!-- Teachers -->
+      <div id="tab-teachers" class="tab-pane">
+        <p class="sub" style="margin:0 0 14px;">Apply to a teacher to join their class. You can take that teacher's exams once they approve you.</p>
+        <input class="inp" id="teacher-search" placeholder="Search teachers…" oninput="renderTeachers()" style="margin-bottom:14px;">
+        <div id="teachers-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading teachers...</div>
+        <div id="teachers-list" class="list"></div>
+        <div id="teachers-empty" class="empty-st hide"><i class="fas fa-user-slash"></i><p>No teachers found.</p></div>
+      </div>
+
+      <!-- History -->
       <div id="tab-history" class="tab-pane">
-        <div id="history-loader" class="pane-loader">
-          <i class="fas fa-circle-notch fa-spin"></i>
-          Loading results...
-        </div>
-        <div id="history-wrap" style="display:none; overflow-x:auto;">
+        <div id="history-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading results...</div>
+        <div id="history-wrap" class="hide table-wrap">
           <table class="h-table">
-            <thead>
-              <tr>
-                <th>Exam Name</th>
-                <th>Date</th>
-                <th>Score</th>
-                <th style="text-align:right;">Details</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Exam</th><th>Date</th><th>Score</th><th>Rank</th><th style="text-align:right;">Paper</th></tr></thead>
             <tbody id="history-body"></tbody>
           </table>
         </div>
-        <div id="history-empty" class="empty-st" style="display:none;">
-          <i class="fas fa-history"></i>
-          <p>You haven't taken any exam yet.</p>
-        </div>
+        <div id="history-empty" class="empty-st hide"><i class="fas fa-history"></i><p>You haven't taken any exam yet.</p></div>
       </div>
     </div>
   </div>
-
 </main>
 
-<!-- ══ MODAL: Edit Profile ══ -->
+<!-- Modal: edit profile -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal-box">
-    <div class="modal-hd">
-      <h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> Profile Update Request</h3>
-      <button class="modal-close" onclick="closeModal('modal-edit')"><i class="fas fa-times"></i></button>
-    </div>
-    <p style="font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.7;">
-      Send a request to change your name, school, or class.
-      Your profile will be updated once the admin approves it.
-    </p>
+    <div class="modal-hd"><h3><i class="fas fa-user-edit"></i> Profile Update Request</h3><button class="modal-close" onclick="closeModal('modal-edit')"><i class="fas fa-times"></i></button></div>
+    <p class="sub" style="margin-bottom:18px;">Send a request to change your name, school, or class. Your profile will be updated once the admin approves it.</p>
     <div class="field"><label>Name</label><input type="text" id="edit-name" class="inp"></div>
     <div class="field"><label>School / College</label><input type="text" id="edit-school" class="inp"></div>
     <div class="field"><label>Class / Year</label><input type="text" id="edit-class" class="inp"></div>
-    <div id="edit-msg" style="display:none; margin-bottom:14px;"></div>
-    <button class="btn primary" style="width:100%;" id="edit-btn" onclick="submitProfileUpdate()">
-      Send Request <i class="fas fa-paper-plane"></i>
-    </button>
+    <div id="edit-msg" class="hide"></div>
+    <button class="btn primary full" id="edit-btn" onclick="submitProfileUpdate()">Send Request <i class="fas fa-paper-plane"></i></button>
   </div>
 </div>
 
-<!-- ══ MODAL: View Mistakes ══ -->
+<!-- Modal: old-style mistakes (results taken before the new system) -->
 <div class="modal-overlay" id="modal-mis">
-  <div class="modal-box" style="max-width:480px;">
-    <div class="modal-hd">
-      <h3><i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Mistakes</h3>
-      <button class="modal-close" onclick="closeModal('modal-mis')"><i class="fas fa-times"></i></button>
-    </div>
-    <div id="mis-content"
-      style="font-size:14px; line-height:1.8; background:var(--surface-soft);
-             padding:16px; border-radius:var(--radius); border:1px solid var(--line);">
-    </div>
+  <div class="modal-box">
+    <div class="modal-hd"><h3><i class="fas fa-exclamation-circle" style="color:#b91c1c;"></i> Mistakes</h3><button class="modal-close" onclick="closeModal('modal-mis')"><i class="fas fa-times"></i></button></div>
+    <div id="mis-content" style="font-size:14px;line-height:1.8;background:var(--surface-soft);padding:16px;border-radius:var(--radius);border:1px solid var(--line);"></div>
   </div>
 </div>
 
-<!-- Mobile Tab Bar -->
-<nav class="mobile-tabbar">
-  <a href="index.html"   class="mobile-tab"><i class="fas fa-house"></i>Home</a>
-  <a href="civil.html"   class="mobile-tab"><i class="fas fa-helmet-safety"></i>Civil</a>
-  <a href="modeling.html" class="mobile-tab"><i class="fas fa-cube"></i>3D</a>
-  <a href="academy.html" class="mobile-tab active"><i class="fas fa-graduation-cap"></i>Academy</a>
-  <a href="research.html" class="mobile-tab"><i class="fas fa-flask"></i>Research</a>
-</nav>
 
 <script src="assets/site.js"></script>
+<script src="assets/exam-common.js"></script>
 <script>
-// ══════════════════════════════════════════════════════════════
-//  CONFIG
-//  ⚠️ localStorage or sessionStorage is not used anywhere
-// ══════════════════════════════════════════════════════════════
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec";
-const GH_RAW  = "https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json";
+let currentUser = null;      // { id, name, mobile, school, studentClass }
+let isNewUser = false;
+let examList = [], teacherList = [], historyList = [];
+const _params = new URLSearchParams(location.search);
 
-// ══════════════════════════════════════════════════════════════
-//  STATE — in memory only. Cleared when the page closes or reloads.
-// ══════════════════════════════════════════════════════════════
-let currentUser = null; // { id, name, mobile, school, studentClass }
-let isNewUser   = false;
-let allExams    = [];
-let myHistory   = [];
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id).classList.remove('hide'); }
+function hide(id) { $(id).classList.add('hide'); }
+function showLoader(msg) { if (msg) $('loader-txt').innerHTML = msg; $('g-loader').style.display = 'flex'; }
+function hideLoader() { $('g-loader').style.display = 'none'; }
+function closeModal(id) { $(id).classList.remove('open'); }
+function openModal(id) { $(id).classList.add('open'); }
 
-// ══════════════════════════════════════════════════════════════
-//  LOADER HELPERS
-// ══════════════════════════════════════════════════════════════
-function showLoader(msg) {
-  if (msg) document.getElementById('loader-txt').innerHTML = msg;
-  document.getElementById('g-loader').style.display = 'flex';
-}
-function hideLoader() {
-  document.getElementById('g-loader').style.display = 'none';
+/* where to go after login (only our own exam pages) */
+function nextUrl() {
+  const n = _params.get('next') || '';
+  return /^exam\.html\?[A-Za-z0-9_=&%.\-]*$/.test(n) ? n : '';
 }
 
-// ══════════════════════════════════════════════════════════════
-//  GAS CALL
-// ══════════════════════════════════════════════════════════════
-async function gasCall(payload) {
-  const res = await fetch(GAS_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-    headers: { 'Content-Type': 'text/plain' }
-  });
-  return res.json();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  STEP 1 — Check mobile number
-// ══════════════════════════════════════════════════════════════
+/* ───────────── login / register ───────────── */
+function setErr(id, msg) { const e = $(id); e.textContent = msg; e.classList.toggle('hide', !msg); }
 async function checkMobile() {
-  let mobile = document.getElementById('auth-mobile').value.trim();
-
-  // normalize the number
-  if (mobile.startsWith('+880')) mobile = '0' + mobile.slice(4);
-  if (mobile.startsWith('880') && mobile.length === 13) mobile = '0' + mobile.slice(3);
-  document.getElementById('auth-mobile').value = mobile;
-
-  // Validation
-  if (!mobile)                              return setS1Error('Enter a mobile number!');
-  if (!/^01[3-9]\d{8}$/.test(mobile))      return setS1Error('Enter a valid Bangladeshi number (01XXXXXXXXX)');
-  setS1Error('');
-
-  showLoader('Looking up the number in the database...<br>Please wait a moment.');
-
+  const mobile = $('auth-mobile').value.trim();
+  setErr('s1-error', '');
+  if (!/^\d{10,11}$/.test(mobile)) return setErr('s1-error', 'সঠিক মোবাইল নম্বর দিন (১১ ডিজিট)');
+  $('s1-btn').disabled = true;
+  showLoader('Checking your number...');
   try {
-    const data = await gasCall({ action: 'checkMobile', mobile });
+    const d = await acadRaw({ action: 'checkMobile', mobile });
     hideLoader();
-
-    document.getElementById('mobile-disp').innerText = mobile;
-    isNewUser = !(data.status === 'success' && (data.found === true || data.found === 'true'));
-
-    if (!isNewUser) {
-      // existing user
-      document.getElementById('exist-name').innerText = data.name || 'Student';
-      flexShow('msg-exist'); hide('msg-new'); hide('new-fields');
-      show('forgot-btn');
-      document.getElementById('auth-btn-txt').innerText = 'Login';
-    } else {
-      // new user
-      flexShow('msg-new'); hide('msg-exist');
-      show('new-fields'); hide('forgot-btn');
-      document.getElementById('auth-btn-txt').innerText = 'Create Account';
+    if (d.status !== 'success') { setErr('s1-error', d.message || 'Something went wrong'); }
+    else {
+      isNewUser = !d.found;
+      $('mobile-disp').textContent = mobile;
+      hide('step-1'); show('step-2');
+      $('msg-exist').classList.toggle('hide', isNewUser);
+      $('msg-new').classList.toggle('hide', !isNewUser);
+      $('new-fields').classList.toggle('hide', !isNewUser);
+      $('forgot-btn').classList.toggle('hide', isNewUser);
+      if (!isNewUser) $('exist-name').textContent = d.name;
+      $('auth-btn-txt').textContent = isNewUser ? 'Create account' : 'Login';
+      $('auth-pass').focus();
     }
-
-    hide('step-1'); show('step-2');
-    setTimeout(() => {
-      const f = isNewUser
-        ? document.getElementById('reg-name')
-        : document.getElementById('auth-pass');
-      f && f.focus();
-    }, 80);
-
-  } catch (e) {
-    hideLoader();
-    setS1Error('Could not connect to the server. Check your internet.');
-  }
+  } catch (e) { hideLoader(); setErr('s1-error', 'Network error — check your connection'); }
+  $('s1-btn').disabled = false;
 }
+function goBack() { hide('step-2'); show('step-1'); setErr('s2-error', ''); $('auth-pass').value = ''; }
 
-function setS1Error(msg) {
-  const el = document.getElementById('s1-error');
-  if (!msg) { el.style.display = 'none'; return; }
-  el.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
-  el.style.display = 'flex';
-}
-
-function goBack() {
-  hide('step-2'); show('step-1');
-  hide('s2-error'); hide('s2-success');
-  document.getElementById('auth-pass').value = '';
-  document.getElementById('auth-mobile').focus();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  STEP 2 — Login or registration
-// ══════════════════════════════════════════════════════════════
 async function handleLogin() {
-  const mobile   = document.getElementById('auth-mobile').value.trim();
-  const password = document.getElementById('auth-pass').value.trim();
-  if (!password) return setS2Error('A password is required!');
-
-  const payload = { mobile, password };
-
+  const mobile = $('auth-mobile').value.trim(), password = $('auth-pass').value.trim();
+  setErr('s2-error', ''); hide('s2-success');
+  if (!password) return setErr('s2-error', 'পাসওয়ার্ড দিন');
+  let payload;
   if (isNewUser) {
-    payload.action       = 'register';
-    payload.name         = document.getElementById('reg-name').value.trim();
-    payload.school       = document.getElementById('reg-school').value.trim();
-    payload.studentClass = document.getElementById('reg-class').value.trim();
-    if (!payload.name)  return setS2Error('Your name is required!');
-  } else {
-    payload.action = 'login';
-  }
-
-  setS2Error('');
-  showLoader(isNewUser
-    ? 'Creating account...'
-    : 'Verifying login...'
-  );
-
+    const name = $('reg-name').value.trim();
+    if (!name) return setErr('s2-error', 'আপনার নাম দিন');
+    if (password.length < 4) return setErr('s2-error', 'পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে');
+    payload = { action: 'register', mobile, password, name, school: $('reg-school').value.trim(), studentClass: $('reg-class').value.trim() };
+  } else payload = { action: 'login', mobile, password };
+  $('auth-btn').disabled = true;
+  showLoader(isNewUser ? 'Creating your account...' : 'Logging in...');
   try {
-    const data = await gasCall(payload);
+    const d = await acadRaw(payload);
     hideLoader();
-
-    if (data.status === 'success') {
-      currentUser = {
-        id:           String(data.id),
-        name:         data.name,
-        mobile:       mobile,
-        school:       data.school       || '',
-        studentClass: data.studentClass || ''
-      };
+    if (d.status === 'success' && d.token) {
+      currentUser = { id: String(d.id), name: d.name, mobile, school: d.school || '', studentClass: d.studentClass || '' };
+      acadSession.set('student', { token: d.token, expiry: d.expiry, user: currentUser });
+      const nx = nextUrl();
+      if (nx) { location.href = nx; return; }
       showDashboard();
-    } else {
-      setS2Error(data.message || 'Incorrect password!');
-    }
-  } catch (e) {
-    hideLoader();
-    setS2Error('Could not connect to the server. Check your internet.');
-  }
+    } else setErr('s2-error', d.message || 'Login failed');
+  } catch (e) { hideLoader(); setErr('s2-error', 'Network error — check your connection'); }
+  $('auth-btn').disabled = false;
 }
-
-function setS2Error(msg) {
-  const el = document.getElementById('s2-error');
-  if (!msg) { el.style.display = 'none'; return; }
-  el.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
-  el.style.display = 'flex';
-  hide('s2-success');
-}
-function setS2Success(msg) {
-  const el = document.getElementById('s2-success');
-  el.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-  el.style.display = 'flex';
-  hide('s2-error');
-}
-
-// ══════════════════════════════════════════════════════════════
-//  Password reset request
-// ══════════════════════════════════════════════════════════════
 async function requestReset() {
-  const mobile = document.getElementById('auth-mobile').value.trim();
-  setS2Error('');
-  showLoader('Sending password reset request...');
+  const mobile = $('auth-mobile').value.trim();
+  showLoader('Sending request...');
   try {
-    const data = await gasCall({ action: 'requestPasswordReset', mobile });
+    const d = await acadRaw({ action: 'requestPasswordReset', mobile });
     hideLoader();
-    if (data.status === 'success') {
-      setS2Success('Request sent! You can log in once the admin sets a password for you.');
-    } else {
-      setS2Error(data.message || 'Could not send the request.');
-    }
-  } catch (e) {
-    hideLoader();
-    setS2Error('Could not connect to the server.');
-  }
+    if (d.status === 'success') { const s = $('s2-success'); s.innerHTML = '<i class="fas fa-check-circle"></i> Request sent. The admin will set a new password for you.'; s.classList.remove('hide'); }
+    else setErr('s2-error', d.message);
+  } catch (e) { hideLoader(); setErr('s2-error', 'Network error'); }
 }
+function logout() { acadSession.clear('student'); currentUser = null; location.href = 'student_portal.html'; }
+function sessionLost() { acadSession.clear('student'); currentUser = null; hide('dashboard-section'); show('auth-section'); hide('step-2'); show('step-1'); setErr('s1-error', 'আপনার সেশন শেষ হয়ে গেছে — আবার লগইন করুন'); }
 
-// ══════════════════════════════════════════════════════════════
-//  DASHBOARD
-// ══════════════════════════════════════════════════════════════
+/* ───────────── dashboard ───────────── */
 function showDashboard() {
-  hide('auth-section');
-  show('dashboard-section');
-
-  document.getElementById('d-name').innerHTML =
-    `${esc(currentUser.name)} <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button>`;
-  document.getElementById('d-mobile').innerText = currentUser.mobile;
-  document.getElementById('d-id').innerText     = currentUser.id;
-  document.getElementById('d-school').innerText = currentUser.school       || 'Not set';
-  document.getElementById('d-class').innerText  = currentUser.studentClass || 'Not set';
-
-  fetchDashboardData();
+  hide('auth-section'); show('dashboard-section');
+  $('d-name').innerHTML = esc(currentUser.name) + ' <button class="btn-edit-profile" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit</button>';
+  $('d-mobile').textContent = currentUser.mobile || '—';
+  $('d-id').textContent = currentUser.id;
+  $('d-school').textContent = currentUser.school || 'Not set';
+  $('d-class').textContent = currentUser.studentClass || 'Not set';
+  loadExams(); loadTeachers(); loadHistory();
+}
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  $('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else { const b = document.querySelector('.tab-btn[data-tab="' + name + '"]'); if (b) b.classList.add('active'); }
+}
+function goCode() {
+  const c = $('exam-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (c.length < 4) return acadToast('Enter the exam code your teacher gave you', 'err');
+  location.href = 'exam.html?code=' + encodeURIComponent(c);
 }
 
-async function fetchDashboardData() {
-  showLoader('Loading exam list and results...<br>Please wait a moment.');
+/* exams */
+async function loadExams() {
+  show('exams-loader'); hide('exams-container'); hide('exams-empty');
   try {
-    // exam list from GitHub
-    const ghRes  = await fetch(`${GH_RAW}?_=${Date.now()}`);
-    const ghData = await ghRes.json();
-    allExams = ghData.exams || [];
-
-    // student results from GAS
-    const gasData = await gasCall({ action: 'getStudentResults', studentId: currentUser.id });
-    myHistory = gasData.results || gasData.data || [];
-
-    hideLoader();
-    renderExams();
-    renderHistory();
-  } catch (e) {
-    hideLoader();
-    document.getElementById('exams-loader').innerHTML =
-      `<i class="fas fa-exclamation-triangle" style="color:#ef4444; font-size:28px; display:block; margin-bottom:12px;"></i>
-       Trouble loading the data.<br>Please reload the page.`;
-  }
+    const d = await studentCall('studentExams');
+    if (d.status === 'unauthorized') return sessionLost();
+    examList = d.exams || [];
+  } catch (e) { $('exams-loader').innerHTML = '<i class="fas fa-triangle-exclamation" style="color:#b91c1c;"></i> Trouble loading data. Please reload.'; return; }
+  renderExams();
 }
-
-// ── Render Exams ──
 function renderExams() {
   hide('exams-loader');
-  const container   = document.getElementById('exams-container');
-  const empty       = document.getElementById('exams-empty');
-  const gridPending = document.getElementById('grid-pending');
-  const gridDone    = document.getElementById('grid-done');
-
-  gridPending.innerHTML = '';
-  gridDone.innerHTML    = '';
-
-  let pendingCount = 0, doneCount = 0;
-
-  allExams.forEach(ex => {
-    const allowed = ex.examData.allowedIds || [];
-    // an empty allowedIds means open for everyone
-    const isAllowed = allowed.length === 0 ||
-      allowed.map(String).includes(String(currentUser.id));
-    if (!isAllowed) return;
-    // don't show it if live === false
-    if (ex.live === false) return;
-
-    const isDone   = myHistory.some(h => String(h.examId || h.ExamId || '') === String(ex.id)) ||
-                     myHistory.some(h => (h.topic || h.Topic) === ex.examData.title);
-    const qCount   = ex.examData.questions ? ex.examData.questions.length : 0;
-    const duration = ex.examData.duration || '30 minutes';
-    const hasPass  = !!ex.examData.password;
-
-    // Student info is passed as URL params — not localStorage
-    const base = `model_test.html?examId=${ex.id}` +
-      `&studentId=${enc(currentUser.id)}` +
-      `&studentName=${enc(currentUser.name)}` +
-      `&studentMobile=${enc(currentUser.mobile)}`;
-
-    const card = isDone
-      ? `<div class="exam-card">
-          <span class="ekbadge eb-done"><i class="fas fa-check"></i> Done</span>
-          <h3>${esc(ex.examData.title)}</h3>
-          <div class="exam-meta">
-            <span><i class="far fa-clock"></i> ${esc(duration)}</span>
-            <span><i class="fas fa-list-ol"></i> ${qCount} Questions</span>
-            <span><i class="fas fa-lock"></i> Password: ${hasPass ? 'Required' : 'None'}</span>
-          </div>
-          <a href="${base}&practice=1" class="btn secondary" style="width:100%;justify-content:center;">
-            <i class="fas fa-redo"></i> Practice Mode
-          </a>
-        </div>`
-      : `<div class="exam-card">
-          <span class="ekbadge eb-new">New</span>
-          <h3>${esc(ex.examData.title)}</h3>
-          <div class="exam-meta">
-            <span><i class="far fa-clock"></i> ${esc(duration)}</span>
-            <span><i class="fas fa-list-ol"></i> ${qCount} Questions</span>
-            <span><i class="fas fa-lock"></i> Password: ${hasPass ? 'Required' : 'None'}</span>
-          </div>
-          <a href="${base}" class="btn primary" style="width:100%;justify-content:center;">
-            <i class="fas fa-play"></i> Start Exam
-          </a>
-        </div>`;
-
-    if (isDone) {
-      gridDone.innerHTML += card;
-      doneCount++;
-    } else {
-      gridPending.innerHTML += card;
-      pendingCount++;
-    }
-  });
-
-  const total = pendingCount + doneCount;
-
-  if (total > 0) {
-    container.style.display = 'block';
-    hide('exams-empty');
-
-    // Pending section
-    const secPending = document.getElementById('section-pending');
-    if (pendingCount > 0) {
-      document.getElementById('pending-count').textContent = pendingCount;
-      secPending.style.display = 'block';
-    } else {
-      secPending.style.display = 'none';
-    }
-
-    // Done section
-    const secDone = document.getElementById('section-done');
-    if (doneCount > 0) {
-      document.getElementById('done-count').textContent = doneCount;
-      secDone.style.display = 'block';
-    } else {
-      secDone.style.display = 'none';
-    }
-  } else {
-    container.style.display = 'none';
+  const pend = examList.filter(e => e.status !== 'done'), done = examList.filter(e => e.status === 'done');
+  const card = e => {
+    const meta = `<div class="exam-meta"><span><i class="fas fa-chalkboard-user"></i> ${esc(e.teacherName)}</span><span><i class="far fa-clock"></i> ${e.durationMin} minutes</span><span><i class="fas fa-list-ol"></i> ${e.qCount} Questions</span>${e.status === 'done' ? `<span><i class="fas fa-star"></i> Score: <b>${e.score}/${e.total}</b></span>` : ''}</div>`;
+    if (e.status === 'done') return `<div class="exam-card"><span class="ekbadge eb-done"><i class="fas fa-check"></i> Done</span><h3>${esc(e.title)}</h3>${meta}<a class="btn secondary full" href="exam.html?review=${encodeURIComponent(e.id)}"><i class="fas fa-eye"></i> View paper &amp; rank</a></div>`;
+    const run = e.status === 'in-progress';
+    return `<div class="exam-card"><span class="ekbadge ${run ? 'eb-run' : 'eb-new'}">${run ? 'In progress' : 'New'}</span><h3>${esc(e.title)}</h3>${meta}<a class="btn primary full" href="exam.html?examId=${encodeURIComponent(e.id)}"><i class="fas fa-${run ? 'rotate-right' : 'play'}"></i> ${run ? 'Continue exam' : 'Start exam'}</a></div>`;
+  };
+  $('grid-pending').innerHTML = pend.map(card).join('');
+  $('grid-done').innerHTML = done.map(card).join('');
+  $('pending-count').textContent = pend.length; $('done-count').textContent = done.length;
+  $('section-pending').classList.toggle('hide', !pend.length);
+  $('section-done').classList.toggle('hide', !done.length);
+  if (pend.length || done.length) show('exams-container');
+  else {
+    const hasTeacher = teacherList.some(t => t.link === 'approved');
+    $('exams-empty-msg').innerHTML = hasTeacher ? 'There are no live exams for you right now.' : 'You are not approved under any teacher yet. Open <b>My Teachers</b> to apply — or enter an exam code above.';
     show('exams-empty');
   }
 }
 
-// ── Render History ──
-function renderHistory() {
-  hide('history-loader');
-  const tbody = document.getElementById('history-body');
-  tbody.innerHTML = '';
-
-  if (myHistory.length === 0) {
-    hide('history-wrap');
-    show('history-empty');
-    return;
-  }
-
-  myHistory.forEach(h => {
-    const score   = h.score !== undefined ? h.score : (h.Score  || 0);
-    const topic   = h.topic || h.Topic   || 'Unknown';
-    const dateStr = h.time  || h.Time    || '—';
-    const details = String(h.details || 'No data');
-    const safeD   = details.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    const cls     = Number(score) > 0 ? 's-hi' : 's-lo';
-
-    tbody.innerHTML += `
-      <tr>
-        <td style="font-weight:600;">${esc(topic)}</td>
-        <td style="color:var(--muted);font-size:12px;">${esc(dateStr)}</td>
-        <td class="${cls}">${score}</td>
-        <td style="text-align:right;">
-          <button class="btn-mis" onclick="viewMistakes('${safeD}')">View Mistakes</button>
-        </td>
-      </tr>`;
-  });
-
-  show('history-wrap');
-  hide('history-empty');
-}
-
-// ══════════════════════════════════════════════════════════════
-//  PROFILE UPDATE REQUEST
-// ══════════════════════════════════════════════════════════════
-function openEditProfile() {
-  document.getElementById('edit-name').value   = currentUser.name;
-  document.getElementById('edit-school').value = currentUser.school       || '';
-  document.getElementById('edit-class').value  = currentUser.studentClass || '';
-  hide('edit-msg');
-  document.getElementById('modal-edit').style.display = 'flex';
-}
-
-async function submitProfileUpdate() {
-  const btn  = document.getElementById('edit-btn');
-  const name         = document.getElementById('edit-name').value.trim();
-  const school       = document.getElementById('edit-school').value.trim();
-  const studentClass = document.getElementById('edit-class').value.trim();
-  if (!name) { showEditMsg('A name is required!', false); return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
+/* teachers */
+async function loadTeachers() {
+  show('teachers-loader');
   try {
-    const data = await gasCall({
-      action: 'requestProfileUpdate',
-      id: currentUser.id, name, school, studentClass
-    });
-    if (data.status === 'success') {
-      showEditMsg('Request sent! Your profile will be updated once the admin approves it.', true);
-      setTimeout(() => closeModal('modal-edit'), 3000);
-    } else {
-      showEditMsg(data.message || 'Something went wrong.', false);
-    }
-  } catch (e) {
-    showEditMsg('Network error!', false);
+    const d = await studentCall('listTeachers');
+    if (d.status === 'unauthorized') return sessionLost();
+    teacherList = d.teachers || [];
+  } catch (e) { teacherList = []; }
+  hide('teachers-loader'); renderTeachers();
+  if ($('exams-loader').classList.contains('hide')) renderExams();   // refresh the empty-state hint
+}
+const LINK_CHIP = { approved: '<span class="chip ok"><i class="fas fa-check"></i> Approved</span>', pending: '<span class="chip wait"><i class="fas fa-hourglass-half"></i> Waiting for approval</span>', rejected: '<span class="chip no">Not accepted</span>' };
+function renderTeachers() {
+  const q = ($('teacher-search').value || '').toLowerCase();
+  const list = teacherList.filter(t => !q || (t.name + ' ' + t.subject + ' ' + t.institution).toLowerCase().includes(q));
+  $('teachers-list').innerHTML = list.map(t => {
+    const act = t.link === 'approved' ? `<button class="btn secondary sm" onclick="leaveTeacher('${esc(t.id)}')">Leave</button>`
+      : t.link === 'pending' ? `<button class="btn secondary sm" onclick="leaveTeacher('${esc(t.id)}')">Cancel</button>`
+      : `<button class="btn primary sm" onclick="applyTeacher('${esc(t.id)}')"><i class="fas fa-paper-plane"></i> ${t.link === 'rejected' ? 'Apply again' : 'Apply'}</button>`;
+    return `<div class="item"><div class="ico"><i class="fas fa-chalkboard-user"></i></div><div class="grow"><div class="t">${esc(t.name)}</div><div class="s">${esc([t.subject, t.institution].filter(Boolean).join(' · ') || 'Teacher')}</div></div>${LINK_CHIP[t.link] || ''}<div class="acts">${act}</div></div>`;
+  }).join('');
+  $('teachers-empty').classList.toggle('hide', list.length > 0);
+}
+async function applyTeacher(id) {
+  const d = await studentCall('applyTeacher', { teacherId: id });
+  if (d.status === 'unauthorized') return sessionLost();
+  acadToast(d.message || (d.status === 'success' ? 'Sent' : 'Failed'), d.status === 'success' ? 'ok' : 'err');
+  loadTeachers();
+}
+async function leaveTeacher(id) {
+  if (!confirm('Are you sure?')) return;
+  const d = await studentCall('leaveTeacher', { teacherId: id });
+  if (d.status === 'unauthorized') return sessionLost();
+  await loadTeachers(); loadExams();
+}
+
+/* history */
+async function loadHistory() {
+  show('history-loader'); hide('history-wrap'); hide('history-empty');
+  try {
+    const d = await studentCall('myResults');
+    if (d.status === 'unauthorized') return sessionLost();
+    historyList = d.results || [];
+  } catch (e) { historyList = []; }
+  hide('history-loader');
+  if (!historyList.length) return show('history-empty');
+  $('history-body').innerHTML = historyList.map((h, i) => {
+    const total = h.total ? '/' + h.total : '';
+    const cls = h.total ? (h.score / h.total >= .5 ? 's-hi' : 's-lo') : 's-hi';
+    const rank = h.rank ? `<span class="rank-pill r${h.rank <= 3 ? h.rank : ''}">${h.rank}</span> <span class="muted" style="font-size:12px;">of ${h.participants}</span>` : '—';
+    const btn = h.hasReview && h.examId ? `<a class="btn-mis" href="exam.html?review=${encodeURIComponent(h.examId)}" style="text-decoration:none;display:inline-block;">View paper</a>` : `<button class="btn-mis" onclick="viewMistakes(${i})">View Mistakes</button>`;
+    return `<tr><td style="font-weight:600;">${esc(h.topic)}</td><td class="muted" style="font-size:12px;">${esc(h.time || '—')}</td><td class="${cls}">${h.score}${total}</td><td>${rank}</td><td style="text-align:right;">${btn}</td></tr>`;
+  }).join('');
+  show('history-wrap');
+}
+function viewMistakes(i) {
+  const str = String((historyList[i] || {}).details || '');
+  let html;
+  if (str === 'Perfect Score') html = '<div style="text-align:center;color:#166534;font-weight:700;"><i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:14px;"></i>Perfect Score! 🏆</div>';
+  else if (!str) html = '<div style="text-align:center;color:var(--muted);">Mistake details not available.</div>';
+  else html = '<ul style="margin:0;padding-left:20px;">' + str.split(', ').filter(Boolean).map(m => '<li style="margin-bottom:8px;">' + sanitizeHtml(m) + '</li>').join('') + '</ul>';
+  $('mis-content').innerHTML = html;
+  openModal('modal-mis');
+  acadTypeset($('mis-content'));
+}
+
+/* profile edit */
+function openEditProfile() {
+  $('edit-name').value = currentUser.name; $('edit-school').value = currentUser.school || ''; $('edit-class').value = currentUser.studentClass || '';
+  hide('edit-msg'); openModal('modal-edit');
+}
+function showEditMsg(msg, ok) { const el = $('edit-msg'); el.className = 'alert ' + (ok ? 'al-success' : 'al-error'); el.innerHTML = '<i class="fas fa-' + (ok ? 'check-circle' : 'triangle-exclamation') + '"></i> ' + esc(msg); }
+async function submitProfileUpdate() {
+  const name = $('edit-name').value.trim();
+  if (!name) return showEditMsg('A name is required!', false);
+  $('edit-btn').disabled = true;
+  try {
+    const d = await acadRaw({ action: 'requestProfileUpdate', id: currentUser.id, name, school: $('edit-school').value.trim(), studentClass: $('edit-class').value.trim() });
+    if (d.status === 'success') { showEditMsg('Request sent! Your profile will be updated once the admin approves it.', true); setTimeout(() => closeModal('modal-edit'), 2500); }
+    else showEditMsg(d.message || 'Something went wrong.', false);
+  } catch (e) { showEditMsg('Network error!', false); }
+  $('edit-btn').disabled = false;
+}
+
+/* ───────────── start ───────────── */
+(function init() {
+  const s = acadSession.get('student');
+  if (s && s.user) {
+    currentUser = s.user;
+    const nx = nextUrl();
+    if (nx) { location.href = nx; return; }
+    showDashboard();
   }
-
-  btn.disabled = false;
-  btn.innerHTML = 'Send Request <i class="fas fa-paper-plane"></i>';
-}
-
-function showEditMsg(msg, ok) {
-  const el = document.getElementById('edit-msg');
-  el.className = 'alert ' + (ok ? 'al-success' : 'al-error');
-  el.innerHTML = `<i class="fas fa-${ok ? 'check-circle' : 'exclamation-triangle'}"></i> ${msg}`;
-  el.style.display = 'flex';
-}
-
-// ══════════════════════════════════════════════════════════════
-//  MISTAKES MODAL
-// ══════════════════════════════════════════════════════════════
-function viewMistakes(str) {
-  let html = '';
-  if (str === 'Perfect Score') {
-    html = `<div style="text-align:center;color:#166534;font-weight:700;">
-      <i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:14px;"></i>
-      Amazing! No mistakes. Perfect Score! 🏆
-    </div>`;
-  } else if (!str || str === 'No data') {
-    html = `<div style="text-align:center;color:var(--muted);">Mistake details not available.</div>`;
-  } else {
-    html = '<ul style="margin:0;padding-left:20px;">' +
-      str.split(', ').filter(Boolean).map(m => `<li style="margin-bottom:8px;">${m}</li>`).join('') +
-      '</ul>';
-  }
-  const misContent = document.getElementById('mis-content');
-  misContent.innerHTML = html;
-  document.getElementById('modal-mis').style.display = 'flex';
-  ensureMathJax('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js')
-    .then(function (M) { return M.typesetPromise([misContent]); })
-    .catch(function () {});
-}
-
-// ══════════════════════════════════════════════════════════════
-//  UTILS
-// ══════════════════════════════════════════════════════════════
-function show(id)         { document.getElementById(id).style.display = 'block'; }
-function hide(id)         { document.getElementById(id).style.display = 'none'; }
-function flexShow(id)     { document.getElementById(id).style.display = 'flex'; }
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function enc(s)           { return encodeURIComponent(s||''); }
-
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-}
-
-function closeModal(id) {
-  document.getElementById(id).style.display = 'none';
-}
-
-// ══════════════════════════════════════════════════════════════
-//  LOGOUT — clears memory only, no storage
-// ══════════════════════════════════════════════════════════════
-function logout() {
-  currentUser = null;
-  isNewUser   = false;
-  allExams    = [];
-  myHistory   = [];
-  location.reload();
-}
-
-// ══════════════════════════════════════════════════════════════
-//  INIT — no auto-login. No localStorage/sessionStorage.
-//  On page load, just focus the mobile input.
-// ══════════════════════════════════════════════════════════════
-window.addEventListener('load', () => {
-  document.getElementById('auth-mobile').focus();
-});
+})();
 </script>
 </body>
 </html>
