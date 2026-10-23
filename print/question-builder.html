@@ -786,6 +786,22 @@
       @media print {
         .page-top-date, .page-footer-meta { color: #888; }
       }
+      
+      /* ── Wizard Stepper ── */
+      .wiz-nav { position: relative; padding: 12px 14px 8px; margin-bottom: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+      .wiz-track-line { position: absolute; top: 24px; left: 41px; right: 41px; height: 2px; background: #e2e8f0; z-index: 0; }
+      .wiz-track-progress { position: absolute; top: 24px; left: 41px; height: 2px; background: #7c3aed; z-index: 0; transition: width 0.35s cubic-bezier(.4,0,.2,1); max-width: calc(100% - 82px); }
+      .wiz-steps-row { display: flex; justify-content: space-between; position: relative; z-index: 1; }
+      .wiz-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; background: none; border: none; padding: 2px 0 0; min-width: 0; flex: 1; }
+      .wiz-circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 8.5px; font-weight: 700; color: #94a3b8; transition: all 0.2s; }
+      .wiz-btn:hover .wiz-circle { border-color: #7c3aed; color: #7c3aed; }
+      .wiz-btn.active .wiz-circle { background: #7c3aed; border-color: #7c3aed; color: #fff; transform: scale(1.18); box-shadow: 0 0 0 3px #ede9fe; }
+      .wiz-btn.done .wiz-circle { background: #ede9fe; border-color: #7c3aed; color: #7c3aed; }
+      .wiz-label { font-size: 8px; font-weight: 600; color: #94a3b8; white-space: nowrap; }
+      .wiz-btn.active .wiz-label { color: #7c3aed; font-weight: 700; }
+      .wiz-btn.done .wiz-label { color: #a78bfa; }
+      .wiz-subtitle { text-align: center; font-size: 11.5px; font-weight: 700; color: #6d28d9; margin-top: 6px; letter-spacing: 0.01em; }
+      .wiz-hidden { display: none !important; }
       </style>
       <script>
       MathJax = {
@@ -816,7 +832,39 @@
         </div>
 
         <h1>Question Builder</h1>
-        <details class="guide-box">
+
+        <div class="wiz-nav" id="wizNav">
+          <div class="wiz-track-line"></div>
+          <div class="wiz-track-progress" id="wizProgress" style="width:0%"></div>
+          <div class="wiz-steps-row">
+            <button class="wiz-btn active" data-step="1" onclick="switchStep(1)" title="Header">
+              <div class="wiz-circle">01</div>
+              <span class="wiz-label">Header</span>
+            </button>
+            <button class="wiz-btn" data-step="2" onclick="switchStep(2)" title="MCQ">
+              <div class="wiz-circle">02</div>
+              <span class="wiz-label">MCQ</span>
+            </button>
+            <button class="wiz-btn" data-step="3" onclick="switchStep(3)" title="CQ">
+              <div class="wiz-circle">03</div>
+              <span class="wiz-label">CQ</span>
+            </button>
+            <button class="wiz-btn" data-step="4" onclick="switchStep(4)" title="Questions">
+              <div class="wiz-circle">04</div>
+              <span class="wiz-label">Q</span>
+            </button>
+            <button class="wiz-btn" data-step="5" onclick="switchStep(5)" title="Settings">
+              <div class="wiz-circle">05</div>
+              <span class="wiz-label">Settings</span>
+            </button>
+            <button class="wiz-btn" data-step="6" onclick="switchStep(6)" title="Export">
+              <div class="wiz-circle">06</div>
+              <span class="wiz-label">Export</span>
+            </button>
+          </div>
+          <div class="wiz-subtitle" id="wizSubtitle">Header</div>
+        </div>
+        <details class="guide-box" id="wizGuideBox">
            <summary>💡 Guidelines & Tips</summary>
            <div class="guide-content">
              <ul>
@@ -856,7 +904,7 @@
         </div>
 
         <!-- ── Zone 1: Navigation ── -->
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
+        <div id="wizNavZone" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
           <div class="zone-label" style="margin-bottom:8px;">📁 Navigation</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
             <button type="button" onclick="saveAndBack()" style="background:#1e293b; color:#fff; border:none; border-radius:7px; padding:9px 6px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:background .15s;" onmouseover="this.style.background='#0f172a'" onmouseout="this.style.background='#1e293b'">↩ Save &amp; Back</button>
@@ -865,7 +913,7 @@
         </div>
 
         <!-- ── Zone 2: History ── -->
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
+        <div id="wizHistZone" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
           <div class="zone-label" style="margin-bottom:8px;">🕓 History</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
             <button type="button" onclick="undoState()" style="background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:7px; padding:7px 4px; font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">↶ Undo</button>
@@ -876,7 +924,7 @@
         </div>
 
         <!-- ── Zone 3: Export ── -->
-        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-bottom:14px;">
+        <div id="wizExportZone" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-bottom:14px;">
           <div class="zone-label" style="margin-bottom:8px; color:#0369a1;">📤 Export</div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-bottom:8px;">
             <button type="button" onclick="downloadPDFDirect(this)" style="background:#2563eb; color:#fff; border:none; border-radius:7px; padding:9px 4px; font-size:11px; font-weight:700; cursor:pointer; text-align:center; line-height:1.3; transition:background .15s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">↓ PDF</button>
@@ -888,7 +936,7 @@
           </button>
         </div>
 
-        <hr class="zone-divider">
+        <hr class="zone-divider" id="wizHr">
 
         <div class="builder-section" id="basicExamInfoSection">
           <h2 class="section-title">Basic Exam Info</h2>
@@ -960,6 +1008,7 @@
         </div>
         </div>
 
+        <div id="wizSettingsZone">
         <div class="control-grid">
           <div class="field" style="margin-bottom: 0">
             <label for="bodyFontControl">Master Font Size</label>
@@ -1246,6 +1295,7 @@
           <button type="button" class="secondary" onclick="applyLayoutControls()">⟳ Apply Layout</button>
         </div>
 
+        </div><!-- /wizSettingsZone -->
         <div class="status-box status-save" id="saveStatus">
           Draft autosave is active. Loading saved draft if available...
         </div>
@@ -3498,13 +3548,11 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         const imgHtml = images.map((img) => {
           const width = numberValueOr(defaultWidth, img.width);
           const height = numberValueOr(defaultHeight, img.height);
-          return `<div class="stimulus-block stimulus-image-block"><span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span><img class="mcq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain;" src="${img.src}"></div>`;
+          return `<div class="stimulus-block stimulus-image-block"><img class="mcq-image img-${img.align || 'left'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain;" src="${img.src}"></div>`;
         }).join("");
 
         const groupInstruction = (qtype === "stimulus" && stimTxt) ? stimulusGroupInstruction(q) : "";
-        const stimulusLabelHtml = groupInstruction
-          ? ""
-          : `<span class="stimulus-block-label">${textByLang("উদ্দীপক :", "Stimulus:")}</span>`;
+        const stimulusLabelHtml = "";
         const stimulusHtml = (qtype === "stimulus" && stimTxt)
           ? `${groupInstruction ? `<div class="stimulus-instruction">${formatText(groupInstruction)}</div>` : ""}<div class="stimulus-block">${stimulusLabelHtml}${formatStimulusHtml(stimTxt)}</div>`
           : "";
@@ -3565,7 +3613,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           .map((img) => {
             const width = numberValueOr(defaultWidth, img.width);
             const height = numberValueOr(defaultHeight, img.height);
-            return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
+            return `<img class="cq-image img-${img.align || 'left'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
           })
           .join("");
 
@@ -3623,7 +3671,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         .map((img) => {
           const width = numberValueOr(defaultWidth, img.width);
           const height = numberValueOr(defaultHeight, img.height);
-          return `<img class="cq-image img-${img.align || 'center'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
+          return `<img class="cq-image img-${img.align || 'left'}" style="width:${width}%; height:auto; max-height:${height}px; object-fit:contain; margin-bottom:6px;" src="${img.src}">`;
         })
         .join("")}
       <div class="cq-head">
@@ -5756,6 +5804,13 @@ function splitIntoQuestionBlocks(text) {
           );
         }
       }
+      // ── Wizard step restore on load ──
+      (function() {
+        var saved = 1;
+        try { saved = parseInt(localStorage.getItem('qb_wiz_step')) || 1; } catch(e) {}
+        switchStep(Math.min(Math.max(saved || 1, 1), 6));
+      })();
+
       // ==========================================
       // ONLINE EXAM GENERATOR INTEGRATION CODE
       // ==========================================
@@ -5996,7 +6051,7 @@ function confirmCrop() {
     };
   } else {
     target.images.push({
-      align: 'center',
+      align: 'left',
       width: String(defaultWidth),
       height: String(defaultHeight),
       ...imageData,
@@ -6007,6 +6062,45 @@ function confirmCrop() {
   renderAll();
   initEditors();
 }
+
+// ── Wizard Step System ──
+const WIZ_MAP = {
+  1: ['wizGuideBox', 'globalLangField', 'sheetOptionsSection', 'basicExamInfoSection'],
+  2: ['bulkMcqImportSection', 'sectionTitlesWrap', 'mcqSectionHeaderWrap', 'mcqMgmtBar', 'mcqEditorList'],
+  3: ['cqSectionMount', 'cqEditorList'],
+  4: ['onlyQuestionSectionMount', 'onlyQuestionEditorList'],
+  5: ['wizSettingsZone'],
+  6: ['wizNavZone', 'wizHistZone', 'wizExportZone', 'wizHr'],
+};
+const WIZ_LABELS = { 1:'Header', 2:'MCQ', 3:'CQ', 4:'Questions', 5:'Settings', 6:'Export' };
+let activeWizStep = 1;
+
+function switchStep(n) {
+  const allIds = Object.values(WIZ_MAP).flat();
+  allIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('wiz-hidden');
+  });
+  (WIZ_MAP[n] || []).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('wiz-hidden');
+  });
+  activeWizStep = n;
+  // Update stepper buttons
+  document.querySelectorAll('.wiz-btn').forEach(function(btn) {
+    var s = +btn.dataset.step;
+    btn.classList.toggle('active', s === n);
+    btn.classList.toggle('done', s < n);
+  });
+  // Update progress bar (0% at step 1, 100% at step 6)
+  var prog = document.getElementById('wizProgress');
+  if (prog) prog.style.width = Math.round(((n - 1) / 5) * 100) + '%';
+  // Update subtitle
+  var sub = document.getElementById('wizSubtitle');
+  if (sub) sub.textContent = WIZ_LABELS[n] || '';
+  try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
+}
+
 </script>
 </body>
 </html>
