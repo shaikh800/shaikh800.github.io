@@ -1350,7 +1350,7 @@ async function submitExam(){
   btn.disabled = true;
 
   let c=0, w=0, s=0;
-  let wrongDetails = [];
+  let wrongItems = [];
   let total = examData.questions.length;
 
   qd.forEach((q,i)=>{
@@ -1365,11 +1365,11 @@ async function submitExam(){
         w++;
         const wrongLbl = document.getElementById(`lbl-${i}-${v}`);
         if(wrongLbl) wrongLbl.classList.add("ans-w");
-        wrongDetails.push(`Q${i+1} (Given: ${q.opts[v] || 'N/A'} | Correct: ${q.opts[q.ans] || 'N/A'})`);
+        wrongItems.push({ n: i+1, q: q.q, opts: q.opts, given: v, ans: q.ans });
       }
     } else {
       s++;
-      wrongDetails.push(`Q${i+1} (Skipped)`);
+      wrongItems.push({ n: i+1, q: q.q, opts: q.opts, given: null, ans: q.ans });
     }
     document.getElementsByName(`q${i}`).forEach(r => r.disabled = true);
   });
@@ -1410,7 +1410,7 @@ async function submitExam(){
         score: c, 
         topic: examData.title,
         examId: examId || '',
-        details: wrongDetails.join(', ') || 'Perfect Score'
+        details: wrongItems.length === 0 ? 'Perfect Score' : JSON.stringify(wrongItems)
       }),
       headers: { 'Content-Type': 'text/plain' }
     }).catch(() => {});

@@ -93,6 +93,7 @@
       <div class="row">
         <a class="btn secondary sm hide" id="b-admin" href="admin_panel.html#teachers"><i class="fas fa-user-tie"></i> Admin Panel</a>
         <button class="btn secondary sm" id="b-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log out</button>
+        <button class="btn secondary sm" id="b-edit-profile" onclick="openTeacherEditProfile()"><i class="fas fa-pen"></i> Edit Profile</button>
       </div>
     </div>
 
@@ -106,6 +107,7 @@
         <button class="tab-btn active" data-tab="students" onclick="switchTab('students')"><i class="fas fa-users"></i> Students <span class="dot hide" id="dot-pending">0</span></button>
         <button class="tab-btn" data-tab="exams" onclick="switchTab('exams')"><i class="fas fa-file-pen"></i> Exams</button>
         <button class="tab-btn" data-tab="results" onclick="switchTab('results')"><i class="fas fa-ranking-star"></i> Results</button>
+        <button class="tab-btn" data-tab="qbuilder" onclick="switchTab('qbuilder')"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</button>
       </div>
 
       <!-- Students -->
@@ -130,7 +132,7 @@
         <div id="exam-list-view">
           <div class="toolbar">
             <button class="btn primary" onclick="newExam()"><i class="fas fa-plus"></i> New exam</button>
-            <a class="btn secondary" href="print/question-builder.html"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</a>
+            <button class="btn secondary" onclick="switchTab('qbuilder')"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</button>
             <button class="btn secondary hide" id="import-btn" onclick="importLegacy()"><i class="fas fa-file-import"></i> Import old exams</button>
           </div>
           <div id="ex-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
@@ -191,11 +193,35 @@
         </div>
         <div id="res-body"><div class="empty-st"><i class="fas fa-ranking-star"></i><p>Choose an exam to see its ranking.</p></div></div>
       </div>
+
+      <!-- Question Builder embedded -->
+      <div id="tab-qbuilder" class="tab-pane" style="padding:0;margin-top:16px;border-radius:8px;overflow:hidden;">
+        <div id="qb-notice" style="padding:12px 0 8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span style="font-size:13.5px;color:var(--muted);"><i class="fas fa-info-circle"></i> Design your question paper here — click <b>Create Online Exam</b> inside to send it to the Exams tab.</span>
+          <a href="print/question-builder.html" target="_blank" class="btn secondary sm"><i class="fas fa-arrow-up-right-from-square"></i> Open full screen</a>
+        </div>
+        <iframe id="qb-frame" src="about:blank" data-src="print/question-builder.html"
+          style="width:100%;height:calc(100svh - 200px);min-height:620px;border:none;display:block;border-radius:8px;"
+          title="Question Builder" allow="fullscreen"></iframe>
+      </div>
     </div>
   </div>
 </main>
 
 <!-- Modal: paper -->
+<div class="modal-overlay" id="modal-teacher-edit">
+  <div class="modal-box">
+    <div class="modal-hd"><h3><i class="fas fa-user-edit" style="color:var(--blue);"></i> Edit Profile</h3><button class="modal-close" onclick="closeModal('modal-teacher-edit')"><i class="fas fa-times"></i></button></div>
+    <div style="padding:8px 0 4px;">
+      <div class="field"><label>Full Name *</label><input type="text" id="te-name" class="inp" placeholder="Your name"></div>
+      <div class="field"><label>Subject</label><input type="text" id="te-subject" class="inp" placeholder="e.g. Mathematics"></div>
+      <div class="field"><label>Institution</label><input type="text" id="te-inst" class="inp" placeholder="e.g. CUET"></div>
+      <div id="te-msg" class="alert al-error hide"></div>
+      <button class="btn primary full" id="te-btn" onclick="submitTeacherProfileUpdate()" style="margin-top:12px;">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-paper">
   <div class="modal-box big">
     <div class="modal-hd"><h3 id="paper-title"><i class="fas fa-file-lines"></i> Paper</h3><button class="modal-close" onclick="closeModal('modal-paper')"><i class="fas fa-times"></i></button></div>
@@ -297,6 +323,18 @@ function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   $('tab-' + name).classList.add('active');
   if (name === 'results') fillResExams();
+  // Lazy-load the QB iframe on first open
+  if (name === 'qbuilder') {
+    const fr = $('qb-frame');
+    if (fr && fr.src === 'about:blank') fr.src = fr.dataset.src;
+  }
+  // Pick up any draft left by the QB
+  if (name === 'exams') {
+    try {
+      const raw = localStorage.getItem('draft_exam_data');
+      if (raw) { localStorage.removeItem('draft_exam_data'); openBuilder(JSON.parse(raw)); acadToast('Questions loaded from the Question Builder ✓', 'ok'); }
+    } catch (_) {}
+  }
 }
 function guard(d) {
   if (d && d.status === 'unauthorized') { acadSession.clear('teacher'); acadToast('Session expired — please log in again', 'err'); setTimeout(() => location.reload(), 900); return true; }
@@ -570,6 +608,62 @@ function exportCsv() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
   a.download = (resData.exam.title || 'results').replace(/[^\wঀ-৿-]+/g, '_') + '.csv'; a.click();
 }
+
+/* ═════════ profile edit ═════════ */
+function openTeacherEditProfile() {
+  if (!ME || !ME.teacher) return;
+  $('te-name').value = ME.teacher.name || '';
+  $('te-subject').value = ME.teacher.subject || '';
+  $('te-inst').value = ME.teacher.institution || '';
+  hide('te-msg'); openModal('modal-teacher-edit');
+}
+function teMsg(msg, ok) {
+  const el = $('te-msg');
+  el.className = 'alert ' + (ok ? 'al-success' : 'al-error');
+  el.innerHTML = '<i class="fas fa-' + (ok ? 'check-circle' : 'triangle-exclamation') + '"></i> ' + esc(msg);
+  show('te-msg');
+}
+async function submitTeacherProfileUpdate() {
+  const name = $('te-name').value.trim();
+  if (!name) return teMsg('Name is required!', false);
+  $('te-btn').disabled = true;
+  try {
+    const d = await teacherCall('teacherUpdateProfile', {
+      name,
+      subject: $('te-subject').value.trim(),
+      institution: $('te-inst').value.trim()
+    });
+    if (d && d.status === 'success') {
+      ME.teacher.name = name;
+      ME.teacher.subject = $('te-subject').value.trim();
+      ME.teacher.institution = $('te-inst').value.trim();
+      $('b-name').innerHTML = esc(name) + ' <span class="chip ' + (isAdmin() ? 'live' : 'ok') + '">' + (isAdmin() ? 'Admin' : 'Teacher') + '</span>';
+      $('b-sub').textContent = isAdmin() ? 'You can see every teacher, student and exam.' : [ME.teacher.subject, ME.teacher.institution, ME.teacher.mobile].filter(Boolean).join(' · ');
+      teMsg('Profile updated!', true);
+      setTimeout(() => closeModal('modal-teacher-edit'), 1500);
+    } else {
+      teMsg(d && d.message ? d.message : 'Update failed — the admin may need to add this feature in GAS.', false);
+    }
+  } catch(e) { teMsg('Network error!', false); }
+  $('te-btn').disabled = false;
+}
+
+/* ═════════ QB postMessage bridge ═════════ */
+window.addEventListener('message', function(ev) {
+  if (!ev.data || ev.data.type !== 'qb-ready') return;
+  try {
+    const raw = localStorage.getItem('draft_exam_data');
+    if (raw) {
+      localStorage.removeItem('draft_exam_data');
+      switchTab('exams');
+      openBuilder(JSON.parse(raw));
+      acadToast('Questions loaded from the Question Builder ✓', 'ok');
+    } else {
+      // QB notified but no draft — just switch to exams
+      switchTab('exams');
+    }
+  } catch (_) {}
+});
 
 /* ═════════ start ═════════ */
 (async function init() {

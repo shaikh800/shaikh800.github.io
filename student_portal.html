@@ -206,7 +206,8 @@ function nextUrl() {
 /* ───────────── login / register ───────────── */
 function setErr(id, msg) { const e = $(id); e.textContent = msg; e.classList.toggle('hide', !msg); }
 async function checkMobile() {
-  const mobile = $('auth-mobile').value.trim();
+  let mobile = $('auth-mobile').value.trim();
+  if (/^\d{10}$/.test(mobile)) { mobile = '0' + mobile; $('auth-mobile').value = mobile; }
   setErr('s1-error', '');
   if (!/^\d{10,11}$/.test(mobile)) return setErr('s1-error', 'সঠিক মোবাইল নম্বর দিন (১১ ডিজিট)');
   $('s1-btn').disabled = true;
@@ -233,7 +234,9 @@ async function checkMobile() {
 function goBack() { hide('step-2'); show('step-1'); setErr('s2-error', ''); $('auth-pass').value = ''; }
 
 async function handleLogin() {
-  const mobile = $('auth-mobile').value.trim(), password = $('auth-pass').value.trim();
+  let mobile = $('auth-mobile').value.trim(), password = $('auth-pass').value.trim();
+  // Normalize to 11-digit format with leading 0 (handles both 10 and 11 digit input)
+  if (/^\d{10}$/.test(mobile)) mobile = '0' + mobile;
   setErr('s2-error', ''); hide('s2-success');
   if (!password) return setErr('s2-error', 'পাসওয়ার্ড দিন');
   let payload;
@@ -381,12 +384,45 @@ async function loadHistory() {
   }).join('');
   show('history-wrap');
 }
+function renderStudentMistakesHtml(str) {
+  if (!str || str === 'No data') return '<div style="text-align:center;color:var(--muted);">Mistake details not available.</div>';
+  try {
+    const items = JSON.parse(str);
+    if (Array.isArray(items)) {
+      return items.map(item => {
+        const optLabels = ['ক','খ','গ','ঘ','ঙ'];
+        const optsHtml = (item.opts||[]).map((opt,idx) => {
+          const isCorrect = idx === item.ans;
+          const isGiven   = item.given !== null && item.given !== undefined && idx === item.given;
+          let bg = isCorrect ? 'background:#dcfce7;color:#166534;font-weight:700;border-left:3px solid #16a34a;'
+                 : isGiven   ? 'background:#fee2e2;color:#b91c1c;text-decoration:line-through;border-left:3px solid #dc2626;'
+                 : 'border-left:3px solid transparent;';
+          const mark = isCorrect ? ' ✓' : (isGiven ? ' ✗' : '');
+          return '<div style="' + bg + 'padding:5px 10px;margin:3px 0;border-radius:4px;font-size:13px;">(' + (optLabels[idx]||idx+1) + ') ' + sanitizeHtml(opt) + mark + '</div>';
+        }).join('');
+        const badge = (item.given === null || item.given === undefined)
+          ? '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Skipped</span>'
+          : '<span style="background:#fee2e2;color:#b91c1c;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">Wrong</span>';
+        const givenNote = (item.given !== null && item.given !== undefined)
+          ? '<div style="margin-top:6px;font-size:12px;color:#b91c1c;">আপনার উত্তর: (' + (optLabels[item.given]||item.given+1) + ') ' + sanitizeHtml((item.opts||[])[item.given]||'') + '</div>' : '';
+        const correctNote = '<div style="margin-top:3px;font-size:12px;color:#166534;font-weight:600;">সঠিক উত্তর: (' + (optLabels[item.ans]||item.ans+1) + ') ' + sanitizeHtml((item.opts||[])[item.ans]||'') + '</div>';
+        return '<div style="margin-bottom:14px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface-soft);">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><strong style="font-size:13px;">প্রশ্ন ' + item.n + '</strong>' + badge + '</div>' +
+          '<div style="font-size:14px;margin-bottom:10px;line-height:1.7;">' + sanitizeHtml(item.q||'') + '</div>' +
+          '<div>' + optsHtml + '</div>' +
+          givenNote + correctNote + '</div>';
+      }).join('');
+    }
+  } catch(e) {}
+  return '<ul style="margin:0;padding-left:20px;">' + str.split(', ').filter(Boolean).map(m => '<li style="margin-bottom:8px;">' + sanitizeHtml(m) + '</li>').join('') + '</ul>';
+}
+
 function viewMistakes(i) {
   const str = String((historyList[i] || {}).details || '');
   let html;
   if (str === 'Perfect Score') html = '<div style="text-align:center;color:#166534;font-weight:700;"><i class="fas fa-trophy fa-2x" style="display:block;margin-bottom:14px;"></i>Perfect Score! 🏆</div>';
   else if (!str) html = '<div style="text-align:center;color:var(--muted);">Mistake details not available.</div>';
-  else html = '<ul style="margin:0;padding-left:20px;">' + str.split(', ').filter(Boolean).map(m => '<li style="margin-bottom:8px;">' + sanitizeHtml(m) + '</li>').join('') + '</ul>';
+  else html = renderStudentMistakesHtml(str);
   $('mis-content').innerHTML = html;
   openModal('modal-mis');
   acadTypeset($('mis-content'));

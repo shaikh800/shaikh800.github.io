@@ -5798,7 +5798,15 @@ function showOnlineExamModal() {
 }
 
 function goToExamController() {
-  window.location.href = "../teacher_panel.html";
+  if (window.parent !== window) {
+    // Embedded as a tab inside Teacher Panel — notify parent via postMessage
+    window.parent.postMessage({ type: 'qb-ready' }, '*');
+    // Close the modal
+    const modal = document.getElementById("onlineExamModal");
+    if (modal) modal.style.display = "none";
+  } else {
+    window.location.href = "../teacher_panel.html";
+  }
 }
     </script>
   <div id="onlineExamModal">
