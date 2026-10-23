@@ -49,7 +49,7 @@
       "initials": "PR",
       "role": "member",
       "view": true,
-      "download": false
+      "download": true
     }
   ],
   "notices": [
@@ -85,5 +85,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-23T17:20:16.162Z"
+  "updated": "2026-10-23T17:20:17.822Z"
 }
