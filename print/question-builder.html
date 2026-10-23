@@ -793,6 +793,7 @@
       .wiz-track-progress { position: absolute; top: 24px; left: 41px; height: 2px; background: #7c3aed; z-index: 0; transition: width 0.35s cubic-bezier(.4,0,.2,1); max-width: calc(100% - 82px); }
       .wiz-steps-row { display: flex; justify-content: space-between; position: relative; z-index: 1; }
       .wiz-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; background: none; border: none; padding: 2px 0 0; min-width: 0; flex: 1; }
+      .wiz-btn[hidden] { display: none !important; }
       .wiz-circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 8.5px; font-weight: 700; color: #94a3b8; transition: all 0.2s; }
       .wiz-btn:hover .wiz-circle { border-color: #7c3aed; color: #7c3aed; }
       .wiz-btn.active .wiz-circle { background: #7c3aed; border-color: #7c3aed; color: #fff; transform: scale(1.18); box-shadow: 0 0 0 3px #ede9fe; }
@@ -5835,22 +5836,6 @@ function splitIntoQuestionBlocks(text) {
         applyMobilePageScale();
       }, { passive: true });
 
-      const loadedDraft = loadData(true);
-      if (!loadedDraft) {
-        syncNumbers();
-        initFields();
-        initEditors();
-        renderAll(false);
-        resetHistory();
-        if (!isHiddenMode) {
-          setSaveStatus(
-            "No saved draft found. Start writing questions; autosave is active.",
-            "status-save",
-            true
-          );
-        }
-      }
-
 // ── Wizard Step System ──
 const WIZ_MAP = {
   1: ['wizGuideBox', 'globalLangField'],
@@ -5890,6 +5875,23 @@ function switchStep(n) {
   updateWizButtons();
   try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
 }
+
+      const loadedDraft = loadData(true);
+      if (!loadedDraft) {
+        syncNumbers();
+        initFields();
+        initEditors();
+        renderAll(false);
+        resetHistory();
+        if (!isHiddenMode) {
+          setSaveStatus(
+            "No saved draft found. Start writing questions; autosave is active.",
+            "status-save",
+            true
+          );
+        }
+      }
+
 
       // ── Wizard step restore on load ──
       (function() {
