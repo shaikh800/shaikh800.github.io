@@ -1491,6 +1491,16 @@
         lastOpenedEditor = { type: "mcq", index: idx };
         debouncedRenderAll(false);
       }
+      function selectCqTile(idx) {
+        lastFocusedSection = "cqFlowSection";
+        lastOpenedEditor = { type: "cq", index: idx };
+        debouncedRenderAll(false);
+      }
+      function selectQuestionTile(idx) {
+        lastFocusedSection = "onlyQuestionFlowSection";
+        lastOpenedEditor = { type: "question", index: idx };
+        debouncedRenderAll(false);
+      }
 
             function copyAiPrompt(type, btn, variant) {
         variant = variant || 'with_figure';
@@ -2607,120 +2617,123 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         const mcqMgmtBar = document.getElementById("mcqMgmtBar");
         if (mcqMgmtBar) mcqMgmtBar.style.display = hasMcqSection ? "grid" : "none";
 
-        cqEditorList.innerHTML = hasCqSection
-          ? `
-      <div class="editor-grid">
-        ${state.cqs
-          .map(
-            (c, idx) => `
-            <details ${
-              lastOpenedEditor.type === "cq" && lastOpenedEditor.index === idx
-                ? "open"
-                : ""
-            }>
-            <summary><span class="summary-row"><span>CQ ${bn(
-              idx + 1
-            )}</span><span class="summary-actions"><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveCQ(${idx},-1)">▲</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveCQ(${idx},1)">▼</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); deleteCQ(${idx})">✕</button></span></span></summary>
-            <div class="editor-grid">
-              ${(state.cqGroups || []).length > 0 ? `<div class="field" style="margin-bottom:4px;"><label>Group</label><select data-type="cqgroupid" data-index="${idx}" style="font-size:13px;width:100%;box-sizing:border-box;padding:6px 8px;" onchange="this.title=this.options[this.selectedIndex].text;var d=this.closest('.field').querySelector('.grp-full');if(d){d.textContent=this.value?(this.options[this.selectedIndex].text):'';}" title="${esc((state.cqGroups||[]).find(g=>g.id===c.groupId)?.name||'')}">  <option value="">— No Group —</option>${(state.cqGroups || []).map(g => `<option value="${esc(g.id)}" ${c.groupId === g.id ? 'selected' : ''}>${esc(g.name || 'Unnamed Group')}</option>`).join('')}</select><div class="grp-full" style="font-size:10.5px;color:#475569;margin-top:2px;line-height:1.4;word-break:break-word;">${esc((state.cqGroups||[]).find(g=>g.id===c.groupId)?.name||'')||''}</div></div>` : ''}
-              <div class="row">
-                <div class="field"><label>Time</label><input data-type="cqtime" data-index="${idx}" value="${esc(
-              c.time || "২০ মিনিট"
-            )}"></div>
-                <div class="field"><label>Total Marks</label><input data-type="cqmarks" data-index="${idx}" value="${esc(
-              c.totalMarks || "১০"
-            )}"></div>
-              </div>
-              <div class="field">
-                <label style="display:flex; justify-content:space-between; align-items:center;">
-                  <span>Stimulus</span>
-                  <select data-type="cqstimalign" data-index="${idx}" style="width: auto; padding: 2px 6px; font-size: 11px; height: 22px; cursor:pointer;">
-                    <option value="" ${!c.stimAlign ? 'selected' : ''}>Global Align</option>
-                    <option value="left" ${c.stimAlign === 'left' ? 'selected' : ''}>Left</option>
-                    <option value="center" ${c.stimAlign === 'center' ? 'selected' : ''}>Center</option>
-                  </select>
-                </label>
-                <textarea data-type="cqstimulus" data-index="${idx}">${esc(c.stimulus || "")}</textarea>
-              </div>
-              ${["ক", "খ", "গ", "ঘ"]
-                .map(
-                  (k, partIndex) => `
-                <div class="part-editor-row">
-                  <div class="field"><label>${partLabel(k, partIndex)} part</label><textarea data-type="cqpart" data-part="${k}" data-index="${idx}">${esc(
-                    c.parts?.[k] || ""
-                  )}</textarea></div>
-                  <div class="field"><label>${partLabel(k, partIndex)} mark</label><input data-type="cqpartmark" data-part="${k}" data-index="${idx}" value="${esc(
-                    c.partMarks?.[k] ?? cqPartMarksDefault[k]
-                  )}"></div>
-                </div>
-              `
-                )
-                .join("")}
-              ${renderImageControls(
-                "cq",
-                idx,
-                c.images,
-                state.layout.cqImageWidth,
-                state.layout.cqImageHeight
-              )}
-            </div>
-          </details>
-        `
-          )
-          .join("")}
-      </div>`
-          : "";
+        {
+          const cqSelIdx = (lastOpenedEditor.type === "cq" && lastOpenedEditor.index >= 0 && lastOpenedEditor.index < state.cqs.length)
+            ? lastOpenedEditor.index
+            : (state.cqs.length > 0 ? 0 : -1);
+          if (cqSelIdx >= 0 && lastOpenedEditor.type !== "cq") {
+            lastOpenedEditor = { type: "cq", index: cqSelIdx };
+          }
+          if (hasCqSection) {
+            const cqTilesHtml = state.cqs.map(function(c, idx) {
+              return '<button type="button" class="mcq-tile' + (idx === cqSelIdx ? ' active' : '') + '" onclick="selectCqTile(' + idx + ')" title="CQ ' + bn(idx+1) + '">' + bn(idx+1) + '</button>';
+            }).join("");
+            let cqEditorHtml = "";
+            if (cqSelIdx >= 0) {
+              const c = state.cqs[cqSelIdx];
+              const idx = cqSelIdx;
+              cqEditorHtml = `<div class="mcq-tile-editor">
+  <div class="mcq-tile-editor-top">
+    <span class="mcq-tile-editor-label">CQ ${bn(idx+1)}</span>
+    <div class="mcq-tile-editor-actions">
+      <button type="button" class="icon-btn" onclick="moveCQ(${idx},-1)">▲</button>
+      <button type="button" class="icon-btn" onclick="moveCQ(${idx},1)">▼</button>
+      <button type="button" class="icon-btn" style="color:#ef4444;border-color:#fecaca;" onclick="deleteCQ(${idx})">✕</button>
+    </div>
+  </div>
+  <div class="editor-grid">
+    ${(state.cqGroups || []).length > 0 ? `<div class="field" style="margin-bottom:4px;"><label>Group</label><select data-type="cqgroupid" data-index="${idx}" style="font-size:13px;width:100%;box-sizing:border-box;padding:6px 8px;" onchange="this.title=this.options[this.selectedIndex].text;var d=this.closest('.field').querySelector('.grp-full');if(d){d.textContent=this.value?(this.options[this.selectedIndex].text):'';}" title="${esc((state.cqGroups||[]).find(g=>g.id===c.groupId)?.name||'')}"><option value="">— No Group —</option>${(state.cqGroups || []).map(g => `<option value="${esc(g.id)}" ${c.groupId === g.id ? 'selected' : ''}>${esc(g.name || 'Unnamed Group')}</option>`).join('')}</select><div class="grp-full" style="font-size:10.5px;color:#475569;margin-top:2px;line-height:1.4;word-break:break-word;">${esc((state.cqGroups||[]).find(g=>g.id===c.groupId)?.name||'')||''}</div></div>` : ''}
+    <div class="row">
+      <div class="field"><label>Time</label><input data-type="cqtime" data-index="${idx}" value="${esc(c.time || "২০ মিনিট")}"></div>
+      <div class="field"><label>Total Marks</label><input data-type="cqmarks" data-index="${idx}" value="${esc(c.totalMarks || "১০")}"></div>
+    </div>
+    <div class="field">
+      <label style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Stimulus</span>
+        <select data-type="cqstimalign" data-index="${idx}" style="width: auto; padding: 2px 6px; font-size: 11px; height: 22px; cursor:pointer;">
+          <option value="" ${!c.stimAlign ? 'selected' : ''}>Global Align</option>
+          <option value="left" ${c.stimAlign === 'left' ? 'selected' : ''}>Left</option>
+          <option value="center" ${c.stimAlign === 'center' ? 'selected' : ''}>Center</option>
+        </select>
+      </label>
+      <textarea data-type="cqstimulus" data-index="${idx}">${esc(c.stimulus || "")}</textarea>
+    </div>
+    ${["ক", "খ", "গ", "ঘ"].map((k, partIndex) => `
+      <div class="part-editor-row">
+        <div class="field"><label>${partLabel(k, partIndex)} part</label><textarea data-type="cqpart" data-part="${k}" data-index="${idx}">${esc(c.parts?.[k] || "")}</textarea></div>
+        <div class="field"><label>${partLabel(k, partIndex)} mark</label><input data-type="cqpartmark" data-part="${k}" data-index="${idx}" value="${esc(c.partMarks?.[k] ?? cqPartMarksDefault[k])}"></div>
+      </div>
+    `).join("")}
+    ${renderImageControls("cq", idx, c.images, state.layout.cqImageWidth, state.layout.cqImageHeight)}
+  </div>
+</div>`;
+            }
+            cqEditorList.innerHTML = '<div class="editor-grid">'
+              + '<div class="mcq-tile-grid">' + cqTilesHtml + '</div>'
+              + cqEditorHtml
+              + '<div class="toolbar three">'
+              + '<button type="button" class="secondary" onclick="addCQ()">Add CQ</button>'
+              + '<button type="button" class="secondary" onclick="trimEmptyCQ()">Trim Empty CQ</button>'
+              + '<button type="button" class="danger" onclick="removeCQPart()">Remove CQ Part</button>'
+              + '</div></div>';
+          } else {
+            cqEditorList.innerHTML = "";
+          }
+        }
 
-        onlyQuestionEditorList.innerHTML = hasOnlyQuestionSection
-          ? `
-      <div class="editor-grid">
-        ${state.onlyQuestions
-          .map(
-            (q, idx) => `
-            <details ${
-              lastOpenedEditor.type === "question" &&
-              lastOpenedEditor.index === idx
-                ? "open"
-                : ""
-            }>
-            <summary><span class="summary-row"><span>Question ${bn(
-              idx + 1
-            )}</span><span class="summary-actions"><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveOnlyQuestion(${idx},-1)">▲</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); moveOnlyQuestion(${idx},1)">▼</button><button type="button" class="icon-btn" onclick="event.stopPropagation(); deleteOnlyQuestion(${idx})">✕</button></span></span></summary>
-            <div class="editor-grid">
-              <div class="field"><label>Question${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (Stem)" : ""}</label><textarea data-type="oqtext" data-index="${idx}">${esc(
-              q.text || ""
-            )}</textarea></div>
-              ${(() => {
-                const subs = Array.isArray(q.subQuestions) ? q.subQuestions : [];
-                const subRows = subs.map((sq, si) =>
-                  `<div class="part-editor-row" style="align-items:flex-end;">
-                    <div class="field"><label>${subQLabel(si)}. Sub-question</label><textarea data-type="oqsubtext" data-index="${idx}" data-si="${si}">${esc(sq.text || "")}</textarea></div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                      <div class="field"><label>Mark</label><input data-type="oqsubmark" data-index="${idx}" data-si="${si}" value="${esc(sq.mark || "1")}" style="width:100%;"></div>
-                      <button type="button" class="icon-btn" style="align-self:flex-end;color:#ef4444;border-color:#fecaca;" onclick="deleteSubQuestion(${idx},${si})">✕ Remove</button>
-                    </div>
-                  </div>`
-                ).join("");
-                return subRows;
-              })()}
-              <button type="button" class="add-stmt-btn" onclick="addSubQuestion(${idx})">+ Add Sub-question</button>
-              <div class="field"><label>Mark${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (auto-computed)" : ""}</label><input data-type="oqmark" data-index="${idx}" value="${esc(
-              q.mark || "1"
-            )}" ${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? 'readonly style="background:#f1f5f9;color:#64748b;cursor:not-allowed;"' : ""}></div>
-              ${renderImageControls(
-                "question",
-                idx,
-                q.images,
-                state.layout.questionImageWidth,
-                state.layout.questionImageHeight
-              )}
-            </div>
-          </details>
-        `
-          )
-          .join("")}
-      </div>`
-          : "";
+        {
+          const qSelIdx = (lastOpenedEditor.type === "question" && lastOpenedEditor.index >= 0 && lastOpenedEditor.index < state.onlyQuestions.length)
+            ? lastOpenedEditor.index
+            : (state.onlyQuestions.length > 0 ? 0 : -1);
+          if (qSelIdx >= 0 && lastOpenedEditor.type !== "question") {
+            lastOpenedEditor = { type: "question", index: qSelIdx };
+          }
+          if (hasOnlyQuestionSection) {
+            const qTilesHtml = state.onlyQuestions.map(function(q, idx) {
+              return '<button type="button" class="mcq-tile' + (idx === qSelIdx ? ' active' : '') + '" onclick="selectQuestionTile(' + idx + ')" title="Q' + bn(idx+1) + '">' + bn(idx+1) + '</button>';
+            }).join("");
+            let qEditorHtml = "";
+            if (qSelIdx >= 0) {
+              const q = state.onlyQuestions[qSelIdx];
+              const idx = qSelIdx;
+              const subs = Array.isArray(q.subQuestions) ? q.subQuestions : [];
+              const subRows = subs.map((sq, si) => `<div class="part-editor-row" style="align-items:flex-end;">
+                <div class="field"><label>${subQLabel(si)}. Sub-question</label><textarea data-type="oqsubtext" data-index="${idx}" data-si="${si}">${esc(sq.text || "")}</textarea></div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div class="field"><label>Mark</label><input data-type="oqsubmark" data-index="${idx}" data-si="${si}" value="${esc(sq.mark || "1")}" style="width:100%;"></div>
+                  <button type="button" class="icon-btn" style="align-self:flex-end;color:#ef4444;border-color:#fecaca;" onclick="deleteSubQuestion(${idx},${si})">✕ Remove</button>
+                </div>
+              </div>`).join("");
+              qEditorHtml = `<div class="mcq-tile-editor">
+  <div class="mcq-tile-editor-top">
+    <span class="mcq-tile-editor-label">Question ${bn(idx+1)}</span>
+    <div class="mcq-tile-editor-actions">
+      <button type="button" class="icon-btn" onclick="moveOnlyQuestion(${idx},-1)">▲</button>
+      <button type="button" class="icon-btn" onclick="moveOnlyQuestion(${idx},1)">▼</button>
+      <button type="button" class="icon-btn" style="color:#ef4444;border-color:#fecaca;" onclick="deleteOnlyQuestion(${idx})">✕</button>
+    </div>
+  </div>
+  <div class="editor-grid">
+    <div class="field"><label>Question${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (Stem)" : ""}</label><textarea data-type="oqtext" data-index="${idx}">${esc(q.text || "")}</textarea></div>
+    ${subRows}
+    <button type="button" class="add-stmt-btn" onclick="addSubQuestion(${idx})">+ Add Sub-question</button>
+    <div class="field"><label>Mark${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? " (auto-computed)" : ""}</label><input data-type="oqmark" data-index="${idx}" value="${esc(q.mark || "1")}" ${Array.isArray(q.subQuestions) && q.subQuestions.length > 0 ? 'readonly style="background:#f1f5f9;color:#64748b;cursor:not-allowed;"' : ""}></div>
+    ${renderImageControls("question", idx, q.images, state.layout.questionImageWidth, state.layout.questionImageHeight)}
+  </div>
+</div>`;
+            }
+            onlyQuestionEditorList.innerHTML = '<div class="editor-grid">'
+              + '<div class="mcq-tile-grid">' + qTilesHtml + '</div>'
+              + qEditorHtml
+              + '<div class="toolbar three">'
+              + '<button type="button" class="secondary" onclick="addOnlyQuestion()">Add Question</button>'
+              + '<button type="button" class="secondary" onclick="trimEmptyOnlyQuestions()">Trim Empty Question</button>'
+              + '<button type="button" class="danger" onclick="removeOnlyQuestionPart()">Remove Question Part</button>'
+              + '</div></div>';
+          } else {
+            onlyQuestionEditorList.innerHTML = "";
+          }
+        }
 
         document
           .querySelectorAll(
@@ -2749,23 +2762,8 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             lastFocusedSection = details.id || lastFocusedSection;
           }
         );
-        bindAccordionWithin(
-          cqEditorList,
-          ":scope .editor-grid > details",
-          (details, idx) => {
-            lastFocusedSection = "cqFlowSection";
-            lastOpenedEditor = { type: "cq", index: idx };
-          }
-        );
+        // CQ + Question use tile grid — bindAccordion not needed for them
         // MCQ uses tile grid — bindAccordion not needed for MCQ
-        bindAccordionWithin(
-          onlyQuestionEditorList,
-          ":scope .editor-grid > details",
-          (details, idx) => {
-            lastFocusedSection = "onlyQuestionFlowSection";
-            lastOpenedEditor = { type: "question", index: idx };
-          }
-        );
         reopenLastEditor();
       }
 
@@ -2805,11 +2803,11 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
 
         let selector = "";
         if (lastOpenedEditor.type === "cq") {
-          selector = "#cqEditorList .editor-grid > details";
+          return; // CQ tile grid highlights itself during render
         } else if (lastOpenedEditor.type === "mcq") {
           return; // MCQ tile grid highlights itself during render
         } else if (lastOpenedEditor.type === "question") {
-          selector = "#onlyQuestionEditorList .editor-grid > details";
+          return; // Question tile grid highlights itself during render
         }
 
         const items = Array.from(document.querySelectorAll(selector));
