@@ -37,17 +37,6 @@
     @media (max-width: 640px) {
       .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
       #mainSection, #pendingView { margin-top: 0; padding-top: 12px; border-top: 0; }
-      #fileTable { display: block; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
-      #fileTable thead { display: none; }
-      #fileTable tbody { display: block; }
-      #fileTable tr { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
-      #fileTable tr:last-child { border-bottom: none; }
-      #fileTable td { padding: 0; border: 0; background: none !important; }
-      #fileTable td:first-child { flex: 1; min-width: 0; }
-      #fileTable td:nth-child(2) { font-size: 12px; color: var(--muted); white-space: nowrap; }
-      #fileTable td:nth-child(3) { display: none; }
-      #fileTable td:nth-child(4) { flex-shrink: 0; }
-      #fileTable .fn { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
     }
     @media (max-width: 640px) {
       #pendingView div[style*="gap:10px"] { flex-direction: column; }
@@ -135,6 +124,25 @@
     .drive-row-folder:hover td { background: var(--surface-soft); }
     .drive-folder-icon { color: var(--muted) !important; }
     .drive-row-chevron { color: var(--muted); font-size: 12px; }
+
+    /* Drive-style list rows — same look as the Civil "Semester Resources" list */
+    .drive-list { display: flex; flex-direction: column; gap: 8px; }
+    .drive-list:empty { display: none; }
+    .drive-row {
+      display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); transition: all .15s;
+    }
+    .drive-row.drive-row-folder { cursor: pointer; }
+    .drive-row.drive-row-folder:hover { border-color: var(--blue); background: var(--surface-soft); }
+    .drive-row > i.dr-icon { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; color: var(--muted); }
+    .drive-row > i.dr-icon.ft-icon.pdf { color: #ea4335; }
+    .drive-row > i.dr-icon.ft-icon.sheet { color: #0f9d58; }
+    .drive-row > i.dr-icon.ft-icon.slide { color: #f4b400; }
+    .drive-row .dr-name { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+    .drive-row .dr-meta { color: var(--muted); font-size: 12px; flex-shrink: 0; white-space: nowrap; }
+    .drive-row .dr-chev { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+    .drive-row .row-actions { flex-shrink: 0; }
 
     .file-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
     .file-table:empty { display: none; }
@@ -525,10 +533,7 @@
         <div id="driveBrowser" style="display:none;">
           <div class="breadcrumb" id="breadcrumb"></div>
           <div class="drive-loading" id="driveLoading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
-          <table class="file-table" id="fileTable">
-            <thead><tr><th>Name</th><th>Modified</th><th>Size</th><th></th></tr></thead>
-            <tbody id="fileTableBody"></tbody>
-          </table>
+          <div class="drive-list" id="fileTableBody"></div>
           <div class="empty-state" id="driveFolderEmpty" style="display:none;text-align:center;padding:30px;color:var(--muted);">This folder is empty.</div>
         </div>
       </div>
@@ -1130,23 +1135,24 @@
         document.getElementById('driveLoading').style.display = 'none';
         const folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
         const files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+        const fmtDate = t => t ? new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
         const folderRows = folders.map(f => `
-          <tr class="drive-row-folder" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
-            <td><div class="file-name-cell"><i class="fas fa-folder drive-folder-icon"></i><span class="fn">${esc(f.name)}</span></div></td>
-            <td class="muted-cell">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
-            <td class="muted-cell">—</td>
-            <td><div class="row-actions"><i class="fas fa-chevron-right drive-row-chevron"></i></div></td>
-          </tr>`).join('');
+          <div class="drive-row drive-row-folder" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
+            <i class="fas fa-folder dr-icon"></i>
+            <span class="dr-name">${esc(f.name)}</span>
+            <span class="dr-meta">${fmtDate(f.modifiedTime)}</span>
+            <i class="fas fa-chevron-right dr-chev"></i>
+          </div>`).join('');
         const fileRows = files.map(f => `
-          <tr class="drive-row-file">
-            <td><div class="file-name-cell"><i class="fas ${fileIconClass(f.mimeType)}"></i><span class="fn">${esc(f.name)}</span></div></td>
-            <td class="muted-cell">${f.modifiedTime ? new Date(f.modifiedTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
-            <td class="muted-cell">${fmtSize(f.size)}</td>
-            <td><div class="row-actions">
+          <div class="drive-row drive-row-file">
+            <i class="fas ${fileIconClass(f.mimeType)} dr-icon"></i>
+            <span class="dr-name">${esc(f.name)}</span>
+            <span class="dr-meta">${[fmtDate(f.modifiedTime), f.size ? fmtSize(f.size) : ''].filter(Boolean).join(' · ')}</span>
+            <div class="row-actions">
               ${f.webViewLink ? `<a class="icon-action" title="Open" href="${f.webViewLink}" target="_blank" rel="noopener"><i class="fas fa-eye"></i></a>` : ''}
               ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
-            </div></td>
-          </tr>`).join('');
+            </div>
+          </div>`).join('');
         document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
         if (!folders.length && !files.length) document.getElementById('driveFolderEmpty').style.display = 'block';
         else document.getElementById('driveFolderEmpty').style.display = 'none';
