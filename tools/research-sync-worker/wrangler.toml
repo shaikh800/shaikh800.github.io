@@ -4,3 +4,8 @@ compatibility_date = "2026-10-01"
 
 [observability]
 enabled = true
+
+# Public URL of the Google Apps Script admin login (same value as SITE_GAS_URL in assets/site-auth.js).
+# The Worker asks it whether an admin session token is valid.
+[vars]
+GAS_URL = "https://script.google.com/macros/s/AKfycbyl1RaM9sL_kHY8_ZBGHKmPnvAbi8PFWw0f4yKezlGiDHQKouaIkdZx8poSrE4jy3jw/exec"

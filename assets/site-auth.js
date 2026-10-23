@@ -89,5 +89,6 @@ function siteAdminFooterInit() {
   group.appendChild(link);
   group.appendChild(out);
 }
+
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', siteAdminFooterInit);
 else siteAdminFooterInit();

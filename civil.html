@@ -455,9 +455,6 @@
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
       <span>Civil Engineering · FEC Batch 10</span>
-      <span class="footer-gh-sync admin-only">
-        <input type="password" id="footer-gh-token" placeholder="GitHub sync token" autocomplete="off" title="GitHub Personal Access Token — needed for saves to sync to the live site">
-      </span>
       <a href="admin_panel.html" class="footer-admin-link" title="Admin"><i class="fas fa-lock"></i></a>
     </div>
   </footer>
@@ -679,7 +676,7 @@
        (and anything else in the file) are never touched. */
     async function pushToGitHub() {
       const token = localStorage.getItem('site_gh_token');
-      if (!token) { toast('Saved on this device only — add the GitHub sync token in the footer to publish', 'info', 4000); return; }
+      if (!token && !siteIsAdmin()) return;      // not logged in as admin: nothing to publish
       const sems = loadSems(), nots = loadNotices();
       const r = await siteDataUpdate(token, d => { d.semesters = sems; d.notices = nots; }, 'Update civil resources');
       if (r.ok) toast('Synced to GitHub ✓', 'success', 2000);

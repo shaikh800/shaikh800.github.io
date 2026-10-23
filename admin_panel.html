@@ -701,7 +701,8 @@ function ghToken() {
 
 // After login, fill the saved GitHub token into both inputs
 function loadSavedToken() {
-  const saved = sessionStorage.getItem(GH_TOKEN_KEY);
+  let saved = sessionStorage.getItem(GH_TOKEN_KEY);
+  if (!saved) { try { saved = localStorage.getItem('site_gh_token'); } catch (e) {} }
   if (saved) {
     document.getElementById('gh-token').value = saved;
     document.getElementById('dz-gh-token').value = saved;
@@ -1205,7 +1206,7 @@ function renderExamList() {
 
 async function toggleExamLive(id) {
   const tok = document.getElementById('gh-token').value.trim();
-  if (!tok) { toast('Enter a GitHub Token!'); return; }
+  if(!tok && !siteHasAdminSession()) { toast('Enter a GitHub Token!'); return; }
 
   const idx = examFullData.exams.findIndex(e => e.id === id);
   if (idx === -1) return;
@@ -1226,7 +1227,7 @@ async function toggleExamLive(id) {
 async function deleteExam(id, title) {
   if (!await askConfirm(`Delete the "${title}" exam?`)) return;
   const tok = document.getElementById('gh-token').value.trim();
-  if (!tok) { toast('Enter a GitHub Token!'); return; }
+  if(!tok && !siteHasAdminSession()) { toast('Enter a GitHub Token!'); return; }
 
   examFullData.exams = examFullData.exams.filter(e => e.id !== id);
   const ok = await pushGitHub(tok, `Delete exam: ${id}`);
@@ -1297,7 +1298,7 @@ async function clearAllGASData() {
 
 async function clearAllGitHubExams() {
   const tok = getDzToken();
-  if (!tok) return;
+  if(!tok && !siteHasAdminSession()) return;
   if (!await askConfirm('⚠️ Delete all exams on GitHub? This cannot be undone.')) return;
   examFullData.exams = [];
   const ok = await pushGitHub(tok, 'Clear all exams', { allowShrink: ['exams'] });
@@ -1306,7 +1307,7 @@ async function clearAllGitHubExams() {
 
 async function clearEverything() {
   const tok = getDzToken();
-  if (!tok) return;
+  if(!tok && !siteHasAdminSession()) return;
   if (!await askConfirm('⚠️⚠️ Delete everything? GitHub Exams + GAS Results + Logs — nothing will remain!')) return;
   if (!await askConfirm('Confirm one last time.')) return;
 
@@ -1344,7 +1345,7 @@ async function deleteStudentById() {
 
 function getDzToken() {
   const tok = document.getElementById('dz-gh-token').value.trim();
-  if (!tok) { toast('Enter a GitHub Token!'); return null; }
+  if(!tok && !siteHasAdminSession()) { toast('Enter a GitHub Token!'); return null; }
   return tok;
 }
 

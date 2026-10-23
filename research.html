@@ -999,7 +999,7 @@
       const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, pendingRequests, geminiCycleStart, geminiCycleEnd, geminiMonthlyFee, updated: new Date().toISOString() };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       const token = localStorage.getItem('site_gh_token');
-      if (!token) return { ok: false, reason: 'no-token' };
+      if (!token && !siteIsAdmin()) return { ok: false, reason: 'no-token' };
       // Re-reads the latest research_data.json right before writing (so changes made by members
       // through the sync Worker in the meantime are seen) and refuses a save that would wipe
       // several items at once.
@@ -1031,7 +1031,7 @@
     // Saves a change by whichever path can actually reach GitHub right now: this
     // browser's own admin token if it has one, otherwise the sync Worker above.
     async function syncChange(action, payload) {
-      if (localStorage.getItem('site_gh_token')) return pushToGitHub();
+      if (localStorage.getItem('site_gh_token') || siteIsAdmin()) return pushToGitHub();
       return syncWrite(action, payload);
     }
 

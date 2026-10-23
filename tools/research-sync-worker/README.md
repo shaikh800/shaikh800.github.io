@@ -49,3 +49,28 @@ npx wrangler deploy
 
 Secrets persist across redeploys — no need to set them again unless you're
 rotating the token.
+
+## Admin saves without a GitHub token (adminRead / adminWrite)
+
+The same Worker also lets the **logged-in admin** save Civil resources, notices,
+exams, 3D works and research data, so no GitHub token has to be pasted on any
+device. The browser sends the admin session token it got from the Google Apps
+Script login; the Worker checks it with the script (`adminVerify`) before
+touching anything. It can only write `civil_data.json`, `modeling_data.json` and
+`research_data.json`, and refuses a save that would delete more than one item of
+a list at once.
+
+After pulling this change, **redeploy once** (the secrets stay as they are):
+
+```
+cd tools/research-sync-worker
+npx wrangler deploy
+```
+
+`wrangler.toml` now carries `GAS_URL` (the public admin-login script URL, the
+same as `SITE_GAS_URL` in `assets/site-auth.js`). If you ever redeploy the Apps
+Script under a new URL, update it in both places.
+
+Until the Worker is redeployed, a device that still has a GitHub token saved
+keeps working through the old path; a device without one shows
+"the sync service needs a one-time update".

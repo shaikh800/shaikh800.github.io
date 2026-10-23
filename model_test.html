@@ -980,7 +980,7 @@ async function saveAdminConfig() {
   const time = document.getElementById('admin-time').value.trim();
   const token = document.getElementById('gh-token').value.trim();
 
-  if(!token) return showAlert('A GitHub Token is required to sync the student list!', '🔑');
+  if(!token && !siteIsAdmin()) return showAlert('Log in as admin first (lock icon in the footer of Civil / 3D / Research, or the Admin Panel) to save the exam and student list.', '🔑');
   
   sessionStorage.setItem('civil_gh_token', token);
   if(url) localStorage.setItem('gas_url', url);

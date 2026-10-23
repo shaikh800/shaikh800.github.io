@@ -415,9 +415,6 @@
     <div class="footer-shell">
       <span>Md. Shaikh Alam</span>
       <span>Built with GitHub Pages</span>
-      <span class="footer-gh-sync admin-actions">
-        <input type="password" id="footer-gh-token" placeholder="GitHub sync token" autocomplete="off" title="GitHub Personal Access Token — needed for saves to sync to the live site">
-      </span>
       <a href="admin_panel.html" class="footer-admin-link" title="Admin"><i class="fas fa-lock"></i></a>
     </div>
   </footer>
@@ -585,7 +582,7 @@
 
     async function pushToGitHub() {
       const token = localStorage.getItem('site_gh_token');
-      if (!token) return;
+      if (!token && !siteIsAdmin()) return;
       setSyncStatus(false, true);
       const works = loadWorks();
       // Re-reads the latest file first and refuses a save that would wipe several works at once.

@@ -392,7 +392,7 @@ function renderList(exams){
 // ── Toggle Live Status ──
 async function toggleLiveStatus(id) {
   const tok = token(); 
-  if(!tok) return toast('Enter a GitHub Token!');
+  if(!tok && !siteHasAdminSession()) return toast('Enter a GitHub Token!');
   
   const exIdx = fullData.exams.findIndex(e => e.id === id);
   if (exIdx === -1) return;
@@ -566,7 +566,7 @@ function addQ(){
 }
 
 async function saveExam(){
-  const tok=token(); if(!tok){return toast('Enter a GitHub Token!');}
+  const tok=token(); if(!tok && !siteHasAdminSession()){return toast('Enter a GitHub Token!');}
   const title=document.getElementById('exam-title').value.trim();
   const dur=document.getElementById('exam-duration').value.trim();
   const pass=document.getElementById('exam-pass').value.trim();
@@ -595,7 +595,7 @@ async function saveExam(){
 // ── Delete Exam ──
 function deleteExam(id){
   confirmAction('delete', 'Delete this exam?', async () => {
-    const tok=token(); if(!tok) return toast('Enter a Token!');
+    const tok=token(); if(!tok && !siteHasAdminSession()) return toast('Enter a Token!');
     fullData.exams=fullData.exams.filter(e=>e.id!==id);
     await pushGitHub(tok,'Delete exam');
     toast('Exam deleted.');
@@ -628,7 +628,7 @@ function confirmAction(type, msg, fn){
 function closeModal(){ document.getElementById('confirm-modal').style.display='none'; pendingAction=null; }
 
 async function clearGitHub(){
-  const tok=token(); if(!tok) return toast('Enter a Token!');
+  const tok=token(); if(!tok && !siteHasAdminSession()) return toast('Enter a Token!');
   toast('GitHub clearing...', 5000);
   fullData.exams=[];
   const ok=await pushGitHub(tok,'Clear all exams',{allowShrink:['exams']});
@@ -745,7 +745,7 @@ function renumberEditQ() {
 
 async function saveEdit() {
   const tok = token();
-  if (!tok) return toast('Enter a GitHub Token!');
+  if(!tok && !siteHasAdminSession()) return toast('Enter a GitHub Token!');
   if (!editingExamId) return;
 
   const exIdx = fullData.exams.findIndex(e => e.id === editingExamId);

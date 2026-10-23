@@ -10,6 +10,15 @@
  * their own Drive upload, and sending an access request before they're even
  * a member yet.
  *
+ * ADMIN WRITES (adminRead / adminWrite): the signed-in admin's browser can save
+ * Civil resources, notices, exams, 3D works and research data through this Worker
+ * too, so the admin never has to paste a GitHub token anywhere. The admin proves
+ * who they are with the same session token the site already gets from the Google
+ * Apps Script admin login; the Worker asks that script ("adminVerify") whether the
+ * token is valid before touching anything. Only the files listed in ADMIN_FILES can
+ * be written, and a save that would delete more than one item of any list at once
+ * is refused.
+ *
  * Every call here re-fetches the file fresh from GitHub and only changes the
  * one thing the request asked for, then writes it straight back — so two
  * people saving at the same time can't stomp on each other the way sending
@@ -51,8 +60,8 @@ function json(data, status, origin) {
   });
 }
 
-async function ghFetchFile(token) {
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}?ref=${GITHUB_BRANCH}`;
+async function ghFetchFile(token, file) {
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${file || GITHUB_FILE}?ref=${GITHUB_BRANCH}&_=${Date.now()}`;
   const res = await fetch(url, {
     headers: {
       Authorization: `token ${token}`,
@@ -66,10 +75,10 @@ async function ghFetchFile(token) {
   return { content, sha: j.sha };
 }
 
-async function ghWriteFile(token, data, sha) {
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+async function ghWriteFile(token, data, sha, file, message) {
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${file || GITHUB_FILE}`;
   const body = {
-    message: 'Research hub sync: ' + new Date().toISOString(),
+    message: message || ('Research hub sync: ' + new Date().toISOString()),
     content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))),
     sha,
     branch: GITHUB_BRANCH,
@@ -161,6 +170,85 @@ function applyAction(data, action, payload) {
   }
 }
 
+// ── ADMIN WRITES ───────────────────────────────────────────────────────────
+// Files the admin may read/write here, and the shape each must keep.
+const ADMIN_FILES = {
+  'civil_data.json':    { semesters: 'object', notices: 'array', exams: 'array' },
+  'modeling_data.json': { works: 'array' },
+  'research_data.json': {},
+};
+
+async function verifyAdmin(env, tokens) {
+  if (!env.GAS_URL) throw new Error('gas-not-configured');
+  const list = (Array.isArray(tokens) ? tokens : []).filter((t) => typeof t === 'string' && t).slice(0, 3);
+  for (const t of list) {
+    try {
+      const res = await fetch(env.GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'adminVerify', token: t }),
+        redirect: 'follow',
+      });
+      const j = await res.json();
+      if (j && j.status === 'success' && j.valid === true) return true;
+    } catch (e) { /* try the next token */ }
+  }
+  return false;
+}
+
+function checkShape(file, data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('bad-data');
+  const shape = ADMIN_FILES[file];
+  Object.keys(shape).forEach((k) => {
+    const want = shape[k];
+    const v = data[k];
+    const okType = want === 'array' ? Array.isArray(v) : (v && typeof v === 'object' && !Array.isArray(v));
+    if (!okType) throw new Error('bad-data');
+  });
+}
+
+// Item count per top-level key (a list = its length, an object of lists = all items in it).
+function countItems(d) {
+  const out = {};
+  Object.keys(d || {}).forEach((k) => {
+    const v = d[k];
+    if (Array.isArray(v)) out[k] = v.length;
+    else if (v && typeof v === 'object') {
+      let n = 0, any = false;
+      Object.values(v).forEach((x) => { if (Array.isArray(x)) { n += x.length; any = true; } });
+      if (any) out[k] = n;
+    }
+  });
+  return out;
+}
+
+async function handleAdmin(action, payload, env, origin) {
+  const file = payload.file;
+  if (!ADMIN_FILES[file]) return json({ ok: false, error: 'bad-file' }, 400, origin);
+  if (!(await verifyAdmin(env, payload.adminTokens))) return json({ ok: false, error: 'not-admin' }, 401, origin);
+
+  const latest = await ghFetchFile(env.GITHUB_TOKEN, file);
+
+  if (action === 'adminRead') return json({ ok: true, data: latest.content, sha: latest.sha }, 200, origin);
+
+  // adminWrite
+  const data = payload.data;
+  checkShape(file, data);
+  if (payload.sha && payload.sha !== latest.sha) return json({ ok: false, error: 'conflict' }, 409, origin);
+
+  const before = countItems(latest.content), after = countItems(data);
+  const allow = Array.isArray(payload.allowShrink) ? payload.allowShrink : [];
+  for (const k of Object.keys(before)) {
+    if (allow.indexOf(k) === -1 && before[k] - (after[k] || 0) > 1) {
+      return json({ ok: false, error: 'blocked', message: `Blocked: this save would remove ${before[k] - (after[k] || 0)} ${k} item(s) at once. Nothing was written.` }, 400, origin);
+    }
+  }
+  data.updated = new Date().toISOString();
+  const message = String(payload.message || 'Update data').slice(0, 100);
+  await ghWriteFile(env.GITHUB_TOKEN, data, latest.sha, file, message);
+  return json({ ok: true }, 200, origin);
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -180,6 +268,7 @@ export default {
     }
 
     try {
+      if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
       const updated = applyAction(content, action, payload);
       updated.updated = new Date().toISOString();
@@ -190,6 +279,7 @@ export default {
       const knownClientErrors = [
         'not-a-member', 'missing-name', 'missing-fields', 'not-owner',
         'bad-email', 'already-a-member', 'unknown-action',
+        'bad-file', 'bad-data', 'not-admin', 'conflict', 'gas-not-configured',
       ];
       return json({ ok: false, error: msg }, knownClientErrors.includes(msg) ? 400 : 502, origin);
     }

@@ -14,7 +14,16 @@
      3. refuses to save if the read failed or if the change would wipe
         out more than one item of any list in a single save,
      4. retries automatically if someone else saved in the meantime.
+
+   NO GITHUB TOKEN NEEDED: when you are logged in as admin, writes go through
+   the Cloudflare Worker (tools/research-sync-worker), which holds the GitHub
+   token itself and checks your admin session with the Google Apps Script. A
+   personal GitHub token saved on a device is still honoured as a fallback.
    ══════════════════════════════════════════════════════════════ */
+const SITE_WORKER = {
+  url: 'https://research-sync-worker.md-shaikh-alam-005.workers.dev',
+  key: 'M-eYQsJn_Gsu5m-DYh3S2ZjjSWl_Hy-r'     // same public key research.html sends
+};
 const SITE_DATA = {
   owner:  'shaikh800',
   repo:   'shaikh800.github.io',
@@ -30,6 +39,40 @@ function _sdDecode(b64) {
 }
 function _sdEncode(str) {
   return btoa(unescape(encodeURIComponent(str)));
+}
+
+/* Admin session tokens this browser holds (Civil/Academy panel use sessionStorage,
+   the Exam Controller keeps its own copy in localStorage). */
+function siteAdminTokens() {
+  const out = [];
+  try {
+    const exp = parseInt(sessionStorage.getItem('shaikh_admin_expiry_v1') || '0', 10);
+    const t = sessionStorage.getItem('shaikh_admin_token_v1');
+    if (t && Date.now() < exp) out.push(t);
+  } catch (e) {}
+  try {
+    const exp = parseInt(localStorage.getItem('shaikh_ctrl_expiry_v1') || '0', 10);
+    const t = localStorage.getItem('shaikh_ctrl_token_v1');
+    if (t && Date.now() < exp && out.indexOf(t) === -1) out.push(t);
+  } catch (e) {}
+  return out;
+}
+function siteHasAdminSession() { return siteAdminTokens().length > 0; }
+
+async function _sdWorker(action, payload) {
+  const res = await fetch(SITE_WORKER.url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Client-Key': SITE_WORKER.key },
+    body: JSON.stringify({ action, payload: Object.assign({ adminTokens: siteAdminTokens() }, payload) })
+  });
+  let j = {};
+  try { j = await res.json(); } catch (e) {}
+  if (!res.ok || j.ok !== true) {
+    const err = new Error(j.message || j.error || ('Sync service error (' + res.status + ')'));
+    err.code = j.error || ''; err.status = res.status;
+    throw err;
+  }
+  return j;
 }
 
 /* Make sure the three lists always exist, keep any other keys untouched. */
@@ -61,6 +104,10 @@ function _sdCounts(d) {
    Returns { data, sha }. Throws if it cannot be read -- callers must NOT
    fall back to an empty object. */
 async function siteDataRead(token, file) {
+  if (!token) {                       // no personal token -> read through the Worker with the admin session
+    const j = await _sdWorker('adminRead', { file: file || SITE_DATA.file });
+    return { data: (!file || file === SITE_DATA.file) ? siteDataNormalize(j.data) : j.data, sha: j.sha };
+  }
   const res = await fetch(`${_sdApi(file)}?ref=${SITE_DATA.branch}&_=${Date.now()}`, {
     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' },
     cache: 'no-store'
@@ -88,10 +135,13 @@ async function siteDataRead(token, file) {
    Returns { ok:true, data } or { ok:false, error }. Never throws. */
 async function siteDataUpdate(token, mutate, message, opts) {
   opts = opts || {};
-  if (!token) return { ok: false, error: 'No GitHub token' };
+  if (!token && !siteHasAdminSession()) return { ok: false, error: 'Not logged in as admin — log in again (footer lock) and retry.' };
+  // Logged-in admin -> Worker (no token needed). A saved GitHub token is only used when there is
+  // no admin session, or as a fallback while the Worker has not been updated yet.
+  let pat = (token && !siteHasAdminSession()) ? token : null;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const { data: latest, sha } = await siteDataRead(token, opts.file);
+      const { data: latest, sha } = await siteDataRead(pat, opts.file);
       const before = _sdCounts(latest);
       const next = JSON.parse(JSON.stringify(latest));
       await mutate(next);
@@ -107,9 +157,21 @@ async function siteDataUpdate(token, mutate, message, opts) {
       if (JSON.stringify(next) === JSON.stringify(latest)) return { ok: true, data: latest, unchanged: true };
 
       next.updated = new Date().toISOString();
+      if (!pat) {                                    // admin session -> Worker writes (no GitHub token on this device)
+        try {
+          await _sdWorker('adminWrite', { file: opts.file || SITE_DATA.file, data: next, sha, message: message || 'Update data', allowShrink: opts.allowShrink || [] });
+          return { ok: true, data: next };
+        } catch (e) {
+          if (e.code === 'conflict' && attempt < 3) continue;     // someone saved first -> re-read and retry
+          if (e.code === 'unknown-action' && token) { pat = token; attempt--; continue; }   // old Worker -> fall back to the saved token
+          if (e.code === 'unknown-action') return { ok: false, error: 'The sync service needs a one-time update (redeploy the Cloudflare Worker — see tools/research-sync-worker/README.md).' };
+          if (e.code === 'not-admin') return { ok: false, error: 'Admin session expired — log in again (footer lock) and retry.' };
+          return { ok: false, error: e.message };
+        }
+      }
       const put = await fetch(_sdApi(opts.file), {
         method: 'PUT',
-        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+        headers: { 'Authorization': `token ${pat}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
         body: JSON.stringify({
           message: message || 'Update data',
           content: _sdEncode(JSON.stringify(next, null, 2)),
@@ -120,6 +182,9 @@ async function siteDataUpdate(token, mutate, message, opts) {
       if ((put.status === 409 || put.status === 422) && attempt < 3) continue;   // someone saved first -> re-read and retry
       return { ok: false, error: 'GitHub write failed (' + put.status + ')' };
     } catch (e) {
+      if (e && e.code === 'unknown-action' && token && !pat) { pat = token; attempt--; continue; }
+      if (e && e.code === 'unknown-action') return { ok: false, error: 'The sync service needs a one-time update (redeploy the Cloudflare Worker — see tools/research-sync-worker/README.md).' };
+      if (e && e.code === 'not-admin') return { ok: false, error: 'Admin session expired — log in again (footer lock) and retry.' };
       if (attempt === 3) return { ok: false, error: String(e && e.message || e) };
     }
   }
