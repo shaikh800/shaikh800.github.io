@@ -2106,7 +2106,7 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           true,
           1
         );
-        sectionTitlesWrap.dataset.wizStep = "2,3,4";
+        sectionTitlesWrap.dataset.wizStep = "1";
         panelSectionsMount.appendChild(sectionTitlesWrap);
         if (hasCqSection) {
           const cqSec = buildPanelFlowSection(
@@ -2155,7 +2155,15 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
             6
           );
         }
+        // Auto-fallback: if active step has no content, go to step 1
+        var _hasMcq = state.questions.length > 0;
+        var _hasCq = state.cqs.length > 0;
+        var _hasQ = state.onlyQuestions.length > 0;
+        if ((activeWizStep === 2 && !_hasMcq) || (activeWizStep === 3 && !_hasCq) || (activeWizStep === 4 && !_hasQ)) {
+          activeWizStep = 1;
+        }
         applyWizToPanel(activeWizStep);
+        updateWizButtons();
       }
 
       function applyWizToPanel(step) {
@@ -2164,6 +2172,23 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
           var steps = el.dataset.wizStep.split(',').map(Number);
           el.classList.toggle('wiz-hidden', !steps.includes(step));
         });
+      }
+
+      function updateWizButtons() {
+        var hasMcq = state.questions.length > 0;
+        var hasCq = state.cqs.length > 0;
+        var hasQ = state.onlyQuestions.length > 0;
+        var anyContent = hasMcq || hasCq || hasQ;
+        var show = { 1: true, 2: hasMcq, 3: hasCq, 4: hasQ, 5: anyContent, 6: true };
+        document.querySelectorAll('.wiz-btn[data-step]').forEach(function(btn) {
+          var s = +btn.dataset.step;
+          btn.hidden = !show[s];
+        });
+        // Update track progress width to span only visible steps
+        var totalSteps = Object.values(show).filter(Boolean).length;
+        var passedSteps = Object.entries(show).filter(function(e) { return e[1] && +e[0] < activeWizStep; }).length;
+        var prog = document.getElementById('wizProgress');
+        if (prog && totalSteps > 1) prog.style.width = Math.round((passedSteps / (totalSteps - 1)) * 100) + '%';
       }
 
       function esc(v) {
@@ -2505,16 +2530,14 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         const hasOnlyQuestionSection = state.onlyQuestions.length > 0;
         sectionTitlesWrap.innerHTML = `
           <div class="starter-box">
+            <p style="font-size:11px;color:#64748b;margin:0 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Add Content</p>
             <div class="toolbar three">
-              <button type="button" class="${
-                hasCqSection ? "secondary" : "secondary"
-              }" onclick="addCQ()">Make CQ Part</button>
-              <button type="button" class="${
-                hasMcqSection ? "secondary" : "secondary"
-              }" onclick="addQuestion()">Make MCQ Part</button>
-              <button type="button" class="${
-                hasOnlyQuestionSection ? "secondary" : "secondary"
-              }" onclick="addOnlyQuestion()">Make Question Part</button>
+              <button type="button" class="secondary${hasMcqSection ? ' done-step' : ''}"
+                onclick="addQuestion();switchStep(2)">+ MCQ</button>
+              <button type="button" class="secondary${hasCqSection ? ' done-step' : ''}"
+                onclick="addCQ();switchStep(3)">+ CQ</button>
+              <button type="button" class="secondary${hasOnlyQuestionSection ? ' done-step' : ''}"
+                onclick="addOnlyQuestion();switchStep(4)">+ Question</button>
             </div>
           </div>`;
       }
@@ -5830,12 +5853,12 @@ function splitIntoQuestionBlocks(text) {
 
 // ── Wizard Step System ──
 const WIZ_MAP = {
-  1: ['wizGuideBox', 'globalLangField', 'sheetOptionsSection', 'basicExamInfoSection'],
-  2: ['bulkMcqImportSection', 'sectionTitlesWrap', 'mcqSectionHeaderWrap', 'mcqMgmtBar', 'mcqEditorList'],
-  3: ['cqSectionMount', 'cqEditorList'],
-  4: ['onlyQuestionSectionMount', 'onlyQuestionEditorList'],
-  5: ['wizSettingsZone'],
-  6: ['wizNavZone', 'wizHistZone', 'wizExportZone', 'wizHr'],
+  1: ['wizGuideBox', 'globalLangField'],
+  2: [],
+  3: [],
+  4: [],
+  5: [],
+  6: [],
 };
 const WIZ_LABELS = { 1:'Header', 2:'MCQ', 3:'CQ', 4:'Questions', 5:'Settings', 6:'Export' };
 let activeWizStep = 1;
@@ -5864,6 +5887,7 @@ function switchStep(n) {
   var sub = document.getElementById('wizSubtitle');
   if (sub) sub.textContent = WIZ_LABELS[n] || '';
   applyWizToPanel(n);
+  updateWizButtons();
   try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
 }
 
