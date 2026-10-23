@@ -788,7 +788,7 @@
       }
       
       /* ── Wizard Stepper ── */
-      .wiz-nav { position: relative; padding: 12px 14px 8px; margin-bottom: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+      .wiz-nav { position: sticky; top: 0; z-index: 20; padding: 12px 14px 8px; margin-bottom: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; border-top-left-radius: 0; border-top-right-radius: 0; }
       .wiz-track-line { position: absolute; top: 24px; left: 41px; right: 41px; height: 2px; background: #e2e8f0; z-index: 0; }
       .wiz-track-progress { position: absolute; top: 24px; left: 41px; height: 2px; background: #7c3aed; z-index: 0; transition: width 0.35s cubic-bezier(.4,0,.2,1); max-width: calc(100% - 82px); }
       .wiz-steps-row { display: flex; justify-content: space-between; position: relative; z-index: 1; }
@@ -905,7 +905,7 @@
         </div>
 
         <!-- ── Zone 1: Navigation ── -->
-        <div id="wizNavZone" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
+        <div id="wizNavZone" data-wiz-step="6" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
           <div class="zone-label" style="margin-bottom:8px;">📁 Navigation</div>
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
             <button type="button" onclick="saveAndBack()" style="background:#1e293b; color:#fff; border:none; border-radius:7px; padding:9px 6px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:background .15s;" onmouseover="this.style.background='#0f172a'" onmouseout="this.style.background='#1e293b'">↩ Save &amp; Back</button>
@@ -913,19 +913,8 @@
           </div>
         </div>
 
-        <!-- ── Zone 2: History ── -->
-        <div id="wizHistZone" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:10px;">
-          <div class="zone-label" style="margin-bottom:8px;">🕓 History</div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px;">
-            <button type="button" onclick="undoState()" style="background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:7px; padding:7px 4px; font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">↶ Undo</button>
-            <button type="button" onclick="redoState()" style="background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:7px; padding:7px 4px; font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">↷ Redo</button>
-            <button type="button" onclick="restoreDraft()" style="background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:7px; padding:7px 4px; font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">⟳ Restore</button>
-            <button type="button" onclick="resetSample()" style="background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:7px; padding:7px 4px; font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">↺ Reset</button>
-          </div>
-        </div>
-
         <!-- ── Zone 3: Export ── -->
-        <div id="wizExportZone" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-bottom:14px;">
+        <div id="wizExportZone" data-wiz-step="6" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-bottom:14px;">
           <div class="zone-label" style="margin-bottom:8px; color:#0369a1;">📤 Export</div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; margin-bottom:8px;">
             <button type="button" onclick="downloadPDFDirect(this)" style="background:#2563eb; color:#fff; border:none; border-radius:7px; padding:9px 4px; font-size:11px; font-weight:700; cursor:pointer; text-align:center; line-height:1.3; transition:background .15s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">↓ PDF</button>
@@ -937,7 +926,7 @@
           </button>
         </div>
 
-        <hr class="zone-divider" id="wizHr">
+        <hr class="zone-divider" id="wizHr" data-wiz-step="6">
 
         <div class="builder-section" id="basicExamInfoSection">
           <h2 class="section-title">Basic Exam Info</h2>
@@ -2168,11 +2157,21 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
       }
 
       function applyWizToPanel(step) {
-        if (!panelSectionsMount) return;
-        panelSectionsMount.querySelectorAll(':scope > [data-wiz-step]').forEach(function(el) {
-          var steps = el.dataset.wizStep.split(',').map(Number);
-          el.classList.toggle('wiz-hidden', !steps.includes(step));
-        });
+        // Filter dynamic sections in panelSectionsMount
+        if (panelSectionsMount) {
+          panelSectionsMount.querySelectorAll(':scope > [data-wiz-step]').forEach(function(el) {
+            var steps = el.dataset.wizStep.split(',').map(Number);
+            el.classList.toggle('wiz-hidden', !steps.includes(step));
+          });
+        }
+        // Also filter static wizard zones in the panel
+        var panel = document.querySelector('aside.panel');
+        if (panel) {
+          panel.querySelectorAll(':scope > [data-wiz-step]').forEach(function(el) {
+            var steps = el.dataset.wizStep.split(',').map(Number);
+            el.classList.toggle('wiz-hidden', !steps.includes(step));
+          });
+        }
       }
 
       function updateWizButtons() {
