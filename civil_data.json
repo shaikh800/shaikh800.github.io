@@ -23,18 +23,7 @@
         "hidden": false
       }
     ],
-    "6": [
-      {
-        "id": "mvmg0hqrbzxm",
-        "title": "Foundation que_261008_224118",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1-oFkRyLa9XPlkxzH3mHXRhDfTQAbI18y/view?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/My Drive/6th Semester",
-        "hidden": false
-      }
-    ]
+    "6": []
   },
   "notices": [],
   "exams": [
@@ -1593,5 +1582,5 @@
       "live": false
     }
   ],
-  "updated": "2026-10-24T13:39:29.838Z"
+  "updated": "2026-10-24T13:39:34.765Z"
 }
