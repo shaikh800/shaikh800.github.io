@@ -22,6 +22,18 @@
         "folder": "Semester 5/CE 501/Books",
         "hidden": false
       }
+    ],
+    "6": [
+      {
+        "id": "mvmfu1kzczgc",
+        "title": "6th semester previous qns 2024 ( 09 batch)",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1Vc4c00fFCw91KC9RS6W5wZpPyrExSOoW/view?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/My Drive/Civil Engineering/Questions",
+        "hidden": false
+      }
     ]
   },
   "notices": [],
@@ -1581,5 +1593,5 @@
       "live": false
     }
   ],
-  "updated": "2026-10-23T04:38:45.000Z"
+  "updated": "2026-10-24T13:32:00.972Z"
 }
