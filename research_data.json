@@ -70,6 +70,16 @@
   ],
   "uploads": [
     {
+      "id": "1BSUA5CIQjyyOOVbMUb1WlDioVxW9YB8B",
+      "title": "au.175",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1BSUA5CIQjyyOOVbMUb1WlDioVxW9YB8B/view",
+      "date": "2026-10-24T18:11:21.603Z"
+    },
+    {
       "id": "1BwpFk10v3bm2KYz-ZNwD6bxnfs1S0A1T",
       "title": "IEVW_SA_EV_Merging_Techniques_Summary",
       "category": "Research Paper",
@@ -92,5 +102,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-24T13:22:18.411Z"
+  "updated": "2026-10-24T18:11:22.633Z"
 }
