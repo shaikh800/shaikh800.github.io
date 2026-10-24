@@ -83,6 +83,16 @@
         "thumb": null,
         "folder": "Semester 6/Questions",
         "hidden": false
+      },
+      {
+        "id": "mvmg8qi5gksy",
+        "title": "Rcc que_261008_224151",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1rv8vgTzF6mkuVoDk04PEE4E-gz4wmlH1/view?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/Questions",
+        "hidden": false
       }
     ]
   },
@@ -1643,5 +1653,5 @@
       "live": false
     }
   ],
-  "updated": "2026-10-24T13:43:11.227Z"
+  "updated": "2026-10-24T13:43:27.610Z"
 }
