@@ -54,6 +54,13 @@
   ],
   "notices": [
     {
+      "id": 1792848136004,
+      "type": "urgent",
+      "title": "Meeting Schedule",
+      "text": "রাত ১১ঃ০০ টার দিকে মিটিং আরেঞ্জ করা হবে।",
+      "date": "Just now"
+    },
+    {
       "id": 1,
       "type": "info",
       "title": "Welcome to the Research Hub",
@@ -85,5 +92,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-23T17:29:10.567Z"
+  "updated": "2026-10-24T13:22:18.411Z"
 }
