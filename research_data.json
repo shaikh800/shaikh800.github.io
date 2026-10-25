@@ -79,6 +79,16 @@
   ],
   "uploads": [
     {
+      "id": "1GxkDl4uECQu97TjslY8ol1K3kdTzI9G9",
+      "title": "water-11-00613",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1GxkDl4uECQu97TjslY8ol1K3kdTzI9G9/view",
+      "date": "2026-10-25T21:35:40.640Z"
+    },
+    {
       "id": "1opm0xwab3iacqnnQKteUMxDJFXcBZqNO",
       "title": "Lahore River Basin",
       "category": "Research Paper",
@@ -124,5 +134,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-25T17:07:00.189Z"
+  "updated": "2026-10-25T21:35:41.498Z"
 }
