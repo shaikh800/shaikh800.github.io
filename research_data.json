@@ -79,6 +79,16 @@
   ],
   "uploads": [
     {
+      "id": "1lk5cJqr2X9L5ltu10NHkcnlL8hkEeWkf",
+      "title": "hess-15",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1lk5cJqr2X9L5ltu10NHkcnlL8hkEeWkf/view",
+      "date": "2026-10-26T16:35:42.532Z"
+    },
+    {
       "id": "139MAzRbnFRENO_4y1IFsOguQav3XpSZ2",
       "title": "hess",
       "category": "Research Paper",
@@ -144,5 +154,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-26T16:34:05.692Z"
+  "updated": "2026-10-26T16:35:43.424Z"
 }
