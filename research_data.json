@@ -79,6 +79,16 @@
   ],
   "uploads": [
     {
+      "id": "139MAzRbnFRENO_4y1IFsOguQav3XpSZ2",
+      "title": "hess",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/139MAzRbnFRENO_4y1IFsOguQav3XpSZ2/view",
+      "date": "2026-10-26T16:34:04.851Z"
+    },
+    {
       "id": "1GxkDl4uECQu97TjslY8ol1K3kdTzI9G9",
       "title": "water-11-00613",
       "category": "Research Paper",
@@ -134,5 +144,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-26T16:33:22.875Z"
+  "updated": "2026-10-26T16:34:05.692Z"
 }
