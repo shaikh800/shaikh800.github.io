@@ -79,16 +79,6 @@
   ],
   "uploads": [
     {
-      "id": "1Qy2E_5BcNewQu-j_wmx3PTBhXuHw23AH",
-      "title": "water-11",
-      "category": "Research Paper",
-      "visibility": "public",
-      "uploaderName": "Turbo Researchers",
-      "uploaderEmail": "turbo.researchers@gmail.com",
-      "link": "https://drive.google.com/file/d/1Qy2E_5BcNewQu-j_wmx3PTBhXuHw23AH/view",
-      "date": "2026-10-26T16:30:07.860Z"
-    },
-    {
       "id": "1GxkDl4uECQu97TjslY8ol1K3kdTzI9G9",
       "title": "water-11-00613",
       "category": "Research Paper",
@@ -144,5 +134,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-26T16:30:08.929Z"
+  "updated": "2026-10-26T16:33:22.875Z"
 }
