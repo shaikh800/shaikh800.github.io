@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1CYrzokt_S50JXMeX1fQP1MltkQznEpgA",
+      "title": "Have satellite precipitation products improved over last two decades A comprehensive comparison of GPM IMERG with nine satellite and reanalysis datasets",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1CYrzokt_S50JXMeX1fQP1MltkQznEpgA/view",
+      "date": "2026-10-28T17:31:20.148Z"
+    },
+    {
       "id": "1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo",
       "title": "Bias correction of satellite rainfall estimates using a radar-gauge product– a case study in Oklahoma (USA)",
       "category": "Research Paper",
@@ -196,5 +206,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-28T17:27:29.204Z"
+  "updated": "2026-10-28T17:31:21.933Z"
 }
