@@ -206,10 +206,15 @@
     .upload-status.ok { color: #0f9d58; }
     .upload-status.err { color: #ef4444; }
 
-    .uploads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 14px; }
-    .upload-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .uploads-grid { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .upload-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface); min-width: 0; }
+    .upload-row:last-child { border-bottom: none; }
+    .upload-row-icon { flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px; background: rgba(var(--blue-rgb,59,130,246),0.10); display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 14px; }
+    .upload-row-body { flex: 1; min-width: 0; }
+    .upload-row-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+    .upload-row-meta { font-size: 11.5px; color: var(--muted); margin-top: 1px; display: flex; align-items: center; flex-wrap: wrap; gap: 3px; }
+    .upload-row-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .upload-cat { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); }
-    .upload-card h4 { margin: 0; font-size: 14.5px; line-height: 1.35; overflow-wrap: anywhere; word-break: break-word; }
     .upload-meta { font-size: 12px; color: var(--muted); }
     /* notice unseen badge */
     .r-tab .notif-dot { display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:100px;margin-left:3px;line-height:1; }
@@ -1605,21 +1610,34 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function renderUploads() {
       const grid = document.getElementById('uploadsGrid');
       const list = visibleUploads();
-      grid.innerHTML = list.length ? list.map(u => {
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">Nothing uploaded yet.</div>';
+        return;
+      }
+      grid.innerHTML = list.map(u => {
         const canRemove = role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase());
+        const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(u.link || '');
+        const iconClass = isImg ? 'fa-file-image' : 'fa-file-pdf';
+        const dateStr = new Date(u.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         return `
-        <div class="upload-card">
-          <div class="upload-cat">${esc(u.category)}</div>
-          <h4>${esc(u.title)}</h4>
-          <div class="upload-meta">${esc(u.uploaderName || 'Unknown')} · ${new Date(u.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-          <span class="vis-badge ${u.visibility}">${u.visibility === 'public' ? 'Public' : 'Private'}</span>
-          <div class="upload-actions">
+        <div class="upload-row">
+          <div class="upload-row-icon"><i class="fas ${iconClass}"></i></div>
+          <div class="upload-row-body">
+            <div class="upload-row-title">${esc(u.title)}</div>
+            <div class="upload-row-meta">
+              <span class="upload-cat">${esc(u.category)}</span>
+              <span>·</span><span>${esc(u.uploaderName || 'Unknown')}</span>
+              <span>·</span><span>${dateStr}</span>
+              <span class="vis-badge ${u.visibility}">${u.visibility === 'public' ? 'Public' : 'Private'}</span>
+            </div>
+          </div>
+          <div class="upload-row-actions">
             <a class="btn secondary sm" href="${esc(u.link)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Open</a>
             <button class="btn secondary sm" onclick="shareUpload('${esc(u.id)}')"><i class="fas fa-share-nodes"></i> Share</button>
             ${canRemove ? `<button class="icon-action danger" title="Remove" onclick="removeUpload('${esc(u.id)}')"><i class="fas fa-trash"></i></button>` : ''}
           </div>
         </div>`;
-      }).join('') : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);grid-column:1/-1;">Nothing uploaded yet.</div>';
+      }).join('');
     }
     function renderTeamTab() {
       const signinArea = document.getElementById('teamSignin');
