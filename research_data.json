@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM",
+      "title": "Evaluation and Bias Correction of CHIRP Rainfall Estimate for Rainfall-Runoff Simulation over Lake Ziway Watershed, Ethiopia",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM/view",
+      "date": "2026-10-28T17:35:59.400Z"
+    },
+    {
       "id": "1CYrzokt_S50JXMeX1fQP1MltkQznEpgA",
       "title": "Have satellite precipitation products improved over last two decades A comprehensive comparison of GPM IMERG with nine satellite and reanalysis datasets",
       "category": "Research Paper",
@@ -206,5 +216,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-28T17:31:21.933Z"
+  "updated": "2026-10-28T17:36:01.184Z"
 }
