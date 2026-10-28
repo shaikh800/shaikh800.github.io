@@ -33,35 +33,13 @@
     .page-title h1 { font-size: clamp(30px, 5vw, 48px); margin-bottom: 8px; }
     .page-title .lead { margin-bottom: 0; }
     /* ── Phone polish: Shared Files look like the Semester list; no empty band above panels ── */
-    .research-tabs-row:not(:has(.switch-view:not([hidden]):not([style*="display: none"]))) { display: none; }
     @media (max-width: 640px) {
-      .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
       #mainSection, #pendingView { margin-top: 0; padding-top: 12px; border-top: 0; }
     }
     @media (max-width: 640px) {
       #pendingView div[style*="gap:10px"] { flex-direction: column; }
       #pendingView div[style*="gap:10px"] .btn { width: 100%; justify-content: center; white-space: normal; text-align: center; }
     }
-    .switch-view {
-      font-size: 12.5px; font-weight: 700; color: var(--muted); background: none; border: none;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
-    }
-    .switch-view:hover { color: var(--blue); }
-
-    /* ── Tabs ──
-       The tab row itself duplicates what the sidebar sub-links already do,
-       so it's not shown — switching sections happens from the sidebar only.
-       The buttons stay in the DOM (still driven by hash) just in case, but
-       visually only the "switch view" control remains here. ──────────── */
-    .research-tabs-row {
-      display: flex; align-items: center; justify-content: flex-end; gap: 12px;
-      flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
-    }
-    .research-tabs-row .switch-view { flex-shrink: 0; }
-    @media (max-width: 640px) {
-      .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
-    }
-    .research-tabs { display: none; }
     .r-tab {
       font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted);
       background: none; border: none; cursor: pointer; padding: 12px 16px;
@@ -526,17 +504,7 @@
     </section>
 
     <section class="section" id="mainSection">
-      <div class="research-tabs-row">
-        <div class="research-tabs">
-          <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
-        <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
-        <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span><span class="notif-dot" id="noticeDot" hidden></span></button>
-        <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini <span class="count due" id="geminiDueBadge" style="display:none;"></span></button>
-        <button class="r-tab" data-tab="account"><i class="fas fa-user-gear"></i> My Account</button>
-          <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
-        </div>
-        <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
-      </div>
+
 
       <!-- ══ FILES PANEL — the real connected Google Drive folder, browsed on this page ══ -->
       <div class="r-panel" id="panel-files">
@@ -637,7 +605,10 @@
           <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;" id="uploadDestNote"></p>
         </div>
 
-        <div style="font-weight:700;font-size:14px;margin:18px 0 10px;">Shared uploads</div>
+        <div style="display:flex;align-items:center;gap:10px;margin:18px 0 10px;">
+          <span style="font-weight:700;font-size:14px;">Shared uploads</span>
+          <button id="deleteAllUploadsBtn" class="btn secondary sm" style="display:none;margin-left:auto;" onclick="deleteAllMyUploads()"><i class="fas fa-trash"></i> Delete All</button>
+        </div>
         <div class="uploads-grid" id="uploadsGrid"></div>
       </div>
 
@@ -1590,6 +1561,21 @@ Content-Type: ${file.type || 'application/octet-stream'}
       renderUploads();
       syncChange('removeUpload', { email: (currentUser && currentUser.email) || '', id });
     }
+    async function deleteAllMyUploads() {
+      if (!currentUser || !currentUser.email) return;
+      const mine = uploads.filter(u => currentUser.email === (u.uploaderEmail || '').toLowerCase());
+      if (!mine.length) { toast('No uploads to delete.', 'info'); return; }
+      if (!confirm(`Delete all ${mine.length} of your upload${mine.length !== 1 ? 's' : ''}?`)) return;
+      for (const u of mine) {
+        if (currentUser.token) {
+          try { await driveApiCall('DELETE', `/files/${u.id}`, null, currentUser.token); } catch (e) {}
+        }
+        uploads = uploads.filter(x => x.id !== u.id);
+        syncChange('removeUpload', { email: currentUser.email, id: u.id });
+      }
+      renderUploads();
+      toast('All your uploads removed.', 'success');
+    }
     async function shareUpload(id) {
       const u = uploads.find(x => x.id === id);
       if (!u || !u.link) return;
@@ -1610,6 +1596,12 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function renderUploads() {
       const grid = document.getElementById('uploadsGrid');
       const list = visibleUploads();
+      // Show/hide Delete All button based on whether the current user has any uploads
+      const delAllBtn = document.getElementById('deleteAllUploadsBtn');
+      if (delAllBtn) {
+        const hasMine = currentUser && currentUser.email && list.some(u => currentUser.email === (u.uploaderEmail || '').toLowerCase());
+        delAllBtn.style.display = (hasMine || role === 'admin') && list.length ? '' : 'none';
+      }
       if (!list.length) {
         grid.innerHTML = '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">Nothing uploaded yet.</div>';
         return;
@@ -2253,17 +2245,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       if (geminiTabBtn) geminiTabBtn.hidden = isUploadOnly;
       document.body.classList.toggle('admin-mode', role === 'admin');
       // Show role-switcher only to admins and pending users; hide for regular members
-      const switchBtn = document.getElementById('switchViewBtn');
-      const switchLabel = document.getElementById('switchViewLabel');
-      if (role === 'admin') {
-        switchBtn.hidden = false;
-        switchLabel.textContent = 'Viewing as Admin · switch?';
-      } else if (role === 'pending') {
-        switchBtn.hidden = false;
-        switchLabel.textContent = 'Waiting for approval · switch?';
-      } else {
-        switchBtn.hidden = true;
-      }
+
 
       document.getElementById('pendingView').hidden = role !== 'pending';
       document.getElementById('mainSection').hidden = role === 'pending';
@@ -2352,7 +2334,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       showGateOptions();
       gateEl.style.display = 'flex';
     }
-    document.getElementById('switchViewBtn').addEventListener('click', exitToGate);
+
     document.getElementById('pendingSwitchBtn').addEventListener('click', exitToGate);
     document.getElementById('pendingRecheckBtn').addEventListener('click', async () => {
       const btn = document.getElementById('pendingRecheckBtn');

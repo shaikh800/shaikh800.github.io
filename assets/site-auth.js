@@ -9,8 +9,8 @@ const SITE_ADMIN_TOKEN_KEY  = 'shaikh_admin_token_v1';
 const SITE_ADMIN_EXPIRY_KEY = 'shaikh_admin_expiry_v1';
 
 function siteIsAdmin() {
-  const token  = sessionStorage.getItem(SITE_ADMIN_TOKEN_KEY);
-  const expiry = sessionStorage.getItem(SITE_ADMIN_EXPIRY_KEY);
+  const token  = localStorage.getItem(SITE_ADMIN_TOKEN_KEY);
+  const expiry = localStorage.getItem(SITE_ADMIN_EXPIRY_KEY);
   return !!(token && expiry && Date.now() < parseInt(expiry, 10));
 }
 
@@ -24,8 +24,8 @@ async function siteAdminLogin(password) {
     });
     const data = await res.json();
     if (data.status === 'success' && data.token) {
-      sessionStorage.setItem(SITE_ADMIN_TOKEN_KEY, data.token);
-      sessionStorage.setItem(SITE_ADMIN_EXPIRY_KEY, String(data.expiry));
+      localStorage.setItem(SITE_ADMIN_TOKEN_KEY, data.token);
+      localStorage.setItem(SITE_ADMIN_EXPIRY_KEY, String(data.expiry));
       return { ok: true };
     }
     return { ok: false, message: data.message || 'Incorrect password.' };
@@ -35,8 +35,8 @@ async function siteAdminLogin(password) {
 }
 
 function siteAdminLogout() {
-  sessionStorage.removeItem(SITE_ADMIN_TOKEN_KEY);
-  sessionStorage.removeItem(SITE_ADMIN_EXPIRY_KEY);
+  localStorage.removeItem(SITE_ADMIN_TOKEN_KEY);
+  localStorage.removeItem(SITE_ADMIN_EXPIRY_KEY);
 }
 
 
