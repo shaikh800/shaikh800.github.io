@@ -1797,7 +1797,8 @@ Content-Type: ${file.type || 'application/octet-stream'}
             <button class="n-delete admin-only-inline" onclick="deleteNotice(${n.id})"><i class="fas fa-trash"></i></button>
           </div>`).join('')
         : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">No notices yet.</div>';
-      document.getElementById('noticeCount').textContent = notices.length;
+      const _noticeCountEl = document.getElementById('noticeCount');
+      if (_noticeCountEl) _noticeCountEl.textContent = notices.length;
       renderPager('noticesPager', noticePage, totalPages, p => { noticePage = p; renderNotices(); });
     }
     async function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); reportSyncResult(await pushToGitHub()); }
