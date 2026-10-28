@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21",
+      "title": "Correcting bias of satellite rainfall data using physical empirical model",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21/view",
+      "date": "2026-10-28T17:27:23.380Z"
+    },
+    {
       "id": "1QR2enClaruuamAWNul-dOzkDiZpMMH-o",
       "title": "shrestha2011",
       "category": "Research Paper",
@@ -176,5 +186,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-27T17:46:16.805Z"
+  "updated": "2026-10-28T17:27:25.471Z"
 }
