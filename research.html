@@ -940,10 +940,6 @@
       // gets its own explicit check rather than relying on CSS alone.
       if (tab === 'access' && role !== 'admin') tab = 'files';
       if (tab === 'gemini' && isUploadOnly) tab = 'uploads';
-      // Auto-clear Google sign-in when navigating AWAY from the uploads tab
-      if (_activeTab === 'uploads' && tab !== 'uploads' && currentUser && currentUser.token) {
-        clearGoogleSession();
-      }
       _activeTab = tab;
       document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
@@ -1283,6 +1279,21 @@
     // Persist consent flag so silent re-auth works on return visits
     let _driveAuthGranted = false;
     try { _driveAuthGranted = localStorage.getItem('rh_driveAuthGranted') === '1'; } catch(e) {}
+    // Restore Drive identity from localStorage so we don't force a re-login on page refresh.
+    // Restore even when the token is expired so trySilentReauth can use login_hint (email)
+    // to skip the "Choose an account" picker. isAuthorizedUploader() still guards actual uploads.
+    try {
+      const _savedDriveUser = JSON.parse(localStorage.getItem('rh_currentUser') || 'null');
+      if (_savedDriveUser && _savedDriveUser.email) {
+        if (Date.now() < (_savedDriveUser.expiry - 5000)) {
+          currentUser = _savedDriveUser; // token still valid
+        } else {
+          // Token expired — keep name/email/picture so silent reauth can login_hint,
+          // but null out the token so isAuthorizedUploader() returns false until refreshed
+          currentUser = { name: _savedDriveUser.name, email: _savedDriveUser.email, picture: _savedDriveUser.picture, token: null, expiry: 0 };
+        }
+      }
+    } catch(e) {}
     function initUploadAuth() {
       if (_uploadTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
       _uploadTokenClient = google.accounts.oauth2.initTokenClient({
@@ -1332,7 +1343,9 @@
         } catch (e) {
           currentUser = { name: 'Signed in', email: '', picture: '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
         }
-        // Drive identity only. Do NOT save this to the member profile: it is a different account.
+        // Save Drive identity to localStorage so it survives page refresh.
+        // Do NOT save this to the member profile: it is a different Google account.
+        try { localStorage.setItem('rh_currentUser', JSON.stringify({ name: currentUser.name, email: currentUser.email, picture: currentUser.picture, token: currentUser.token, expiry: currentUser.expiry })); } catch(e) {}
         renderTeamTab();
       };
       _uploadTokenClient.requestAccessToken({ prompt: _driveAuthGranted ? '' : 'consent' });
@@ -1349,6 +1362,7 @@
       currentUser.expiry = 0;
       _driveAuthGranted = false;
       try { localStorage.removeItem('rh_driveAuthGranted'); } catch(e) {}
+      try { localStorage.removeItem('rh_currentUser'); } catch(e) {}
       renderTeamTab();
     }
 
@@ -1357,6 +1371,7 @@
         try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
       }
       if (role === 'member') {
+        try { localStorage.removeItem('rh_currentUser'); } catch(e) {}
         currentUser = null;
         gateUser = null;
         clearMemberProfile();
@@ -1365,6 +1380,7 @@
         gateEl.style.display = 'flex';
         return;
       }
+      try { localStorage.removeItem('rh_currentUser'); } catch(e) {}
       currentUser = null;
       renderTeamTab();
     }
@@ -1411,9 +1427,11 @@
         if (resp.error) return; // fine — they can still browse; uploading will ask them to reconnect
         currentUser.token = resp.access_token;
         currentUser.expiry = Date.now() + (resp.expires_in - 60) * 1000;
+        try { localStorage.setItem('rh_currentUser', JSON.stringify({ name: currentUser.name, email: currentUser.email, picture: currentUser.picture, token: currentUser.token, expiry: currentUser.expiry })); } catch(e) {}
         renderTeamTab();
       };
-      try { _uploadTokenClient.requestAccessToken({ prompt: '' }); } catch (e) { _authInFlight = false; }
+      const _lhint = (currentUser && currentUser.email) ? currentUser.email : '';
+      try { _uploadTokenClient.requestAccessToken({ prompt: '', login_hint: _lhint }); } catch (e) { _authInFlight = false; }
     }
 
     /* ── Drive upload helpers (uploader's own Drive, drive.file scope only) ── */

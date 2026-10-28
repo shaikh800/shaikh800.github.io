@@ -772,7 +772,11 @@
     });
 
     /* ── Modal helpers ─────────────────────── */
-    function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+    function openModal(id)  {
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow='hidden';
+      if (id === 'modal-image') history.pushState({ civil_overlay: 'image' }, '');
+    }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
     document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
     document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) closeModal(ov.id); }));
@@ -810,6 +814,7 @@
       document.getElementById('pdf-frame').src = src;
       document.getElementById('pdf-fullscreen').classList.add('open');
       document.body.style.overflow = 'hidden';
+      history.pushState({ civil_overlay: 'pdf' }, '');
     }
     function closePdfViewer() {
       const el = document.getElementById('pdf-fullscreen');
@@ -958,7 +963,11 @@
     let currentSemPath = "";
     let currentViewMode = localStorage.getItem('civil_view_mode') || 'view-grid';
 
-    window.navigateFolder = function(sem, path) {
+    window.navigateFolder = function(sem, path, _fromPopstate) {
+      if (!_fromPopstate) {
+        // Push the CURRENT state first (so Back returns here), then push the new state.
+        history.pushState({ civil_sem: sem, civil_path: path }, '');
+      }
       currentSemPath = path;
       renderSem(sem);
     };
@@ -968,6 +977,30 @@
       localStorage.setItem('civil_view_mode', mode);
       renderSem(activeSem);
     };
+
+    /* ── History / Back-button support ───────────────────────────────── */
+    window.addEventListener('popstate', function(e) {
+      const state = e.state || {};
+      // 1. Close PDF viewer if open
+      if (document.getElementById('pdf-fullscreen').classList.contains('open')) {
+        closePdfViewer();
+        return;
+      }
+      // 2. Close image modal if open
+      if (document.getElementById('modal-image').classList.contains('open')) {
+        closeModal('modal-image');
+        return;
+      }
+      // 3. Navigate to the folder stored in state (or root)
+      if ('civil_path' in state) {
+        currentSemPath = state.civil_path;
+        renderSem(state.civil_sem || activeSem);
+      } else {
+        // Fell back to page history entry or state without civil info — go to folder root
+        currentSemPath = '';
+        renderSem(activeSem);
+      }
+    });
 
     function buildPanels() {
       document.getElementById('sem-panels').innerHTML = Array.from({length:8},(_,i)=>`
@@ -1065,6 +1098,10 @@ if (targetSegs.length && /^semester\s*\d+/i.test(targetSegs[0])) {
 if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
   itSegs.shift();
 }
+// remove "My Drive" root prefix added by the Drive picker
+if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
+  itSegs.shift();
+}
         
         let match = itSegs.slice(0, targetSegs.length).join('/') === targetSegs.join('/');
         if (match) {
@@ -1073,6 +1110,9 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
           } else if (itSegs.length > targetSegs.length) {
             let originalSegs = folderStr.split('/').map(x => x.trim()).filter(x => x);
             if (originalSegs.length && /^semester\s*\d+/i.test(originalSegs[0])) {
+              originalSegs.shift();
+            }
+            if (originalSegs.length && /^my\s*drive$/i.test(originalSegs[0])) {
               originalSegs.shift();
             }
             let nextLevel = originalSegs[targetSegs.length];
@@ -1095,6 +1135,7 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
           <div class="fs-folder-card" onclick="navigateFolder(${n}, '${nextPath}')">
             <i class="fas fa-folder"></i>
             <span>${esc(f)}</span>
+            <button class="rc-btn del admin-only" onclick="event.stopPropagation();showConfirm('Delete folder \'${esc(f)}\' and ALL its files?',()=>deleteFolder(${n},'${nextPath}'))" title="Delete folder"><i class="fas fa-trash-alt"></i></button>
             <i class="fas fa-chevron-right fs-folder-chevron"></i>
           </div>
         `;
@@ -1157,10 +1198,10 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
           await openResource(card.dataset.id, card.dataset.sem);
         });
       });
-      grid.querySelectorAll('.rc-btn.edit').forEach(btn => {
+      grid.querySelectorAll('.resource-card .rc-btn.edit').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id, btn.dataset.sem); });
       });
-      grid.querySelectorAll('.rc-btn.del').forEach(btn => {
+      grid.querySelectorAll('.resource-card .rc-btn.del').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
           showConfirm('Delete this resource?', () => deleteResource(btn.dataset.id, btn.dataset.sem));
@@ -1231,6 +1272,29 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       }
       sems[sem] = (sems[sem]||[]).filter(i=>i.id!==id);
       saveSems(sems); renderSem(sem); toast('Deleted', 'info');
+    }
+    /* Delete all resources whose (normalised) folder path starts with folderPath */
+    async function deleteFolder(sem, folderPath) {
+      const sems = loadSems();
+      const pathLower = folderPath.toLowerCase();
+      const toDelete = (sems[sem]||[]).filter(it => {
+        let f = ((it.folder||'').trim() || `Semester ${sem}/General`).toLowerCase();
+        // normalise: strip semester prefix then My Drive prefix (mirrors renderSem logic)
+        let segs = f.split('/').map(x=>x.trim()).filter(x=>x);
+        if (segs.length && /^semester\s*\d+/i.test(segs[0])) segs.shift();
+        if (segs.length && /^my\s*drive$/i.test(segs[0])) segs.shift();
+        const normalised = segs.join('/');
+        return normalised === pathLower || normalised.startsWith(pathLower + '/');
+      });
+      for (const it of toDelete) {
+        if (it.src && it.src.startsWith('idb:')) {
+          try { await delFile(it.src.slice(4)); } catch(e) {}
+        }
+      }
+      const deleteIds = new Set(toDelete.map(it=>it.id));
+      sems[sem] = (sems[sem]||[]).filter(it=>!deleteIds.has(it.id));
+      saveSems(sems); renderSem(sem);
+      toast(`Deleted folder (${toDelete.length} file${toDelete.length!==1?'s':''})`, 'info');
     }
 
     /* ── Add resource form ─────────────────── */
