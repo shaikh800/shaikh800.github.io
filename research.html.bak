@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research | Md. Shaikh Alam</title>
+  <meta name="description" content="Research hub: browse shared files, upload your own papers or 3D work, and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://accounts.google.com" crossorigin>
+  <link rel="preconnect" href="https://www.googleapis.com" crossorigin>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#f3f1ec">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Research Hub | Md. Shaikh Alam">
+  <meta property="og:description" content="Research hub: browse shared files, upload your own papers or 3D work, and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
+  <meta property="og:image" content="https://mdshaikh.me/assets/images/shaikh.jpg">
+  <meta property="og:url" content="https://mdshaikh.me/research.html">
+  <meta name="twitter:card" content="summary">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    /* ══════════════ RESEARCH PAGE — built on top of site.css tokens ══════════════ */
+
+    .page-title { padding-bottom: 24px; }
+    .page-title h1 { font-size: clamp(30px, 5vw, 48px); margin-bottom: 8px; }
+    .page-title .lead { margin-bottom: 0; }
+    /* ── Phone polish: Shared Files look like the Semester list; no empty band above panels ── */
+    .research-tabs-row:not(:has(.switch-view:not([hidden]):not([style*="display: none"]))) { display: none; }
+    @media (max-width: 640px) {
+      .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
+      #mainSection, #pendingView { margin-top: 0; padding-top: 12px; border-top: 0; }
+    }
+    @media (max-width: 640px) {
+      #pendingView div[style*="gap:10px"] { flex-direction: column; }
+      #pendingView div[style*="gap:10px"] .btn { width: 100%; justify-content: center; white-space: normal; text-align: center; }
+    }
+    .switch-view {
+      font-size: 12.5px; font-weight: 700; color: var(--muted); background: none; border: none;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 0;
+    }
+    .switch-view:hover { color: var(--blue); }
+
+    /* ── Tabs ──
+       The tab row itself duplicates what the sidebar sub-links already do,
+       so it's not shown — switching sections happens from the sidebar only.
+       The buttons stay in the DOM (still driven by hash) just in case, but
+       visually only the "switch view" control remains here. ──────────── */
+    .research-tabs-row {
+      display: flex; align-items: center; justify-content: flex-end; gap: 12px;
+      flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--line);
+    }
+    .research-tabs-row .switch-view { flex-shrink: 0; }
+    @media (max-width: 640px) {
+      .research-tabs-row { margin: 0 0 6px; padding: 0; border: 0; min-height: 0; }
+    }
+    .research-tabs { display: none; }
+    .r-tab {
+      font-family: inherit; font-size: 14px; font-weight: 700; color: var(--muted);
+      background: none; border: none; cursor: pointer; padding: 12px 16px;
+      display: flex; align-items: center; gap: 8px; border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: 0.15s;
+    }
+    .r-tab:hover { color: var(--ink); }
+    .r-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .r-tab .count { background: var(--surface-soft); color: var(--muted); font-size: 11px; padding: 1px 7px; border-radius: 100px; }
+    .r-tab .count.due { background: rgba(239,68,68,0.15); color: #ef4444; font-weight: 800; }
+    .gem-amt { display:inline-flex; align-items:center; justify-content:center; min-width:48px; padding:3px 10px; border-radius:100px; background:var(--surface-soft); color:var(--muted); font-size:12px; font-weight:700; }
+    .gem-amt.on { background: rgba(16,185,129,0.15); color:#0f9d58; }
+    .gem-amt.partial { background: rgba(245,158,11,0.15); color:#f59e0b; }
+    .gem-amt.clickable { cursor:pointer; }
+    .gem-amt.clickable:hover { outline:2px solid var(--blue); outline-offset:1px; }
+    #geminiCycleBox input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    #geminiCycleBox .field label { display:block; margin-bottom:4px; }
+    .r-tab.admin-only { display: none; }
+    body.admin-mode .r-tab.admin-only { display: flex; }
+    .nav-sub a.admin-only { display: none; }
+    body.admin-mode .nav-sub a.admin-only { display: inline-flex; }
+
+    /* ── My Account panel ── */
+    .acct-avatar-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .acct-avatar {
+      width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+      background: var(--surface-soft); color: var(--muted); border: 1px solid var(--line);
+      display: flex; align-items: center; justify-content: center; font-size: 26px;
+    }
+    .acct-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .r-panel { animation: fadeSlideUp .3s var(--ease-out) both; }
+
+    /* ── Toolbar shared by panels ── */
+    .r-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .r-toolbar h2 { margin: 0; font-size: clamp(19px,3vw,24px); }
+    .r-toolbar p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+    .admin-only-inline { display: none !important; }
+    body.admin-mode .admin-only-inline { display: inline-flex !important; }
+
+    /* ── Shared form look (same pattern as the Civil page) ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px;
+      font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink);
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--blue); }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .form-row .form-group { flex: 1; min-width: 160px; }
+
+    /* ── FILE BROWSER (real Drive data, rendered as our own page — never leaves the site) ── */
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; }
+    .breadcrumb a, .breadcrumb span.current { color: var(--ink); font-weight: 600; cursor: pointer; }
+    .breadcrumb a:hover { color: var(--blue); }
+    .breadcrumb i { font-size: 10px; opacity: .5; }
+
+    .drive-row-folder { cursor: pointer; }
+    .drive-row-folder:hover td { background: var(--surface-soft); }
+    .drive-folder-icon { color: var(--muted) !important; }
+    .drive-row-chevron { color: var(--muted); font-size: 12px; }
+
+    /* Drive-style list rows — same look as the Civil "Semester Resources" list */
+    .drive-list { display: flex; flex-direction: column; gap: 8px; }
+    .drive-list:empty { display: none; }
+    .drive-row {
+      display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); transition: all .15s;
+    }
+    .drive-row.drive-row-folder { cursor: pointer; }
+    .drive-row.drive-row-folder:hover { border-color: var(--blue); background: var(--surface-soft); }
+    .drive-row > i.dr-icon { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; color: var(--muted); }
+    .drive-row > i.dr-icon.ft-icon.pdf { color: #ea4335; }
+    .drive-row > i.dr-icon.ft-icon.sheet { color: #0f9d58; }
+    .drive-row > i.dr-icon.ft-icon.slide { color: #f4b400; }
+    .drive-row .dr-name { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+    .drive-row .dr-meta { color: var(--muted); font-size: 12px; flex-shrink: 0; white-space: nowrap; }
+    .drive-row .dr-chev { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+    .drive-row .row-actions { flex-shrink: 0; }
+
+    .file-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .file-table:empty { display: none; }
+    .file-table th {
+      text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+      font-weight: 700; padding: 10px 14px; background: var(--surface-soft); border-bottom: 1px solid var(--line);
+    }
+    .file-table td { padding: 10px 14px; font-size: 13.5px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .file-table tr:last-child td { border-bottom: none; }
+    .file-table tr:hover td { background: var(--surface-soft); }
+    .file-name-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .file-name-cell i { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; }
+    .file-name-cell .fn { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ft-icon.pdf { color: #ea4335; } .ft-icon.sheet { color: #0f9d58; } .ft-icon.slide { color: #f4b400; }
+    .muted-cell { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+    .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .icon-action {
+      width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+      color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12.5px; text-decoration: none;
+    }
+    .icon-action:hover { color: var(--blue); border-color: var(--blue); }
+    .icon-action.danger:hover { color: #ef4444; border-color: #ef4444; }
+
+    @media (max-width: 760px) {
+      .file-table thead { display: none; }
+      .file-table tr { display: grid; grid-template-columns: 1fr; padding: 10px 0; }
+      .file-table td { border-bottom: none; padding: 4px 14px; }
+      .file-table tr:not(:last-child) { border-bottom: 1px solid var(--line); }
+      .row-actions { justify-content: flex-start; margin-top: 4px; }
+    }
+
+    .drive-loading { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+    .drive-empty {
+      text-align: center; padding: 60px 20px; color: var(--muted); background: var(--surface);
+      border: 1px dashed var(--line); border-radius: var(--radius-lg);
+    }
+    .drive-empty i { font-size: 30px; color: #0f9d58; margin-bottom: 12px; display: block; }
+    .drive-empty p { margin: 4px 0; font-size: 13.5px; }
+    .drive-empty-admin { font-size: 12.5px !important; }
+    .drive-hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin: -4px 0 16px; }
+    .gh-sync-details { margin-bottom: 18px; }
+    .gh-sync-details summary { cursor: pointer; font-size: 11.5px; color: var(--muted); font-weight: 600; user-select: none; }
+    .gh-sync-details > div { margin-top: 10px; }
+    .gh-sync-details input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    .gh-sync-details ol { margin: 8px 0 0 18px; padding: 0; font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+    /* ── TEAM UPLOADS ── */
+    .signin-row { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: var(--surface); border: 1px dashed var(--line); border-radius: var(--radius-lg); padding: 30px 20px; margin-bottom: 20px; text-align: center; }
+    .signin-row i { font-size: 26px; color: var(--blue); }
+    .signin-row p { color: var(--muted); font-size: 13px; max-width: 420px; }
+    .user-chip { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; }
+    .user-chip img { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+    .user-chip .tu-name { font-weight: 700; font-size: 13.5px; }
+    .user-chip .tu-email { font-size: 12px; color: var(--muted); }
+    .user-chip > div:nth-child(2) { flex: 1; min-width: 0; }
+    .denied-box { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius); padding: 16px; font-size: 13px; color: var(--ink); margin-bottom: 18px; }
+    .denied-box b { color: #b45309; }
+
+    .upload-form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 24px; }
+    .upload-status { font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+    .upload-status.ok { color: #0f9d58; }
+    .upload-status.err { color: #ef4444; }
+
+    .uploads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 14px; }
+    .upload-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .upload-cat { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); }
+    .upload-card h4 { margin: 0; font-size: 14.5px; line-height: 1.35; overflow-wrap: anywhere; word-break: break-word; }
+    .upload-meta { font-size: 12px; color: var(--muted); }
+    .vis-badge { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 100px; width: fit-content; }
+    .vis-badge.public { background: rgba(16,185,129,0.12); color: #0f9d58; }
+    .vis-badge.private { background: var(--surface-soft); color: var(--muted); }
+    .upload-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; align-items: center; }
+
+    /* ── NOTICE BOARD ── */
+    .notices-grid { display: grid; gap: 10px; }
+    .notice-card {
+      display: flex; gap: 12px; align-items: flex-start; background: var(--surface);
+      border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: var(--radius);
+      padding: 13px 15px; position: relative;
+    }
+    .notice-card.info { border-left-color: var(--blue); }
+    .notice-card.warning { border-left-color: #f59e0b; }
+    .notice-card.urgent { border-left-color: #ef4444; }
+    .notice-card .n-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12.5px; flex-shrink: 0; }
+    .notice-card.info .n-icon { background: rgba(23,22,15,0.1); color: var(--blue); }
+    .notice-card.warning .n-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .notice-card.urgent .n-icon { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .notice-card .n-title { font-weight: 700; font-size: 13.5px; margin-bottom: 2px; }
+    .notice-card .n-text { color: var(--muted); font-size: 12.5px; line-height: 1.55; }
+    .notice-card .n-meta { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .notice-card .n-delete { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--muted); cursor: pointer; opacity: 0; font-size: 13px; }
+    .notice-card:hover .n-delete { opacity: .7; }
+    .notice-card .n-delete:hover { color: #ef4444; opacity: 1; }
+
+    /* ── DRIVE & ACCESS (admin only) ── */
+    .drive-connect {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 10px;
+    }
+    .drive-connect .field { flex: 1; min-width: 220px; }
+    .drive-connect label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+    .drive-connect input { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    .drive-status { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); margin-bottom: 20px; }
+    .drive-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); flex-shrink: 0; }
+    .drive-status.connected .dot { background: #0f9d58; }
+    .drive-status.connected { color: #0f9d58; }
+
+    .member-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+    .member-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; padding: 10px 14px; background: var(--surface-soft); border-bottom: 1px solid var(--line); }
+    .member-table td { padding: 11px 14px; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+    .member-table tr:last-child td { border-bottom: none; }
+    .member-who { display: flex; align-items: center; gap: 10px; }
+    .chat-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .chat-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+    .role-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+    .role-pill.admin { background: rgba(23,22,15,0.1); color: var(--blue); }
+    .role-pill.member { background: var(--surface-soft); color: var(--muted); }
+    .toggle { position: relative; width: 36px; height: 21px; border-radius: 100px; background: var(--line); cursor: pointer; flex-shrink: 0; transition: .15s; display: inline-block; }
+    .toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; transition: .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle.on { background: #10b981; }
+    .toggle.on::after { left: 17px; }
+    .invite-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .invite-row input { flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: inherit; background: var(--surface); color: var(--ink); }
+    @media (max-width: 640px) {
+      .member-table thead { display: none; }
+      .member-table tr { display: grid; grid-template-columns: 1fr 1fr; padding: 10px 14px; gap: 6px; }
+      .member-table td { border-bottom: none; padding: 2px 0; }
+      .member-table tr:not(:last-child) { border-bottom: 1px solid var(--line); }
+    }
+
+    /* ── FOOTNOTE ── */
+    .proto-footnote { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+    /* ── Pagination (shared pattern with Civil page) ── */
+    .pager { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 16px; flex-wrap: wrap; }
+    .pager button { min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .pager button:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+    .pager button.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .pager button:disabled { opacity: .4; cursor: default; }
+    .pager .pg-gap { color: var(--muted); font-size: 13px; padding: 0 2px; }
+
+    /* ── Gemini subscription tracker ── */
+    .gem-dot { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--surface-soft); color: var(--muted); font-size: 11px; }
+    .gem-dot.on { background: rgba(16,185,129,0.15); color: #0f9d58; }
+    .gem-dot.clickable { cursor: pointer; }
+    .gem-dot.clickable:hover { outline: 2px solid var(--blue); outline-offset: 1px; }
+    .gemini-table th:first-child, .gemini-table td:first-child { white-space: nowrap; position: sticky; left: 0; background: var(--surface); }
+    .gemini-table th { white-space: nowrap; }
+    /* keep this one a real scrollable table on phones instead of the stacked member-table layout */
+    @media (max-width: 640px) {
+      .gemini-table.member-table { min-width: 560px; }
+      .gemini-table.member-table thead { display: table-header-group; }
+      .gemini-table.member-table tr { display: table-row; padding: 0; gap: 0; }
+      .gemini-table.member-table td { border-bottom: 1px solid var(--line); padding: 11px 14px; }
+    }
+
+    /* ── Gate: checking / denied states ── */
+    .gate-checking { display: none; padding: 20px 0; }
+    .gate-checking.show { display: block; }
+    .gate-checking i { font-size: 22px; color: var(--blue); margin-bottom: 10px; display: block; }
+    .gate-checking p { color: var(--muted); font-size: 13.5px; }
+    .gate-denied { display: none; max-width: 360px; margin: 0 auto; text-align: left; }
+    .gate-denied.show { display: block; }
+    .gate-denied .gd-box { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: var(--ink); margin-bottom: 12px; }
+
+    /* ══════════════ ENTRY GATE ══════════════ */
+    #roleGate {
+      position: fixed; inset: 0; z-index: 2000; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .gate-card { max-width: 480px; width: 100%; text-align: center; }
+    .gate-card h1 { font-size: clamp(26px,5vw,34px); margin-bottom: 6px; }
+    .gate-card p.sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    .gate-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .gate-options { grid-template-columns: 1fr; } }
+    .gate-opt {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+      padding: 24px 16px; cursor: pointer; transition: .15s; text-align: center;
+    }
+    .gate-opt:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-2px); }
+    .gate-opt i { font-size: 26px; color: var(--blue); margin-bottom: 10px; display: block; }
+    .gate-opt .g-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .gate-opt .g-sub { font-size: 12px; color: var(--muted); }
+
+    .gate-pw-step { display: none; max-width: 340px; width: 100%; margin: 0 auto; text-align: left; }
+    .gate-pw-step.open { display: block; }
+    .gate-options.hidden { display: none; }
+    .gate-pw-step input {
+      width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; font-size: 15px;
+      font-family: inherit; background: var(--surface); color: var(--ink); margin-bottom: 10px; text-align: center; letter-spacing: 1px;
+    }
+    .gate-pw-step input:focus { outline: none; border-color: var(--blue); }
+    .gate-err { color: #ef4444; font-size: 12.5px; min-height: 18px; margin-bottom: 6px; text-align: center; }
+    .gate-back { display: block; text-align: center; font-size: 12.5px; color: var(--muted); background: none; border: none; cursor: pointer; margin-top: 12px; width: 100%; }
+    .gate-back:hover { color: var(--blue); }
+
+    /* ── Admin (lock) access — matches civil.html / modeling.html ── */
+    .admin-fab {
+      position: fixed; bottom: 24px; right: 24px; z-index: 2100;
+      width: 46px; height: 46px; border-radius: 50%; border: none;
+      background: var(--ink); color: #fff; font-size: 16px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25); transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .admin-fab:hover { transform: scale(1.1); }
+    .admin-fab.active { background: var(--blue); }
+    #modal-admin { z-index: 2200; }
+    #modal-gemini-pay { z-index: 2200; }
+
+    /* ── Toast (used mainly to surface a sync save that silently failed) ── */
+    .toast-wrap { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 2400; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+    .toast { padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 20px rgba(0,0,0,0.15); animation: toastIn 0.3s var(--ease-out) both; pointer-events: none; white-space: nowrap; max-width: 90vw; white-space: normal; text-align: center; }
+    .toast.success { background: #10b981; color: #fff; }
+    .toast.error   { background: #ef4444; color: #fff; }
+    .toast.info    { background: var(--ink); color: #fff; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(10px); } }
+    .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .browse-drive-btn:hover { background: rgba(15,157,88,0.08); border-color: #0f9d58; }
+  </style>
+</head>
+<body>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <!-- ══════════════ ENTRY GATE — shown first, every visit ══════════════ -->
+  <div id="roleGate">
+    <div class="gate-card">
+      <i class="fab fa-google-drive" style="font-size:30px;color:#0f9d58;margin-bottom:14px;display:block;"></i>
+      <h1>Research Hub</h1>
+      <p class="sub">Log in or sign up to continue — just your email.</p>
+
+      <div class="gate-pw-step open" id="gateMemberForm">
+        <input type="email" id="memberEmail" placeholder="Your email" autocomplete="email">
+        <input type="password" id="memberPass" placeholder="Choose a password" autocomplete="new-password">
+        <div class="gate-err" id="memberFormErr"></div>
+        <button class="btn primary" style="width:100%;justify-content:center;" id="memberFormBtn"><i class="fas fa-right-to-bracket"></i> Continue</button>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">New here? Fill this in once — the admin will approve your email, and you'll have access on any device.</p>
+      </div>
+
+      <div class="gate-checking" id="gateChecking">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p id="gateCheckingText">Checking…</p>
+      </div>
+
+      <div class="gate-denied" id="gateDenied">
+        <div class="gd-box" id="gateDeniedText"></div>
+        <button class="btn secondary" style="width:100%;justify-content:center;" id="gateDeniedBackBtn"><i class="fas fa-rotate-left"></i> Try again</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="modal-gemini-pay">
+    <div class="modal-box" style="max-width:340px;">
+      <div class="modal-head">
+        <h3><i class="fas fa-money-bill-wave" style="color:var(--blue);margin-right:8px;"></i>Set Payment</h3>
+        <button class="modal-close" onclick="closeModal('modal-gemini-pay')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <label id="gemini-pay-label" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px;"></label>
+        <input type="number" id="gemini-pay-input" min="0" step="0.01" placeholder="Amount (৳)" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);">
+        <p id="gemini-pay-error" style="color:#ef4444;font-size:13px;display:none;margin-top:8px;">Enter a valid amount.</p>
+      </div>
+      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
+        <button class="btn secondary sm" onclick="closeModal('modal-gemini-pay')">Cancel</button>
+        <button class="btn primary sm" id="gemini-pay-save-btn"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="nav-shell">
+      <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+      </button>
+      <a class="brand" href="index.html" aria-label="Md. Shaikh home">
+        <img src="favicon.svg" alt="Logo" style="width:38px;height:38px;border-radius:10px;">
+        <span>Md. Shaikh<small>Portfolio and tools</small></span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="index.html" data-page="index.html" class="nav-link"><i class="fas fa-house"></i> Home</a>
+
+        <div class="nav-group">
+          <div class="nav-group-head">
+            <a href="civil.html" data-page="civil.html" class="nav-link"><i class="fas fa-helmet-safety"></i> Civil</a>
+            <button class="nav-caret" type="button" aria-expanded="false" aria-label="Toggle Civil submenu"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-sub">
+            <a href="civil.html#semester-section">Semester Resources</a>
+            <a href="notice.html#notice-section">Notices</a>
+            <a href="civil.html#quick-tools">Tools</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-head">
+            <a href="modeling.html" data-page="modeling.html" class="nav-link"><i class="fas fa-cube"></i> 3D</a>
+            <button class="nav-caret" type="button" aria-expanded="false" aria-label="Toggle 3D submenu"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-sub">
+            <a href="modeling.html#works-title">All Works</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-head">
+            <a href="academy.html" data-page="academy.html" class="nav-link"><i class="fas fa-graduation-cap"></i> Academy</a>
+            <button class="nav-caret" type="button" aria-expanded="false" aria-label="Toggle Academy submenu"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-sub">
+            <a href="academy.html#exam-tools">Exam Tools</a>
+            <a href="academy.html#access-management">Access &amp; Management</a>
+          </div>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-head">
+            <a href="research.html" data-page="research.html" class="nav-link"><i class="fas fa-flask"></i> Research</a>
+            <button class="nav-caret" type="button" aria-expanded="false" aria-label="Toggle Research submenu"><i class="fas fa-chevron-down"></i></button>
+          </div>
+          <div class="nav-sub">
+            <a href="research.html#account">My Account</a>
+            <a href="research.html#files">Files</a>
+            <a href="research.html#uploads">Team Uploads</a>
+            <a href="research.html#notices">Notice Board</a>
+            <a href="research.html#gemini">Gemini</a>
+            <a href="research.html#access" class="admin-only">Drive &amp; Access</a>
+          </div>
+        </div>
+              <div class="nav-actions">          <a class="act-dark" href="mailto:md.shaikh.alam.007@gmail.com"><i class="fas fa-envelope"></i> Get in touch</a>
+        </div>
+</nav>
+      <div class="nav-scrim" id="navScrim"></div>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <section class="page-title reveal" id="research-hero" hidden data-keep-hidden>
+      <h1>Research Hub</h1>
+      <p class="lead">Browse shared files, upload your own papers or 3D work, and track notices — everything stored on Google Drive.</p>
+    </section>
+
+    <!-- ══ PENDING APPROVAL VIEW — shown instead of the tabs, for a signed-up account the admin hasn't approved yet ══ -->
+    <section class="section" id="pendingView" hidden>
+      <div style="max-width:460px;margin:0 auto;text-align:center;padding:30px 20px;">
+        <i class="fas fa-hourglass-half" style="font-size:30px;color:#f59e0b;margin-bottom:14px;display:block;"></i>
+        <h2 style="margin-bottom:6px;">Waiting for approval</h2>
+        <p class="lead" style="font-size:14px;margin-bottom:18px;">Your request has been sent automatically — it's now waiting under Drive &amp; Access for the admin to approve with one click. Files, Team Uploads, Notice Board and Gemini stay locked until then — come back and check again once you've been approved.</p>
+        <div class="user-chip" style="justify-content:center;" id="pendingChip"></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;">
+          <button class="btn primary sm" id="pendingRecheckBtn" type="button"><i class="fas fa-rotate"></i> I've been approved — check again</button>
+          <button class="btn secondary sm" id="pendingSwitchBtn" type="button"><i class="fas fa-right-left"></i> Not you? Switch view</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;">The admin sees your request on their <b>Drive &amp; Access</b> page and will approve it there &mdash; no email needed. Just come back and tap <i>check again</i> once you've been approved.</p>
+      </div>
+    </section>
+
+    <section class="section" id="mainSection">
+      <div class="research-tabs-row">
+        <div class="research-tabs">
+          <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
+        <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
+        <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
+        <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini <span class="count due" id="geminiDueBadge" style="display:none;"></span></button>
+        <button class="r-tab" data-tab="account"><i class="fas fa-user-gear"></i> My Account</button>
+          <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
+        </div>
+        <button class="switch-view" id="switchViewBtn"><i class="fas fa-right-left"></i> <span id="switchViewLabel">Not you? Switch view</span></button>
+      </div>
+
+      <!-- ══ FILES PANEL — the real connected Google Drive folder, browsed on this page ══ -->
+      <div class="r-panel" id="panel-files">
+        <div class="r-toolbar">
+          <div>
+            <h2>Shared Files</h2>
+            <p>Browse the connected Drive folder right here — nothing jumps to a new tab.</p>
+          </div>
+          <a class="btn secondary sm" id="driveOpenLink" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-up-right-from-square"></i> Open in Drive</a>
+        </div>
+
+        <div id="driveEmpty" class="drive-empty">
+          <i class="fab fa-google-drive"></i>
+          <p id="driveEmptyText">No Drive folder connected yet — check back soon.</p>
+          <p class="drive-empty-admin admin-only-inline">Go to <b>Drive &amp; Access</b> to connect one.</p>
+        </div>
+
+        <div id="driveBrowser" style="display:none;">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <div class="drive-loading" id="driveLoading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
+          <div class="drive-list" id="fileTableBody"></div>
+          <div class="empty-state" id="driveFolderEmpty" style="display:none;text-align:center;padding:30px;color:var(--muted);">This folder is empty.</div>
+        </div>
+      </div>
+
+      <!-- ══ TEAM UPLOADS PANEL ══ -->
+      <div class="r-panel" id="panel-uploads" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>Team Uploads</h2>
+            <p>Sign in with the shared <strong>Turbo Researchers</strong> Google account to upload files to the team Drive.</p>
+          </div>
+        </div>
+
+        <!-- Shown when the user signs in with a Google account other than turbo.researchers@gmail.com -->
+        <div class="denied-box" id="teamMemberUploadNote" hidden></div>
+
+        <div class="signin-row" id="teamSignin">
+          <i class="fab fa-google"></i>
+          <p>Sign in with the shared <strong>Turbo Researchers</strong> account (<code>turbo.researchers@gmail.com</code>) to upload files to the team Drive. All team members use this shared account for uploads.</p>
+          <button class="btn primary sm" id="googleSigninBtn"><i class="fab fa-google"></i> Sign in with Google</button>
+        </div>
+
+        <div class="user-chip" id="teamUserChip" style="display:none;"></div>
+
+        <div class="denied-box" id="teamReconnect" style="display:none;">
+          Your Google sign-in needs a quick refresh before you can upload again.
+          <div style="margin-top:10px;"><button class="btn primary sm" id="teamReconnectBtn"><i class="fab fa-google"></i> Reconnect Google</button></div>
+        </div>
+
+        <div class="upload-form" id="teamUploadForm" style="display:none;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:12px;">Upload something new</div>
+          <div class="form-group">
+            <label>File</label>
+            <input type="file" id="upFile">
+          </div>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="upTitle" placeholder="e.g. Soil Mechanics Lab Paper">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="upCategory">
+                <option value="Research Paper">Research Paper</option>
+                <option value="3D Artwork">3D Artwork</option>
+                <option value="Dataset">Dataset</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Visibility</label>
+              <select id="upVisibility">
+                <option value="private">Private — only me &amp; admin</option>
+                <option value="public">Public — everyone can see</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Folder path <span style="color:var(--muted);font-weight:500;font-size:11px;">(optional — Browse to pick an existing folder inside the shared Files folder)</span></label>
+            <div class="path-input-wrap" style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-soft);overflow:hidden;padding:0 8px;">
+              <i class="fas fa-folder-open" style="color:var(--muted);font-size:13px;margin:0 6px;"></i>
+              <input type="text" id="upDrivePath" placeholder="e.g. Dataset / 2026" style="border:none;outline:none;background:transparent;padding:10px 6px;flex:1;box-shadow:none !important;font-family:monospace;font-size:12.5px;min-width:0;">
+              <input type="hidden" id="upDriveFolderId">
+              <button type="button" id="upBrowseDriveBtn" class="browse-drive-btn" title="Browse your Drive folders"><i class="fab fa-google-drive"></i> Browse</button>
+            </div>
+          </div>
+          <button class="btn primary sm" id="upSubmitBtn"><i class="fas fa-cloud-arrow-up"></i> Upload</button>
+          <div class="upload-status" id="uploadStatus"></div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;" id="uploadDestNote"></p>
+        </div>
+
+        <div style="font-weight:700;font-size:14px;margin:18px 0 10px;">Shared uploads</div>
+        <div class="uploads-grid" id="uploadsGrid"></div>
+      </div>
+
+      <!-- ══ NOTICES PANEL ══ -->
+      <div class="r-panel" id="panel-notices" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>Notice Board</h2>
+            <p>Pinned updates for everyone with access.</p>
+          </div>
+          <button class="btn primary sm admin-only-inline" id="addNoticeBtn"><i class="fas fa-plus"></i> Add Notice</button>
+        </div>
+        <div class="notices-grid" id="noticesGrid"></div>
+        <div class="pager" id="noticesPager"></div>
+      </div>
+
+      <!-- ══ GEMINI SUBSCRIPTION TRACKER PANEL ══ -->
+      <div class="r-panel" id="panel-gemini" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>Gemini Subscription</h2>
+            <p>Tracks who has paid their share of the shared Gemini subscription, by month.</p>
+          </div>
+        </div>
+
+
+        <!-- ══ PAYMENT INFO CARD ══ -->
+        <div class="card" id="geminiPayInfo" style="padding:16px 18px;margin-bottom:16px;border-left:4px solid var(--blue);">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-circle-info" style="color:var(--blue);"></i> How to Pay Your Share
+          </div>
+          <p style="font-size:13px;color:var(--ink);margin-bottom:10px;">
+            Payments are made from Rafat's card, so please send your share to his bank account each month.
+            If you have a bank account, transfer directly — it's easier for him. If not, bKash works too.
+          </p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px 18px;font-size:12.5px;">
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Account Number</span><b>1065346220001</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Account Name</span><b>S. M. Rafat Uddin</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Bank</span><b>BRAC Bank PLC</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Branch</span><b>Faridpur SME/Krishi Br</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">Routing No.</span><b>060290526</b></div>
+            <div><span style="color:var(--muted);display:inline-block;min-width:110px;">SWIFT Code</span><b>BRAKBDDH</b></div>
+          </div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:8px;">After sending, let Rafat know so he can mark your payment in the table below.</p>
+        </div>
+
+        <div class="card" id="geminiCycleBox" style="display:none;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:10px;">Subscription Cycle &amp; Fee</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+            <div class="field" style="flex:1;min-width:130px;">
+              <label style="font-size:11px;color:var(--muted);">Cycle starts</label>
+              <input type="month" id="geminiCycleStartInput">
+            </div>
+            <div class="field" style="flex:1;min-width:130px;">
+              <label style="font-size:11px;color:var(--muted);">Cycle ends</label>
+              <input type="month" id="geminiCycleEndInput">
+            </div>
+            <div class="field" style="flex:1;min-width:110px;">
+              <label style="font-size:11px;color:var(--muted);">Monthly fee (৳)</label>
+              <input type="number" id="geminiFeeInput" min="0" placeholder="e.g. 150">
+            </div>
+            <button class="btn primary sm" onclick="saveGeminiCycle()"><i class="fas fa-check"></i> Save</button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px;">Leave the cycle blank to auto-show the last 6 months. Set a fee to work out who owes what each month.</p>
+          <div id="geminiCycleStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;color:var(--muted);"></div>
+        </div>
+
+        <div id="geminiDueBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);margin-bottom:14px;">
+          <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:18px;"></i>
+          <div><b>Payment due</b> — <span class="due-months"></span></div>
+        </div>
+
+        <div id="geminiAdminTableWrap">
+          <div style="overflow-x:auto;">
+            <table class="member-table gemini-table" id="geminiTable">
+              <thead><tr id="geminiTableHead"></tr></thead>
+              <tbody id="geminiTableBody"></tbody>
+            </table>
+          </div>
+          <p class="drive-hint" style="margin-top:10px;" id="geminiHint">Everyone can see who's paid. Click a cell to mark it (admin only).</p>
+        </div>
+      </div>
+
+      <!-- ══ MY ACCOUNT PANEL (every signed-in user) ══ -->
+      <div class="r-panel" id="panel-account" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>My Account</h2>
+            <p>Your name, photo and WhatsApp number — visible to the rest of the team.</p>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;max-width:420px;">
+          <div class="acct-avatar-row">
+            <div class="acct-avatar" id="acctAvatarPreview"><i class="fas fa-user"></i></div>
+            <div>
+              <button class="btn secondary sm" type="button" id="acctPhotoBtn"><i class="fas fa-camera"></i> Change photo</button>
+              <input type="file" id="acctPhotoInput" accept="image/*" style="display:none;">
+              <p style="font-size:11px;color:var(--muted);margin-top:6px;">JPG or PNG — a square photo looks best.</p>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:18px;">
+            <label>Name</label>
+            <input type="text" id="acctName" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="acctEmail" disabled>
+          </div>
+          <div class="form-group">
+            <label>WhatsApp Number</label>
+            <input type="tel" id="acctWhatsapp" placeholder="e.g. +8801XXXXXXXXX">
+          </div>
+
+          <button class="btn primary sm" id="acctSaveBtn" type="button"><i class="fas fa-check"></i> Save changes</button>
+          <div class="upload-status" id="acctStatus"></div>
+        </div>
+
+        <div class="card" style="padding:16px 20px;max-width:420px;margin-top:16px;border-color:rgba(239,68,68,0.25);">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">Log out</div>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">Signs you out of the Research Hub on this device.</p>
+          <button class="btn secondary sm" id="acctLogoutBtn" type="button"><i class="fas fa-right-from-bracket"></i> Log out</button>
+        </div>
+      </div>
+
+      <!-- ══ DRIVE & ACCESS PANEL (admin only) ══ -->
+      <div class="r-panel admin-only" id="panel-access" hidden>
+        <div class="r-toolbar">
+          <div>
+            <h2>Drive &amp; Access</h2>
+            <p>Pick the Drive folder this hub reads from, and who's allowed to see and upload.</p>
+          </div>
+        </div>
+
+        <div class="drive-connect">
+          <div class="field">
+            <label>Google Drive folder link</label>
+            <input type="text" id="driveLink" placeholder="https://drive.google.com/drive/folders/...">
+          </div>
+        </div>
+        <div class="drive-connect">
+          <div class="field">
+            <label>Google API key (lets this page browse the folder itself)</label>
+            <input type="text" id="apiKeyInput" placeholder="AIzaSy...">
+          </div>
+          <button class="btn primary sm" onclick="saveDriveSettings()"><i class="fas fa-check"></i> Save</button>
+        </div>
+        <div class="drive-status" id="driveStatus"><span class="dot"></span><span id="driveStatusText">No folder connected yet</span></div>
+        <p class="drive-hint">In the real Drive folder's own Share settings, set it to <b>"Anyone with the link — Viewer"</b> — that's what actually controls who can open it. The member list below is just your own record of who you've given access to.</p>
+
+        <details class="gh-sync-details">
+          <summary><i class="fas fa-key" style="margin-right:6px;"></i>How to get the API key (free, 2 minutes)</summary>
+          <div>
+            <ol>
+              <li>Open <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Cloud Console → Drive API</a> (same project your Drive upload button already uses) and click <b>Enable</b>.</li>
+              <li>Go to <b>APIs &amp; Services → Credentials → Create Credentials → API key</b>.</li>
+              <li>Click the new key → <b>Restrict key</b>: under "API restrictions" pick <b>Google Drive API</b> only; under "Application restrictions" pick <b>Websites</b> and add <code>mdshaikh.me/*</code>.</li>
+              <li>Copy the key and paste it above, then Save.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="gh-sync-details">
+          <summary><i class="fas fa-code-branch" style="margin-right:6px;"></i>GitHub Sync Token (optional — makes your changes here visible to everyone, not just this browser)</summary>
+          <div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="password" id="research-gh-token" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" style="flex:1;">
+              <button type="button" class="btn secondary sm" id="ghTokenCheckBtn" style="flex-shrink:0;"><i class="fas fa-rotate"></i> Check</button>
+            </div>
+            <div id="ghTokenStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;"></div>
+            <p style="font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4;">Same token you use on the Civil page — GitHub → Settings → Developer Settings → Personal Access Tokens (Fine-grained) → <b>Contents: Read &amp; Write</b>. Paste it, then tap <b>Check</b> to make sure it works.</p>
+          </div>
+        </details>
+
+        <div id="memberSection" style="margin-top:18px;">
+          <div id="memberLocked" class="drive-empty" style="padding:24px 20px;">
+            <i class="fas fa-lock"></i>
+            <p>Connect a Drive folder above first — then pick who can see it.</p>
+          </div>
+          <div id="memberUnlocked" style="display:none;">
+            <div id="pendingRequestsBox" style="display:none;margin-bottom:18px;">
+              <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">
+                <i class="fas fa-hourglass-half" style="color:#f59e0b;"></i> Pending Requests <span class="count" id="pendingReqCount">0</span>
+              </div>
+              <div id="pendingRequestsList"></div>
+            </div>
+            <table class="member-table">
+              <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th></th></tr></thead>
+              <tbody id="memberTableBody"></tbody>
+            </table>
+            <div class="card" style="padding:16px;">
+              <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Add a member</div>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Use the exact Gmail address they'll sign in with — that's also what lets them upload under Team Uploads.</p>
+              <div class="invite-row">
+                <input type="email" id="inviteEmail" placeholder="friend@gmail.com">
+                <select id="inviteRole" style="max-width:150px;">
+                  <option value="view">View only</option>
+                  <option value="download">Can download</option>
+                </select>
+                <button class="btn primary sm" onclick="inviteMember()"><i class="fas fa-paper-plane"></i> Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="proto-footnote" id="protoFootnote">Files and uploads live on Google Drive — this page only organizes and links to them.</p>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-shell">
+      <span style="font-weight:700;color:var(--ink);">Md. Shaikh Alam</span>
+      <span>Built with GitHub Pages · Faridpur, Bangladesh</span>
+      <a href="admin_panel.html" class="footer-admin-link" title="Admin"><i class="fas fa-lock"></i></a>
+    </div>
+  </footer>
+
+
+  <script src="assets/site.js"></script>
+  <script src="assets/site-auth.js"></script>
+  <script src="assets/site-data.js"></script>
+  <script>
+    /* ═══════════════ SHARED STATE — synced via GitHub, same pattern as the Civil page ═══════════════ */
+    let role = null; // 'admin' | 'member' — set by the gate
+
+    const GITHUB_OWNER  = 'shaikh800';
+    const GITHUB_REPO   = 'shaikh800.github.io';
+    const GITHUB_FILE   = 'research_data.json';
+    const GITHUB_BRANCH = 'main';
+    const CACHE_KEY     = 'research_data_cache_v1';
+
+    // A member's browser has no GitHub token of its own, so writes it makes (its own
+    // profile, its own uploads, an access request) go through this small Cloudflare
+    // Worker instead of the GitHub API directly -- see tools/research-sync-worker/.
+    // Empty until deployed: syncWrite() below quietly no-ops (falls back to a local-only
+    // save) rather than erroring, so nothing breaks before this is wired up.
+    const SYNC_WORKER_URL = 'https://research-sync-worker.md-shaikh-alam-005.workers.dev';
+    const SYNC_CLIENT_KEY = 'M-eYQsJn_Gsu5m-DYh3S2ZjjSWl_Hy-r';
+
+    const GDRIVE_CLIENT_ID    = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
+    const GDRIVE_UPLOAD_SCOPE = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+
+    let driveLinkSaved = '';
+    let driveId = '';
+    let apiKeySaved = '';
+    let folderStack = []; // [{id,name}] — browsing history within the connected folder
+
+    let notices = [
+      { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Browse the Drive folder for shared papers and data, upload your own work under Team Uploads, and check this board for updates.', date: 'Oct 13' },
+    ];
+
+    let members = [
+      { id: 1, name: 'Md. Shaikh Alam (You)', email: 'md.shaikh.alam.007@gmail.com', initials: 'MS', role: 'admin', view: true, download: true },
+    ];
+
+    let uploads = [];
+    let geminiPayments = {}; // { "<email>": { "2026-10": true, ... } }
+    let pendingRequests = []; // [{ email, name, requestedAt }] — signups waiting for admin approval
+    let geminiCycleStart = ''; // 'YYYY-MM', admin-set; '' = fall back to a rolling last-6-months view
+    let geminiCycleEnd   = ''; // 'YYYY-MM'
+    let geminiMonthlyFee = 0;  // ৳ per month; 0 = not tracking amounts yet
+
+    // gateUser = the member/admin identity browsing the hub. A Google Drive sign-in in Team Uploads
+    // must never replace it, otherwise the saved member profile ends up with the Turbo account's email
+    // and the next page load sends the real member to the "Request sent" screen.
+    let gateUser = null;
+    function gateIdentity() { return gateUser || currentUser; }
+    let currentUser = null; // { name, email, picture, token, expiry } -- Google Drive sign-in only — set by Google sign-in
+    let isUploadOnly = false; // true when the signed-in Google user's member record has uploadOnly:true
+
+    const MEMBER_PROFILE_KEY = 'research_member_profile_v1';
+    function saveMemberProfile(p) { try { localStorage.setItem(MEMBER_PROFILE_KEY, JSON.stringify(p)); } catch (e) {} }
+    function loadMemberProfile() { try { return JSON.parse(localStorage.getItem(MEMBER_PROFILE_KEY) || 'null'); } catch (e) { return null; } }
+    function clearMemberProfile() { try { localStorage.removeItem(MEMBER_PROFILE_KEY); } catch (e) {} }
+    function isMemberEmail(email) {
+      if (!email) return false;
+      email = email.toLowerCase();
+      return members.some(m => (m.email || '').toLowerCase() === email);
+    }
+
+    function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function avatarHtml(m) {
+      const bg = m.role === 'admin' ? '' : 'background:#10b981;';
+      const initials = esc(m.initials || '?');
+      if (m.photo) return `<span class="chat-avatar" style="${bg}"><img src="${esc(m.photo)}" onerror="this.outerHTML='${initials}'"></span>`;
+      return `<span class="chat-avatar" style="${bg}">${initials}</span>`;
+    }
+
+    /* ── Pagination (shared util) ── */
+    function pagerRange(current, total) {
+      const delta = 1; const range = [];
+      for (let i = 1; i <= total; i++) { if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) range.push(i); }
+      const withDots = []; let prev = 0;
+      for (const i of range) { if (prev && i - prev > 1) withDots.push('…'); withDots.push(i); prev = i; }
+      return withDots;
+    }
+    function renderPager(containerId, current, total, onPage) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      if (total <= 1) { el.innerHTML = ''; return; }
+      const pages = pagerRange(current, total);
+      el.innerHTML = `<button ${current===1?'disabled':''} data-pg="prev"><i class="fas fa-chevron-left"></i></button>` +
+        pages.map(p => p === '…' ? `<span class="pg-gap">…</span>` : `<button class="${p===current?'active':''}" data-pg="${p}">${p}</button>`).join('') +
+        `<button ${current===total?'disabled':''} data-pg="next"><i class="fas fa-chevron-right"></i></button>`;
+      el.querySelectorAll('button[data-pg]').forEach(b => b.addEventListener('click', () => {
+        const v = b.dataset.pg;
+        onPage(v === 'prev' ? Math.max(1, current - 1) : v === 'next' ? Math.min(total, current + 1) : parseInt(v, 10));
+      }));
+    }
+
+    /* ── Tabs ──
+       Every way of switching tabs (the tab bar, a sidebar link, applyRole() on
+       sign-in, or the browser's own Back/Forward) now goes through ONE path, so
+       the address bar's hash always matches what's actually on screen. Before,
+       only the sidebar links updated the hash (via pushState) -- clicking the
+       tab bar itself changed nothing about the URL, so Back had no real history
+       to return to and just kept landing back on the same tab, looking "stuck". */
+    let _reauthAttempted = false;
+    let _activeTab = ''; // track so we can clear Google when leaving uploads
+    function activateTab(tab) {
+      // Never show the admin-only "access" panel to a non-admin session, even
+      // if the body's admin-mode class (which is what the tab button's own
+      // CSS keys off) were ever out of sync with the real role -- this tab is
+      // the one place with real admin controls (remove member, etc.), so it
+      // gets its own explicit check rather than relying on CSS alone.
+      if (tab === 'access' && role !== 'admin') tab = 'files';
+      if (tab === 'gemini' && isUploadOnly) tab = 'uploads';
+      // Auto-clear Google sign-in when navigating AWAY from the uploads tab
+      if (_activeTab === 'uploads' && tab !== 'uploads' && currentUser && currentUser.token) {
+        clearGoogleSession();
+      }
+      _activeTab = tab;
+      document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
+      const panel = document.getElementById('panel-' + tab);
+      if (panel) panel.hidden = false;
+      if (tab === 'uploads' && !_reauthAttempted && currentUser && !currentUser.token) {
+        _reauthAttempted = true;
+        trySilentReauth();
+      }
+    }
+    function goToTab(tab) {
+      const tabs = ['files', 'uploads', 'notices'].concat(isUploadOnly ? [] : ['gemini']).concat(['account']).concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
+      if (!tabs.includes(tab)) return;
+      if ((window.location.hash || '').replace('#', '') !== tab) {
+        history.pushState('', document.title, window.location.pathname + window.location.search + '#' + tab);
+      }
+      activateTab(tab);
+    }
+    document.querySelectorAll('.r-tab').forEach(btn => {
+      btn.addEventListener('click', () => goToTab(btn.dataset.tab));
+    });
+    window.addEventListener('hashchange', () => {
+      // The hash already changed (typed, a link, or Back/Forward) -- just reflect
+      // it. Never push a new entry here, or pressing Back would instantly push
+      // right back Forward and the button would feel like it does nothing.
+      activateTab((window.location.hash || '').replace('#', ''));
+    });
+    document.querySelectorAll('.nav-sub a[href^="research.html#"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToTab(link.getAttribute('href').split('#')[1]);
+      });
+    });
+
+    /* ── GitHub shared storage (config + catalog — the files themselves live in Drive) ── */
+    function applyData(data) {
+      if (data.driveLink) { driveLinkSaved = data.driveLink; driveId = data.driveId || parseDriveFolderId(data.driveLink); }
+      if (data.apiKey) apiKeySaved = data.apiKey;
+      if (Array.isArray(data.members) && data.members.length) members = data.members;
+      if (Array.isArray(data.notices)) notices = data.notices;
+      if (Array.isArray(data.uploads)) uploads = data.uploads;
+      if (data.geminiPayments) geminiPayments = data.geminiPayments;
+      if (Array.isArray(data.pendingRequests)) pendingRequests = data.pendingRequests;
+      if (typeof data.geminiCycleStart === 'string') geminiCycleStart = data.geminiCycleStart;
+      if (typeof data.geminiCycleEnd === 'string') geminiCycleEnd = data.geminiCycleEnd;
+      if (typeof data.geminiMonthlyFee === 'number') geminiMonthlyFee = data.geminiMonthlyFee;
+    }
+    async function fetchFromGitHub() {
+      try {
+        const res = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        applyData(data);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        return true;
+      } catch { return false; }
+    }
+    function loadFromCache() {
+      try { const d = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (d) applyData(d); } catch {}
+    }
+    async function pushToGitHub() {
+      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, pendingRequests, geminiCycleStart, geminiCycleEnd, geminiMonthlyFee, updated: new Date().toISOString() };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      const token = localStorage.getItem('site_gh_token');
+      if (!token && !siteIsAdmin()) return { ok: false, reason: 'no-token' };
+      // Re-reads the latest research_data.json right before writing (so changes made by members
+      // through the sync Worker in the meantime are seen) and refuses a save that would wipe
+      // several items at once.
+      const r = await siteDataUpdate(token, d => {
+        Object.keys(d).forEach(k => { delete d[k]; });
+        Object.assign(d, data);
+      }, 'Update research hub data', { file: GITHUB_FILE });
+      if (r.ok) return { ok: true, reason: null };
+      if (/\((401|403)\)/.test(r.error || '')) return { ok: false, reason: 'bad-token' };
+      return { ok: false, reason: 'push-failed', message: r.error };
+    }
+
+    // Writes one specific, limited change through the sync Worker -- for anyone without
+    // their own GitHub token (i.e. every member). See tools/research-sync-worker/.
+    async function syncWrite(action, payload) {
+      if (!SYNC_WORKER_URL) return { ok: false, reason: 'worker-not-configured' };
+      try {
+        const res = await fetch(SYNC_WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Client-Key': SYNC_CLIENT_KEY },
+          body: JSON.stringify({ action, payload }),
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok && data.ok === true, reason: data.error };
+      } catch (e) {
+        return { ok: false, reason: 'network' };
+      }
+    }
+    // Saves a change by whichever path can actually reach GitHub right now: this
+    // browser's own admin token if it has one, otherwise the sync Worker above.
+    async function syncChange(action, payload) {
+      if (localStorage.getItem('site_gh_token') || siteIsAdmin()) return pushToGitHub();
+      return syncWrite(action, payload);
+    }
+
+    /* ── Toast + sync-result reporting ──
+       pushToGitHub()/syncChange() used to be fire-and-forget from every admin
+       action (remove member, add notice, etc.): the on-screen list updated
+       immediately from local state, but if the actual save to GitHub failed
+       (no token saved in this browser, an expired token, or no network) that
+       failure was silent -- the change just quietly reverted the next time
+       the page re-fetched the shared data, with no explanation. Every call
+       site below now awaits the result and reports it here. */
+    function toast(msg, type, ms) {
+      const wrap = document.getElementById('toast-wrap');
+      if (!wrap) return;
+      const el = document.createElement('div');
+      el.className = `toast ${type || 'info'}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => { el.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => el.remove(), 300); }, ms || 3200);
+    }
+    function reportSyncResult(result, okMsg) {
+      if (result && result.ok) {
+        if (okMsg) toast(okMsg, 'success');
+        return true;
+      }
+      const reason = (result && result.reason) || 'unknown';
+      const msg = reason === 'no-token' ? "Not saved -- enter your GitHub token under Drive & Access first."
+        : reason === 'bad-token' ? "Not saved -- your GitHub token is invalid or expired."
+        : reason === 'network' ? "Not saved -- couldn't reach GitHub, check your connection."
+        : reason === 'worker-not-configured' ? "Not saved -- the sync service isn't set up for this browser."
+        : "Not saved -- the change will be lost on refresh until this is retried.";
+      toast(msg, 'error', 5000);
+      return false;
+    }
+
+    /* ── Drive browser — real Drive data, rendered as our own page (no iframe, no new tab) ── */
+    function parseDriveFolderId(input) {
+      input = (input || '').trim();
+      let m = input.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
+      if (m) return m[1];
+      m = input.match(/[?&]id=([a-zA-Z0-9_-]{10,})/);
+      if (m) return m[1];
+      if (/^[a-zA-Z0-9_-]{10,}$/.test(input)) return input;
+      return '';
+    }
+    function fileIconClass(mime) {
+      mime = mime || '';
+      if (mime.includes('folder')) return 'fa-folder';
+      if (mime.includes('pdf')) return 'fa-file-pdf ft-icon pdf';
+      if (mime.includes('spreadsheet') || mime.includes('excel') || mime.includes('csv')) return 'fa-file-excel ft-icon sheet';
+      if (mime.includes('presentation') || mime.includes('powerpoint')) return 'fa-file-powerpoint ft-icon slide';
+      if (mime.includes('image')) return 'fa-file-image';
+      if (mime.includes('document') || mime.includes('word')) return 'fa-file-word';
+      if (mime.includes('zip') || mime.includes('compressed')) return 'fa-file-zipper';
+      return 'fa-file';
+    }
+    function fmtSize(bytes) {
+      if (!bytes) return '—';
+      bytes = Number(bytes);
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+    }
+    async function driveListFolder(folderId) {
+      const key = (apiKeySaved || '').trim();
+      if (!key) throw new Error('no-api-key');
+      const q = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
+      const fields = encodeURIComponent('files(id,name,mimeType,webViewLink,webContentLink,modifiedTime,size)');
+      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=folder,name&pageSize=200&key=${key}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message || 'drive-error');
+      return data.files || [];
+    }
+    function renderBreadcrumb() {
+      const bc = document.getElementById('breadcrumb');
+      bc.innerHTML = folderStack.map((f, i) => {
+        const isLast = i === folderStack.length - 1;
+        const prefix = i === 0 ? '<i class="fab fa-google-drive" style="color:#0f9d58;"></i>&nbsp; ' : '<i class="fas fa-chevron-right"></i> ';
+        return prefix + (isLast ? `<span class="current">${esc(f.name)}</span>` : `<a onclick="jumpToFolder(${i})">${esc(f.name)}</a>`);
+      }).join(' ');
+    }
+    function jumpToFolder(i) { folderStack = folderStack.slice(0, i + 1); loadCurrentFolder(); }
+    function openSubfolder(id, name) { folderStack.push({ id, name }); loadCurrentFolder(); }
+    async function loadCurrentFolder() {
+      renderBreadcrumb();
+      const current = folderStack[folderStack.length - 1];
+      const openLink = document.getElementById('driveOpenLink');
+      openLink.href = `https://drive.google.com/drive/folders/${current.id}`;
+      openLink.style.display = '';
+      document.getElementById('driveLoading').style.display = 'block';
+      document.getElementById('fileTableBody').innerHTML = '';
+      document.getElementById('driveFolderEmpty').style.display = 'none';
+      try {
+        const items = await driveListFolder(current.id);
+        document.getElementById('driveLoading').style.display = 'none';
+        const folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+        const files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+        const fmtDate = t => t ? new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+        const folderRows = folders.map(f => `
+          <div class="drive-row drive-row-folder" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
+            <i class="fas fa-folder dr-icon"></i>
+            <span class="dr-name">${esc(f.name)}</span>
+            <span class="dr-meta">${fmtDate(f.modifiedTime)}</span>
+            <i class="fas fa-chevron-right dr-chev"></i>
+          </div>`).join('');
+        const fileRows = files.map(f => `
+          <div class="drive-row drive-row-file">
+            <i class="fas ${fileIconClass(f.mimeType)} dr-icon"></i>
+            <span class="dr-name">${esc(f.name)}</span>
+            <span class="dr-meta">${[fmtDate(f.modifiedTime), f.size ? fmtSize(f.size) : ''].filter(Boolean).join(' · ')}</span>
+            <div class="row-actions">
+              ${f.webViewLink ? `<a class="icon-action" title="Open" href="${f.webViewLink}" target="_blank" rel="noopener"><i class="fas fa-eye"></i></a>` : ''}
+              ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
+            </div>
+          </div>`).join('');
+        document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
+        if (!folders.length && !files.length) document.getElementById('driveFolderEmpty').style.display = 'block';
+        else document.getElementById('driveFolderEmpty').style.display = 'none';
+      } catch (e) {
+        document.getElementById('driveLoading').style.display = 'none';
+        document.getElementById('driveFolderEmpty').style.display = 'block';
+        document.getElementById('driveFolderEmpty').textContent = "Couldn't load this folder — check the API key, and make sure the Drive folder is shared as \"Anyone with the link.\"";
+      }
+    }
+    function renderDriveBrowser() {
+      const empty = document.getElementById('driveEmpty');
+      const browser = document.getElementById('driveBrowser');
+      const openLink = document.getElementById('driveOpenLink');
+      if (!driveId || !(apiKeySaved || '').trim()) {
+        empty.style.display = 'block'; browser.style.display = 'none'; openLink.style.display = 'none';
+        document.getElementById('driveEmptyText').textContent = driveId
+          ? 'Drive folder connected, but it needs an API key to browse here — admin can add one in Drive & Access.'
+          : 'No Drive folder connected yet — check back soon.';
+        return;
+      }
+      empty.style.display = 'none'; browser.style.display = 'block';
+      folderStack = [{ id: driveId, name: 'Shared Files' }];
+      loadCurrentFolder();
+    }
+
+    /* ── Google sign-in (Team Uploads' own Drive auth, separate from the gate) ── */
+    let _uploadTokenClient = null;
+    // True once this page load has actually completed a Drive-scope consent at least
+    // once. Only then is it safe to ask Google for a *silent* (prompt:'') token — before
+    // that, Google can't silently grant a scope nobody has agreed to yet, so a silent
+    // request just fails with no visible dialog at all. That's the bug this used to hit:
+    // the old code decided silent-vs-consent from whether the gate identity (currentUser)
+    // existed, which is true for every signed-in member/admin — so "Sign in with Google" /
+    // "Reconnect Google" always tried silently and looked like it did nothing ("cancelled").
+    let _driveAuthGranted = false;
+    function initUploadAuth() {
+      if (_uploadTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
+      _uploadTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: GDRIVE_UPLOAD_SCOPE,
+        callback: () => {},
+        // Fires when the Google window is closed or fails to open. Without this, _authInFlight
+        // stayed true and the sign-in button stopped responding until a full page refresh.
+        error_callback: () => { _authInFlight = false; renderTeamTab(); }
+      });
+    }
+    window.addEventListener('load', initUploadAuth);
+    function waitForTokenClient(timeoutMs) {
+      timeoutMs = timeoutMs || 8000;
+      return new Promise(resolve => {
+        const start = Date.now();
+        (function poll() {
+          if (_uploadTokenClient) return resolve(true);
+          initUploadAuth();
+          if (_uploadTokenClient) return resolve(true);
+          if (Date.now() - start > timeoutMs) return resolve(false);
+          setTimeout(poll, 150);
+        })();
+      });
+    }
+
+    let _authInFlight = false; // guards against trySilentReauth and signInWithGoogle both
+                                // calling requestAccessToken on the same shared client at once
+    async function signInWithGoogle() {
+      if (_authInFlight) return;
+      const ready = await waitForTokenClient();
+      if (!ready) { toast("Google sign-in didn't load. Check your connection and try again.", 'error', 5000); return; }
+      _authInFlight = true;
+      _uploadTokenClient.callback = async (resp) => {
+        _authInFlight = false;
+        if (resp.error) {
+          toast("Google sign-in was closed before it finished. Tap Sign in with Google to try again.", 'error', 5000);
+          renderTeamTab();
+          return;
+        }
+        _driveAuthGranted = true;
+        const token = resp.access_token;
+        try {
+          const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(r => r.json());
+          currentUser = { name: info.name || info.email, email: (info.email || '').toLowerCase(), picture: info.picture || '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+        } catch (e) {
+          currentUser = { name: 'Signed in', email: '', picture: '', token, expiry: Date.now() + (resp.expires_in - 60) * 1000 };
+        }
+        // Drive identity only. Do NOT save this to the member profile: it is a different account.
+        renderTeamTab();
+      };
+      _uploadTokenClient.requestAccessToken({ prompt: _driveAuthGranted ? '' : 'consent' });
+    }
+    /* clearGoogleSession: clears only the Google OAuth token, keeping the gate session intact.
+       Called when the user leaves the upload tab, so they're automatically signed out of Google
+       and returned to their "default" gate-session state next time they visit the upload tab. */
+    function clearGoogleSession() {
+      if (!currentUser) return;
+      if (currentUser.token && window.google && window.google.accounts) {
+        try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
+      }
+      currentUser.token = null;
+      currentUser.expiry = 0;
+      _driveAuthGranted = false;
+      renderTeamTab();
+    }
+
+    function signOutGoogle() {
+      if (currentUser && currentUser.token && window.google && window.google.accounts) {
+        try { google.accounts.oauth2.revoke(currentUser.token, () => {}); } catch (e) {}
+      }
+      if (role === 'member') {
+        currentUser = null;
+        gateUser = null;
+        clearMemberProfile();
+        role = null;
+        showGateOptions();
+        gateEl.style.display = 'flex';
+        return;
+      }
+      currentUser = null;
+      renderTeamTab();
+    }
+    function isAuthorizedUploader() {
+      // Upload requires being signed in via Google as the shared Turbo Researchers account.
+      // The gate role just needs to be member or admin — but the Google sign-in must be turbo.
+      if (!currentUser || !currentUser.token || Date.now() > currentUser.expiry - 5000) return false;
+      return (currentUser.email || '').toLowerCase() === 'turbo.researchers@gmail.com';
+    }
+
+    /* ── Gate: simple name + email + password sign-in (no Google needed to get past the gate) ── */
+    async function sha256Hex(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function submitMemberForm() {
+      const email = document.getElementById('memberEmail').value.trim().toLowerCase();
+      const name = email.split('@')[0];
+      const pass = document.getElementById('memberPass').value;
+      const errEl = document.getElementById('memberFormErr');
+      errEl.textContent = '';
+      if (!email || !email.includes('@')) { errEl.textContent = 'Enter a valid email.'; return; }
+      if (!pass || pass.length < 4) { errEl.textContent = 'Password must be at least 4 characters.'; return; }
+      showGateChecking('Checking access…');
+      const passwordHash = await sha256Hex(email + ':' + pass);
+      await fetchFromGitHub(); // make sure we have the freshest member list before deciding
+      gateUser = { name, email, picture: '', token: null, expiry: 0 };
+      saveMemberProfile({ email, name, picture: '', passwordHash });
+      const alreadyMember = isMemberEmail(email);
+      if (!alreadyMember) addPendingRequest(name, email);
+      enterAs(alreadyMember ? 'member' : 'pending');
+    }
+    async function trySilentReauth() {
+      // Nothing to silently refresh until Drive consent has actually been granted once
+      // this page load (see _driveAuthGranted above) — attempting it before that always
+      // fails instantly with no dialog, so there's no point trying, and it would also race
+      // with a manual "Sign in with Google" tap on the same shared token client.
+      if (!_driveAuthGranted || _authInFlight) return;
+      const ready = await waitForTokenClient();
+      if (!ready || !currentUser) return;
+      _authInFlight = true;
+      _uploadTokenClient.callback = (resp) => {
+        _authInFlight = false;
+        if (resp.error) return; // fine — they can still browse; uploading will ask them to reconnect
+        currentUser.token = resp.access_token;
+        currentUser.expiry = Date.now() + (resp.expires_in - 60) * 1000;
+        renderTeamTab();
+      };
+      try { _uploadTokenClient.requestAccessToken({ prompt: '' }); } catch (e) { _authInFlight = false; }
+    }
+
+    /* ── Drive upload helpers (uploader's own Drive, drive.file scope only) ── */
+    async function driveApiCall(method, endpoint, body, token, isUpload) {
+      const base = isUpload ? 'https://www.googleapis.com/upload/drive/v3' : 'https://www.googleapis.com/drive/v3';
+      const res = await fetch(base + endpoint, {
+        method,
+        headers: { Authorization: 'Bearer ' + token, ...(body && !isUpload ? { 'Content-Type': 'application/json' } : {}) },
+        body: body ? (isUpload ? body : JSON.stringify(body)) : undefined
+      });
+      return res.json();
+    }
+    async function findOrCreateFolder(name, parentId, token) {
+      const safeName = name.replace(/'/g, "\\'");
+      const q = `name='${safeName}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
+      const list = await driveApiCall('GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, null, token);
+      if (list.error) throw new Error(list.error.message || `Can't see that folder (check Drive sharing permissions)`);
+      if (list.files && list.files.length) return list.files[0].id;
+      const folder = await driveApiCall('POST', '/files', { name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] }, token);
+      if (!folder.id) throw new Error((folder.error && folder.error.message) || `Can't create "${name}" there (the admin may need to share that Drive folder as Editor, not just Viewer)`);
+      return folder.id;
+    }
+    function setUploadStatus(msg, cls) {
+      const el = document.getElementById('uploadStatus');
+      el.textContent = msg; el.className = 'upload-status' + (cls ? ' ' + cls : '');
+    }
+    async function submitUpload() {
+      if (!isAuthorizedUploader()) return;
+      const fileInput = document.getElementById('upFile');
+      const file = fileInput.files[0];
+      const title = document.getElementById('upTitle').value.trim();
+      const category = document.getElementById('upCategory').value;
+      const visibility = document.getElementById('upVisibility').value;
+      if (!file) { setUploadStatus('Choose a file first.', 'err'); return; }
+      if (!title) { setUploadStatus('Give it a title.', 'err'); return; }
+      if (!currentUser || Date.now() > currentUser.expiry - 5000) {
+        setUploadStatus('Your sign-in expired — click Sign in with Google again, then retry.', 'err');
+        return;
+      }
+      const pathOverride = document.getElementById('upDrivePath').value;
+      const pickedFolderId = document.getElementById('upDriveFolderId').value;
+      setUploadStatus('Uploading to your Drive…', '');
+      try {
+        const token = currentUser.token;
+        let parentId;
+        if (pickedFolderId) {
+          // Picked an exact folder via Browse Drive (could be anywhere the
+          // uploader has access to, including a subfolder of the shared Files
+          // folder) -- upload straight into it, no re-creation / re-nesting.
+          parentId = pickedFolderId;
+        } else {
+          // Default destination: inside the SAME shared Drive folder the Files
+          // tab browses (driveId), under a category subfolder -- so an upload
+          // shows up right there in Files for everyone, instead of landing in
+          // the uploader's own separate personal Drive. Only falls back to a
+          // personal "Research Hub Uploads" folder if the site has no shared
+          // Files folder configured at all yet.
+          const anchorId = driveId || await findOrCreateFolder('Research Hub Uploads', 'root', token);
+          const folders = (pathOverride && pathOverride.trim())
+            ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
+            : [category];
+          if (!folders.length) folders.push(category);
+          parentId = anchorId;
+          for (const folderName of folders) {
+            parentId = await findOrCreateFolder(folderName, parentId, token);
+          }
+        }
+        const meta = JSON.stringify({ name: file.name, parents: [parentId] });
+        const boundary = '-------research_upload_boundary';
+        const bodyStart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`;
+        const bodyEnd = `\r\n--${boundary}--`;
+        const bodyBlob = new Blob([bodyStart, file, bodyEnd]);
+        const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+          body: bodyBlob
+        });
+        const uploaded = await uploadRes.json();
+        if (!uploaded.id) throw new Error((uploaded.error && uploaded.error.message) || 'Upload failed.');
+        if (visibility === 'public') {
+          await driveApiCall('POST', `/files/${uploaded.id}/permissions`, { role: 'reader', type: 'anyone' }, token);
+        }
+        const newUpload = {
+          id: uploaded.id, title, category, visibility,
+          uploaderName: currentUser.name, uploaderEmail: currentUser.email,
+          link: `https://drive.google.com/file/d/${uploaded.id}/view`,
+          date: new Date().toISOString()
+        };
+        uploads.unshift(newUpload);
+        fileInput.value = ''; document.getElementById('upTitle').value = ''; document.getElementById('upDrivePath').value = ''; document.getElementById('upDriveFolderId').value = '';
+        setUploadStatus('Uploaded ✓', 'ok');
+        renderUploads();
+        await syncChange('addUpload', newUpload);
+      } catch (e) {
+        setUploadStatus('Upload failed: ' + (e.message || 'try again'), 'err');
+      }
+    }
+    async function removeUpload(id) {
+      const u = uploads.find(x => x.id === id);
+      if (!u) return;
+      const isOwner = currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase();
+      if (isOwner && currentUser.token) {
+        try { await driveApiCall('DELETE', `/files/${id}`, null, currentUser.token); } catch (e) {}
+      }
+      uploads = uploads.filter(x => x.id !== id);
+      renderUploads();
+      syncChange('removeUpload', { email: (currentUser && currentUser.email) || '', id });
+    }
+    async function shareUpload(id) {
+      const u = uploads.find(x => x.id === id);
+      if (!u || !u.link) return;
+      if (navigator.share) {
+        try { await navigator.share({ title: u.title, url: u.link }); return; }
+        catch (e) { if (e && e.name === 'AbortError') return; }
+      }
+      try {
+        await navigator.clipboard.writeText(u.link);
+        toast(u.visibility === 'public' ? 'Link copied' : 'Link copied \u2014 only people the file is shared with can open it', 'success');
+      } catch (e) {
+        toast("Couldn't copy the link here. Use Open and copy it from Drive.", 'error', 4000);
+      }
+    }
+    function visibleUploads() {
+      return uploads.filter(u => u.visibility === 'public' || role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase()));
+    }
+    function renderUploads() {
+      const grid = document.getElementById('uploadsGrid');
+      const list = visibleUploads();
+      grid.innerHTML = list.length ? list.map(u => {
+        const canRemove = role === 'admin' || (currentUser && currentUser.email && currentUser.email === (u.uploaderEmail || '').toLowerCase());
+        return `
+        <div class="upload-card">
+          <div class="upload-cat">${esc(u.category)}</div>
+          <h4>${esc(u.title)}</h4>
+          <div class="upload-meta">${esc(u.uploaderName || 'Unknown')} · ${new Date(u.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+          <span class="vis-badge ${u.visibility}">${u.visibility === 'public' ? 'Public' : 'Private'}</span>
+          <div class="upload-actions">
+            <a class="btn secondary sm" href="${esc(u.link)}" target="_blank" rel="noopener"><i class="fas fa-up-right-from-square"></i> Open</a>
+            <button class="btn secondary sm" onclick="shareUpload('${esc(u.id)}')"><i class="fas fa-share-nodes"></i> Share</button>
+            ${canRemove ? `<button class="icon-action danger" title="Remove" onclick="removeUpload('${esc(u.id)}')"><i class="fas fa-trash"></i></button>` : ''}
+          </div>
+        </div>`;
+      }).join('') : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);grid-column:1/-1;">Nothing uploaded yet.</div>';
+    }
+    function renderTeamTab() {
+      const signinArea = document.getElementById('teamSignin');
+      const chip = document.getElementById('teamUserChip');
+      const formArea = document.getElementById('teamUploadForm');
+      const reconnectArea = document.getElementById('teamReconnect');
+      const wrongAccNote = document.getElementById('teamMemberUploadNote');
+      const TURBO_EMAIL = 'turbo.researchers@gmail.com';
+
+      const hasGoogleToken = currentUser && currentUser.token && Date.now() < currentUser.expiry - 5000;
+      const isTurboAccount = currentUser && (currentUser.email || '').toLowerCase() === TURBO_EMAIL;
+
+      // Hide everything by default, then show the right state
+      signinArea.style.display = 'none'; chip.style.display = 'none';
+      formArea.style.display = 'none'; reconnectArea.style.display = 'none';
+      if (wrongAccNote) wrongAccNote.hidden = true;
+
+      if (!currentUser || !currentUser.token) {
+        // Not signed in with Google — show sign-in prompt (open to all members)
+        signinArea.style.display = 'flex';
+      } else if (!isTurboAccount) {
+        // Signed in with a DIFFERENT Google account — show error, let them sign out & retry
+        chip.style.display = 'flex';
+        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
+          <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
+          <button class="btn secondary sm" onclick="clearGoogleSession()">Switch account</button>`;
+        if (wrongAccNote) {
+          wrongAccNote.hidden = false;
+          wrongAccNote.innerHTML = `<i class="fas fa-triangle-exclamation" style="margin-right:6px;color:#f59e0b;"></i>
+            File uploads must go through the shared <strong>Turbo Researchers</strong> account (<code>${TURBO_EMAIL}</code>).
+            Click <strong>Switch account</strong> above, then sign in again with that account.`;
+        }
+      } else {
+        // Signed in as turbo — show chip + form (or reconnect if token stale)
+        chip.style.display = 'flex';
+        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
+          <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
+          <button class="btn secondary sm" onclick="clearGoogleSession()">Sign out</button>`;
+        if (hasGoogleToken) { formArea.style.display = 'block'; reconnectArea.style.display = 'none'; }
+        else { formArea.style.display = 'none'; reconnectArea.style.display = 'block'; }
+      }
+      const destNote = document.getElementById('uploadDestNote');
+      if (destNote) {
+        destNote.innerHTML = driveId
+          ? "By default, uploads go straight into the shared <b>Files</b> folder (under a folder named after the category) so everyone can see them there — use Browse to pick a different existing folder instead. This needs the admin to have shared that Drive folder as Editor, not just Viewer; if an upload fails, that's the first thing to check."
+          : "Uploads go into your own Google Drive, inside a &quot;Research Hub Uploads&quot; folder — not the admin's. You remain the owner and can delete it anytime, from here or from Drive.";
+      }
+      renderUploads();
+    }
+    document.getElementById('googleSigninBtn').addEventListener('click', signInWithGoogle);
+    document.getElementById('teamReconnectBtn').addEventListener('click', signInWithGoogle);
+    document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
+
+    // Browse Drive button -- same shared DrivePicker used on Civil/3D Portfolio.
+    // Rooted at the SAME shared Files folder the Files tab browses (driveId),
+    // so an uploader sees the real existing folders (Basic, GeoTech, FEC Thesis
+    // Papers, ...) and the file lands right there in Files -- not off in their
+    // own separate personal Drive. Falls back to the uploader's own Drive root
+    // only if the site has no shared Files folder configured yet.
+    // Note: browsing it needs only the folder's normal "anyone with the link"
+    // view access (same as Files tab); actually uploading into it needs the
+    // admin to have shared that folder as Editor, not just Viewer.
+    document.getElementById('upBrowseDriveBtn').addEventListener('click', () => {
+      if (!isAuthorizedUploader() || !currentUser || Date.now() > currentUser.expiry - 5000) {
+        alert('Sign in with Google first.'); return;
+      }
+      DrivePicker.open({
+        token: currentUser.token,
+        rootId: driveId || 'root',
+        rootLabel: driveId ? 'Shared Files' : 'My Drive',
+        onChoose: (path, folderId) => {
+          document.getElementById('upDrivePath').value = path;
+          document.getElementById('upDriveFolderId').value = folderId || '';
+        }
+      });
+    });
+    // Typing a path by hand means "build/find this by name" again, not "use the
+    // folder I browsed to" -- so a manual edit clears any picked folder id.
+    document.getElementById('upDrivePath').addEventListener('input', () => {
+      document.getElementById('upDriveFolderId').value = '';
+    });
+
+    /* ── Notices ── */
+    let noticePage = 1;
+    const NOTICE_PAGE_SIZE = 5;
+    function renderNotices() {
+      const grid = document.getElementById('noticesGrid');
+      const totalPages = Math.max(1, Math.ceil(notices.length / NOTICE_PAGE_SIZE));
+      if (noticePage > totalPages) noticePage = totalPages;
+      const pageItems = notices.slice((noticePage - 1) * NOTICE_PAGE_SIZE, noticePage * NOTICE_PAGE_SIZE);
+      grid.innerHTML = pageItems.length ? pageItems.map(n => `
+          <div class="notice-card ${n.type}">
+            <div class="n-icon"><i class="fas ${n.type === 'urgent' ? 'fa-triangle-exclamation' : n.type === 'warning' ? 'fa-circle-exclamation' : 'fa-circle-info'}"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="n-title">${esc(n.title)}</div>
+              <div class="n-text">${esc(n.text)}</div>
+              <div class="n-meta">${n.date}</div>
+            </div>
+            <button class="n-delete admin-only-inline" onclick="deleteNotice(${n.id})"><i class="fas fa-trash"></i></button>
+          </div>`).join('')
+        : '<div class="empty-state" style="text-align:center;padding:30px;color:var(--muted);">No notices yet.</div>';
+      document.getElementById('noticeCount').textContent = notices.length;
+      renderPager('noticesPager', noticePage, totalPages, p => { noticePage = p; renderNotices(); });
+    }
+    async function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); reportSyncResult(await pushToGitHub()); }
+    async function saveNotice() {
+      const title = document.getElementById('noticeTitle').value.trim();
+      const text = document.getElementById('noticeText').value.trim();
+      const type = document.getElementById('noticeType').value;
+      if (!title || !text) return;
+      notices.unshift({ id: Date.now(), type, title, text, date: 'Just now' });
+      document.getElementById('noticeTitle').value = '';
+      document.getElementById('noticeText').value = '';
+      closeModal('modalNotice');
+      noticePage = 1;
+      renderNotices();
+      reportSyncResult(await pushToGitHub(), 'Notice posted');
+    }
+
+    /* ── Gemini subscription tracker ── */
+    function geminiMonthKeys() {
+      const out = [];
+      if (geminiCycleStart && geminiCycleEnd) {
+        let [sy, sm] = geminiCycleStart.split('-').map(Number);
+        const [ey, em] = geminiCycleEnd.split('-').map(Number);
+        let y = sy, m = sm, guard = 0;
+        while ((y < ey || (y === ey && m <= em)) && guard < 60) {
+          const dt = new Date(y, m - 1, 1);
+          out.push({ key: y + '-' + String(m).padStart(2, '0'), label: dt.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) });
+          m++; if (m > 12) { m = 1; y++; }
+          guard++;
+        }
+        if (out.length) return out;
+      }
+      // fallback: rolling last 6 months ending this month (cycle not set yet)
+      const base = new Date(); base.setDate(1);
+      for (let i = 5; i >= 0; i--) {
+        const dt = new Date(base.getFullYear(), base.getMonth() - i, 1);
+        out.push({ key: dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'), label: dt.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }) });
+      }
+      return out;
+    }
+    async function saveGeminiCycle() {
+      if (role !== 'admin') return;
+      geminiCycleStart = document.getElementById('geminiCycleStartInput').value || '';
+      geminiCycleEnd   = document.getElementById('geminiCycleEndInput').value || '';
+      geminiMonthlyFee = parseFloat(document.getElementById('geminiFeeInput').value) || 0;
+      renderGeminiTab();
+      const result = await pushToGitHub();
+      const status = document.getElementById('geminiCycleStatus');
+      if (result.ok) {
+        if (status) status.textContent = 'Saved \u2713';
+      } else {
+        if (status) status.textContent = '';
+        reportSyncResult(result);
+      }
+    }
+    function setGeminiAmount(email, key) {
+      if (role !== 'admin') return;
+      const current = (geminiPayments[email] && geminiPayments[email][key]) || 0;
+      const label = document.getElementById('gemini-pay-label');
+      const inp = document.getElementById('gemini-pay-input');
+      const err = document.getElementById('gemini-pay-error');
+      const btn = document.getElementById('gemini-pay-save-btn');
+      if (label) label.textContent = 'Amount paid for ' + key + ' (৳):';
+      if (inp) { inp.value = current || ''; }
+      if (err) err.style.display = 'none';
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', async () => {
+        const amt = parseFloat(inp.value);
+        if (isNaN(amt) || amt < 0) { if (err) err.style.display = ''; return; }
+        closeModal('modal-gemini-pay');
+        if (!geminiPayments[email]) geminiPayments[email] = {};
+        geminiPayments[email][key] = amt;
+        renderGeminiTab();
+        reportSyncResult(await pushToGitHub());
+      });
+      inp.onkeydown = (e) => { if (e.key === 'Enter') newBtn.click(); };
+      openModal('modal-gemini-pay');
+      setTimeout(() => { if (inp) inp.focus(); }, 80);
+    }
+    function renderGeminiTab() {
+      const months = geminiMonthKeys();
+      const _now = new Date();
+      const curKey = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0');
+      const cycleBox = document.getElementById('geminiCycleBox');
+      const adminWrap = document.getElementById('geminiAdminTableWrap');
+      if (!adminWrap) return;
+      const canEdit = role === 'admin';
+
+      if (cycleBox) {
+        cycleBox.style.display = canEdit ? 'block' : 'none';
+        const sEl = document.getElementById('geminiCycleStartInput');
+        const eEl = document.getElementById('geminiCycleEndInput');
+        const fEl = document.getElementById('geminiFeeInput');
+        if (sEl && !sEl.matches(':focus')) sEl.value = geminiCycleStart;
+        if (eEl && !eEl.matches(':focus')) eEl.value = geminiCycleEnd;
+        if (fEl && !fEl.matches(':focus')) fEl.value = geminiMonthlyFee || '';
+      }
+
+      // Everyone with access sees the full table, admin or member, so no one
+      // has to guess who's paid; only admin can tap a cell to edit an amount.
+      const hint = document.getElementById('geminiHint');
+      if (hint) hint.textContent = canEdit
+        ? "Click a cell to enter how much that member paid for that month."
+        : "Everyone can see who's paid each month \u2014 only the admin can edit amounts.";
+
+      const head = document.getElementById('geminiTableHead');
+      head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
+      const body = document.getElementById('geminiTableBody');
+      let myDueMonths = [];
+      const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
+      body.innerHTML = members.filter(m => !m.uploadOnly).map(m => {
+        const email = (m.email || '').toLowerCase();
+        const row = geminiPayments[email] || {};
+        let totalDue = 0;
+        const rowDueMonths = [];
+        const cells = months.map(mo => {
+          const paid = row[mo.key] || 0;
+          // Only a month that has already ended can be overdue. The current month and
+          // future months are not due yet, so they never add to the due banner or total.
+          const isPast = mo.key < curKey;
+          const due = (geminiMonthlyFee > 0 && isPast) ? Math.max(0, geminiMonthlyFee - paid) : 0;
+          totalDue += due;
+          if (geminiMonthlyFee > 0 && due > 0) rowDueMonths.push(mo.label);
+          const cls = geminiMonthlyFee > 0 ? (paid >= geminiMonthlyFee ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
+          const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
+          const clickAttr = canEdit ? ` onclick="setGeminiAmount('${esc(email)}','${mo.key}')"` : '';
+          return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
+        }).join('');
+        if (email === myEmail) myDueMonths = rowDueMonths;
+        return `<tr>
+          <td><div class="member-who">${avatarHtml(m)} ${esc(m.name)}</div></td>
+          ${cells}
+          <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
+        </tr>`;
+      }).join('');
+
+      // Simple, month-based due status: fully paid for a month -> that
+      // month just shows green in the table (done, nothing more to say).
+      // Anything still owed shows here as which months, not a running total.
+      const dueBanner = document.getElementById('geminiDueBanner');
+      const dueBadge  = document.getElementById('geminiDueBadge');
+      if (myDueMonths.length > 0) {
+        const n = myDueMonths.length;
+        if (dueBanner) {
+          dueBanner.style.display = 'flex';
+          dueBanner.querySelector('.due-months').textContent = `${n} month${n > 1 ? 's' : ''} unpaid \u2014 ${myDueMonths.join(', ')}`;
+        }
+        if (dueBadge) { dueBadge.style.display = 'inline-flex'; dueBadge.textContent = String(n); }
+      } else {
+        if (dueBanner) dueBanner.style.display = 'none';
+        if (dueBadge) dueBadge.style.display = 'none';
+      }
+    }
+
+    /* ── My Account (every signed-in user edits their own name/photo/WhatsApp) ── */
+    let _acctPendingPhoto = null; // data URL staged in the browser until Save is pressed
+
+    function myMemberRecord() {
+      const email = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
+      if (!email) return null;
+      return members.find(m => (m.email || '').toLowerCase() === email) || null;
+    }
+
+    function renderAccountTab() {
+      const nameEl = document.getElementById('acctName');
+      if (!nameEl || !gateIdentity()) return;
+      const me = myMemberRecord();
+      _acctPendingPhoto = null;
+      nameEl.value = (me && me.name) || gateIdentity().name || '';
+      document.getElementById('acctEmail').value = gateIdentity().email || '';
+      document.getElementById('acctWhatsapp').value = (me && me.whatsapp) || '';
+      const preview = document.getElementById('acctAvatarPreview');
+      const photo = (me && me.photo) || gateIdentity().picture || '';
+      preview.innerHTML = photo
+        ? `<img src="${esc(photo)}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'">`
+        : '<i class="fas fa-user"></i>';
+      const status = document.getElementById('acctStatus');
+      if (status) { status.textContent = ''; status.className = 'upload-status'; }
+    }
+
+    document.getElementById('acctPhotoBtn').addEventListener('click', () => document.getElementById('acctPhotoInput').click());
+    document.getElementById('acctPhotoInput').addEventListener('change', function () {
+      const file = this.files[0];
+      this.value = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Crop to a centred square and shrink — keeps every member's photo roughly
+          // the same size in the shared data file no matter what they upload.
+          const size = Math.min(img.width, img.height);
+          const canvas = document.createElement('canvas');
+          canvas.width = 160; canvas.height = 160;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 160, 160);
+          _acctPendingPhoto = canvas.toDataURL('image/jpeg', 0.85);
+          document.getElementById('acctAvatarPreview').innerHTML = `<img src="${_acctPendingPhoto}">`;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function saveAccountProfile() {
+      if (!gateIdentity()) return;
+      const name = document.getElementById('acctName').value.trim();
+      const whatsapp = document.getElementById('acctWhatsapp').value.trim();
+      const statusEl = document.getElementById('acctStatus');
+      if (!name) { statusEl.textContent = 'Enter your name.'; statusEl.className = 'upload-status err'; return; }
+
+      const newPhoto = _acctPendingPhoto;
+      gateIdentity().name = name;
+      if (newPhoto) gateIdentity().picture = newPhoto;
+
+      const me = myMemberRecord();
+      if (me) {
+        me.name = name;
+        me.whatsapp = whatsapp;
+        me.initials = name.slice(0, 2).toUpperCase();
+        if (newPhoto) me.photo = newPhoto;
+      }
+      if (role === 'member') {
+        saveMemberProfile({ email: gateIdentity().email, name, picture: gateIdentity().picture || '' });
+      }
+      _acctPendingPhoto = null;
+      renderMembers(); renderGeminiTab(); renderTeamTab();
+
+      statusEl.textContent = 'Saving…'; statusEl.className = 'upload-status';
+      const result = await syncChange('updateProfile', { email: gateIdentity().email, name, whatsapp, photo: newPhoto || '' });
+      // Either way the change is saved for this device/browser right now (above). Once
+      // the sync Worker is deployed (tools/research-sync-worker/), a member's own save
+      // reaches the shared file straight away too, same as the admin's.
+      statusEl.textContent = result.ok ? 'Saved ✓' : 'Saved on this device ✓';
+      statusEl.className = 'upload-status ok';
+    }
+    document.getElementById('acctSaveBtn').addEventListener('click', saveAccountProfile);
+    document.getElementById('acctLogoutBtn').addEventListener('click', () => exitToGate());
+
+    /* ── Drive & Access ── */
+    function renderDriveStatus() {
+      const status = document.getElementById('driveStatus');
+      const text = document.getElementById('driveStatusText');
+      status.classList.toggle('connected', !!driveId);
+      text.textContent = driveId ? 'Connected — everyone sees this folder now' : 'No folder connected yet';
+      document.getElementById('memberLocked').style.display = driveId ? 'none' : 'block';
+      document.getElementById('memberUnlocked').style.display = driveId ? 'block' : 'none';
+      const linkInput = document.getElementById('driveLink');
+      if (driveLinkSaved && !linkInput.value) linkInput.value = driveLinkSaved;
+      const keyInput = document.getElementById('apiKeyInput');
+      if (apiKeySaved && !keyInput.value) keyInput.value = apiKeySaved;
+    }
+    async function saveDriveSettings() {
+      const val = document.getElementById('driveLink').value.trim();
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (!val) return;
+      const id = parseDriveFolderId(val);
+      if (!id) { document.getElementById('driveStatusText').textContent = "Couldn't read a folder ID from that link."; return; }
+      driveLinkSaved = val; driveId = id; apiKeySaved = key;
+      renderDriveStatus(); renderDriveBrowser(); renderMembers(); renderGeminiTab();
+      const result = await pushToGitHub();
+      const text = document.getElementById('driveStatusText');
+      if (result.ok) text.textContent = 'Connected & synced — everyone sees this folder now ✓';
+      else if (result.reason === 'bad-token') text.textContent = "Saved on this browser only — your GitHub token looks invalid, check it below.";
+      else if (result.reason === 'no-token') text.textContent = 'Connected (this browser only — add a GitHub token above to sync for everyone)';
+      else text.textContent = "Saved locally — couldn't reach GitHub to sync right now, try again.";
+    }
+    function renderMembers() {
+      const body = document.getElementById('memberTableBody');
+      body.innerHTML = members.map(m => `
+        <tr>
+          <td><div class="member-who">${avatarHtml(m)} ${esc(m.name)}</div></td>
+          <td><span class="role-pill ${m.role}">${m.role === 'admin' ? 'Admin' : 'Member'}</span></td>
+          <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.view ? 'on' : ''}" onclick="toggleMember(${m.id},'view')"></span>`}</td>
+          <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.download ? 'on' : ''}" onclick="toggleMember(${m.id},'download')"></span>`}</td>
+          <td>${m.role === 'admin' ? '' : `<button class="icon-action danger" onclick="removeMember(${m.id})"><i class="fas fa-user-slash"></i></button>`}</td>
+        </tr>`).join('');
+    }
+    async function toggleMember(id, field) {
+      if (role !== 'admin') return;
+      const m = members.find(x => x.id === id);
+      if (!m) return;
+      const prev = m[field];
+      m[field] = !m[field];
+      renderMembers(); renderGeminiTab();
+      const result = await pushToGitHub();
+      if (!result.ok) { m[field] = prev; renderMembers(); renderGeminiTab(); }
+      reportSyncResult(result);
+    }
+    async function removeMember(id) {
+      if (role !== 'admin') return;
+      const removed = members.find(m => m.id === id);
+      if (!removed) return;
+      members = members.filter(m => m.id !== id);
+      renderMembers(); renderGeminiTab();
+      const result = await pushToGitHub();
+      if (!result.ok) { members.push(removed); renderMembers(); renderGeminiTab(); }
+      reportSyncResult(result, result.ok ? `Removed ${removed.name || removed.email}` : null);
+    }
+    async function inviteMember() {
+      if (role !== 'admin') return;
+      const email = document.getElementById('inviteEmail').value.trim();
+      if (!email) return;
+      const access = document.getElementById('inviteRole').value;
+      members.push({ id: Date.now(), name: email, email: email.toLowerCase(), initials: email.slice(0, 2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
+      pendingRequests = pendingRequests.filter(r => r.email !== email.toLowerCase());
+      document.getElementById('inviteEmail').value = '';
+      renderMembers();
+      renderGeminiTab();
+      renderPendingRequests();
+      reportSyncResult(await pushToGitHub(), `Invited ${email}`);
+    }
+
+    /* \u2500\u2500 Pending sign-up requests (shared queue, visible to the admin from any device) \u2500\u2500 */
+    function addPendingRequest(name, email) {
+      email = (email || '').toLowerCase();
+      if (!email || isMemberEmail(email)) return;
+      const existing = pendingRequests.find(r => r.email === email);
+      if (existing) { existing.name = name; existing.requestedAt = new Date().toISOString(); }
+      else pendingRequests.push({ email, name, requestedAt: new Date().toISOString() });
+      syncChange('addPendingRequest', { email, name });
+    }
+    function renderPendingRequests() {
+      const box = document.getElementById('pendingRequestsBox');
+      const tabCount = document.getElementById('pendingTabCount');
+      if (!box) return;
+      if (!pendingRequests.length) {
+        box.style.display = 'none';
+        if (tabCount) tabCount.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      document.getElementById('pendingReqCount').textContent = pendingRequests.length;
+      if (tabCount) { tabCount.style.display = 'inline-flex'; tabCount.textContent = pendingRequests.length; }
+      document.getElementById('pendingRequestsList').innerHTML = pendingRequests.map(r => `
+        <div class="card" style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+          <div>
+            <div style="font-weight:700;font-size:13px;">${esc(r.name || r.email)}</div>
+            <div style="font-size:12px;color:var(--muted);">${esc(r.email)}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn primary sm" onclick="approveRequest('${esc(r.email)}')"><i class="fas fa-check"></i> Approve</button>
+            <button class="btn secondary sm" onclick="rejectRequest('${esc(r.email)}')"><i class="fas fa-xmark"></i> Reject</button>
+          </div>
+        </div>`).join('');
+    }
+    async function approveRequest(email) {
+      if (role !== 'admin') return;
+      const req = pendingRequests.find(r => r.email === email);
+      if (!req) return;
+      members.push({ id: Date.now(), name: req.name || req.email, email: req.email, initials: (req.name || req.email).slice(0, 2).toUpperCase(), role: 'member', view: true, download: false });
+      pendingRequests = pendingRequests.filter(r => r.email !== email);
+      renderMembers(); renderGeminiTab(); renderPendingRequests();
+      reportSyncResult(await pushToGitHub(), `Approved ${email}`);
+    }
+    async function rejectRequest(email) {
+      if (role !== 'admin') return;
+      pendingRequests = pendingRequests.filter(r => r.email !== email);
+      renderPendingRequests();
+      reportSyncResult(await pushToGitHub());
+    }
+
+    /* ── Entry gate ── */
+    const gateEl = document.getElementById('roleGate');
+    function showGateOptions() {
+      document.getElementById('gateMemberForm').classList.add('open');
+      document.getElementById('gateChecking').classList.remove('show');
+      document.getElementById('gateDenied').classList.remove('show');
+      document.getElementById('memberFormErr').textContent = '';
+      // returning visitor on this device — prefill so they don't retype
+      const cached = loadMemberProfile();
+      if (cached) {
+        document.getElementById('memberEmail').value = cached.email || '';
+      }
+    }
+    function showGateChecking(msg) {
+      document.getElementById('gateMemberForm').classList.remove('open');
+      document.getElementById('gateDenied').classList.remove('show');
+      document.getElementById('gateChecking').classList.add('show');
+      document.getElementById('gateCheckingText').textContent = msg || 'Checking…';
+    }
+    function showGateDenied(msg) {
+      document.getElementById('gateMemberForm').classList.remove('open');
+      document.getElementById('gateChecking').classList.remove('show');
+      document.getElementById('gateDenied').classList.add('show');
+      document.getElementById('gateDeniedText').innerHTML = msg;
+    }
+    document.getElementById('gateDeniedBackBtn').addEventListener('click', showGateOptions);
+    document.getElementById('memberFormBtn').addEventListener('click', submitMemberForm);
+    document.getElementById('memberPass').addEventListener('keydown', e => { if (e.key === 'Enter') submitMemberForm(); });
+
+    /* ── Admin mode — shared, server-checked session (assets/site-auth.js).
+       Logging in/out happens on admin_panel.html (linked from the footer);
+       this page just reflects that shared session (see role handling below). ── */
+
+    function enterAs(r) {
+      role = r;
+      gateEl.style.display = 'none';
+      applyRole();
+    }
+    function applyRole() {
+      // Compute uploadOnly state from current user's member record
+      const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
+      const myMember = myEmail ? members.find(m => (m.email || '').toLowerCase() === myEmail) : null;
+      isUploadOnly = !!(myMember && myMember.uploadOnly);
+      // Hide Gemini tab for uploadOnly accounts
+      const geminiTabBtn = document.querySelector('.r-tab[data-tab="gemini"]');
+      if (geminiTabBtn) geminiTabBtn.hidden = isUploadOnly;
+      document.body.classList.toggle('admin-mode', role === 'admin');
+      // Show role-switcher only to admins and pending users; hide for regular members
+      const switchBtn = document.getElementById('switchViewBtn');
+      const switchLabel = document.getElementById('switchViewLabel');
+      if (role === 'admin') {
+        switchBtn.hidden = false;
+        switchLabel.textContent = 'Viewing as Admin · switch?';
+      } else if (role === 'pending') {
+        switchBtn.hidden = false;
+        switchLabel.textContent = 'Waiting for approval · switch?';
+      } else {
+        switchBtn.hidden = true;
+      }
+
+      document.getElementById('pendingView').hidden = role !== 'pending';
+      document.getElementById('mainSection').hidden = role === 'pending';
+      document.getElementById('protoFootnote').hidden = role === 'pending';
+
+      if (role === 'pending') {
+        renderPendingView();
+        return;
+      }
+      const hashTab = (window.location.hash || '').replace('#', '');
+      const validTabs = ['files', 'uploads', 'notices'].concat(isUploadOnly ? [] : ['gemini']).concat(['account']).concat(role === 'admin' ? ['access'] : []);
+      const initialTab = validTabs.includes(hashTab) ? hashTab : 'files';
+      if (hashTab !== initialTab) {
+        history.replaceState('', document.title, window.location.pathname + window.location.search + '#' + initialTab);
+      }
+      if (role !== 'admin') {
+        document.getElementById('panel-access').hidden = true;
+      } else {
+        const savedToken = localStorage.getItem('site_gh_token');
+        if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
+      }
+      activateTab(initialTab);
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
+    }
+    function renderPendingView() {
+      if (!gateIdentity()) return;
+      const chip = document.getElementById('pendingChip');
+      chip.innerHTML = `${gateIdentity().picture ? `<img src="${esc(gateIdentity().picture)}" onerror="this.style.display='none'">` : ''}
+        <div><div class="tu-name">${esc(gateIdentity().name)}</div><div class="tu-email">${esc(gateIdentity().email)}</div></div>`;
+      // The request is already queued automatically (see submitMemberForm ->
+      // addPendingRequest -> syncChange) and shows up for the admin under
+      // Drive & Access with a one-click Approve/Reject -- no email required.
+      // The link above is only a manual fallback for the rare case the
+      // automatic sync didn't go through.
+    }
+
+    /* ── GitHub token live validation (so a wrong token never fails silently) ── */
+    let ghVerifyTimer = null;
+    function updateGhTokenStatus(msg, color) {
+      const el = document.getElementById('ghTokenStatus');
+      if (!el) return;
+      el.textContent = msg; el.style.color = color || 'var(--muted)';
+    }
+    async function verifyGhToken(token) {
+      if (!token) { updateGhTokenStatus('', ''); return; }
+      updateGhTokenStatus('Checking token…', 'var(--muted)');
+      try {
+        const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
+        if (res.ok) {
+          const u = await res.json();
+          updateGhTokenStatus(`Token looks valid ✓ — signed in as ${u.login}`, '#0f9d58');
+        } else if (res.status === 401) {
+          updateGhTokenStatus('✗ This token is invalid or expired — generate a new one on GitHub.', '#ef4444');
+        } else {
+          updateGhTokenStatus(`✗ GitHub returned an error (${res.status}) — check the token's permissions.`, '#ef4444');
+        }
+      } catch (e) {
+        updateGhTokenStatus("Couldn't reach GitHub to verify — check your connection.", 'var(--muted)');
+      }
+    }
+    document.getElementById('research-gh-token').addEventListener('input', e => {
+      const val = e.target.value.trim();
+      localStorage.setItem('site_gh_token', val);
+      clearTimeout(ghVerifyTimer);
+      if (!val) { updateGhTokenStatus('', ''); return; }
+      ghVerifyTimer = setTimeout(() => verifyGhToken(val), 700);
+    });
+    // Autofill/paste on some mobile browsers doesn't fire 'input' reliably, so also check on blur
+    // and give a manual button — tapping Check always works no matter how the value got there.
+    document.getElementById('research-gh-token').addEventListener('blur', e => {
+      const val = e.target.value.trim();
+      if (val) { localStorage.setItem('site_gh_token', val); verifyGhToken(val); }
+    });
+    document.getElementById('ghTokenCheckBtn').addEventListener('click', () => {
+      const val = document.getElementById('research-gh-token').value.trim();
+      localStorage.setItem('site_gh_token', val);
+      verifyGhToken(val);
+    });
+    function exitToGate() {
+      if (role === 'admin') siteAdminLogout();
+      if (role === 'member' || role === 'pending') clearMemberProfile();
+      currentUser = null;
+      gateUser = null;
+      role = null;
+      document.body.classList.remove('admin-mode');
+      showGateOptions();
+      gateEl.style.display = 'flex';
+    }
+    document.getElementById('switchViewBtn').addEventListener('click', exitToGate);
+    document.getElementById('pendingSwitchBtn').addEventListener('click', exitToGate);
+    document.getElementById('pendingRecheckBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('pendingRecheckBtn');
+      const orig = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking…';
+      try {
+        await fetchFromGitHub(); // pull the freshest member list before deciding
+        if (gateIdentity() && isMemberEmail(gateIdentity().email)) {
+          role = 'member';
+          applyRole();
+        } else {
+          btn.innerHTML = '<i class="fas fa-xmark"></i> Still not approved';
+          setTimeout(() => { btn.innerHTML = orig; btn.disabled = false; }, 1800);
+          return;
+        }
+      } catch (e) {
+        btn.innerHTML = orig;
+      }
+      btn.disabled = false;
+    });
+
+    /* Add-notice modal wiring (modal markup added lazily via JS to keep page HTML short) */
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    document.addEventListener('click', e => {
+      if (e.target.id === 'addNoticeBtn' || e.target.closest('#addNoticeBtn')) openModal('modalNotice');
+    });
+
+    /* ── init ── */
+    async function boot() {
+      loadFromCache();         // instant paint from last-known data
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
+      const freshPromise = fetchFromGitHub().then(() => {
+        renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
+      });
+      if (siteIsAdmin()) { enterAs('admin'); return; } // already logged in elsewhere on the site this tab
+      const cached = loadMemberProfile();
+      if (cached && cached.email) {
+        showGateChecking('Checking your access…');
+        await freshPromise; // make sure the member list is current before trusting the cached sign-in
+        gateUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
+        enterAs(isMemberEmail(cached.email) ? 'member' : 'pending');
+        // Drive token is fetched lazily (see Tabs below) only when the member actually opens
+        // Team Uploads — requesting it eagerly here pops Google's account-chooser window on
+        // every single page load, even for people who never touch uploads.
+        return;
+      }
+      showGateOptions();
+    }
+    boot();
+  </script>
+
+  <!-- Add notice modal -->
+  <div class="modal-overlay" id="modalNotice">
+    <div class="modal-box">
+      <div class="modal-head"><h3><i class="fas fa-bell" style="color:var(--blue);margin-right:8px;"></i>Add Notice</h3><button class="modal-close" onclick="closeModal('modalNotice')"><i class="fas fa-times"></i></button></div>
+      <div class="modal-body">
+        <input type="text" id="noticeTitle" placeholder="Notice title..." style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);margin-bottom:10px;">
+        <textarea id="noticeText" placeholder="Details..." style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);margin-bottom:10px;"></textarea>
+        <select id="noticeType" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);">
+          <option value="info">Info</option>
+          <option value="warning">Warning</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
+        <button class="btn secondary sm" onclick="closeModal('modalNotice')">Cancel</button>
+        <button class="btn primary sm" onclick="saveNotice()"><i class="fas fa-check"></i> Save</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--surface); border-radius: var(--radius-lg); max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .modal-head h3 { margin: 0; font-size: 16px; }
+    .modal-body { padding: 18px; }
+    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; }
+  </style>
+</body>
+</html>

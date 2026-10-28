@@ -211,6 +211,8 @@
     .upload-cat { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--blue); }
     .upload-card h4 { margin: 0; font-size: 14.5px; line-height: 1.35; overflow-wrap: anywhere; word-break: break-word; }
     .upload-meta { font-size: 12px; color: var(--muted); }
+    /* notice unseen badge */
+    .r-tab .notif-dot { display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:100px;margin-left:3px;line-height:1; }
     .vis-badge { font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 100px; width: fit-content; }
     .vis-badge.public { background: rgba(16,185,129,0.12); color: #0f9d58; }
     .vis-badge.private { background: var(--surface-soft); color: var(--muted); }
@@ -361,6 +363,8 @@
     @keyframes toastOut { to { opacity: 0; transform: translateY(10px); } }
     .browse-drive-btn { flex: none; display: flex; align-items: center; gap: 5px; padding: 7px 11px; margin: 4px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: #0f9d58; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
     .browse-drive-btn:hover { background: rgba(15,157,88,0.08); border-color: #0f9d58; }
+      #upDropZone.dragover { border-color:var(--blue) !important; }
+    #upDropZone.dragover * { pointer-events:none; }
   </style>
 </head>
 <body>
@@ -506,7 +510,7 @@
         <div class="research-tabs">
           <button class="r-tab active" data-tab="files"><i class="fas fa-folder-open"></i> Files</button>
         <button class="r-tab" data-tab="uploads"><i class="fas fa-cloud-arrow-up"></i> Team Uploads</button>
-        <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span></button>
+        <button class="r-tab" data-tab="notices"><i class="fas fa-bell"></i> Notice Board <span class="count" id="noticeCount">—</span><span class="notif-dot" id="noticeDot" hidden></span></button>
         <button class="r-tab" data-tab="gemini"><i class="fas fa-robot"></i> Gemini <span class="count due" id="geminiDueBadge" style="display:none;"></span></button>
         <button class="r-tab" data-tab="account"><i class="fas fa-user-gear"></i> My Account</button>
           <button class="r-tab admin-only" data-tab="access"><i class="fas fa-user-shield"></i> Drive &amp; Access <span class="count due" id="pendingTabCount" style="display:none;"></span></button>
@@ -945,9 +949,16 @@
       document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
       const panel = document.getElementById('panel-' + tab);
       if (panel) panel.hidden = false;
-      if (tab === 'uploads' && !_reauthAttempted && currentUser && !currentUser.token) {
-        _reauthAttempted = true;
-        trySilentReauth();
+      if (tab === 'uploads') {
+        restoreUploadSettings();
+        tryAutoReauth();
+        if (!_reauthAttempted && currentUser && !currentUser.token) {
+          _reauthAttempted = true;
+          trySilentReauth();
+        }
+      }
+      if (tab === 'notices') {
+        markNoticesSeen();
       }
     }
     function goToTab(tab) {
@@ -1136,12 +1147,16 @@
         const folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
         const files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
         const fmtDate = t => t ? new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+        const isAdminView = (role === 'admin');
         const folderRows = folders.map(f => `
           <div class="drive-row drive-row-folder" onclick="openSubfolder('${f.id}', ${esc(JSON.stringify(f.name))})">
             <i class="fas fa-folder dr-icon"></i>
             <span class="dr-name">${esc(f.name)}</span>
             <span class="dr-meta">${fmtDate(f.modifiedTime)}</span>
-            <i class="fas fa-chevron-right dr-chev"></i>
+            <div class="row-actions" style="margin-left:auto;display:flex;align-items:center;gap:4px;">
+              ${isAdminView ? `<button class="icon-action" title="Rename" style="display:inline-flex;" onclick="event.stopPropagation();driveRenameItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-pen-to-square"></i></button>` : ''}
+              <i class="fas fa-chevron-right dr-chev"></i>
+            </div>
           </div>`).join('');
         const fileRows = files.map(f => `
           <div class="drive-row drive-row-file">
@@ -1151,9 +1166,25 @@
             <div class="row-actions">
               ${f.webViewLink ? `<a class="icon-action" title="Open" href="${f.webViewLink}" target="_blank" rel="noopener"><i class="fas fa-eye"></i></a>` : ''}
               ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
+              ${isAdminView ? `<button class="icon-action" title="Rename" style="display:inline-flex;" onclick="driveRenameItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-pen-to-square"></i></button>` : ''}
             </div>
           </div>`).join('');
-        document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
+        // Inject "New Folder" button for admin in breadcrumb bar
+      const _existingNfBtn = document.getElementById('driveNewFolderBtn');
+      if (_existingNfBtn) _existingNfBtn.remove();
+      if (role === 'admin') {
+        const _bcrumb = document.querySelector('.drive-breadcrumb');
+        if (_bcrumb) {
+          const nfBtn = document.createElement('button');
+          nfBtn.id = 'driveNewFolderBtn';
+          nfBtn.className = 'btn secondary sm';
+          nfBtn.style.cssText = 'margin-left:auto;font-size:11.5px;padding:5px 10px;';
+          nfBtn.innerHTML = '<i class="fas fa-folder-plus"></i> New Folder';
+          nfBtn.onclick = driveCreateNewFolder;
+          _bcrumb.appendChild(nfBtn);
+        }
+      }
+      document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
         if (!folders.length && !files.length) document.getElementById('driveFolderEmpty').style.display = 'block';
         else document.getElementById('driveFolderEmpty').style.display = 'none';
       } catch (e) {
@@ -1178,6 +1209,68 @@
       loadCurrentFolder();
     }
 
+    /* ── Admin Drive management: rename + new folder ── */
+    let _adminDriveTokenClient = null;
+    let _adminDriveToken = null;
+    let _adminDriveTokenExpiry = 0;
+    function initAdminDriveAuth() {
+      if (_adminDriveTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
+      _adminDriveTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive',
+        callback: () => {},
+        error_callback: () => {}
+      });
+    }
+    window.addEventListener('load', initAdminDriveAuth);
+    async function getAdminDriveToken() {
+      if (_adminDriveToken && Date.now() < _adminDriveTokenExpiry - 5000) return _adminDriveToken;
+      initAdminDriveAuth();
+      if (!_adminDriveTokenClient) throw new Error('Could not init Drive auth — try refreshing');
+      return new Promise((resolve, reject) => {
+        _adminDriveTokenClient.callback = (resp) => {
+          if (resp.error) { reject(new Error('Sign-in cancelled')); return; }
+          _adminDriveToken = resp.access_token;
+          _adminDriveTokenExpiry = Date.now() + (resp.expires_in - 60) * 1000;
+          resolve(_adminDriveToken);
+        };
+        _adminDriveTokenClient.requestAccessToken({ prompt: _adminDriveToken ? '' : 'consent' });
+      });
+    }
+    async function driveRenameItem(id, currentName) {
+      const newName = prompt('Rename to:', currentName);
+      if (!newName || newName.trim() === currentName) return;
+      try {
+        toast('Renaming…', 'info');
+        const token = await getAdminDriveToken();
+        const res = await driveApiCall('PATCH', '/files/' + id + '?fields=id,name', { name: newName.trim() }, token);
+        if (res.error) throw new Error(res.error.message || 'Rename failed');
+        toast('Renamed ✓', 'success');
+        loadCurrentFolder();
+      } catch(e) {
+        toast('Rename failed: ' + (e.message || 'try again'), 'error', 4000);
+      }
+    }
+    async function driveCreateNewFolder() {
+      const name = prompt('New folder name:');
+      if (!name || !name.trim()) return;
+      try {
+        toast('Creating folder…', 'info');
+        const token = await getAdminDriveToken();
+        const parentId = folderStack[folderStack.length - 1].id;
+        const res = await driveApiCall('POST', '/files', {
+          name: name.trim(),
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [parentId]
+        }, token);
+        if (res.error) throw new Error(res.error.message || 'Create failed');
+        toast('Folder created ✓', 'success');
+        loadCurrentFolder();
+      } catch(e) {
+        toast('Could not create folder: ' + (e.message || 'try again'), 'error', 4000);
+      }
+    }
+
     /* ── Google sign-in (Team Uploads' own Drive auth, separate from the gate) ── */
     let _uploadTokenClient = null;
     // True once this page load has actually completed a Drive-scope consent at least
@@ -1187,7 +1280,9 @@
     // the old code decided silent-vs-consent from whether the gate identity (currentUser)
     // existed, which is true for every signed-in member/admin — so "Sign in with Google" /
     // "Reconnect Google" always tried silently and looked like it did nothing ("cancelled").
+    // Persist consent flag so silent re-auth works on return visits
     let _driveAuthGranted = false;
+    try { _driveAuthGranted = localStorage.getItem('rh_driveAuthGranted') === '1'; } catch(e) {}
     function initUploadAuth() {
       if (_uploadTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
       _uploadTokenClient = google.accounts.oauth2.initTokenClient({
@@ -1229,6 +1324,7 @@
           return;
         }
         _driveAuthGranted = true;
+        try { localStorage.setItem('rh_driveAuthGranted', '1'); } catch(e) {}
         const token = resp.access_token;
         try {
           const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + token } }).then(r => r.json());
@@ -1252,6 +1348,7 @@
       currentUser.token = null;
       currentUser.expiry = 0;
       _driveAuthGranted = false;
+      try { localStorage.removeItem('rh_driveAuthGranted'); } catch(e) {}
       renderTeamTab();
     }
 
@@ -1343,76 +1440,94 @@
       const el = document.getElementById('uploadStatus');
       el.textContent = msg; el.className = 'upload-status' + (cls ? ' ' + cls : '');
     }
+    async function _uploadOneFile(file, title, category, visibility, token, pathOverride, pickedFolderId) {
+      let parentId;
+      if (pickedFolderId) {
+        parentId = pickedFolderId;
+      } else {
+        const anchorId = driveId || await findOrCreateFolder('Research Hub Uploads', 'root', token);
+        const folders = (pathOverride && pathOverride.trim())
+          ? pathOverride.split('/').map(fn => fn.trim()).filter(Boolean)
+          : [category];
+        if (!folders.length) folders.push(category);
+        parentId = anchorId;
+        for (const folderName of folders) {
+          parentId = await findOrCreateFolder(folderName, parentId, token);
+        }
+      }
+      const meta = JSON.stringify({ name: file.name, parents: [parentId] });
+      const boundary = '-------research_upload_boundary';
+      const bodyStart = `--${boundary}
+Content-Type: application/json; charset=UTF-8
+
+${meta}
+--${boundary}
+Content-Type: ${file.type || 'application/octet-stream'}
+
+`;
+      const bodyEnd = `
+--${boundary}--`;
+      const bodyBlob = new Blob([bodyStart, file, bodyEnd]);
+      const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body: bodyBlob
+      });
+      const uploaded = await uploadRes.json();
+      if (!uploaded.id) throw new Error((uploaded.error && uploaded.error.message) || 'Upload failed.');
+      if (visibility === 'public') {
+        await driveApiCall('POST', `/files/${uploaded.id}/permissions`, { role: 'reader', type: 'anyone' }, token);
+      }
+      return {
+        id: uploaded.id, title, category, visibility,
+        uploaderName: currentUser.name, uploaderEmail: currentUser.email,
+        link: `https://drive.google.com/file/d/${uploaded.id}/view`,
+        date: new Date().toISOString()
+      };
+    }
     async function submitUpload() {
       if (!isAuthorizedUploader()) return;
       const fileInput = document.getElementById('upFile');
-      const file = fileInput.files[0];
+      const files = Array.from(fileInput.files);
       const title = document.getElementById('upTitle').value.trim();
       const category = document.getElementById('upCategory').value;
       const visibility = document.getElementById('upVisibility').value;
-      if (!file) { setUploadStatus('Choose a file first.', 'err'); return; }
+      if (!files.length) { setUploadStatus('Choose at least one file.', 'err'); return; }
       if (!title) { setUploadStatus('Give it a title.', 'err'); return; }
       if (!currentUser || Date.now() > currentUser.expiry - 5000) {
         setUploadStatus('Your sign-in expired — click Sign in with Google again, then retry.', 'err');
         return;
       }
+      // Persist category + visibility for next visit
+      try { localStorage.setItem('rh_upCategory', category); localStorage.setItem('rh_upVisibility', visibility); } catch(e) {}
       const pathOverride = document.getElementById('upDrivePath').value;
       const pickedFolderId = document.getElementById('upDriveFolderId').value;
-      setUploadStatus('Uploading to your Drive…', '');
-      try {
-        const token = currentUser.token;
-        let parentId;
-        if (pickedFolderId) {
-          // Picked an exact folder via Browse Drive (could be anywhere the
-          // uploader has access to, including a subfolder of the shared Files
-          // folder) -- upload straight into it, no re-creation / re-nesting.
-          parentId = pickedFolderId;
-        } else {
-          // Default destination: inside the SAME shared Drive folder the Files
-          // tab browses (driveId), under a category subfolder -- so an upload
-          // shows up right there in Files for everyone, instead of landing in
-          // the uploader's own separate personal Drive. Only falls back to a
-          // personal "Research Hub Uploads" folder if the site has no shared
-          // Files folder configured at all yet.
-          const anchorId = driveId || await findOrCreateFolder('Research Hub Uploads', 'root', token);
-          const folders = (pathOverride && pathOverride.trim())
-            ? pathOverride.split('/').map(f => f.trim()).filter(Boolean)
-            : [category];
-          if (!folders.length) folders.push(category);
-          parentId = anchorId;
-          for (const folderName of folders) {
-            parentId = await findOrCreateFolder(folderName, parentId, token);
-          }
+      const token = currentUser.token;
+      let done = 0, failed = 0;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const fileTitle = files.length === 1 ? title : (title + ' (' + (i + 1) + ')');
+        setUploadStatus('Uploading ' + (i + 1) + ' / ' + files.length + ': ' + f.name + '…', '');
+        try {
+          const newUpload = await _uploadOneFile(f, fileTitle, category, visibility, token, pathOverride, pickedFolderId);
+          uploads.unshift(newUpload);
+          done++;
+          renderUploads();
+          syncChange('addUpload', newUpload);
+        } catch(e) {
+          failed++;
+          setUploadStatus('File ' + (i + 1) + ' failed: ' + (e.message || 'try again'), 'err');
+          await new Promise(r => setTimeout(r, 1200));
         }
-        const meta = JSON.stringify({ name: file.name, parents: [parentId] });
-        const boundary = '-------research_upload_boundary';
-        const bodyStart = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`;
-        const bodyEnd = `\r\n--${boundary}--`;
-        const bodyBlob = new Blob([bodyStart, file, bodyEnd]);
-        const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + token, 'Content-Type': `multipart/related; boundary=${boundary}` },
-          body: bodyBlob
-        });
-        const uploaded = await uploadRes.json();
-        if (!uploaded.id) throw new Error((uploaded.error && uploaded.error.message) || 'Upload failed.');
-        if (visibility === 'public') {
-          await driveApiCall('POST', `/files/${uploaded.id}/permissions`, { role: 'reader', type: 'anyone' }, token);
-        }
-        const newUpload = {
-          id: uploaded.id, title, category, visibility,
-          uploaderName: currentUser.name, uploaderEmail: currentUser.email,
-          link: `https://drive.google.com/file/d/${uploaded.id}/view`,
-          date: new Date().toISOString()
-        };
-        uploads.unshift(newUpload);
-        fileInput.value = ''; document.getElementById('upTitle').value = ''; document.getElementById('upDrivePath').value = ''; document.getElementById('upDriveFolderId').value = '';
-        setUploadStatus('Uploaded ✓', 'ok');
-        renderUploads();
-        await syncChange('addUpload', newUpload);
-      } catch (e) {
-        setUploadStatus('Upload failed: ' + (e.message || 'try again'), 'err');
       }
+      fileInput.value = '';
+      const fileListEl = document.getElementById('upFileList');
+      if (fileListEl) { fileListEl.style.display = 'none'; fileListEl.innerHTML = ''; }
+      document.getElementById('upDrivePath').value = '';
+      document.getElementById('upDriveFolderId').value = '';
+      if (files.length === 1) document.getElementById('upTitle').value = '';
+      if (failed === 0) setUploadStatus(done === 1 ? 'Uploaded ✓' : done + ' files uploaded ✓', 'ok');
+      else if (done > 0) setUploadStatus(done + ' uploaded, ' + failed + ' failed.', 'err');
     }
     async function removeUpload(id) {
       const u = uploads.find(x => x.id === id);
@@ -1513,6 +1628,56 @@
     document.getElementById('teamReconnectBtn').addEventListener('click', signInWithGoogle);
     document.getElementById('upSubmitBtn').addEventListener('click', submitUpload);
 
+    // Restore persisted upload settings (category + visibility)
+    function restoreUploadSettings() {
+      try {
+        const cat = localStorage.getItem('rh_upCategory');
+        const vis = localStorage.getItem('rh_upVisibility');
+        if (cat) { const el = document.getElementById('upCategory'); if (el) el.value = cat; }
+        if (vis) { const el = document.getElementById('upVisibility'); if (el) el.value = vis; }
+      } catch(e) {}
+    }
+    // Try silent re-auth when switching to uploads tab
+    function tryAutoReauth() {
+      if (!_driveAuthGranted || _authInFlight) return;
+      if (currentUser && currentUser.token && Date.now() < currentUser.expiry - 5000) return;
+      trySilentReauth();
+    }
+    // Drag-drop wiring for upload zone
+    (function() {
+      const dropZone = document.getElementById('upDropZone');
+      const fileInput = document.getElementById('upFile');
+      if (!dropZone || !fileInput) return;
+      function updateList(files) {
+        const el = document.getElementById('upFileList');
+        if (!el) return;
+        if (!files || !files.length) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        el.innerHTML = Array.from(files).map(f =>
+          '<div style="padding:2px 0;"><i class="fas fa-file" style="color:var(--blue);margin-right:5px;"></i>' + esc(f.name) +
+          ' <span style="color:var(--muted);">(' + (f.size/1024/1024).toFixed(1) + ' MB)</span></div>'
+        ).join('');
+      }
+      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+          try {
+            const dt = new DataTransfer();
+            Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+            fileInput.files = dt.files;
+          } catch(e2) {}
+          updateList(fileInput.files);
+          if (fileInput.files.length === 1) document.getElementById('upTitle').value = fileInput.files[0].name.replace(/\.[^.]+$/, '');
+        }
+      });
+      fileInput.addEventListener('change', () => {
+        updateList(fileInput.files);
+        if (fileInput.files.length === 1) document.getElementById('upTitle').value = fileInput.files[0].name.replace(/\.[^.]+$/, '');
+      });
+    })();
+
     // Browse Drive button -- same shared DrivePicker used on Civil/3D Portfolio.
     // Rooted at the SAME shared Files folder the Files tab browses (driveId),
     // so an uploader sees the real existing folders (Basic, GeoTech, FEC Thesis
@@ -1565,6 +1730,41 @@
       renderPager('noticesPager', noticePage, totalPages, p => { noticePage = p; renderNotices(); });
     }
     async function deleteNotice(id) { notices = notices.filter(n => n.id !== id); renderNotices(); reportSyncResult(await pushToGitHub()); }
+    /* ── Notice unseen-badge helpers ── */
+    function _noticeStorageKey() {
+      try {
+        const id = gateIdentity && gateIdentity() && gateIdentity().email;
+        return id ? 'rh_lastSeenNotice_' + id : null;
+      } catch(e) { return null; }
+    }
+    function getLastSeenNoticeId() {
+      const k = _noticeStorageKey();
+      if (!k) return 0;
+      try { return parseInt(localStorage.getItem(k) || '0', 10) || 0; } catch(e) { return 0; }
+    }
+    function markNoticesSeen() {
+      const k = _noticeStorageKey();
+      if (!k || !notices.length) return;
+      try { localStorage.setItem(k, String(notices[0].id)); } catch(e) {}
+      renderNoticeBadge();
+    }
+    function countUnseenNotices() {
+      if (!notices.length) return 0;
+      const lastId = getLastSeenNoticeId();
+      if (!lastId) return notices.length;
+      return notices.filter(n => n.id > lastId).length;
+    }
+    function renderNoticeBadge() {
+      const dot = document.getElementById('noticeDot');
+      if (!dot) return;
+      const n = countUnseenNotices();
+      if (n > 0) {
+        dot.textContent = n > 9 ? '9+' : String(n);
+        dot.hidden = false;
+      } else {
+        dot.hidden = true;
+      }
+    }
     async function saveNotice() {
       const title = document.getElementById('noticeTitle').value.trim();
       const text = document.getElementById('noticeText').value.trim();
@@ -1576,6 +1776,7 @@
       closeModal('modalNotice');
       noticePage = 1;
       renderNotices();
+      renderNoticeBadge();
       reportSyncResult(await pushToGitHub(), 'Notice posted');
     }
 
@@ -2006,7 +2207,7 @@
         if (savedToken) { document.getElementById('research-gh-token').value = savedToken; verifyGhToken(savedToken); }
       }
       activateTab(initialTab);
-      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab();
+      renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab(); renderNoticeBadge();
     }
     function renderPendingView() {
       if (!gateIdentity()) return;

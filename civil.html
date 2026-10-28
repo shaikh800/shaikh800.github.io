@@ -564,7 +564,7 @@
             <div class="file-drop-zone" id="file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
               <p>Click to browse or drag & drop</p>
-              <input type="file" id="r-file" accept=".pdf,image/*">
+              <input type="file" id="r-file" accept=".pdf,image/*" multiple>
             </div>
             <div class="file-status" id="file-status"></div>
             <div class="drive-progress" id="drive-progress">
@@ -1226,7 +1226,9 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
     async function deleteResource(id, sem) {
       const sems = loadSems();
       const item = (sems[sem]||[]).find(i=>i.id===id);
-      if (item && item.src && item.src.startsWith('idb:')) await delFile(item.src.slice(4));
+      if (item && item.src && item.src.startsWith('idb:')) {
+        try { await delFile(item.src.slice(4)); } catch(e) { console.warn('IDB delete failed (ok to ignore):', e); }
+      }
       sems[sem] = (sems[sem]||[]).filter(i=>i.id!==id);
       saveSems(sems); renderSem(sem); toast('Deleted', 'info');
     }
@@ -1316,18 +1318,34 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
     dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if(e.dataTransfer.files[0]) fileSelected(e.dataTransfer.files[0]); });
-    fileInput.addEventListener('change', () => { if(fileInput.files[0]) fileSelected(fileInput.files[0]); });
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) filesSelected(Array.from(e.dataTransfer.files));
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) filesSelected(Array.from(fileInput.files));
+    });
 
     let _pendingFile = null;
-    function fileSelected(f) {
-      _pendingFile = f;
-      const mb = (f.size/1024/1024).toFixed(1);
-      setFileStatus(`✓ ${f.name} (${mb} MB)`, 'ok');
-      if (!document.getElementById('r-title').value) document.getElementById('r-title').value = f.name.replace(/\.[^.]+$/, '');
-      if (f.type.startsWith('image/')) document.getElementById('r-type').value = 'image';
-      else if (f.type === 'application/pdf') document.getElementById('r-type').value = 'pdf';
+    let _pendingFiles = [];   // multi-file queue
+    function filesSelected(files) {
+      _pendingFiles = files;
+      _pendingFile  = files[0] || null;
+      if (files.length === 1) {
+        const f = files[0];
+        const mb = (f.size/1024/1024).toFixed(1);
+        setFileStatus(`✓ ${f.name} (${mb} MB)`, 'ok');
+        if (!document.getElementById('r-title').value) document.getElementById('r-title').value = f.name.replace(/\.[^.]+$/, '');
+        if (f.type.startsWith('image/')) document.getElementById('r-type').value = 'image';
+        else if (f.type === 'application/pdf') document.getElementById('r-type').value = 'pdf';
+      } else {
+        const total = files.reduce((a,f)=>a+f.size,0);
+        setFileStatus(`✓ ${files.length} files selected (${(total/1024/1024).toFixed(1)} MB total)`, 'ok');
+        document.getElementById('r-title').value = '(auto — using filenames)';
+        document.getElementById('r-title').readOnly = true;
+      }
     }
+    function fileSelected(f) { filesSelected([f]); }
     function setFileStatus(msg, cls) {
       const el = document.getElementById('file-status');
       el.textContent = msg; el.className = `file-status ${cls}`;
@@ -1347,10 +1365,21 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       document.getElementById('r-type').value = 'pdf';
       document.getElementById('resource-modal-title').innerHTML = '<i class="fas fa-plus-circle" style="color:var(--blue);margin-right:8px;"></i>Add Resource';
       document.getElementById('save-resource-label').textContent = 'Add to Semester';
-      _pendingFile = null; pendingFileData = null;
-      // reset to url tab
-      document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===1));
-      document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===1));
+      _pendingFile = null; _pendingFiles = []; pendingFileData = null;
+      document.getElementById('r-title').readOnly = false;
+      // Restore last-used source tab + access mode from localStorage
+      try {
+        const lastTab = localStorage.getItem('civil_lastSrcTab') || 'url-panel';
+        document.querySelectorAll('.form-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === lastTab));
+        document.querySelectorAll('.form-tab-panel').forEach(p => p.classList.toggle('active', p.id === lastTab));
+        const ua = localStorage.getItem('civil_uploadAccess');
+        if (ua) { const r = document.querySelector(`input[name="upload-access"][value="${ua}"]`); if(r) r.checked=true; }
+        const ga = localStorage.getItem('civil_gdriveAccess');
+        if (ga) { const r = document.querySelector(`input[name="gdrive-access"][value="${ga}"]`); if(r) r.checked=true; }
+      } catch(e) {
+        document.querySelectorAll('.form-tab').forEach((t,i) => t.classList.toggle('active', i===1));
+        document.querySelectorAll('.form-tab-panel').forEach((p,i) => p.classList.toggle('active', i===1));
+      }
       openModal('modal-resource');
       setTimeout(() => document.getElementById('r-title').focus(), 300);
     });
@@ -1361,6 +1390,18 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
       const type      = document.getElementById('r-type').value;
       const activeTab = document.querySelector('#src-tabs .form-tab.active').dataset.tab;
       if (!title) { toast('Enter a title', 'error'); return; }
+      // Save current tab + access mode
+      try {
+        localStorage.setItem('civil_lastSrcTab', activeTab);
+        if (activeTab === 'upload-panel') {
+          const uacc = document.querySelector('input[name="upload-access"]:checked');
+          if (uacc) localStorage.setItem('civil_uploadAccess', uacc.value);
+        }
+        if (activeTab === 'gdrive-panel') {
+          const gacc = document.querySelector('input[name="gdrive-access"]:checked');
+          if (gacc) localStorage.setItem('civil_gdriveAccess', gacc.value);
+        }
+      } catch(e) {}
 
       const id = uid();
       let src = '';
@@ -1392,53 +1433,64 @@ if (itSegs.length && /^semester\s*\d+/i.test(itSegs[0])) {
         if (!src) { toast('Enter a URL', 'error'); return; }
 
       } else {
-        // Upload → Drive
-        if (!_pendingFile) { toast('Select a file', 'error'); return; }
-        if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
-          // Fallback: IndexedDB
-          setFileStatus('⏳ Saving locally...', 'loading');
-          if (_pendingFile.type.startsWith('image/')) {
-              compressImage(_pendingFile, 600, async (dataUrl) => {
-                  await saveFile(id, dataUrl);
-                  const item = { id, title, desc, type, src:'idb:'+id, thumb: dataUrl, folder: folderPath };
-                  const sems = loadSems();
-                  if (!sems[activeSem]) sems[activeSem]=[];
-                  sems[activeSem].push(item);
-                  saveSems(sems); renderSem(activeSem);
-                  closeModal('modal-resource');
-                  toast('Saved locally (Drive not configured)', 'info');
-              });
-          } else {
-              const reader = new FileReader();
-              reader.onload = async ev => {
+        // Upload → Drive (supports multiple files)
+        const filesToUpload = (_pendingFiles && _pendingFiles.length > 1) ? _pendingFiles : (_pendingFile ? [_pendingFile] : []);
+        if (!filesToUpload.length) { toast('Select a file', 'error'); return; }
+        const rawMode = document.querySelector('input[name="upload-access"]:checked').value;
+        isHidden = (rawMode === 'private');
+        const mode = isHidden ? 'preview' : rawMode;
+        const pickedFolderId = document.getElementById('r-drive-folder-id').value;
+
+        closeModal('modal-resource');
+        let successCount = 0;
+        for (let fi = 0; fi < filesToUpload.length; fi++) {
+          const curFile = filesToUpload[fi];
+          const curTitle = filesToUpload.length > 1 ? curFile.name.replace(/\.[^.]+$/, '') : (title || curFile.name.replace(/\.[^.]+$/, ''));
+          const curType  = curFile.type.startsWith('image/') ? 'image' : 'pdf';
+          const curId    = uid();
+
+          if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') {
+            // Fallback: IndexedDB
+            if (curFile.type.startsWith('image/')) {
+              await new Promise(resolve => compressImage(curFile, 600, async (dataUrl) => {
+                await saveFile(curId, dataUrl);
+                const item = { id: curId, title: curTitle, desc, type: curType, src:'idb:'+curId, thumb: dataUrl, folder: folderPath };
+                const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
+                sems2[activeSem].push(item); saveSems(sems2); resolve();
+              }));
+            } else {
+              await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = async ev => {
                   const dataUrl = ev.target.result;
-                  await saveFile(id, dataUrl);
-                  const item = { id, title, desc, type, src:'idb:'+id, thumb: null, folder: folderPath };
-                  const sems = loadSems();
-                  if (!sems[activeSem]) sems[activeSem]=[];
-                  sems[activeSem].push(item);
-                  saveSems(sems); renderSem(activeSem);
-                  closeModal('modal-resource');
-                  toast('Saved locally (Drive not configured)', 'info');
-              };
-              reader.readAsDataURL(_pendingFile);
+                  await saveFile(curId, dataUrl);
+                  const item = { id: curId, title: curTitle, desc, type: curType, src:'idb:'+curId, thumb: null, folder: folderPath };
+                  const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
+                  sems2[activeSem].push(item); saveSems(sems2); resolve();
+                };
+                reader.readAsDataURL(curFile);
+              });
+            }
+            successCount++;
+          } else {
+            try {
+              if (filesToUpload.length > 1) toast(`Uploading ${fi+1}/${filesToUpload.length}: ${curFile.name}`, 'info');
+              const result = await uploadFileToDrive(curFile, folderPath, mode, pickedFolderId);
+              const item = { id: curId, title: curTitle, desc, type: curType, src: result.embedUrl, thumb:null, folder: folderPath, hidden: isHidden };
+              const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
+              sems2[activeSem].push(item); saveSems(sems2);
+              successCount++;
+            } catch (err) {
+              console.error(err);
+              toast(`Failed: ${curFile.name} — ${err.message || 'Check CLIENT_ID'}`, 'error');
+            }
           }
-          return;
         }
-        
-        // Drive upload Custom Path
-        try {
-          const rawMode = document.querySelector('input[name="upload-access"]:checked').value;
-          isHidden = (rawMode === 'private');
-          const mode = isHidden ? 'preview' : rawMode;
-          const pickedFolderId = document.getElementById('r-drive-folder-id').value;
-          const result = await uploadFileToDrive(_pendingFile, folderPath, mode, pickedFolderId);
-          src = result.embedUrl;
-        } catch (err) {
-          console.error(err);
-          toast('Drive upload failed: ' + (err.message || 'Check CLIENT_ID'), 'error');
-          return;
-        }
+        renderSem(activeSem);
+        if (GDRIVE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID_HERE') toast('Saved locally (Drive not configured)', 'info');
+        else toast(filesToUpload.length > 1 ? `${successCount}/${filesToUpload.length} uploaded ✓` : 'Resource added ✓', 'success');
+        _pendingFiles = []; _pendingFile = null;
+        return;
       }
 
       const item = { id, title, desc, type, src, thumb:null, folder: folderPath, hidden: isHidden || false };
