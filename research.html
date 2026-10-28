@@ -2374,7 +2374,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       const cached = loadMemberProfile();
       if (cached && cached.email) {
         showGateChecking('Checking your access…');
-        await freshPromise; // make sure the member list is current before trusting the cached sign-in
+        try { await freshPromise; } catch(e) {} // make sure the member list is current; ignore failure on hard refresh
         gateUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
         enterAs(isMemberEmail(cached.email) ? 'member' : 'pending');
         // Drive token is fetched lazily (see Tabs below) only when the member actually opens
