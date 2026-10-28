@@ -2373,13 +2373,15 @@ Content-Type: ${file.type || 'application/octet-stream'}
       if (siteIsAdmin()) { enterAs('admin'); return; } // already logged in elsewhere on the site this tab
       const cached = loadMemberProfile();
       if (cached && cached.email) {
-        showGateChecking('Checking your access…');
-        try { await freshPromise; } catch(e) {} // make sure the member list is current; ignore failure on hard refresh
+        // Enter immediately from cached data — no waiting for network on every page load.
+        // This makes tab-switching and back-navigation instant with no gate flash.
         gateUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
         enterAs(isMemberEmail(cached.email) ? 'member' : 'pending');
-        // Drive token is fetched lazily (see Tabs below) only when the member actually opens
-        // Team Uploads — requesting it eagerly here pops Google's account-chooser window on
-        // every single page load, even for people who never touch uploads.
+        // After fresh data arrives, silently re-check in case membership was revoked.
+        // Drive token is fetched lazily when the member opens Team Uploads.
+        freshPromise.then(() => {
+          if ((role === 'member' || role === 'pending') && !isMemberEmail(cached.email)) exitToGate();
+        }).catch(() => {});
         return;
       }
       showGateOptions();
