@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo",
+      "title": "Bias correction of satellite rainfall estimates using a radar-gauge product– a case study in Oklahoma (USA)",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo/view",
+      "date": "2026-10-28T17:27:27.711Z"
+    },
+    {
       "id": "1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21",
       "title": "Correcting bias of satellite rainfall data using physical empirical model",
       "category": "Research Paper",
@@ -186,5 +196,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-28T17:27:25.471Z"
+  "updated": "2026-10-28T17:27:29.204Z"
 }
