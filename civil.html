@@ -979,6 +979,7 @@
         history.pushState({ civil_sem: sem, civil_path: path }, '');
       }
       currentSemPath = path;
+      try { sessionStorage.setItem('civil_nav', JSON.stringify({sem: sem, path: path})); } catch(e) {}
       renderSem(sem);
     };
 
@@ -1038,6 +1039,7 @@
     }
 
     window.backToSemList = function() {
+      try { sessionStorage.removeItem('civil_nav'); } catch(e) {}
       document.getElementById('sem-panels').style.display = 'none';
       document.getElementById('sem-list').style.display = '';
       buildSemList();
@@ -1228,6 +1230,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${n}`));
       currentSemPath = "";
       activeSem = n;
+      try { sessionStorage.setItem('civil_nav', JSON.stringify({sem: n, path: ""})); } catch(e) {}
       document.getElementById('sem-list').style.display = 'none';
       document.getElementById('sem-panels').style.display = '';
       renderSem(n);
@@ -1592,6 +1595,21 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
     /* ── Init ──────────────────────────────── */
     buildPanels();
     buildSemList();
+
+    // Restore navigation position after a page refresh
+    try {
+      const _civilNav = sessionStorage.getItem('civil_nav');
+      if (_civilNav) {
+        const _nav = JSON.parse(_civilNav);
+        if (_nav && _nav.sem >= 1 && _nav.sem <= 8) {
+          activeSem = _nav.sem;
+          currentSemPath = _nav.path || '';
+          document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id === `sem-panel-${activeSem}`));
+          document.getElementById('sem-list').style.display = 'none';
+          document.getElementById('sem-panels').style.display = '';
+        }
+      }
+    } catch(e) {}
 
     // Show spinner while loading shared data from GitHub
     document.querySelectorAll('[id^="sem-grid-"]').forEach(g => {
