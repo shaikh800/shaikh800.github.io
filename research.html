@@ -1138,8 +1138,16 @@
         return prefix + (isLast ? `<span class="current">${esc(f.name)}</span>` : `<a onclick="jumpToFolder(${i})">${esc(f.name)}</a>`);
       }).join(' ');
     }
-    function jumpToFolder(i) { folderStack = folderStack.slice(0, i + 1); loadCurrentFolder(); }
-    function openSubfolder(id, name) { folderStack.push({ id, name }); loadCurrentFolder(); }
+    function jumpToFolder(i) {
+      folderStack = folderStack.slice(0, i + 1);
+      try { sessionStorage.setItem('rh_folderStack', JSON.stringify(folderStack)); } catch(e) {}
+      loadCurrentFolder();
+    }
+    function openSubfolder(id, name) {
+      folderStack.push({ id, name });
+      try { sessionStorage.setItem('rh_folderStack', JSON.stringify(folderStack)); } catch(e) {}
+      loadCurrentFolder();
+    }
     let driveSortMode = (function(){ try { return localStorage.getItem('rh_driveSortMode') || 'name-asc'; } catch(e) { return 'name-asc'; } })();
     function sortDriveList(list, mode) {
       const arr = list.slice();
@@ -1233,6 +1241,17 @@
       const sortSel = document.getElementById('driveSortSelect');
       if (sortSel) sortSel.value = driveSortMode;
       folderStack = [{ id: driveId, name: 'Shared Files' }];
+      // Restore saved subfolder position (survives F5; cleared on tab close)
+      try {
+        const _savedStack = sessionStorage.getItem('rh_folderStack');
+        if (_savedStack) {
+          const _parsed = JSON.parse(_savedStack);
+          // Only restore if root folder ID still matches
+          if (Array.isArray(_parsed) && _parsed.length > 0 && _parsed[0].id === driveId) {
+            folderStack = _parsed;
+          }
+        }
+      } catch(e) {}
       loadCurrentFolder();
     }
     function setDriveSort(mode) {
