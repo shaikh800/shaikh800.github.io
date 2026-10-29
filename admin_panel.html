@@ -799,6 +799,8 @@ function adminLogout() {
   const token  = sessionStorage.getItem(SESSION_TOKEN_KEY)  || localStorage.getItem(SESSION_TOKEN_KEY);
   const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY) || localStorage.getItem(SESSION_EXPIRY_KEY);
   if (token && expiry && Date.now() < parseInt(expiry)) {
+    // Mirror to localStorage so site-auth.js siteIsAdmin() works on all pages
+    try { localStorage.setItem(SESSION_TOKEN_KEY, token); localStorage.setItem(SESSION_EXPIRY_KEY, expiry); } catch(e) {}
     if (_wantReturn) { location.replace(_from); return; }
     document.getElementById('ctrl-gate').style.display = 'none';
     document.addEventListener('DOMContentLoaded', () => { loadSavedToken(); loadAll(); });
