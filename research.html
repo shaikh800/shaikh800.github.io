@@ -2310,10 +2310,20 @@ Content-Type: ${file.type || 'application/octet-stream'}
       applyRole();
     }
     function applyRole() {
-      // Compute uploadOnly state from current user's member record
+      // Compute uploadOnly state from current user's member record.
+      // gateIdentity() can resolve to the Team Uploads shared Google
+      // account (currentUser) instead of the real signed-in person --
+      // that Drive sign-in is restored from localStorage unconditionally
+      // at script load, well before role is known, so an admin who ever
+      // used "Sign in with the shared Google account" to upload under
+      // Team Uploads ends up with gateIdentity().email == the shared
+      // uploadOnly account's email. uploadOnly is a MEMBER restriction;
+      // an admin is never restricted by it, so skip the lookup entirely
+      // for role === 'admin' -- this is the actual bug behind "Gemini
+      // tab does nothing" for an admin who'd signed in to Team Uploads.
       const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
       const myMember = myEmail ? members.find(m => (m.email || '').toLowerCase() === myEmail) : null;
-      isUploadOnly = !!(myMember && myMember.uploadOnly);
+      isUploadOnly = role !== 'admin' && !!(myMember && myMember.uploadOnly);
       // Hide Gemini tab for uploadOnly accounts
       const geminiTabBtn = document.querySelector('.r-tab[data-tab="gemini"]');
       if (geminiTabBtn) geminiTabBtn.hidden = isUploadOnly;
