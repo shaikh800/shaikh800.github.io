@@ -37,6 +37,16 @@ async function siteAdminLogin(password) {
 function siteAdminLogout() {
   localStorage.removeItem(SITE_ADMIN_TOKEN_KEY);
   localStorage.removeItem(SITE_ADMIN_EXPIRY_KEY);
+  // admin_panel.html's own gate mirrors this same token into sessionStorage
+  // too (so civil.html etc. recognise a login made there). Clearing only
+  // localStorage left that sessionStorage copy behind, so "Logout" here
+  // looked like it worked (admin buttons disappeared) but a later visit to
+  // admin_panel.html auto-logged back in from the leftover session copy,
+  // with no password asked. Clear both so Logout actually logs out.
+  try {
+    sessionStorage.removeItem(SITE_ADMIN_TOKEN_KEY);
+    sessionStorage.removeItem(SITE_ADMIN_EXPIRY_KEY);
+  } catch (e) {}
 }
 
 
@@ -69,8 +79,16 @@ function siteAdminFooterInit() {
     return;
   }
 
-  link.href = q;
-  link.title = 'Admin Panel';
+  // Logged in: the lock icon used to double as a link straight into the
+  // Academy Admin Panel (Students / Exam Results / Teachers) -- unrelated
+  // to this page's own content, since Civil/Research/3D/Notice already do
+  // their own add/edit/delete inline, right here, once admin mode is on.
+  // Clicking what looked like a simple "you're unlocked" icon and landing
+  // on a completely different dashboard was the actual bug being reported.
+  // So now the icon is just a status indicator; the Academy Panel is still
+  // one deliberate tap away via its own small link beside Logout.
+  link.removeAttribute('href');
+  link.title = 'Logged in as admin';
   const icon = link.querySelector('i');
   if (icon) icon.className = 'fas fa-lock-open';
 
@@ -80,6 +98,12 @@ function siteAdminFooterInit() {
   const state = document.createElement('span');
   state.className = 'footer-admin-state';
   state.textContent = 'Admin ✓';
+  const panel = document.createElement('a');
+  panel.href = q;
+  panel.className = 'footer-admin-btn';
+  panel.style.textDecoration = 'none';
+  panel.textContent = 'Academy Panel';
+  panel.title = 'Students, exams & teachers -- a separate area from this page\'s own resources';
   const out = document.createElement('button');
   out.type = 'button';
   out.className = 'footer-admin-btn';
@@ -87,6 +111,7 @@ function siteAdminFooterInit() {
   out.addEventListener('click', () => { siteAdminLogout(); location.reload(); });
   group.appendChild(state);
   group.appendChild(link);
+  group.appendChild(panel);
   group.appendChild(out);
 }
 

@@ -48,7 +48,19 @@ function siteAdminTokens() {
   try {
     const exp = parseInt(sessionStorage.getItem('shaikh_admin_expiry_v1') || '0', 10);
     const t = sessionStorage.getItem('shaikh_admin_token_v1');
-    if (t && Date.now() < exp) out.push(t);
+    if (t && Date.now() < exp && out.indexOf(t) === -1) out.push(t);
+  } catch (e) {}
+  try {
+    // Shared site-admin session (Civil/Research/Academy) -- the SAME token
+    // siteIsAdmin() in site-auth.js checks, which is what shows the admin-only
+    // buttons on this page. A fresh tab/window (or one that never opened
+    // admin_panel.html in THIS tab) can have this valid in localStorage while
+    // sessionStorage above is still empty. Without this check, admin-only
+    // buttons would show but every save would silently fail with
+    // "Not logged in as admin" -- that mismatch was the bug.
+    const exp = parseInt(localStorage.getItem('shaikh_admin_expiry_v1') || '0', 10);
+    const t = localStorage.getItem('shaikh_admin_token_v1');
+    if (t && Date.now() < exp && out.indexOf(t) === -1) out.push(t);
   } catch (e) {}
   try {
     const exp = parseInt(localStorage.getItem('shaikh_ctrl_expiry_v1') || '0', 10);
