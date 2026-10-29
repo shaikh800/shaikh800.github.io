@@ -1178,6 +1178,7 @@
             <span class="dr-meta">${fmtDate(f.modifiedTime)}</span>
             <div class="row-actions" style="margin-left:auto;display:flex;align-items:center;gap:4px;">
               ${isAdminView ? `<button class="icon-action" title="Rename" style="display:inline-flex;" onclick="event.stopPropagation();driveRenameItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-pen-to-square"></i></button>` : ''}
+              <button class="icon-action" title="Copy share link" style="display:inline-flex;" onclick="event.stopPropagation();driveShareItem('${f.id}',true)"><i class="fas fa-share-nodes"></i></button>
               <i class="fas fa-chevron-right dr-chev"></i>
             </div>
           </div>`).join('');
@@ -1189,6 +1190,7 @@
             <div class="row-actions">
               ${f.webViewLink ? `<a class="icon-action" title="Open" href="${f.webViewLink}" target="_blank" rel="noopener"><i class="fas fa-eye"></i></a>` : ''}
               ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
+              <button class="icon-action" title="Copy share link" style="display:inline-flex;" onclick="driveShareItem('${f.id}',false)"><i class="fas fa-share-nodes"></i></button>
               ${isAdminView ? `<button class="icon-action" title="Rename" style="display:inline-flex;" onclick="driveRenameItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-pen-to-square"></i></button>` : ''}
             </div>
           </div>`).join('');
@@ -1301,6 +1303,23 @@
       }
     }
 
+
+    async function driveShareItem(id, isFolder) {
+      const url = isFolder
+        ? `https://drive.google.com/drive/folders/${id}?usp=sharing`
+        : `https://drive.google.com/file/d/${id}/view?usp=sharing`;
+      try {
+        await navigator.clipboard.writeText(url);
+        toast('Share link copied!', 'success', 2200);
+      } catch(e) {
+        const inp = document.createElement('input');
+        inp.value = url; inp.style.position = 'fixed'; inp.style.opacity = '0';
+        document.body.appendChild(inp); inp.select();
+        document.execCommand('copy');
+        document.body.removeChild(inp);
+        toast('Share link copied!', 'success', 2200);
+      }
+    }
     /* ── Google sign-in (Team Uploads' own Drive auth, separate from the gate) ── */
     let _uploadTokenClient = null;
     // True once this page load has actually completed a Drive-scope consent at least
