@@ -81,6 +81,46 @@
   ],
   "uploads": [
     {
+      "id": "1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM",
+      "title": "Evaluation and Bias Correction of CHIRP Rainfall Estimate for Rainfall-Runoff Simulation over Lake Ziway Watershed, Ethiopia",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM/view",
+      "date": "2026-10-28T17:35:59.400Z"
+    },
+    {
+      "id": "1CYrzokt_S50JXMeX1fQP1MltkQznEpgA",
+      "title": "Have satellite precipitation products improved over last two decades A comprehensive comparison of GPM IMERG with nine satellite and reanalysis datasets",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1CYrzokt_S50JXMeX1fQP1MltkQznEpgA/view",
+      "date": "2026-10-28T17:31:20.148Z"
+    },
+    {
+      "id": "1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo",
+      "title": "Bias correction of satellite rainfall estimates using a radar-gauge product– a case study in Oklahoma (USA)",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo/view",
+      "date": "2026-10-28T17:27:27.711Z"
+    },
+    {
+      "id": "1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21",
+      "title": "Correcting bias of satellite rainfall data using physical empirical model",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21/view",
+      "date": "2026-10-28T17:27:23.380Z"
+    },
+    {
       "id": "1QR2enClaruuamAWNul-dOzkDiZpMMH-o",
       "title": "shrestha2011",
       "category": "Research Paper",
@@ -176,5 +216,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-27T17:46:16.805Z"
+  "updated": "2026-10-28T17:36:01.184Z"
 }
