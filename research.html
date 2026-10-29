@@ -93,10 +93,13 @@
     .form-row .form-group { flex: 1; min-width: 160px; }
 
     /* ── FILE BROWSER (real Drive data, rendered as our own page — never leaves the site) ── */
-    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; }
+    .drive-toolbar-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
     .breadcrumb a, .breadcrumb span.current { color: var(--ink); font-weight: 600; cursor: pointer; }
     .breadcrumb a:hover { color: var(--blue); }
     .breadcrumb i { font-size: 10px; opacity: .5; }
+    .drive-sort-select { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 12.5px; font-family: inherit; background: var(--surface); color: var(--ink); flex-shrink: 0; cursor: pointer; }
+    .drive-sort-select:focus { outline: none; border-color: var(--blue); }
 
     .drive-row-folder { cursor: pointer; }
     .drive-row-folder:hover td { background: var(--surface-soft); }
@@ -523,7 +526,17 @@
         </div>
 
         <div id="driveBrowser" style="display:none;">
-          <div class="breadcrumb" id="breadcrumb"></div>
+          <div class="drive-toolbar-row">
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <select class="drive-sort-select" id="driveSortSelect" onchange="setDriveSort(this.value)" title="Sort files">
+              <option value="name-asc">Name (A–Z)</option>
+              <option value="name-desc">Name (Z–A)</option>
+              <option value="date-desc">Date (Newest)</option>
+              <option value="date-asc">Date (Oldest)</option>
+              <option value="size-desc">Size (Largest)</option>
+              <option value="size-asc">Size (Smallest)</option>
+            </select>
+          </div>
           <div class="drive-loading" id="driveLoading" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
           <div class="drive-list" id="fileTableBody"></div>
           <div class="empty-state" id="driveFolderEmpty" style="display:none;text-align:center;padding:30px;color:var(--muted);">This folder is empty.</div>
@@ -1127,6 +1140,19 @@
     }
     function jumpToFolder(i) { folderStack = folderStack.slice(0, i + 1); loadCurrentFolder(); }
     function openSubfolder(id, name) { folderStack.push({ id, name }); loadCurrentFolder(); }
+    let driveSortMode = (function(){ try { return localStorage.getItem('rh_driveSortMode') || 'name-asc'; } catch(e) { return 'name-asc'; } })();
+    function sortDriveList(list, mode) {
+      const arr = list.slice();
+      const dir = mode.indexOf('-desc') !== -1 ? -1 : 1;
+      if (mode.indexOf('name') === 0) {
+        arr.sort((a, b) => dir * a.name.localeCompare(b.name, undefined, { sensitivity: 'base', numeric: true }));
+      } else if (mode.indexOf('date') === 0) {
+        arr.sort((a, b) => dir * (new Date(a.modifiedTime || 0) - new Date(b.modifiedTime || 0)));
+      } else if (mode.indexOf('size') === 0) {
+        arr.sort((a, b) => dir * ((Number(a.size) || 0) - (Number(b.size) || 0)));
+      }
+      return arr;
+    }
     async function loadCurrentFolder() {
       renderBreadcrumb();
       const current = folderStack[folderStack.length - 1];
@@ -1139,8 +1165,10 @@
       try {
         const items = await driveListFolder(current.id);
         document.getElementById('driveLoading').style.display = 'none';
-        const folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
-        const files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+        let folders = items.filter(f => f.mimeType === 'application/vnd.google-apps.folder');
+        let files = items.filter(f => f.mimeType !== 'application/vnd.google-apps.folder');
+        folders = sortDriveList(folders, driveSortMode);
+        files = sortDriveList(files, driveSortMode);
         const fmtDate = t => t ? new Date(t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
         const isAdminView = (role === 'admin');
         const folderRows = folders.map(f => `
@@ -1168,7 +1196,7 @@
       const _existingNfBtn = document.getElementById('driveNewFolderBtn');
       if (_existingNfBtn) _existingNfBtn.remove();
       if (role === 'admin') {
-        const _bcrumb = document.querySelector('.drive-breadcrumb');
+        const _bcrumb = document.querySelector('.drive-toolbar-row');
         if (_bcrumb) {
           const nfBtn = document.createElement('button');
           nfBtn.id = 'driveNewFolderBtn';
@@ -1200,7 +1228,14 @@
         return;
       }
       empty.style.display = 'none'; browser.style.display = 'block';
+      const sortSel = document.getElementById('driveSortSelect');
+      if (sortSel) sortSel.value = driveSortMode;
       folderStack = [{ id: driveId, name: 'Shared Files' }];
+      loadCurrentFolder();
+    }
+    function setDriveSort(mode) {
+      driveSortMode = mode;
+      try { localStorage.setItem('rh_driveSortMode', mode); } catch(e) {}
       loadCurrentFolder();
     }
 
