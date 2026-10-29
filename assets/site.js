@@ -98,9 +98,14 @@ document.addEventListener("keydown", (e) => {
    Opening one of those links should show ONLY that topic -- not
    the page's hero or its other sections, sitting above/below it
    to scroll past. So: a matching hash hides every sibling section
-   and shows just the target; no hash (or a hash this page didn't
-   opt in) shows the full page, which is also the fallback for a
-   bare visit with no hash at all.
+   and shows just the target.
+   With no hash (a bare visit, or a hash this page didn't opt in),
+   every section shows by default EXCEPT one explicitly marked
+   data-focus-default="hidden" -- e.g. Civil's own "Academic Tools"
+   section, kept out of the way so it never sits stacked on top of
+   "Semester Resources" on a plain civil.html visit. A page that
+   marks nothing this way keeps the old "show everything" fallback
+   unchanged.
    Only sections explicitly marked data-focus-section take part,
    so this never touches research.html -- its hash values name
    internal tabs, not top-level sections, and it already runs its
@@ -116,7 +121,9 @@ document.addEventListener("keydown", (e) => {
       sections.forEach((sec) => { sec.hidden = sec !== target; });
       target.scrollIntoView({ block: "start" });
     } else {
-      sections.forEach((sec) => { sec.hidden = false; });
+      sections.forEach((sec) => {
+        sec.hidden = sec.getAttribute("data-focus-default") === "hidden";
+      });
     }
   }
 
