@@ -764,6 +764,9 @@ async function gateUnlock() {
     if (data.status === 'success' && data.token) {
       sessionStorage.setItem(SESSION_TOKEN_KEY,  data.token);
       sessionStorage.setItem(SESSION_EXPIRY_KEY, String(data.expiry));
+      // Also save to localStorage so site-auth.js siteIsAdmin() recognises the session
+      localStorage.setItem(SESSION_TOKEN_KEY,  data.token);
+      localStorage.setItem(SESSION_EXPIRY_KEY, String(data.expiry));
       if (_wantReturn) { location.replace(_from); return; }   // back to the page the admin came from
       document.getElementById('ctrl-gate').style.display = 'none';
       loadSavedToken();
@@ -786,13 +789,15 @@ function adminLogout() {
   sessionStorage.removeItem(SESSION_TOKEN_KEY);
   sessionStorage.removeItem(SESSION_EXPIRY_KEY);
   sessionStorage.removeItem(GH_TOKEN_KEY);
+  localStorage.removeItem(SESSION_TOKEN_KEY);
+  localStorage.removeItem(SESSION_EXPIRY_KEY);
   location.reload();
 }
 
-// Auto-login: skip the gate if a valid token exists in sessionStorage
+// Auto-login: skip the gate if a valid token exists in sessionStorage OR localStorage
 (function autoLogin() {
-  const token  = sessionStorage.getItem(SESSION_TOKEN_KEY);
-  const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY);
+  const token  = sessionStorage.getItem(SESSION_TOKEN_KEY)  || localStorage.getItem(SESSION_TOKEN_KEY);
+  const expiry = sessionStorage.getItem(SESSION_EXPIRY_KEY) || localStorage.getItem(SESSION_EXPIRY_KEY);
   if (token && expiry && Date.now() < parseInt(expiry)) {
     if (_wantReturn) { location.replace(_from); return; }
     document.getElementById('ctrl-gate').style.display = 'none';
@@ -822,7 +827,7 @@ function stopLoad() {
 // ════════════════════════════════════════════════════════
 async function gasCall(action, payload = {}) {
   startLoad();
-  const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
+  const token = sessionStorage.getItem(SESSION_TOKEN_KEY) || localStorage.getItem(SESSION_TOKEN_KEY) || '';
   try {
     const res  = await fetch(gasUrl(), {
       method:  'POST',
@@ -836,6 +841,8 @@ async function gasCall(action, payload = {}) {
     if (data && data.status === 'unauthorized') {
       sessionStorage.removeItem(SESSION_TOKEN_KEY);
       sessionStorage.removeItem(SESSION_EXPIRY_KEY);
+      localStorage.removeItem(SESSION_TOKEN_KEY);
+      localStorage.removeItem(SESSION_EXPIRY_KEY);
       toast('⏱️ Session expired! Please log in again.');
       setTimeout(() => location.reload(), 1500);
       return null;
