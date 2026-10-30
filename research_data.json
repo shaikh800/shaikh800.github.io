@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1KWIaId1vxd-Rd9Q6hWBonCEeV_DkXTQl",
+      "title": "Meteorological Applications - 2012 - Prasanna - Development of daily gridded rainfall dataset over the Ganga  Brahmaputra",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1KWIaId1vxd-Rd9Q6hWBonCEeV_DkXTQl/view",
+      "date": "2026-10-30T17:58:57.713Z"
+    },
+    {
       "id": "1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM",
       "title": "Evaluation and Bias Correction of CHIRP Rainfall Estimate for Rainfall-Runoff Simulation over Lake Ziway Watershed, Ethiopia",
       "category": "Research Paper",
@@ -216,5 +226,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-28T17:36:01.184Z"
+  "updated": "2026-10-30T17:58:59.188Z"
 }
