@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1Q9Duw6rLz8LH5-6zZWGW8OipWWZL9M8w",
+      "title": "Hydrologic characteristics of floods in Ganges–Brahmaputra–Meghna (GBM) delta",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1Q9Duw6rLz8LH5-6zZWGW8OipWWZL9M8w/view",
+      "date": "2026-11-02T17:37:58.795Z"
+    },
+    {
       "id": "1XqEKqMA4bZQXxZoMYA4drqAG2z-E1lFL",
       "title": "Correction and V alidation of GPM - IMERG and CHIRPS Satellite Precipitation Data in t he Lahor River Basin",
       "category": "Research Paper",
@@ -246,5 +256,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-02T17:37:56.010Z"
+  "updated": "2026-11-02T17:37:59.687Z"
 }
