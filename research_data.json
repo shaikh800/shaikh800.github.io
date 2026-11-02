@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "10rny59YAfJSENByeDegLZvrjhGaHelKg",
+      "title": "Evaluation of TRMM Precipitation Dataset over Himalayan Catchment The Upper Ganga Basin, India",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/10rny59YAfJSENByeDegLZvrjhGaHelKg/view",
+      "date": "2026-11-02T17:42:59.255Z"
+    },
+    {
       "id": "18NtujUb7EgkzC2G4DOEMOhIrJmPxnmM-",
       "title": "Bias correction of satellite rainfall estimates using a radar-gauge product – a case study in Oklahoma (USA)",
       "category": "Research Paper",
@@ -276,5 +286,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-02T17:41:36.162Z"
+  "updated": "2026-11-02T17:43:00.487Z"
 }
