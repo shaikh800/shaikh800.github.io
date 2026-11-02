@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1mqxfIvMxbmqkg6hvEab2qpRdPdFskK8g",
+      "title": "Inter-Comparison of Gauge-Corrected Global Satellite Rainfall Estimates and Their Applicability for Effective Water Resource Management in a Transboundary ",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1mqxfIvMxbmqkg6hvEab2qpRdPdFskK8g/view",
+      "date": "2026-11-02T17:38:02.685Z"
+    },
+    {
       "id": "1Q9Duw6rLz8LH5-6zZWGW8OipWWZL9M8w",
       "title": "Hydrologic characteristics of floods in Ganges–Brahmaputra–Meghna (GBM) delta",
       "category": "Research Paper",
@@ -256,5 +266,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-02T17:37:59.687Z"
+  "updated": "2026-11-02T17:38:03.790Z"
 }
