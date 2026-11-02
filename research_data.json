@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "18NtujUb7EgkzC2G4DOEMOhIrJmPxnmM-",
+      "title": "Bias correction of satellite rainfall estimates using a radar-gauge product – a case study in Oklahoma (USA)",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/18NtujUb7EgkzC2G4DOEMOhIrJmPxnmM-/view",
+      "date": "2026-11-02T17:41:35.172Z"
+    },
+    {
       "id": "1mqxfIvMxbmqkg6hvEab2qpRdPdFskK8g",
       "title": "Inter-Comparison of Gauge-Corrected Global Satellite Rainfall Estimates and Their Applicability for Effective Water Resource Management in a Transboundary ",
       "category": "Research Paper",
@@ -266,5 +276,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-02T17:38:03.790Z"
+  "updated": "2026-11-02T17:41:36.162Z"
 }
