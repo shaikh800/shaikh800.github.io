@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "1x6lcXJrO9A9b0NtDXFiUqEzVoFgPaoVw",
+      "title": "An improved bias correction method of daily rainfall data using a sliding window technique for climate change impact assessment",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1x6lcXJrO9A9b0NtDXFiUqEzVoFgPaoVw/view",
+      "date": "2026-11-02T17:55:41.226Z"
+    },
+    {
       "id": "13jiFtgoaMOCWXRrTcZcVb5nVIGoat9mE",
       "title": "Evaluation and Bias Correction of CHIRP Rainfall Estimate for Rainfall-Runoff Simulation over Lake Ziway Watershed, Ethiopia",
       "category": "Research Paper",
@@ -296,5 +306,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-02T17:43:05.118Z"
+  "updated": "2026-11-02T17:55:42.276Z"
 }
