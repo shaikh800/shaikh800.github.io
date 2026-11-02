@@ -81,6 +81,16 @@
   ],
   "uploads": [
     {
+      "id": "19owu6RNdsRflAMvW8fq_IVLros6vY66i",
+      "title": "Remote Sensing of Environment Have satellite precipitation products improved over last two decades A comprehensive comparison of GPM IMERG w",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/19owu6RNdsRflAMvW8fq_IVLros6vY66i/view",
+      "date": "2026-11-02T17:37:51.690Z"
+    },
+    {
       "id": "1KWIaId1vxd-Rd9Q6hWBonCEeV_DkXTQl",
       "title": "Meteorological Applications - 2012 - Prasanna - Development of daily gridded rainfall dataset over the Ganga  Brahmaputra",
       "category": "Research Paper",
@@ -226,5 +236,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-10-30T17:58:59.188Z"
+  "updated": "2026-11-02T17:37:52.786Z"
 }
