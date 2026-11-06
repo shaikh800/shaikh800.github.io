@@ -60,7 +60,8 @@
       "initials": "SH",
       "role": "member",
       "view": true,
-      "download": true
+      "download": true,
+      "whatsapp": "+8801521734793"
     }
   ],
   "notices": [
@@ -316,5 +317,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-02T18:20:43.101Z"
+  "updated": "2026-11-06T13:59:24.615Z"
 }
