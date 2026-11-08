@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>FEC Index Generator | Lab Report Index Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -963,14 +966,27 @@
             }).outputPdf('blob');
         }).then(async (pdfBlob) => {
             const file = new File([pdfBlob], filename, { type: 'application/pdf' });
-            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-                await navigator.share({ title: filename, files: [file] });
-            } else {
+            const downloadDirectly = () => {
                 const url = URL.createObjectURL(pdfBlob);
                 const a = document.createElement('a');
                 a.href = url; a.download = filename;
                 document.body.appendChild(a); a.click(); a.remove();
                 setTimeout(() => URL.revokeObjectURL(url), 1500);
+            };
+            if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+                // The PDF is already built at this point -- cancelling the native
+                // share sheet throws AbortError, which used to fall into the
+                // generic catch below and show "Could not create PDF" even
+                // though the PDF itself was fine; this handles that case here
+                // instead, and only falls back to a plain download if sharing
+                // failed for some other reason.
+                try {
+                    await navigator.share({ title: filename, files: [file] });
+                } catch (shareErr) {
+                    if (shareErr && shareErr.name !== 'AbortError') downloadDirectly();
+                }
+            } else {
+                downloadDirectly();
             }
             btn.innerText = originalText;
             btn.style.backgroundColor = "#111827";

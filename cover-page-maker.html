@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FEC Cover Page Maker | Professional Cover Page Generator</title>
 
@@ -947,14 +950,27 @@ function downloadPDF() {
         pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
         const pdfBlob = pdf.output('blob');
         const file = new File([pdfBlob], saveName, { type: 'application/pdf' });
-        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-            await navigator.share({ title: saveName, files: [file] });
-        } else {
+        const downloadDirectly = () => {
             const url = URL.createObjectURL(pdfBlob);
             const a = document.createElement('a');
             a.href = url; a.download = saveName;
             document.body.appendChild(a); a.click(); a.remove();
             setTimeout(() => URL.revokeObjectURL(url), 1500);
+        };
+        if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+            // The PDF is already built at this point -- cancelling the native
+            // share sheet (or it failing to open) is NOT a PDF export failure,
+            // so it's handled right here instead of falling into the generic
+            // catch below, which used to blame "Logo image path" for a plain
+            // cancel (navigator.share rejects with AbortError when the user
+            // just closes the share sheet).
+            try {
+                await navigator.share({ title: saveName, files: [file] });
+            } catch (shareErr) {
+                if (shareErr && shareErr.name !== 'AbortError') downloadDirectly();
+            }
+        } else {
+            downloadDirectly();
         }
     }).catch(error => { 
         console.error('PDF export failed:', error); 
