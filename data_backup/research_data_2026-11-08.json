@@ -1,0 +1,311 @@
+{
+  "driveLink": "https://drive.google.com/drive/folders/106dbVPI0LWPlqmVqJdPb-HHxoC-zz6nJ?usp=sharing",
+  "driveId": "106dbVPI0LWPlqmVqJdPb-HHxoC-zz6nJ",
+  "apiKey": "AIzaSyC2l_X1Hco3VHQ9x31ajECoCGV0QMLh8d4",
+  "members": [
+    {
+      "id": 1,
+      "name": "Md. Shaikh Alam (You)",
+      "email": "md.shaikh.alam.007@gmail.com",
+      "initials": "MD",
+      "role": "admin",
+      "view": true,
+      "download": true,
+      "whatsapp": "01722592967",
+      "photo": "data:image/jpeg;base64,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"
+    },
+    {
+      "id": 1750000001,
+      "name": "Turbo Researchers",
+      "email": "turbo.researchers@gmail.com",
+      "initials": "TR",
+      "role": "member",
+      "view": true,
+      "download": true,
+      "uploadOnly": true
+    },
+    {
+      "id": 1792645380197,
+      "name": "rafat.u.sifat@gmail.com",
+      "email": "rafat.u.sifat@gmail.com",
+      "initials": "RA",
+      "role": "member",
+      "view": true,
+      "download": true
+    },
+    {
+      "id": 1792690647691,
+      "name": "naimur03rahman@gmail.com",
+      "email": "naimur03rahman@gmail.com",
+      "initials": "NA",
+      "role": "member",
+      "view": true,
+      "download": true
+    },
+    {
+      "id": 1792945892833,
+      "name": "shazidrownok.ceworks@gmail.com",
+      "email": "shazidrownok.ceworks@gmail.com",
+      "initials": "SH",
+      "role": "member",
+      "view": true,
+      "download": true,
+      "whatsapp": "+8801521734793",
+      "photo": "data:image/jpeg;base64,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"
+    }
+  ],
+  "notices": [
+    {
+      "id": 1792848136004,
+      "type": "urgent",
+      "title": "Meeting Schedule",
+      "text": "রাত ১১ঃ০০ টার দিকে মিটিং আরেঞ্জ করা হবে।",
+      "date": "Just now"
+    },
+    {
+      "id": 1,
+      "type": "info",
+      "title": "Welcome to the Research Hub",
+      "text": "Browse the Drive folder for shared papers and data, upload your own work under Team Uploads, and check this board for updates.",
+      "date": "Oct 13"
+    }
+  ],
+  "uploads": [
+    {
+      "id": "1ETmyLLJ8Te78bGzojhfisQYVmavKl6no",
+      "title": "Bias Correction and Trend Analysis of Temperature and Rainfall in Eastern India",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1ETmyLLJ8Te78bGzojhfisQYVmavKl6no/view",
+      "date": "2026-11-02T18:20:42.142Z"
+    },
+    {
+      "id": "1x6lcXJrO9A9b0NtDXFiUqEzVoFgPaoVw",
+      "title": "An improved bias correction method of daily rainfall data using a sliding window technique for climate change impact assessment",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1x6lcXJrO9A9b0NtDXFiUqEzVoFgPaoVw/view",
+      "date": "2026-11-02T17:55:41.226Z"
+    },
+    {
+      "id": "13jiFtgoaMOCWXRrTcZcVb5nVIGoat9mE",
+      "title": "Evaluation and Bias Correction of CHIRP Rainfall Estimate for Rainfall-Runoff Simulation over Lake Ziway Watershed, Ethiopia",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/13jiFtgoaMOCWXRrTcZcVb5nVIGoat9mE/view",
+      "date": "2026-11-02T17:43:04.389Z"
+    },
+    {
+      "id": "10rny59YAfJSENByeDegLZvrjhGaHelKg",
+      "title": "Evaluation of TRMM Precipitation Dataset over Himalayan Catchment The Upper Ganga Basin, India",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/10rny59YAfJSENByeDegLZvrjhGaHelKg/view",
+      "date": "2026-11-02T17:42:59.255Z"
+    },
+    {
+      "id": "18NtujUb7EgkzC2G4DOEMOhIrJmPxnmM-",
+      "title": "Bias correction of satellite rainfall estimates using a radar-gauge product – a case study in Oklahoma (USA)",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/18NtujUb7EgkzC2G4DOEMOhIrJmPxnmM-/view",
+      "date": "2026-11-02T17:41:35.172Z"
+    },
+    {
+      "id": "1mqxfIvMxbmqkg6hvEab2qpRdPdFskK8g",
+      "title": "Inter-Comparison of Gauge-Corrected Global Satellite Rainfall Estimates and Their Applicability for Effective Water Resource Management in a Transboundary ",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1mqxfIvMxbmqkg6hvEab2qpRdPdFskK8g/view",
+      "date": "2026-11-02T17:38:02.685Z"
+    },
+    {
+      "id": "1Q9Duw6rLz8LH5-6zZWGW8OipWWZL9M8w",
+      "title": "Hydrologic characteristics of floods in Ganges–Brahmaputra–Meghna (GBM) delta",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1Q9Duw6rLz8LH5-6zZWGW8OipWWZL9M8w/view",
+      "date": "2026-11-02T17:37:58.795Z"
+    },
+    {
+      "id": "1XqEKqMA4bZQXxZoMYA4drqAG2z-E1lFL",
+      "title": "Correction and V alidation of GPM - IMERG and CHIRPS Satellite Precipitation Data in t he Lahor River Basin",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1XqEKqMA4bZQXxZoMYA4drqAG2z-E1lFL/view",
+      "date": "2026-11-02T17:37:55.318Z"
+    },
+    {
+      "id": "19owu6RNdsRflAMvW8fq_IVLros6vY66i",
+      "title": "Remote Sensing of Environment Have satellite precipitation products improved over last two decades A comprehensive comparison of GPM IMERG w",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/19owu6RNdsRflAMvW8fq_IVLros6vY66i/view",
+      "date": "2026-11-02T17:37:51.690Z"
+    },
+    {
+      "id": "1KWIaId1vxd-Rd9Q6hWBonCEeV_DkXTQl",
+      "title": "Meteorological Applications - 2012 - Prasanna - Development of daily gridded rainfall dataset over the Ganga  Brahmaputra",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1KWIaId1vxd-Rd9Q6hWBonCEeV_DkXTQl/view",
+      "date": "2026-10-30T17:58:57.713Z"
+    },
+    {
+      "id": "1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM",
+      "title": "Evaluation and Bias Correction of CHIRP Rainfall Estimate for Rainfall-Runoff Simulation over Lake Ziway Watershed, Ethiopia",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1UOzFcueFHP2fQO2wUSPBuc7iDmQaspfM/view",
+      "date": "2026-10-28T17:35:59.400Z"
+    },
+    {
+      "id": "1CYrzokt_S50JXMeX1fQP1MltkQznEpgA",
+      "title": "Have satellite precipitation products improved over last two decades A comprehensive comparison of GPM IMERG with nine satellite and reanalysis datasets",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1CYrzokt_S50JXMeX1fQP1MltkQznEpgA/view",
+      "date": "2026-10-28T17:31:20.148Z"
+    },
+    {
+      "id": "1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo",
+      "title": "Bias correction of satellite rainfall estimates using a radar-gauge product– a case study in Oklahoma (USA)",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1OYfjNat6UHGCYx1xk1S07aTD9jIFNJlo/view",
+      "date": "2026-10-28T17:27:27.711Z"
+    },
+    {
+      "id": "1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21",
+      "title": "Correcting bias of satellite rainfall data using physical empirical model",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1WkzrEx5IQVXj5jiHzs1NVpi2bhHUcd21/view",
+      "date": "2026-10-28T17:27:23.380Z"
+    },
+    {
+      "id": "1QR2enClaruuamAWNul-dOzkDiZpMMH-o",
+      "title": "shrestha2011",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1QR2enClaruuamAWNul-dOzkDiZpMMH-o/view",
+      "date": "2026-10-26T16:42:59.146Z"
+    },
+    {
+      "id": "1GieeNwn0oU_D-DbULAqaCdU99rtUQTB1",
+      "title": "hess-2019",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1GieeNwn0oU_D-DbULAqaCdU99rtUQTB1/view",
+      "date": "2026-10-26T16:36:45.419Z"
+    },
+    {
+      "id": "1lk5cJqr2X9L5ltu10NHkcnlL8hkEeWkf",
+      "title": "hess-15",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1lk5cJqr2X9L5ltu10NHkcnlL8hkEeWkf/view",
+      "date": "2026-10-26T16:35:42.532Z"
+    },
+    {
+      "id": "139MAzRbnFRENO_4y1IFsOguQav3XpSZ2",
+      "title": "hess",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/139MAzRbnFRENO_4y1IFsOguQav3XpSZ2/view",
+      "date": "2026-10-26T16:34:04.851Z"
+    },
+    {
+      "id": "1GxkDl4uECQu97TjslY8ol1K3kdTzI9G9",
+      "title": "water-11-00613",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1GxkDl4uECQu97TjslY8ol1K3kdTzI9G9/view",
+      "date": "2026-10-25T21:35:40.640Z"
+    },
+    {
+      "id": "1opm0xwab3iacqnnQKteUMxDJFXcBZqNO",
+      "title": "Lahore River Basin",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1opm0xwab3iacqnnQKteUMxDJFXcBZqNO/view",
+      "date": "2026-10-24T18:20:16.546Z"
+    },
+    {
+      "id": "1BSUA5CIQjyyOOVbMUb1WlDioVxW9YB8B",
+      "title": "au.175",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1BSUA5CIQjyyOOVbMUb1WlDioVxW9YB8B/view",
+      "date": "2026-10-24T18:11:21.603Z"
+    },
+    {
+      "id": "1BwpFk10v3bm2KYz-ZNwD6bxnfs1S0A1T",
+      "title": "IEVW_SA_EV_Merging_Techniques_Summary",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/1BwpFk10v3bm2KYz-ZNwD6bxnfs1S0A1T/view",
+      "date": "2026-10-21T15:07:49.424Z"
+    }
+  ],
+  "geminiPayments": {
+    "md.shaikh.alam.007@gmail.com": {
+      "2026-10": 100
+    },
+    "rafat.u.sifat@gmail.com": {
+      "2026-10": 100
+    },
+    "shazidrownok.ceworks@gmail.com": {
+      "2026-10": 100
+    }
+  },
+  "pendingRequests": [],
+  "geminiCycleStart": "2026-10",
+  "geminiCycleEnd": "2027-09",
+  "geminiMonthlyFee": 100,
+  "updated": "2026-11-06T15:27:06.301Z"
+}
