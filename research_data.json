@@ -72,6 +72,16 @@
   ],
   "uploads": [
     {
+      "id": "116b6GApL3AHWL2Aeby0VdatV26YMcwEf",
+      "title": "Developing High-resolution Gridded Rainfall and Temperature Data for Bangladesh the ENACTS-BMD dataset",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/116b6GApL3AHWL2Aeby0VdatV26YMcwEf/view",
+      "date": "2026-11-09T16:28:50.968Z"
+    },
+    {
       "id": "162rLSaHmii3A4v9kogorIcveh-0OAXMk",
       "title": "Developing a high-resolution gridded rainfall product for Bangladesh during 1901–2018",
       "category": "Research Paper",
@@ -317,5 +327,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-09T16:28:48.698Z"
+  "updated": "2026-11-09T16:28:51.663Z"
 }
