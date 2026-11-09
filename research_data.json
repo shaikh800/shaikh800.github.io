@@ -72,6 +72,16 @@
   ],
   "uploads": [
     {
+      "id": "162rLSaHmii3A4v9kogorIcveh-0OAXMk",
+      "title": "Developing a high-resolution gridded rainfall product for Bangladesh during 1901–2018",
+      "category": "Research Paper",
+      "visibility": "public",
+      "uploaderName": "Turbo Researchers",
+      "uploaderEmail": "turbo.researchers@gmail.com",
+      "link": "https://drive.google.com/file/d/162rLSaHmii3A4v9kogorIcveh-0OAXMk/view",
+      "date": "2026-11-09T16:28:47.726Z"
+    },
+    {
       "id": "1ETmyLLJ8Te78bGzojhfisQYVmavKl6no",
       "title": "Bias Correction and Trend Analysis of Temperature and Rainfall in Eastern India",
       "category": "Research Paper",
@@ -307,5 +317,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 100,
-  "updated": "2026-11-06T15:27:06.301Z"
+  "updated": "2026-11-09T16:28:48.698Z"
 }
