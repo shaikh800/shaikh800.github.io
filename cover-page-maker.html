@@ -495,7 +495,10 @@ h3 {
 </div>
 <input type="date" id="in-date">
 </div>
-<button class="print-btn" onclick="downloadPDF()">Download PDF</button>
+<div style="display: flex; gap: 8px;">
+<button class="print-btn" onclick="downloadPDF()" style="flex: 1;">Download PDF</button>
+<button class="print-btn" id="btnCtrlP" onclick="sendToCtrlP()" style="flex: 1; background: #0f62fe;">Send to CtrlP</button>
+</div>
 </aside>
 
 <main class="page-wrap" id="pagesWrap">
@@ -558,6 +561,9 @@ h3 {
 </main>
 
 <script>
+const CTRLP_PORTAL_URL = "https://ctrlpmyportal.netlify.app/";
+const CTRLP_ORIGIN = "https://ctrlpmyportal.netlify.app";
+
 let currentMobileTab = 'edit';
 function switchMobileTab(tab) {
   currentMobileTab = tab;
@@ -933,6 +939,114 @@ function downloadPDF() {
     btn.style.opacity = "1";
     btn.style.pointerEvents = "auto";
   });
+}
+
+async function sendToCtrlP() {
+  const original = document.getElementById('printable-area');
+  const btn = document.getElementById('btnCtrlP');
+  const origText = btn.innerText;
+
+  if (!window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) {
+    alert('PDF library load hoyni. Internet connection check kore page reload din.');
+    return;
+  }
+
+  const printWin = window.open(CTRLP_PORTAL_URL + "?incoming=cover", "_blank");
+  if (!printWin) {
+    alert("Please allow pop-ups so the cover page can open directly in CtrlP.");
+    return;
+  }
+
+  btn.innerText = "Preparing...";
+  btn.style.opacity = "0.7";
+  btn.style.pointerEvents = "none";
+
+  const nameInput = document.getElementById('in-from-name').value.trim().split(' ')[0] || 'page';
+  const filename = 'cover-' + nameInput.toLowerCase() + '.pdf';
+
+  const clone = original.cloneNode(true);
+  clone.id = 'pdf-export-area';
+  clone.classList.add('exporting');
+  clone.style.position = 'fixed';
+  clone.style.left = '-10000px';
+  clone.style.top = '0';
+  clone.style.margin = '0';
+  clone.style.width = '210mm';
+  clone.style.height = '297mm';
+  clone.style.boxShadow = 'none';
+  clone.style.overflow = 'hidden';
+  clone.style.background = '#ffffff';
+  clone.style.zIndex = '999999';
+  document.body.appendChild(clone);
+
+  const isMobile = window.innerWidth <= 768;
+  const renderScale = isMobile ? 1.5 : 2;
+  const fontReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+
+  try {
+    await fontReady.catch(() => {});
+    await waitForImages(clone);
+    const canvas = await html2canvas(clone, {
+      scale: renderScale,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: 0,
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
+      windowWidth: clone.offsetWidth,
+      windowHeight: clone.offsetHeight
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('portrait', 'mm', 'a4');
+    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+    const blob = pdf.output('blob');
+
+    btn.innerText = "Sending...";
+
+    let delivered = false;
+    const sendPayload = () => {
+      if (delivered || printWin.closed) return;
+      printWin.postMessage({ type: "CTRLP_INCOMING_PDF", filename, blob }, CTRLP_ORIGIN);
+    };
+
+    const onMessage = (event) => {
+      if (event.origin !== CTRLP_ORIGIN) return;
+      if (event.data && event.data.type === "CTRLP_READY") {
+        sendPayload();
+      } else if (event.data && event.data.type === "CTRLP_ACK") {
+        delivered = true;
+        clearInterval(retryTimer);
+        window.removeEventListener("message", onMessage);
+      }
+    };
+    window.addEventListener("message", onMessage);
+
+    const retryTimer = setInterval(() => {
+      if (delivered || printWin.closed) {
+        clearInterval(retryTimer);
+        window.removeEventListener("message", onMessage);
+        return;
+      }
+      sendPayload();
+    }, 600);
+
+    setTimeout(() => {
+      clearInterval(retryTimer);
+      window.removeEventListener("message", onMessage);
+    }, 20000);
+  } catch (error) {
+    console.error('Send to CtrlP failed:', error);
+    alert('PDF export failed. Logo image path ba browser console check korun.');
+  } finally {
+    clone.remove();
+    btn.innerText = origText;
+    btn.style.opacity = "1";
+    btn.style.pointerEvents = "auto";
+  }
 }
 </script>
 </body>
