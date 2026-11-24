@@ -315,7 +315,7 @@
   "geminiPayments": {
     "md.shaikh.alam.007@gmail.com": {
       "2026-10": 115,
-      "2026-11": 100
+      "2026-11": 115
     },
     "rafat.u.sifat@gmail.com": {
       "2026-10": 100
@@ -328,5 +328,5 @@
   "geminiCycleStart": "2026-10",
   "geminiCycleEnd": "2027-09",
   "geminiMonthlyFee": 115,
-  "updated": "2026-11-24T19:52:34.047Z"
+  "updated": "2026-11-24T19:52:40.929Z"
 }
