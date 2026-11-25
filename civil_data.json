@@ -75,23 +75,13 @@
         "hidden": false
       },
       {
-        "id": "mww5u05vqezz",
+        "id": "mww5x1my6qyv",
         "title": "Soil exploration (single slide)",
         "desc": "",
         "type": "pdf",
-        "src": "https://drive.google.com/file/d/18a7Me_QOAIY6QpnwmDR2vfV9LjewsqPA/view?usp=sharing",
+        "src": "https://drive.google.com/file/d/1nrZKJykndkh2IuFYbDLUuQIuLOysu83v/view?usp=sharing",
         "thumb": null,
-        "folder": "Semester 6/My Drive/Civil Engineering/CE604 - Principles of Foundation Engineering",
-        "hidden": false
-      },
-      {
-        "id": "mww5u5loj2s8",
-        "title": "Bearing capacity (single slide)",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/15nSCvmD_cgWBPmmDT5TMZNOwFrLDcbuF/view?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/My Drive/Civil Engineering/CE604 - Principles of Foundation Engineering",
+        "folder": "Semester 6/My Drive/CE604 - Principles of Foundation Engineering",
         "hidden": false
       }
     ]
@@ -1653,5 +1643,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-25T13:29:36.695Z"
+  "updated": "2026-11-25T13:31:49.432Z"
 }
