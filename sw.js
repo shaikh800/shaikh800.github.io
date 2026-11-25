@@ -5,7 +5,7 @@
      because those exact URLs never change.
    - Everything else (Google sign-in and Drive, GitHub API, Cloudflare Workers,
      Apps Script, JSON data files) is NOT touched at all. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const PAGE_CACHE = 'mdshaikh-' + VERSION;
 const CDN_CACHE = 'mdshaikh-cdn-' + VERSION;
 const NETWORK_TIMEOUT_MS = 3000;

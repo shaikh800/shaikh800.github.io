@@ -991,14 +991,28 @@
     let currentSemPath = "";
     let currentViewMode = localStorage.getItem('civil_view_mode') || 'view-grid';
 
+    function showSemesterList() {
+      try { sessionStorage.removeItem('civil_nav'); } catch(e) {}
+      document.getElementById('sem-panels').style.display = 'none';
+      document.getElementById('sem-list').style.display = '';
+      buildSemList();
+    }
+
+    function showSemesterPanel(sem, path) {
+      activeSem = sem;
+      currentSemPath = path || '';
+      document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id === `sem-panel-${sem}`));
+      document.getElementById('sem-list').style.display = 'none';
+      document.getElementById('sem-panels').style.display = '';
+      try { sessionStorage.setItem('civil_nav', JSON.stringify({sem, path: currentSemPath})); } catch(e) {}
+      renderSem(sem);
+    }
+
     window.navigateFolder = function(sem, path, _fromPopstate) {
       if (!_fromPopstate) {
-        // Push the CURRENT state first (so Back returns here), then push the new state.
-        history.pushState({ civil_sem: sem, civil_path: path }, '');
+        history.pushState({ civil_view: 'semester', civil_sem: sem, civil_path: path }, '');
       }
-      currentSemPath = path;
-      try { sessionStorage.setItem('civil_nav', JSON.stringify({sem: sem, path: path})); } catch(e) {}
-      renderSem(sem);
+      showSemesterPanel(sem, path);
     };
 
     window.setViewMode = function(mode) {
@@ -1021,13 +1035,11 @@
         return;
       }
       // 3. Navigate to the folder stored in state (or root)
-      if ('civil_path' in state) {
-        currentSemPath = state.civil_path;
-        renderSem(state.civil_sem || activeSem);
+      if (state.civil_view === 'semester' && state.civil_sem) {
+        showSemesterPanel(state.civil_sem, state.civil_path || '');
       } else {
         // Fell back to page history entry or state without civil info — go to folder root
-        currentSemPath = '';
-        renderSem(activeSem);
+        showSemesterList();
       }
     });
 
@@ -1057,10 +1069,8 @@
     }
 
     window.backToSemList = function() {
-      try { sessionStorage.removeItem('civil_nav'); } catch(e) {}
-      document.getElementById('sem-panels').style.display = 'none';
-      document.getElementById('sem-list').style.display = '';
-      buildSemList();
+      history.pushState({ civil_view: 'list' }, '');
+      showSemesterList();
     };
 
     function civilShareItem(rawSrc) {
@@ -1320,13 +1330,8 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
     document.getElementById('sem-list').addEventListener('click', e => {
       const card = e.target.closest('.fs-folder-card[data-sem]'); if (!card) return;
       const n = parseInt(card.dataset.sem);
-      document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id===`sem-panel-${n}`));
-      currentSemPath = "";
-      activeSem = n;
-      try { sessionStorage.setItem('civil_nav', JSON.stringify({sem: n, path: ""})); } catch(e) {}
-      document.getElementById('sem-list').style.display = 'none';
-      document.getElementById('sem-panels').style.display = '';
-      renderSem(n);
+      history.pushState({ civil_view: 'semester', civil_sem: n, civil_path: '' }, '');
+      showSemesterPanel(n, '');
     });
 
     /* ── Open resource ─────────────────────── */
