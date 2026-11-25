@@ -1489,15 +1489,25 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         const normalised = segs.join('/');
         return normalised === pathLower || normalised.startsWith(pathLower + '/');
       });
+      const driveItems = toDelete.filter(driveIdForItem);
+      if (driveItems.length) {
+        try {
+          await driveSyncAction('driveDeleteBatch', { semester: String(sem), ids: driveItems.map(it => it.id) });
+        } catch (e) {
+          toast(e.message || 'Drive delete failed; resources were kept.', 'error');
+          return;
+        }
+      }
       for (const it of toDelete) {
         if (it.src && it.src.startsWith('idb:')) {
           try { await delFile(it.src.slice(4)); } catch(e) {}
         }
       }
       const deleteIds = new Set(toDelete.map(it=>it.id));
-      sems[sem] = (sems[sem]||[]).filter(it=>!deleteIds.has(it.id));
-      saveSems(sems); renderSem(sem);
-      toast(`Deleted folder (${toDelete.length} file${toDelete.length!==1?'s':''})`, 'info');
+      const latest = loadSems();
+      latest[sem] = (latest[sem]||[]).filter(it=>!deleteIds.has(it.id));
+      saveSems(latest); renderSem(sem); buildSemList();
+      toast(`Moved folder contents to Drive Bin (${toDelete.length} file${toDelete.length!==1?'s':''})`, 'info');
     }
 
     /* ── Add resource form ─────────────────── */

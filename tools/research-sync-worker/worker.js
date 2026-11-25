@@ -359,14 +359,23 @@ async function handleDriveAction(action, payload, env, origin) {
   }
   const sem = String(payload.semester || '');
   const items = data.semesters[sem] || [];
-  const item = items.find(x => x.id === payload.id);
-  if (!item) return json({ ok: false, error: 'resource-not-found' }, 404, origin);
-  const id = driveId(item);
-  if (!id) return json({ ok: false, error: 'not-a-drive-resource' }, 400, origin);
-  if (action === 'driveDelete') {
-    await driveRequest(env, 'DELETE', `/files/${encodeURIComponent(id)}`);
-    data.semesters[sem] = items.filter(x => x.id !== item.id);
+  const deleteIds = action === 'driveDelete' ? [payload.id] : (action === 'driveDeleteBatch' ? payload.ids : null);
+  if (deleteIds) {
+    if (!Array.isArray(deleteIds) || !deleteIds.length) return json({ ok: false, error: 'resource-not-found' }, 404, origin);
+    const selected = items.filter(item => deleteIds.includes(item.id));
+    if (selected.length !== deleteIds.length) return json({ ok: false, error: 'resource-not-found' }, 404, origin);
+    for (const entry of selected) {
+      const id = driveId(entry);
+      if (!id) return json({ ok: false, error: 'not-a-drive-resource' }, 400, origin);
+      await driveRequest(env, 'PATCH', `/files/${encodeURIComponent(id)}`, { trashed: true });
+    }
+    const selectedIds = new Set(deleteIds);
+    data.semesters[sem] = items.filter(item => !selectedIds.has(item.id));
   } else if (action === 'driveMove') {
+    const item = items.find(x => x.id === payload.id);
+    if (!item) return json({ ok: false, error: 'resource-not-found' }, 404, origin);
+    const id = driveId(item);
+    if (!id) return json({ ok: false, error: 'not-a-drive-resource' }, 400, origin);
     const targetSem = String(payload.targetSemester || sem);
     if (!/^[1-8]$/.test(targetSem)) return json({ ok: false, error: 'bad-semester' }, 400, origin);
     const targetFolder = cleanSegments(payload.targetFolder, targetSem).join('/');
@@ -447,7 +456,7 @@ export default {
 
     try {
       if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
-      if (action === 'driveDelete' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow') return await handleDriveAction(action, payload, env, origin);
+      if (action === 'driveDelete' || action === 'driveDeleteBatch' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow') return await handleDriveAction(action, payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
       const updated = applyAction(content, action, payload);
       updated.updated = new Date().toISOString();
