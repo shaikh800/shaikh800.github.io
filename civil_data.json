@@ -83,6 +83,16 @@
         "thumb": null,
         "folder": "Semester 6/My Drive/CE604 - Principles of Foundation Engineering",
         "hidden": false
+      },
+      {
+        "id": "mww5x5j0mmr4",
+        "title": "Bearing capacity (single slide)",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/11lwfiHORNWWQWl9H6eUWHz1rr9LJnW3M/view?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/My Drive/CE604 - Principles of Foundation Engineering",
+        "hidden": false
       }
     ]
   },
@@ -1643,5 +1653,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-25T13:31:49.432Z"
+  "updated": "2026-11-25T13:31:55.368Z"
 }
