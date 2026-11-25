@@ -47,19 +47,6 @@
         "driveManaged": true
       },
       {
-        "id": "mww65pyal38s",
-        "title": "Hydrology all question ",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1buMI9cUppwplsHKRKRzhZpXtSgkOGN08/preview?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/Civil Engineering/Questions",
-        "hidden": false,
-        "driveFileId": "1buMI9cUppwplsHKRKRzhZpXtSgkOGN08",
-        "driveFolderId": "1JATB5x3dYKZbK7Hl1dL5D22OBF82TfeY",
-        "driveManaged": true
-      },
-      {
         "id": "mww5x5j0mmr4",
         "title": "Bearing capacity (single slide)",
         "desc": "",
@@ -1711,5 +1698,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-25T17:46:47.578Z"
+  "updated": "2026-11-25T17:50:53.755Z"
 }
