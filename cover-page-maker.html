@@ -608,7 +608,7 @@ h3 {
 
 <script>
 const CTRLP_PORTAL_URL = "https://ctrlpmyportal.netlify.app/";
-const CTRLP_ORIGIN = "https://ctrlpmyportal.netlify.app";
+const CTRLP_RELAY_URL = "https://script.google.com/macros/s/AKfycbwQsObF2EK94uf0IJCAtMlFUNUe3dloD595xnhK0ZNx_H2qX97HgQSENkGqOL03Et4/exec";
 
 let currentMobileTab = 'edit';
 function switchMobileTab(tab) {
@@ -741,7 +741,6 @@ courseData.forEach(c => {
   cNameL.innerHTML += `<option value="${c.name}">`;
 });
 
-// Teacher suggestions: 6th-semester teachers first, then everyone else (no duplicates).
 const teacherOrder = [];
 const addTeacher = n => { if (n && !teacherOrder.includes(n)) teacherOrder.push(n); };
 courseData.filter(c => c.code.startsWith('CE 6')).forEach(c => addTeacher(c.teacher));
@@ -890,10 +889,6 @@ function findStudentByReg(reg) {
   return studentData.find(s => s.reg && s.reg.trim() === clean);
 }
 
-// 'input' fires the match immediately while typing or right after picking a
-// datalist suggestion, so Reg No fills in without needing the field to blur.
-// isFillingStudent guards against the synthetic 'input' events dispatched by
-// trigger() during an autofill from re-triggering this same lookup.
 document.getElementById('in-from-name').addEventListener('input', function() {
   if (isFillingStudent) return;
   fillStudent(findStudentByName(this.value));
@@ -933,6 +928,15 @@ fs('fs-info', '.info-text');
 window.onload = () => { updateDocTypeVisibility(); applyMobilePageScale(); };
 
 function waitForImages(root) { const images = Array.from(root.querySelectorAll('img')); return Promise.all(images.map(img => { if (img.complete) return Promise.resolve(); return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }); })); }
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(',')[1]);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
 
 function downloadPDF() {
   const original = document.getElementById('printable-area');
@@ -1002,12 +1006,6 @@ function downloadPDF() {
     };
 
     if (isMobile && navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-      // The PDF is already built at this point -- cancelling the native
-      // share sheet (or it failing to open) is NOT a PDF export failure,
-      // so it's handled right here instead of falling into the generic
-      // catch below, which used to blame "Logo image path" for a plain
-      // cancel (navigator.share rejects with AbortError when the user
-      // just closes the share sheet).
       try {
         await navigator.share({ title: saveName, files: [file] });
       } catch (shareErr) {
@@ -1037,11 +1035,8 @@ async function sendToCtrlP() {
     return;
   }
 
-  const printWin = window.open(CTRLP_PORTAL_URL + "?incoming=cover", "_blank");
-  if (!printWin) {
-    alert("Please allow pop-ups so the cover page can open directly in CtrlP.");
-    return;
-  }
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const printWin = !isMobile ? window.open('about:blank', '_blank') : null;
 
   btn.innerText = "Preparing...";
   btn.style.opacity = "0.7";
@@ -1065,7 +1060,6 @@ async function sendToCtrlP() {
   clone.style.zIndex = '999999';
   document.body.appendChild(clone);
 
-  const isMobile = window.innerWidth <= 768;
   const renderScale = isMobile ? 1.5 : 2;
   const fontReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
 
@@ -1092,41 +1086,31 @@ async function sendToCtrlP() {
     const blob = pdf.output('blob');
 
     btn.innerText = "Sending...";
+    const coverId = "cov_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+    const fileBase64 = await blobToBase64(blob);
 
-    let delivered = false;
-    const sendPayload = () => {
-      if (delivered || printWin.closed) return;
-      printWin.postMessage({ type: "CTRLP_INCOMING_PDF", filename, blob }, CTRLP_ORIGIN);
-    };
+    await fetch(CTRLP_RELAY_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "tempCoverUpload",
+        coverId: coverId,
+        filename: filename,
+        fileBase64: fileBase64
+      })
+    });
 
-    const onMessage = (event) => {
-      if (event.origin !== CTRLP_ORIGIN) return;
-      if (event.data && event.data.type === "CTRLP_READY") {
-        sendPayload();
-      } else if (event.data && event.data.type === "CTRLP_ACK") {
-        delivered = true;
-        clearInterval(retryTimer);
-        window.removeEventListener("message", onMessage);
-      }
-    };
-    window.addEventListener("message", onMessage);
-
-    const retryTimer = setInterval(() => {
-      if (delivered || printWin.closed) {
-        clearInterval(retryTimer);
-        window.removeEventListener("message", onMessage);
-        return;
-      }
-      sendPayload();
-    }, 600);
-
-    setTimeout(() => {
-      clearInterval(retryTimer);
-      window.removeEventListener("message", onMessage);
-    }, 20000);
+    const targetUrl = CTRLP_PORTAL_URL + "?coverId=" + encodeURIComponent(coverId);
+    if (printWin && !printWin.closed) {
+      printWin.location.href = targetUrl;
+    } else {
+      window.location.href = targetUrl;
+    }
   } catch (error) {
+    if (printWin && !printWin.closed) printWin.close();
     console.error('Send to CtrlP failed:', error);
-    alert('PDF export failed. Logo image path ba browser console check korun.');
+    alert('Failed to send cover page. Please try again.');
   } finally {
     clone.remove();
     btn.innerText = origText;
