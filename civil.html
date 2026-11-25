@@ -466,8 +466,8 @@
       <div class="sem-section-head">
         <h2><i class="fas fa-books" style="color:var(--blue);font-size:20px;margin-right:8px;"></i>Semester Resources</h2>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button class="btn secondary sm admin-only" id="drive-migrate-btn" title="Move existing semester resources into the managed Drive folder and enable 24/7 sync">
-            <i class="fab fa-google-drive"></i> Organize &amp; Sync Drive
+          <button class="btn secondary sm admin-only" id="drive-migrate-btn" title="Refresh semester resources from Google Drive without restoring deleted files">
+            <i class="fab fa-google-drive"></i> Sync from Drive
           </button>
           <button class="btn secondary sm admin-only" id="clear-data-btn" title="Remove this device's local cache; GitHub and Google Drive files are unchanged">
             <i class="fas fa-trash-can"></i> Reset local cache
@@ -1023,13 +1023,12 @@
       }
     });
     document.getElementById('drive-migrate-btn').addEventListener('click', async () => {
-      if (!confirm('This will move all existing Google Drive semester resources into My Drive / Semester Resources / Semester X folders, then enable the 24/7 mirror. Continue?')) return;
       const btn = document.getElementById('drive-migrate-btn'); const old = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Organizing…';
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Syncing…';
       try {
-        await driveSyncAction('driveBootstrap', {});
-        buildSemList(); renderAllSems(); toast('Drive organization and 24/7 sync enabled.', 'success');
-      } catch (e) { toast(e.message || 'Drive organization failed', 'error'); }
+        await driveSyncAction('driveSyncNow', {});
+        buildSemList(); renderAllSems(); toast('Resources refreshed from Google Drive.', 'success');
+      } catch (e) { toast(e.message || 'Drive sync failed', 'error'); }
       finally { btn.disabled = false; btn.innerHTML = old; }
     });
 

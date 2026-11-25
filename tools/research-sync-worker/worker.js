@@ -332,6 +332,10 @@ async function moveDriveFile(env, id, parentId) {
 async function handleDriveAction(action, payload, env, origin) {
   if (!(await verifyAdmin(env, payload.adminTokens))) return json({ ok: false, error: 'not-admin' }, 401, origin);
   if (!env.DRIVE_SYNC_STATE) return json({ ok: false, error: 'drive-state-not-configured' }, 503, origin);
+  if (action === 'driveSyncNow') {
+    const data = await syncDriveMirror(env);
+    return json({ ok: true, data }, 200, origin);
+  }
   const latest = await ghFetchFile(env.GITHUB_TOKEN, 'civil_data.json');
   const data = latest.content;
   data.semesters = data.semesters || {};
@@ -420,6 +424,7 @@ async function syncDriveMirror(env) {
     data.updated = new Date().toISOString();
     await ghWriteFile(env.GITHUB_TOKEN, data, latest.sha, 'civil_data.json', 'Mirror Semester Resources from Drive');
   }
+  return data;
 }
 
 export default {
@@ -442,7 +447,7 @@ export default {
 
     try {
       if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
-      if (action === 'driveDelete' || action === 'driveMove' || action === 'driveBootstrap') return await handleDriveAction(action, payload, env, origin);
+      if (action === 'driveDelete' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow') return await handleDriveAction(action, payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
       const updated = applyAction(content, action, payload);
       updated.updated = new Date().toISOString();
