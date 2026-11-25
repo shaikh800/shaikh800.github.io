@@ -304,12 +304,15 @@ async function findFolder(env, parentId, name) {
   const data = await driveRequest(env, 'GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=10`);
   return data.files && data.files[0];
 }
-async function ensureResourceFolder(env, semester, folder) {
+async function ensureResourceFolder(env, semester, folder, cache = new Map()) {
   let parent = env.DRIVE_ROOT_FOLDER_ID;
   if (!parent) throw new Error('drive-root-not-configured');
   for (const name of [`Semester ${semester}`, ...cleanSegments(folder, semester)]) {
-    let child = await findFolder(env, parent, name);
+    const cacheKey = `${parent}:${name}`;
+    let child = cache.get(cacheKey);
+    if (!child) child = await findFolder(env, parent, name);
     if (!child) child = await driveRequest(env, 'POST', '/files', { name, mimeType: DRIVE_FOLDER_MIME, parents: [parent] });
+    cache.set(cacheKey, child);
     parent = child.id;
   }
   return parent;
@@ -321,6 +324,7 @@ function driveId(item) {
 }
 async function moveDriveFile(env, id, parentId) {
   const meta = await driveRequest(env, 'GET', `/files/${encodeURIComponent(id)}?fields=parents`);
+  if ((meta.parents || []).includes(parentId)) return meta;
   const removeParents = (meta.parents || []).join(',');
   const q = `addParents=${encodeURIComponent(parentId)}${removeParents ? `&removeParents=${encodeURIComponent(removeParents)}` : ''}&fields=id,parents`;
   return driveRequest(env, 'PATCH', `/files/${encodeURIComponent(id)}?${q}`, {});
@@ -332,12 +336,13 @@ async function handleDriveAction(action, payload, env, origin) {
   const data = latest.content;
   data.semesters = data.semesters || {};
   if (action === 'driveBootstrap') {
+    const folderCache = new Map();
     for (let semester = 1; semester <= 8; semester++) {
       const list = data.semesters[String(semester)] || [];
       for (const entry of list) {
         const id = driveId(entry);
         if (!id) continue;
-        const folderId = await ensureResourceFolder(env, semester, entry.folder);
+        const folderId = await ensureResourceFolder(env, semester, entry.folder, folderCache);
         await moveDriveFile(env, id, folderId);
         entry.driveFileId = id; entry.driveFolderId = folderId; entry.driveManaged = true;
         entry.folder = `Semester ${semester}/${cleanSegments(entry.folder, semester).join('/')}`;
