@@ -1,120 +1,158 @@
 {
   "semesters": {
     "1": [],
+    "2": [],
+    "3": [],
+    "4": [],
     "5": [
       {
-        "id": "mp90atblbabv",
-        "title": "Book_Principles of Geotechnical Engineering",
-        "desc": "- B. M. Das",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1mBBgOcJ3kAQI6Wb-Wxm7CnkBlfLRFjFz/preview?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 5/CE 506/Books",
-        "hidden": false
-      },
-      {
         "id": "mp90kyzi0ezh",
-        "title": "Book_Structural Analysis",
+        "title": "Book_Structural Analysis by Hibbeler",
         "desc": "by Hibbeler",
         "type": "pdf",
         "src": "https://drive.google.com/file/d/1Mfh0iuY953eg6G4Zxuj5LWIURfSpHPNB/preview?usp=sharing",
         "thumb": null,
         "folder": "Semester 5/CE 501/Books",
-        "hidden": false
+        "hidden": false,
+        "driveFileId": "1Mfh0iuY953eg6G4Zxuj5LWIURfSpHPNB",
+        "driveFolderId": "1ojxSy5jvyTWw1y71YcjbYEMWRDaI_e0E",
+        "driveManaged": true
+      },
+      {
+        "id": "mp90atblbabv",
+        "title": "Book_Principles of Geotechnical Engineering - B. M. Das",
+        "desc": "- B. M. Das",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1mBBgOcJ3kAQI6Wb-Wxm7CnkBlfLRFjFz/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 5/CE 506/Books",
+        "hidden": false,
+        "driveFileId": "1mBBgOcJ3kAQI6Wb-Wxm7CnkBlfLRFjFz",
+        "driveFolderId": "15zgLf90oV3ZHOfyPzQG3tEu1fo6SML7B",
+        "driveManaged": true
       }
     ],
     "6": [
       {
-        "id": "mvmg73dob7yu",
-        "title": "Transport que_261008_224056",
+        "id": "mww63lqbhbvk",
+        "title": "EE -Lab-4+5",
         "desc": "",
         "type": "pdf",
-        "src": "https://drive.google.com/file/d/1sSH3MZgXWeLB7Y_LqBQoKtd3lXVOHdmI/view?usp=sharing",
+        "src": "https://drive.google.com/file/d/1YXgpg-Flzg-jLTp3VUjFXLXKxer2ehmd/preview?usp=sharing",
         "thumb": null,
-        "folder": "Semester 6/Questions",
-        "hidden": false
+        "folder": "Semester 6/CE608 - Environmental Engineering Sessional",
+        "hidden": false,
+        "driveFileId": "1YXgpg-Flzg-jLTp3VUjFXLXKxer2ehmd",
+        "driveFolderId": "1Jxt-G5ljcsUQ3wFy5NR6e-V7achrlTiu",
+        "driveManaged": true
       },
       {
-        "id": "mvmg7ubffvpn",
-        "title": "Foundation que_261008_224118",
+        "id": "mww65pyal38s",
+        "title": "Hydrology all question ",
         "desc": "",
         "type": "pdf",
-        "src": "https://drive.google.com/file/d/1wZWlWzI0bN4zdq1iotEEInzd8cScYHFs/view?usp=sharing",
+        "src": "https://drive.google.com/file/d/1buMI9cUppwplsHKRKRzhZpXtSgkOGN08/preview?usp=sharing",
         "thumb": null,
-        "folder": "Semester 6/Questions",
-        "hidden": false
-      },
-      {
-        "id": "mvmg8d57rr24",
-        "title": "SAD que_261008_224136",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1HxUzqkyyAWNSDhEmBj3WqBdykqSgjsZy/view?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/Questions",
-        "hidden": false
-      },
-      {
-        "id": "mvmg8qi5gksy",
-        "title": "Rcc que_261008_224151",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1rv8vgTzF6mkuVoDk04PEE4E-gz4wmlH1/view?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/Questions",
-        "hidden": false
-      },
-      {
-        "id": "mvmg96579d2g",
-        "title": "Hydrology ques_261008_224105",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1PLb5seBdbRpz_I6uTDDcjSZWy34Nmtq3/view?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/Questions",
-        "hidden": false
-      },
-      {
-        "id": "mww5x1my6qyv",
-        "title": "Soil exploration (single slide)",
-        "desc": "",
-        "type": "pdf",
-        "src": "https://drive.google.com/file/d/1nrZKJykndkh2IuFYbDLUuQIuLOysu83v/view?usp=sharing",
-        "thumb": null,
-        "folder": "Semester 6/My Drive/CE604 - Principles of Foundation Engineering",
-        "hidden": false
+        "folder": "Semester 6/Civil Engineering/Questions",
+        "hidden": false,
+        "driveFileId": "1buMI9cUppwplsHKRKRzhZpXtSgkOGN08",
+        "driveFolderId": "1ZE3uKtkiBHC2PTgt1EnO3ISD8cI1ikxN",
+        "driveManaged": true
       },
       {
         "id": "mww5x5j0mmr4",
         "title": "Bearing capacity (single slide)",
         "desc": "",
         "type": "pdf",
-        "src": "https://drive.google.com/file/d/11lwfiHORNWWQWl9H6eUWHz1rr9LJnW3M/view?usp=sharing",
+        "src": "https://drive.google.com/file/d/11lwfiHORNWWQWl9H6eUWHz1rr9LJnW3M/preview?usp=sharing",
         "thumb": null,
-        "folder": "Semester 6/My Drive/CE604 - Principles of Foundation Engineering",
-        "hidden": false
+        "folder": "Semester 6/CE604 - Principles of Foundation Engineering",
+        "hidden": false,
+        "driveFileId": "11lwfiHORNWWQWl9H6eUWHz1rr9LJnW3M",
+        "driveFolderId": "1oxzSQQzG9T-2TrrFKxA6BjfEOfYs7S4P",
+        "driveManaged": true
       },
       {
-        "id": "mww63lqbhbvk",
-        "title": "EE -Lab-4+5",
+        "id": "mww5x1my6qyv",
+        "title": "Soil exploration (single slide)",
         "desc": "",
         "type": "pdf",
-        "src": "https://drive.google.com/file/d/1YXgpg-Flzg-jLTp3VUjFXLXKxer2ehmd/view?usp=sharing",
+        "src": "https://drive.google.com/file/d/1nrZKJykndkh2IuFYbDLUuQIuLOysu83v/preview?usp=sharing",
         "thumb": null,
-        "folder": "Semester 6/My Drive/CE608 - Environmental Engineering Sessional",
-        "hidden": false
+        "folder": "Semester 6/CE604 - Principles of Foundation Engineering",
+        "hidden": false,
+        "driveFileId": "1nrZKJykndkh2IuFYbDLUuQIuLOysu83v",
+        "driveFolderId": "1oxzSQQzG9T-2TrrFKxA6BjfEOfYs7S4P",
+        "driveManaged": true
       },
       {
-        "id": "mww65pyal38s",
-        "title": "Hydrology all question",
+        "id": "mvmg7ubffvpn",
+        "title": "Foundation que_261008_224118",
         "desc": "",
         "type": "pdf",
-        "src": "https://drive.google.com/file/d/1buMI9cUppwplsHKRKRzhZpXtSgkOGN08/view?usp=sharing",
+        "src": "https://drive.google.com/file/d/1wZWlWzI0bN4zdq1iotEEInzd8cScYHFs/preview?usp=sharing",
         "thumb": null,
-        "folder": "Semester 6/My Drive/Civil Engineering/Questions",
-        "hidden": false
+        "folder": "Semester 6/Questions",
+        "hidden": false,
+        "driveFileId": "1wZWlWzI0bN4zdq1iotEEInzd8cScYHFs",
+        "driveFolderId": "1Mhkw7_bol4CBTLWTywuLX4D8g1rwfO4_",
+        "driveManaged": true
+      },
+      {
+        "id": "mvmg8qi5gksy",
+        "title": "Rcc que_261008_224151",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1rv8vgTzF6mkuVoDk04PEE4E-gz4wmlH1/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/Questions",
+        "hidden": false,
+        "driveFileId": "1rv8vgTzF6mkuVoDk04PEE4E-gz4wmlH1",
+        "driveFolderId": "1Mhkw7_bol4CBTLWTywuLX4D8g1rwfO4_",
+        "driveManaged": true
+      },
+      {
+        "id": "mvmg96579d2g",
+        "title": "Hydrology ques_261008_224105",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1PLb5seBdbRpz_I6uTDDcjSZWy34Nmtq3/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/Questions",
+        "hidden": false,
+        "driveFileId": "1PLb5seBdbRpz_I6uTDDcjSZWy34Nmtq3",
+        "driveFolderId": "1Mhkw7_bol4CBTLWTywuLX4D8g1rwfO4_",
+        "driveManaged": true
+      },
+      {
+        "id": "mvmg8d57rr24",
+        "title": "SAD que_261008_224136",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1HxUzqkyyAWNSDhEmBj3WqBdykqSgjsZy/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/Questions",
+        "hidden": false,
+        "driveFileId": "1HxUzqkyyAWNSDhEmBj3WqBdykqSgjsZy",
+        "driveFolderId": "1Mhkw7_bol4CBTLWTywuLX4D8g1rwfO4_",
+        "driveManaged": true
+      },
+      {
+        "id": "mvmg73dob7yu",
+        "title": "Transport que_261008_224056",
+        "desc": "",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1sSH3MZgXWeLB7Y_LqBQoKtd3lXVOHdmI/preview?usp=sharing",
+        "thumb": null,
+        "folder": "Semester 6/Questions",
+        "hidden": false,
+        "driveFileId": "1sSH3MZgXWeLB7Y_LqBQoKtd3lXVOHdmI",
+        "driveFolderId": "1Mhkw7_bol4CBTLWTywuLX4D8g1rwfO4_",
+        "driveManaged": true
       }
-    ]
+    ],
+    "7": [],
+    "8": []
   },
   "notices": [],
   "exams": [
@@ -1673,5 +1711,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-25T13:38:33.054Z"
+  "updated": "2026-11-25T17:45:55.859Z"
 }
