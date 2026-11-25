@@ -5,6 +5,14 @@ compatibility_date = "2026-10-01"
 [observability]
 enabled = true
 
+# Persistent cursor/channel state for the 24/7 Semester Resources Drive sync.
+[[kv_namespaces]]
+binding = "DRIVE_SYNC_STATE"
+id = "5a0961e559014043826c1f9e488b2ae4"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
 # Public URL of the Google Apps Script admin login (same value as SITE_GAS_URL in assets/site-auth.js).
 # The Worker asks it whether an admin session token is valid.
 [vars]

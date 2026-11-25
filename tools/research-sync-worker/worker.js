@@ -249,6 +249,174 @@ async function handleAdmin(action, payload, env, origin) {
   return json({ ok: true }, 200, origin);
 }
 
+// ── Semester Resources: 24/7 Google Drive mirror ───────────────────────────
+// The service account is granted Editor only on DRIVE_ROOT_FOLDER_ID, never on
+// the owner's full Drive. State is stored in the DRIVE_SYNC_STATE KV binding.
+let driveAccessToken = null;
+let driveAccessTokenExpiry = 0;
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
+const DRIVE_FOLDER_MIME = 'application/vnd.google-apps.folder';
+
+function b64url(value) {
+  const text = typeof value === 'string' ? value : JSON.stringify(value);
+  return btoa(unescape(encodeURIComponent(text))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+function b64urlBytes(bytes) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+function pemBytes(pem) {
+  const b64 = String(pem || '').replace(/\\n/g, '\n').replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+  const raw = atob(b64);
+  return Uint8Array.from(raw, c => c.charCodeAt(0)).buffer;
+}
+async function getDriveAccessToken(env) {
+  if (driveAccessToken && Date.now() < driveAccessTokenExpiry) return driveAccessToken;
+  if (!env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || !env.DRIVE_ROOT_FOLDER_ID) throw new Error('drive-not-configured');
+  const now = Math.floor(Date.now() / 1000);
+  const unsigned = `${b64url({ alg: 'RS256', typ: 'JWT' })}.${b64url({ iss: env.GOOGLE_SERVICE_ACCOUNT_EMAIL, scope: DRIVE_SCOPE, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3500 })}`;
+  const key = await crypto.subtle.importKey('pkcs8', pemBytes(env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(unsigned));
+  const jwt = `${unsigned}.${b64urlBytes(new Uint8Array(sig))}`;
+  const res = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: jwt }) });
+  const body = await res.json();
+  if (!res.ok || !body.access_token) throw new Error('drive-auth-failed');
+  driveAccessToken = body.access_token;
+  driveAccessTokenExpiry = Date.now() + ((body.expires_in || 3600) - 60) * 1000;
+  return driveAccessToken;
+}
+async function driveRequest(env, method, path, body) {
+  const token = await getDriveAccessToken(env);
+  const res = await fetch(`https://www.googleapis.com/drive/v3${path}`, { method, headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error((data && data.error && data.error.message) || `drive-${res.status}`);
+  return data;
+}
+function cleanSegments(folder, semester) {
+  const parts = String(folder || '').split('/').map(s => s.trim()).filter(Boolean);
+  while (parts.length && (/^my\s*drive$/i.test(parts[0]) || /^semester\s*resources$/i.test(parts[0]) || /^semester\s*\d+$/i.test(parts[0]))) parts.shift();
+  return parts.length ? parts : ['General'];
+}
+async function findFolder(env, parentId, name) {
+  const q = `name='${String(name).replace(/'/g, "\\'")}' and mimeType='${DRIVE_FOLDER_MIME}' and '${parentId}' in parents and trashed=false`;
+  const data = await driveRequest(env, 'GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=10`);
+  return data.files && data.files[0];
+}
+async function ensureResourceFolder(env, semester, folder) {
+  let parent = env.DRIVE_ROOT_FOLDER_ID;
+  if (!parent) throw new Error('drive-root-not-configured');
+  for (const name of [`Semester ${semester}`, ...cleanSegments(folder, semester)]) {
+    let child = await findFolder(env, parent, name);
+    if (!child) child = await driveRequest(env, 'POST', '/files', { name, mimeType: DRIVE_FOLDER_MIME, parents: [parent] });
+    parent = child.id;
+  }
+  return parent;
+}
+function driveId(item) {
+  if (item && item.driveFileId) return item.driveFileId;
+  const m = String(item && item.src || '').match(/\/file\/d\/([\w-]+)/);
+  return m ? m[1] : '';
+}
+async function moveDriveFile(env, id, parentId) {
+  const meta = await driveRequest(env, 'GET', `/files/${encodeURIComponent(id)}?fields=parents`);
+  const removeParents = (meta.parents || []).join(',');
+  const q = `addParents=${encodeURIComponent(parentId)}${removeParents ? `&removeParents=${encodeURIComponent(removeParents)}` : ''}&fields=id,parents`;
+  return driveRequest(env, 'PATCH', `/files/${encodeURIComponent(id)}?${q}`, {});
+}
+async function handleDriveAction(action, payload, env, origin) {
+  if (!(await verifyAdmin(env, payload.adminTokens))) return json({ ok: false, error: 'not-admin' }, 401, origin);
+  if (!env.DRIVE_SYNC_STATE) return json({ ok: false, error: 'drive-state-not-configured' }, 503, origin);
+  const latest = await ghFetchFile(env.GITHUB_TOKEN, 'civil_data.json');
+  const data = latest.content;
+  data.semesters = data.semesters || {};
+  if (action === 'driveBootstrap') {
+    for (let semester = 1; semester <= 8; semester++) {
+      const list = data.semesters[String(semester)] || [];
+      for (const entry of list) {
+        const id = driveId(entry);
+        if (!id) continue;
+        const folderId = await ensureResourceFolder(env, semester, entry.folder);
+        await moveDriveFile(env, id, folderId);
+        entry.driveFileId = id; entry.driveFolderId = folderId; entry.driveManaged = true;
+        entry.folder = `Semester ${semester}/${cleanSegments(entry.folder, semester).join('/')}`;
+      }
+    }
+    data.updated = new Date().toISOString();
+    await ghWriteFile(env.GITHUB_TOKEN, data, latest.sha, 'civil_data.json', 'Organize Semester Resources in Drive');
+    await env.DRIVE_SYNC_STATE.put('semester-resources-active', 'true');
+    return json({ ok: true, data }, 200, origin);
+  }
+  const sem = String(payload.semester || '');
+  const items = data.semesters[sem] || [];
+  const item = items.find(x => x.id === payload.id);
+  if (!item) return json({ ok: false, error: 'resource-not-found' }, 404, origin);
+  const id = driveId(item);
+  if (!id) return json({ ok: false, error: 'not-a-drive-resource' }, 400, origin);
+  if (action === 'driveDelete') {
+    await driveRequest(env, 'DELETE', `/files/${encodeURIComponent(id)}`);
+    data.semesters[sem] = items.filter(x => x.id !== item.id);
+  } else if (action === 'driveMove') {
+    const targetSem = String(payload.targetSemester || sem);
+    if (!/^[1-8]$/.test(targetSem)) return json({ ok: false, error: 'bad-semester' }, 400, origin);
+    const targetFolder = cleanSegments(payload.targetFolder, targetSem).join('/');
+    const folderId = await ensureResourceFolder(env, targetSem, targetFolder);
+    await moveDriveFile(env, id, folderId);
+    data.semesters[sem] = items.filter(x => x.id !== item.id);
+    const moved = { ...item, driveFileId: id, driveFolderId: folderId, driveManaged: true, folder: `Semester ${targetSem}/${targetFolder}` };
+    (data.semesters[targetSem] ||= []).push(moved);
+  } else return json({ ok: false, error: 'unknown-drive-action' }, 400, origin);
+  data.updated = new Date().toISOString();
+  await ghWriteFile(env.GITHUB_TOKEN, data, latest.sha, 'civil_data.json', `Sync Semester Resources: ${action}`);
+  return json({ ok: true, data }, 200, origin);
+}
+
+async function listDriveChildren(env, parentId) {
+  const out = []; let pageToken = '';
+  do {
+    const data = await driveRequest(env, 'GET', `/files?q=${encodeURIComponent(`'${parentId}' in parents and trashed=false`)}&fields=nextPageToken,files(id,name,mimeType,parents,permissions(type,role))&pageSize=1000${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`);
+    out.push(...(data.files || [])); pageToken = data.nextPageToken || '';
+  } while (pageToken);
+  return out;
+}
+async function syncDriveMirror(env) {
+  if (!env.DRIVE_SYNC_STATE || await env.DRIVE_SYNC_STATE.get('semester-resources-active') !== 'true') return;
+  const found = [];
+  async function walk(parent, semester, segments) {
+    for (const f of await listDriveChildren(env, parent)) {
+      if (f.mimeType === DRIVE_FOLDER_MIME) {
+        const match = !semester && f.name.match(/^semester\s*([1-8])$/i);
+        await walk(f.id, match ? match[1] : semester, match ? [] : (semester ? [...segments, f.name] : segments));
+      } else if (semester && (f.mimeType === 'application/pdf' || String(f.mimeType).startsWith('image/'))) {
+        found.push({ file: f, semester, folder: `Semester ${semester}/${segments.length ? segments.join('/') : 'General'}`, folderId: parent });
+      }
+    }
+  }
+  await walk(env.DRIVE_ROOT_FOLDER_ID, '', []);
+  const latest = await ghFetchFile(env.GITHUB_TOKEN, 'civil_data.json');
+  const data = latest.content; data.semesters = data.semesters || {};
+  const before = JSON.stringify(data);
+  const byDriveId = new Map();
+  Object.values(data.semesters).flat().forEach(item => { const id = driveId(item); if (id) byDriveId.set(id, item); });
+  const foundIds = new Set(found.map(x => x.file.id));
+  for (let n = 1; n <= 8; n++) data.semesters[n] = (data.semesters[n] || []).filter(item => !item.driveManaged || foundIds.has(driveId(item)));
+  for (const hit of found) {
+    const old = byDriveId.get(hit.file.id);
+    const title = hit.file.name.replace(/\.[^.]+$/, '');
+    const item = old || { id: `drv_${hit.file.id}`, desc: '', hidden: false };
+    item.title = title; item.type = hit.file.mimeType.startsWith('image/') ? 'image' : 'pdf';
+    item.src = `https://drive.google.com/file/d/${hit.file.id}/preview?usp=sharing`;
+    item.folder = hit.folder; item.driveFileId = hit.file.id; item.driveFolderId = hit.folderId; item.driveManaged = true;
+    for (let n = 1; n <= 8; n++) data.semesters[n] = (data.semesters[n] || []).filter(x => x !== item);
+    (data.semesters[hit.semester] ||= []).push(item);
+  }
+  if (JSON.stringify(data) !== before) {
+    data.updated = new Date().toISOString();
+    await ghWriteFile(env.GITHUB_TOKEN, data, latest.sha, 'civil_data.json', 'Mirror Semester Resources from Drive');
+  }
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -269,6 +437,7 @@ export default {
 
     try {
       if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
+      if (action === 'driveDelete' || action === 'driveMove' || action === 'driveBootstrap') return await handleDriveAction(action, payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
       const updated = applyAction(content, action, payload);
       updated.updated = new Date().toISOString();
@@ -283,5 +452,8 @@ export default {
       ];
       return json({ ok: false, error: msg }, knownClientErrors.includes(msg) ? 400 : 502, origin);
     }
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(syncDriveMirror(env).catch(err => console.error('Drive mirror failed:', err && err.message)));
   },
 };

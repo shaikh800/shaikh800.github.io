@@ -466,6 +466,9 @@
       <div class="sem-section-head">
         <h2><i class="fas fa-books" style="color:var(--blue);font-size:20px;margin-right:8px;"></i>Semester Resources</h2>
         <div style="display:flex;align-items:center;gap:10px;">
+          <button class="btn secondary sm admin-only" id="drive-migrate-btn" title="Move existing semester resources into the managed Drive folder and enable 24/7 sync">
+            <i class="fab fa-google-drive"></i> Organize &amp; Sync Drive
+          </button>
           <button class="btn secondary sm admin-only" id="clear-data-btn" title="Remove this device's local cache; GitHub and Google Drive files are unchanged">
             <i class="fas fa-trash-can"></i> Reset local cache
           </button>
@@ -662,6 +665,7 @@
     ════════════════════════════════════════ */
     const GDRIVE_CLIENT_ID = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
     const GDRIVE_SCOPE     = 'https://www.googleapis.com/auth/drive.file';
+    const SEMESTER_DRIVE_ROOT = 'Semester Resources';
     const STORE_KEY        = 'civil_semesters';
     const NOTICE_KEY       = 'civil_notices';
     const DB_NAME = 'civilDB2'; const DB_VER = 1; const ISTORE = 'files';
@@ -935,7 +939,7 @@
         finalFolderId = folderIdOverride;
         fill.style.width = '40%'; txt.textContent = 'Accessing your chosen folder...';
       } else {
-        let currentParentId = await findOrCreateFolder('Civil Engineering', 'root', token);
+        let currentParentId = await findOrCreateFolder(SEMESTER_DRIVE_ROOT, 'root', token);
 
         // Parse the custom folder path
         const folders = pathString.split('/').map(f => f.trim()).filter(f => f);
@@ -987,7 +991,7 @@
       setTimeout(() => prog.classList.remove('show'), 1500);
 
       const embedUrl = `https://drive.google.com/file/d/${uploaded.id}/${embedMode}?usp=sharing`;
-      return { fileId: uploaded.id, embedUrl };
+      return { fileId: uploaded.id, folderId: finalFolderId, embedUrl };
     }
 
     /* ── Google Drive link → extract ID ─── */
@@ -1017,6 +1021,16 @@
         btn.disabled = false;
         toast('Could not clear local files. Please try again.', 'error');
       }
+    });
+    document.getElementById('drive-migrate-btn').addEventListener('click', async () => {
+      if (!confirm('This will move all existing Google Drive semester resources into My Drive / Semester Resources / Semester X folders, then enable the 24/7 mirror. Continue?')) return;
+      const btn = document.getElementById('drive-migrate-btn'); const old = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Organizing…';
+      try {
+        await driveSyncAction('driveBootstrap', {});
+        buildSemList(); renderAllSems(); toast('Drive organization and 24/7 sync enabled.', 'success');
+      } catch (e) { toast(e.message || 'Drive organization failed', 'error'); }
+      finally { btn.disabled = false; btn.innerHTML = old; }
     });
 
     /* ── Semester panels ───────────────────── */
@@ -1123,6 +1137,31 @@
     function pathToken(path) {
       return encodeURIComponent(String(path || '')).replace(/'/g, '%27');
     }
+    async function driveSyncAction(action, payload) {
+      const res = await fetch(SITE_WORKER.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Client-Key': SITE_WORKER.key },
+        body: JSON.stringify({ action, payload: { ...payload, adminTokens: siteAdminTokens() } })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || 'Drive sync failed');
+      if (data.data && data.data.semesters) localStorage.setItem(STORE_KEY, JSON.stringify(data.data.semesters));
+      return data;
+    }
+    async function moveResource(id, sem) {
+      const item = (loadSems()[sem] || []).find(x => x.id === id);
+      if (!item || !driveIdForItem(item)) { toast('Only Google Drive resources can be moved.', 'error'); return; }
+      const targetSemester = prompt('Move to semester (1-8):', String(sem));
+      if (!targetSemester) return;
+      if (!/^[1-8]$/.test(targetSemester.trim())) { toast('Enter a semester from 1 to 8.', 'error'); return; }
+      const targetFolder = prompt('Destination folder (example: CE604 / Notes):', 'General');
+      if (targetFolder === null) return;
+      try {
+        await driveSyncAction('driveMove', { id, semester: String(sem), targetSemester: targetSemester.trim(), targetFolder });
+        buildSemList(); showSemesterPanel(parseInt(targetSemester, 10), ''); toast('Moved in Drive and Semester Resources.', 'success');
+      } catch (e) { toast(e.message || 'Move failed', 'error'); }
+    }
+    function driveIdForItem(item) { return item.driveFileId || extractDriveId(item.src || ''); }
     function renderSem(n) {
       const items = (loadSems()[n] || []);
       const grid = document.getElementById(`sem-grid-${n}`);
@@ -1291,6 +1330,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
               <div class="dr-actions">
                 <button class="civ-icon-action" data-id="${it.id}" data-sem="${n}" title="Open"><i class="fas fa-eye"></i></button>
                 ${!isLocal ? `<button class="civ-icon-action share-btn" data-src="${esc(it.src||'')}" title="Copy share link"><i class="fas fa-share-nodes"></i></button>` : ''}
+                <button class="civ-icon-action move-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Move"><i class="fas fa-folder-tree"></i></button>
                 <button class="civ-icon-action edit-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen-to-square"></i></button>
                 <button class="civ-icon-action danger del-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
               </div>
@@ -1317,6 +1357,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
             <div class="rc-meta">
               <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
               <div class="rc-actions">
+                <button class="rc-btn move admin-only" data-id="${it.id}" data-sem="${n}" title="Move"><i class="fas fa-folder-tree"></i></button>
                 <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
                 <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
               </div>
@@ -1335,6 +1376,9 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       });
       grid.querySelectorAll('.resource-card .rc-btn.edit').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id, btn.dataset.sem); });
+      });
+      grid.querySelectorAll('.resource-card .rc-btn.move').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); moveResource(btn.dataset.id, btn.dataset.sem); });
       });
       grid.querySelectorAll('.resource-card .rc-btn.del').forEach(btn => {
         btn.addEventListener('click', e => {
@@ -1357,6 +1401,9 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       });
       grid.querySelectorAll('.civ-icon-action.edit-btn').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id, btn.dataset.sem); });
+      });
+      grid.querySelectorAll('.civ-icon-action.move-btn').forEach(btn => {
+        btn.addEventListener('click', e => { e.stopPropagation(); moveResource(btn.dataset.id, btn.dataset.sem); });
       });
       grid.querySelectorAll('.civ-icon-action.del-btn').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); showConfirm('Delete this resource?', () => deleteResource(btn.dataset.id, btn.dataset.sem)); });
@@ -1417,6 +1464,13 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
     async function deleteResource(id, sem) {
       const sems = loadSems();
       const item = (sems[sem]||[]).find(i=>i.id===id);
+      if (item && driveIdForItem(item)) {
+        try {
+          await driveSyncAction('driveDelete', { id, semester: String(sem) });
+          renderSem(sem); buildSemList(); toast('Deleted from Drive and Semester Resources.', 'success');
+        } catch (e) { toast(e.message || 'Drive delete failed; resource was kept.', 'error'); }
+        return;
+      }
       if (item && item.src && item.src.startsWith('idb:')) {
         try { await delFile(item.src.slice(4)); } catch(e) { console.warn('IDB delete failed (ok to ignore):', e); }
       }
@@ -1709,7 +1763,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
             try {
               if (filesToUpload.length > 1) toast(`Uploading ${fi+1}/${filesToUpload.length}: ${curFile.name}`, 'info');
               const result = await uploadFileToDrive(curFile, folderPath, rawMode, pickedFolderId);
-              const item = { id: curId, title: curTitle, desc, type: curType, src: result.embedUrl, thumb:null, folder: folderPath, hidden: isHidden };
+              const item = { id: curId, title: curTitle, desc, type: curType, src: result.embedUrl, thumb:null, folder: folderPath, hidden: isHidden, driveFileId: result.fileId, driveFolderId: result.folderId, driveManaged: true };
               const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
               sems2[activeSem].push(item); saveSems(sems2);
               successCount++;
@@ -1726,7 +1780,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         return;
       }
 
-      const item = { id, title, desc, type, src, thumb:null, folder: folderPath, hidden: isHidden || false };
+        const item = { id, title, desc, type, src, thumb:null, folder: folderPath, hidden: isHidden || false, driveFileId: activeTab === 'gdrive-panel' ? extractDriveId(src) : undefined };
       const sems = loadSems();
       if (!sems[activeSem]) sems[activeSem] = [];
       sems[activeSem].push(item);

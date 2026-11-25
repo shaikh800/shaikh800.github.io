@@ -50,6 +50,34 @@ npx wrangler deploy
 Secrets persist across redeploys — no need to set them again unless you're
 rotating the token.
 
+## Semester Resources Drive mirror (one-time setup)
+
+The Civil resources screen can mirror the shared `Semester Resources` Drive
+folder after the Worker has the following three **secrets**. Run these from the
+same `tools/research-sync-worker` folder; paste values only into the terminal
+prompt — never into source code or GitHub:
+
+```
+npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_EMAIL
+npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+npx wrangler secret put DRIVE_ROOT_FOLDER_ID
+npx wrangler deploy
+```
+
+- `GOOGLE_SERVICE_ACCOUNT_EMAIL`: the service-account email address.
+- `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY`: the full `private_key` value in its
+  downloaded JSON key, including the `BEGIN PRIVATE KEY` and `END PRIVATE KEY`
+  lines.
+- `DRIVE_ROOT_FOLDER_ID`: open the `Semester Resources` folder in Drive and
+  copy the text after `/folders/` in its URL.
+
+The folder must be shared with that service account as **Editor**. Once the
+site's admin clicks **Organize & Sync Drive**, existing Drive-linked resources
+are arranged below `Semester Resources/Semester N/...`; the Worker then checks
+the Drive tree every five minutes. Additions, moves and deletes from the site
+are applied to Drive immediately, while Drive-originated changes appear on the
+site on the next check.
+
 ## Admin saves without a GitHub token (adminRead / adminWrite)
 
 The same Worker also lets the **logged-in admin** save Civil resources, notices,
