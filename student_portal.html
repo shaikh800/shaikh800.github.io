@@ -405,7 +405,7 @@ async function applyTeacher(id) {
   loadTeachers();
 }
 async function leaveTeacher(id) {
-  if (!confirm('Are you sure?')) return;
+  if (!await acadConfirm({ title: 'Leave this teacher?', message: 'You can apply again later if you change your mind.', confirmLabel: 'Leave teacher', danger: true })) return;
   const d = await studentCall('leaveTeacher', { teacherId: id });
   if (d.status === 'unauthorized') return sessionLost();
   await loadTeachers(); loadExams();

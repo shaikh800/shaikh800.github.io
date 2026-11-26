@@ -74,10 +74,82 @@ function acadToast(msg, kind) {
   acadToast._t = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
+/* ── In-page confirmations ──
+   Native browser confirm boxes can be hard to read on some dark system themes.
+   Keep consequential Academy actions inside the same accessible, themed dialog. */
+function acadConfirm(options) {
+  const o = typeof options === 'string' ? { message: options } : (options || {});
+  return new Promise(resolve => {
+    let modal = document.getElementById('acad-confirm-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'acad-confirm-modal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="acad-confirm-title" style="max-width:430px;">
+          <div class="modal-hd">
+            <h3 id="acad-confirm-title"><i id="acad-confirm-icon" class="fas fa-circle-exclamation" style="color:#b45309;"></i> Confirm action</h3>
+            <button class="modal-close" type="button" aria-label="Close" data-acad-confirm-cancel><i class="fas fa-times"></i></button>
+          </div>
+          <p id="acad-confirm-message" style="margin:6px 0 22px;line-height:1.7;white-space:pre-line;color:var(--muted);"></p>
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn secondary" type="button" data-acad-confirm-cancel>Cancel</button>
+            <button class="btn danger" type="button" id="acad-confirm-ok">Continue</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+
+    if (typeof acadConfirm._finish === 'function') acadConfirm._finish(false);
+    const title = modal.querySelector('#acad-confirm-title');
+    const icon = modal.querySelector('#acad-confirm-icon');
+    const message = modal.querySelector('#acad-confirm-message');
+    const accept = modal.querySelector('#acad-confirm-ok');
+    title.lastChild.textContent = ' ' + (o.title || 'Confirm action');
+    icon.className = 'fas ' + (o.danger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation');
+    icon.style.color = o.danger ? '#dc2626' : '#b45309';
+    message.textContent = o.message || 'Are you sure you want to continue?';
+    accept.textContent = o.confirmLabel || (o.danger ? 'Delete' : 'Continue');
+    accept.className = 'btn ' + (o.danger ? 'danger' : 'primary');
+
+    let done = false;
+    const finish = result => {
+      if (done) return;
+      done = true;
+      modal.classList.remove('open');
+      modal.removeEventListener('click', onClick);
+      document.removeEventListener('keydown', onKey);
+      if (acadConfirm._finish === finish) acadConfirm._finish = null;
+      resolve(result);
+    };
+    const onClick = e => {
+      if (e.target === modal || e.target.closest('[data-acad-confirm-cancel]')) finish(false);
+      else if (e.target.closest('#acad-confirm-ok')) finish(true);
+    };
+    const onKey = e => { if (e.key === 'Escape') finish(false); };
+    acadConfirm._finish = finish;
+    modal.addEventListener('click', onClick);
+    document.addEventListener('keydown', onKey);
+    modal.classList.add('open');
+    requestAnimationFrame(() => accept.focus());
+  });
+}
+
 /* ── Teacher-written HTML → safe HTML ──
    Questions are rich text ($math$, <b>, <img>…). Anything that could run code is removed. */
 function sanitizeHtml(html) {
-  const doc = new DOMParser().parseFromString('<div>' + String(html == null ? '' : html) + '</div>', 'text/html');
+  /* Keep TeX comparison symbols as text.  Without this, HTML parsing can read
+     `x<y` inside `$...$` as an unfinished tag before MathJax gets it. */
+  const maths = [];
+  const source = String(html == null ? '' : html).replace(
+    /\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|\$(?:\\.|[^$\n])+?\$/g,
+    match => {
+      const key = '@@ACAD_MATH_' + maths.length + '@@';
+      maths.push(match.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
+      return key;
+    }
+  );
+  const doc = new DOMParser().parseFromString('<div>' + source + '</div>', 'text/html');
   const root = doc.body.firstChild;
   root.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form,frame,frameset,applet').forEach(n => n.remove());
   root.querySelectorAll('*').forEach(el => {
@@ -88,12 +160,12 @@ function sanitizeHtml(html) {
     }
     if (el.tagName === 'A') { el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener noreferrer'); }
   });
-  return root.innerHTML;
+  return root.innerHTML.replace(/@@ACAD_MATH_(\d+)@@/g, (_, i) => maths[Number(i)] || '');
 }
 
 /* ── MathJax (loaded only when a page needs it) ── */
 window.MathJax = window.MathJax || {
-  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']], processEscapes: true },
   svg: { fontCache: 'none' },
   options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
 };

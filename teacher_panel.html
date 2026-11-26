@@ -411,7 +411,7 @@ function renderStudents() {
   $('stu-wrap').classList.toggle('hide', !ok.length); $('stu-empty').classList.toggle('hide', !!ok.length || !!q);
 }
 async function linkOp(sid, op, tid) {
-  if (op === 'remove' && !confirm('Remove this student from your class? Their past results stay.')) return;
+  if (op === 'remove' && !await acadConfirm({ title: 'Remove student?', message: 'This student will no longer be in your class. Their past results will stay.', confirmLabel: 'Remove student', danger: true })) return;
   const d = await teacherCall('teacherLink', { studentId: sid, op, teacherId: tid });
   if (guard(d)) return;
   acadToast(d.status === 'success' ? 'Done' : (d.message || 'Failed'), d.status === 'success' ? 'ok' : 'err');
@@ -454,13 +454,13 @@ async function toggleLive(id, on) {
 }
 async function deleteExam(id) {
   const e = exams.find(x => x.id === id);
-  if (!confirm('Delete "' + e.title + '"?\nAll its results will be deleted too. This cannot be undone.')) return;
+  if (!e || !await acadConfirm({ title: 'Delete exam?', message: '“' + (e ? e.title : 'This exam') + '” and all of its results will be deleted. This cannot be undone.', confirmLabel: 'Delete exam', danger: true })) return;
   showLoader('Deleting…'); const d = await teacherCall('teacherExamDelete', { examId: id }); hideLoader();
   if (guard(d)) return;
   acadToast(d.status === 'success' ? 'Deleted' : (d.message || 'Failed'), d.status === 'success' ? 'ok' : 'err'); loadExams();
 }
 async function importLegacy() {
-  if (!confirm('Copy the exams from the old system (civil_data.json) into the new secure system?\nOld results stay linked. Already-imported exams are skipped.')) return;
+  if (!await acadConfirm({ title: 'Import old exams?', message: 'Copies exams from the previous system into this secure system. Old results stay linked, and exams already imported are skipped.', confirmLabel: 'Import exams' })) return;
   showLoader('Importing old exams…');
   try {
     const r = await fetch('https://raw.githubusercontent.com/shaikh800/shaikh800.github.io/main/civil_data.json?_=' + Date.now());
@@ -582,7 +582,7 @@ async function saveExam(live, force) {
   hideLoader();
   if (guard(d)) return;
   if (d.code === 'has-results') {
-    if (confirm(d.message + '\n\nSave anyway? (Old scores will not be recalculated.)')) return saveExam(live, true);
+    if (await acadConfirm({ title: 'Save changes anyway?', message: d.message + '\n\nExisting scores will not be recalculated.', confirmLabel: 'Save changes' })) return saveExam(live, true);
     return;
   }
   if (d.status !== 'success') return acadToast(d.message || 'Failed', 'err');
@@ -643,7 +643,7 @@ async function viewPaper(examId, sid) {
   openModal('modal-paper'); acadTypeset($('paper-body'));
 }
 async function clearResult(examId, sid, name) {
-  if (!confirm('Delete ' + name + "'s result so they can take this exam again?")) return;
+  if (!await acadConfirm({ title: 'Allow a retake?', message: 'Delete ' + name + "’s result so they can take this exam again?", confirmLabel: 'Allow retake', danger: true })) return;
   const d = await teacherCall('teacherDeleteResult', { examId, studentId: sid });
   if (guard(d)) return;
   acadToast(d.message || 'Done', d.status === 'success' ? 'ok' : 'err'); loadResults(); loadExams();
