@@ -700,6 +700,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (_from) {
     document.getElementById('back-btn').href = _from;
     const gb = document.getElementById('gate-back'); gb.href = _from; gb.style.display = 'inline-block';
+    // Return to the originating hub without leaving this control-panel page in
+    // browser history. Otherwise Browser Back immediately opens the panel again.
+    const returnToSource = e => { e.preventDefault(); location.replace(_from); };
+    document.getElementById('back-btn').addEventListener('click', returnToSource);
+    gb.addEventListener('click', returnToSource);
   }
 });
 const SESSION_TOKEN_KEY  = 'shaikh_admin_token_v1';
