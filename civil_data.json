@@ -325,6 +325,18 @@
         "driveManaged": true
       },
       {
+        "id": "drv_1wwEwLybaFQDtF8JAR-nZ2JY_1F-wQ5g-",
+        "desc": "",
+        "hidden": false,
+        "title": "RCC 2 Previous Question 24-20",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1wwEwLybaFQDtF8JAR-nZ2JY_1F-wQ5g-/preview?usp=sharing",
+        "folder": "Semester 6/Questions",
+        "driveFileId": "1wwEwLybaFQDtF8JAR-nZ2JY_1F-wQ5g-",
+        "driveFolderId": "1Mhkw7_bol4CBTLWTywuLX4D8g1rwfO4_",
+        "driveManaged": true
+      },
+      {
         "id": "mvmg7ubffvpn",
         "title": "Foundation que_261008_224118",
         "desc": "",
@@ -1962,5 +1974,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-26T17:28:42.962Z"
+  "updated": "2026-11-26T20:52:54.632Z"
 }
