@@ -312,30 +312,9 @@
       "date": "2026-10-21T15:07:49.424Z"
     }
   ],
-  "geminiPayments": {
-    "md.shaikh.alam.007@gmail.com": {
-      "2026-10": 115,
-      "2026-11": 115
-    },
-    "rafat.u.sifat@gmail.com": {
-      "2026-10": 115,
-      "2026-11": 115
-    },
-    "shazidrownok.ceworks@gmail.com": {
-      "2026-10": 100
-    },
-    "naimur03rahman@gmail.com": {
-      "2026-10": 115,
-      "2026-11": 115
-    }
-  },
   "pendingRequests": [],
-  "geminiCycleStart": "2026-10",
-  "geminiCycleEnd": "2027-09",
-  "geminiMonthlyFee": 115,
   "geminiManagers": [
     "rafat.u.sifat@gmail.com"
   ],
-  "geminiRoster": [],
-  "updated": "2026-11-26T18:06:12.102Z"
+  "updated": "2026-11-26T21:05:10.012Z"
 }
