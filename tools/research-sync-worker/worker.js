@@ -118,6 +118,7 @@ function geminiSnapshot(data) {
     geminiCycleEnd: typeof data.geminiCycleEnd === 'string' ? data.geminiCycleEnd : '',
     geminiMonthlyFee: Number(data.geminiMonthlyFee) || 0,
     geminiManagers: Array.isArray(data.geminiManagers) ? data.geminiManagers : [],
+    geminiRoster: Array.isArray(data.geminiRoster) ? data.geminiRoster : [],
     updated: data.updated || new Date().toISOString(),
   };
 }
@@ -136,42 +137,96 @@ async function googleEmailForToken(token) {
   return res.ok && data.email_verified && validEmail(data.email) ? data.email.toLowerCase() : '';
 }
 
+function approvedGeminiMember(data, email) {
+  email = String(email || '').toLowerCase();
+  return (data.members || []).some((member) =>
+    String(member.email || '').toLowerCase() === email && !member.uploadOnly
+  );
+}
+
+function normalizeGeminiState(state, source) {
+  const fallback = geminiSnapshot(source);
+  const clean = (state && typeof state === 'object') ? state : fallback;
+  if (!clean.geminiPayments || typeof clean.geminiPayments !== 'object') clean.geminiPayments = fallback.geminiPayments;
+  if (!Array.isArray(clean.geminiRoster)) clean.geminiRoster = fallback.geminiRoster;
+  if (!Array.isArray(clean.geminiManagers)) clean.geminiManagers = fallback.geminiManagers;
+  if (typeof clean.geminiCycleStart !== 'string') clean.geminiCycleStart = fallback.geminiCycleStart;
+  if (typeof clean.geminiCycleEnd !== 'string') clean.geminiCycleEnd = fallback.geminiCycleEnd;
+  clean.geminiMonthlyFee = Number(clean.geminiMonthlyFee) || 0;
+  clean.updated = clean.updated || fallback.updated || new Date().toISOString();
+  return clean;
+}
+
+function geminiParticipantKeys(data, state) {
+  const roster = new Map((state.geminiRoster || []).filter((entry) => entry && entry.key).map((entry) => [String(entry.key), entry]));
+  const keys = new Set();
+  (data.members || []).forEach((member) => {
+    const key = String(member.email || '').toLowerCase();
+    const entry = roster.get(key);
+    if (key && !member.uploadOnly && !(entry && entry.hidden)) keys.add(key);
+  });
+  (state.geminiRoster || []).forEach((entry) => {
+    if (entry && entry.type === 'record' && entry.key && !entry.archived) keys.add(String(entry.key));
+  });
+  return keys;
+}
+
+function rosterEntry(state, key) {
+  return (state.geminiRoster || []).find((entry) => entry && String(entry.key) === String(key));
+}
+
+async function loadGeminiState(env, latest) {
+  const stored = await env.DRIVE_SYNC_STATE.get('gemini:live-state', 'json');
+  const state = stored && stored.updated
+    ? normalizeGeminiState(stored, latest.content)
+    : geminiSnapshot(latest.content);
+  if (!(stored && stored.updated)) await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state));
+
+  // The first secure read migrates legacy Gemini fields out of the public
+  // GitHub Pages JSON file and into KV. KV is written first, so a failed
+  // cleanup can never lose payment history; later reads retry the cleanup.
+  const legacyKeys = ['geminiPayments', 'geminiCycleStart', 'geminiCycleEnd', 'geminiMonthlyFee', 'geminiRoster'];
+  if (legacyKeys.some((key) => Object.prototype.hasOwnProperty.call(latest.content, key))) {
+    const publicData = { ...latest.content };
+    legacyKeys.forEach((key) => { delete publicData[key]; });
+    publicData.updated = new Date().toISOString();
+    try {
+      await ghWriteFile(env.GITHUB_TOKEN, publicData, latest.sha, GITHUB_FILE, 'Move Gemini data into protected state');
+    } catch (error) {
+      // The already-written KV state is authoritative; retry cleanup next time
+      // only if the Worker is redeployed before this request finishes.
+      console.error('Gemini public-data cleanup failed:', error && error.message);
+    }
+  }
+  return state;
+}
+
 async function handleGemini(action, payload, env, origin) {
   if (!env.DRIVE_SYNC_STATE) return json({ ok: false, error: 'live-state-not-configured' }, 503, origin);
-
-  // Reads are lightweight and served from KV. A short lifetime also picks up
-  // the rare manual edit made directly in GitHub without making every viewer
-  // wait for a GitHub Pages deployment.
-  if (action === 'geminiRead') {
-    const cached = await env.DRIVE_SYNC_STATE.get('gemini:live-state', 'json');
-    if (cached && cached.updated) return json({ ok: true, data: cached }, 200, origin);
-    const latest = await ghFetchFile(env.GITHUB_TOKEN, GITHUB_FILE);
-    const state = geminiSnapshot(latest.content);
-    // Cloudflare KV enforces a 60-second minimum expiry. The browser still
-    // polls every few seconds, so writes are reflected immediately while a
-    // direct GitHub-only edit becomes visible within this short cache window.
-    await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state), { expirationTtl: 60 });
-    return json({ ok: true, data: state }, 200, origin);
-  }
-
   const latest = await ghFetchFile(env.GITHUB_TOKEN, GITHUB_FILE);
-  const isPrimaryAdmin = await verifyAdmin(env, payload.adminTokens);
+  const adminTokens = Array.isArray(payload.adminTokens) ? payload.adminTokens.filter(Boolean) : [];
+  const isPrimaryAdmin = adminTokens.length ? await verifyAdmin(env, adminTokens) : false;
   const googleEmail = isPrimaryAdmin ? '' : await googleEmailForToken(payload.googleToken);
-  if (!isPrimaryAdmin && !isGeminiManager(latest.content, googleEmail)) {
-    return json({ ok: false, error: 'not-gemini-manager' }, 403, origin);
+  const canView = isPrimaryAdmin || approvedGeminiMember(latest.content, googleEmail);
+  const canManage = isPrimaryAdmin || isGeminiManager(latest.content, googleEmail);
+  if (!canView) {
+    return json({ ok: false, error: 'not-approved-gemini-member' }, 403, origin);
   }
+
+  let state = await loadGeminiState(env, latest);
+  if (action === 'geminiRead') return json({ ok: true, data: state }, 200, origin);
+  if (!canManage) return json({ ok: false, error: 'not-gemini-manager' }, 403, origin);
 
   const kind = String(payload.kind || '');
   if (kind === 'setPayment') {
-    const email = String(payload.email || '').toLowerCase();
+    const participantKey = String(payload.participantKey || '').toLowerCase();
     const month = String(payload.month || '');
     const amount = Number(payload.amount);
-    if (!isMember(latest.content, email) || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !Number.isFinite(amount) || amount < 0 || amount > 1000000) {
+    if (!geminiParticipantKeys(latest.content, state).has(participantKey) || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !Number.isFinite(amount) || amount < 0 || amount > 1000000) {
       return json({ ok: false, error: 'bad-gemini-payment' }, 400, origin);
     }
-    latest.content.geminiPayments = latest.content.geminiPayments || {};
-    latest.content.geminiPayments[email] = latest.content.geminiPayments[email] || {};
-    latest.content.geminiPayments[email][month] = amount;
+    state.geminiPayments[participantKey] = state.geminiPayments[participantKey] || {};
+    state.geminiPayments[participantKey][month] = amount;
   } else if (kind === 'setCycle') {
     const start = String(payload.start || '');
     const end = String(payload.end || '');
@@ -180,17 +235,35 @@ async function handleGemini(action, payload, env, origin) {
     if (!monthOk(start) || !monthOk(end) || !!start !== !!end || (start && start > end) || fee < 0 || fee > 1000000) {
       return json({ ok: false, error: 'bad-gemini-cycle' }, 400, origin);
     }
-    latest.content.geminiCycleStart = start;
-    latest.content.geminiCycleEnd = end;
-    latest.content.geminiMonthlyFee = fee;
+    state.geminiCycleStart = start;
+    state.geminiCycleEnd = end;
+    state.geminiMonthlyFee = fee;
+  } else if (kind === 'addParticipant') {
+    const key = String(payload.participantKey || '');
+    const name = String(payload.name || '').trim().slice(0, 80);
+    if (!/^record_[a-z0-9]{6,32}$/i.test(key) || !name || rosterEntry(state, key)) return json({ ok: false, error: 'bad-gemini-participant' }, 400, origin);
+    state.geminiRoster.push({ key, type: 'record', name, createdAt: new Date().toISOString() });
+  } else if (kind === 'renameParticipant') {
+    const key = String(payload.participantKey || '').toLowerCase();
+    const name = String(payload.name || '').trim().slice(0, 80);
+    if (!name || !geminiParticipantKeys(latest.content, state).has(key)) return json({ ok: false, error: 'bad-gemini-participant' }, 400, origin);
+    let entry = rosterEntry(state, key);
+    if (entry && entry.type === 'record') entry.name = name;
+    else if (entry) { entry.name = name; entry.hidden = false; }
+    else state.geminiRoster.push({ key, type: 'team', name, hidden: false });
+  } else if (kind === 'removeParticipant') {
+    const key = String(payload.participantKey || '').toLowerCase();
+    const entry = rosterEntry(state, key);
+    if (!geminiParticipantKeys(latest.content, state).has(key)) return json({ ok: false, error: 'bad-gemini-participant' }, 400, origin);
+    if (entry && entry.type === 'record') entry.archived = true;
+    else if (entry) entry.hidden = true;
+    else state.geminiRoster.push({ key, type: 'team', hidden: true });
   } else {
     return json({ ok: false, error: 'unknown-gemini-action' }, 400, origin);
   }
 
-  latest.content.updated = new Date().toISOString();
-  await ghWriteFile(env.GITHUB_TOKEN, latest.content, latest.sha, GITHUB_FILE, `Update Gemini subscription: ${kind}`);
-  const state = geminiSnapshot(latest.content);
-  await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state), { expirationTtl: 60 });
+  state.updated = new Date().toISOString();
+  await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state));
   return json({ ok: true, data: state }, 200, origin);
 }
 
@@ -557,6 +630,8 @@ export default {
         'not-a-member', 'missing-name', 'missing-fields', 'not-owner',
         'bad-email', 'already-a-member', 'unknown-action',
         'bad-file', 'bad-data', 'not-admin', 'conflict', 'gas-not-configured',
+        'not-approved-gemini-member', 'not-gemini-manager',
+        'bad-gemini-payment', 'bad-gemini-cycle', 'bad-gemini-participant',
       ];
       return json({ ok: false, error: msg }, knownClientErrors.includes(msg) ? 400 : 502, origin);
     }

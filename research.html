@@ -425,6 +425,32 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-gemini-person">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-head"><h3 id="gemini-person-title"><i class="fas fa-user-pen" style="color:var(--blue);margin-right:8px;"></i>Edit Gemini name</h3><button class="modal-close" onclick="closeModal('modal-gemini-person')"><i class="fas fa-times"></i></button></div>
+      <div class="modal-body">
+        <label for="gemini-person-input" style="display:block;font-size:13px;color:var(--muted);margin-bottom:6px;">Name shown in the Gemini dashboard</label>
+        <input id="gemini-person-input" type="text" maxlength="80" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;background:var(--surface);color:var(--ink);">
+        <p id="gemini-person-error" style="display:none;color:#ef4444;font-size:13px;margin-top:8px;">Enter a name.</p>
+      </div>
+      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
+        <button class="btn secondary sm" onclick="closeModal('modal-gemini-person')">Cancel</button>
+        <button class="btn primary sm" id="gemini-person-save-btn"><i class="fas fa-save"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-gemini-remove">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-head"><h3><i class="fas fa-user-minus" style="color:#ef4444;margin-right:8px;"></i>Remove from Gemini list?</h3><button class="modal-close" onclick="closeModal('modal-gemini-remove')"><i class="fas fa-times"></i></button></div>
+      <div class="modal-body"><p id="gemini-remove-text" style="font-size:13px;line-height:1.55;color:var(--muted);"></p></div>
+      <div class="modal-foot" style="display:flex;justify-content:flex-end;gap:8px;padding:14px 18px;border-top:1px solid var(--line);">
+        <button class="btn secondary sm" onclick="closeModal('modal-gemini-remove')">Cancel</button>
+        <button class="btn danger sm" id="gemini-remove-confirm-btn"><i class="fas fa-trash"></i> Remove</button>
+      </div>
+    </div>
+  </div>
+
   <header class="site-header">
     <div class="nav-shell">
       <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
@@ -476,7 +502,7 @@
             <button class="nav-caret" type="button" aria-expanded="false" aria-label="Toggle Research submenu"><i class="fas fa-chevron-down"></i></button>
           </div>
           <div class="nav-sub">
-            <a href="research.html#account">My Account</a>
+            <a href="research.html#account">My Dashboard</a>
             <a href="research.html#files">Files</a>
             <a href="research.html#uploads">Team Uploads</a>
             <a href="research.html#notices">Notice Board</a>
@@ -656,10 +682,18 @@
         <div class="r-toolbar">
           <div>
             <h2>Gemini Subscription</h2>
-            <p>Tracks who has paid their share of the shared Gemini subscription, by month.</p>
+            <p>Private to approved Research team members. Tracks the shared Gemini subscription by month.</p>
           </div>
         </div>
 
+        <div class="card" id="geminiAccessGate" style="padding:20px;margin-bottom:16px;max-width:620px;">
+          <div style="font-weight:700;margin-bottom:6px;"><i class="fas fa-shield-halved" style="color:var(--blue);margin-right:7px;"></i>Team member verification</div>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Verify the same Google email that was approved for Research to open the Gemini dashboard. Gemini-only names never receive access.</p>
+          <button class="btn primary sm" type="button" onclick="unlockGeminiDashboard()"><i class="fab fa-google"></i> Verify &amp; open Gemini</button>
+          <div id="geminiAccessStatus" style="font-size:12px;color:var(--muted);margin-top:8px;min-height:16px;"></div>
+        </div>
+
+        <div id="geminiDashboardContent" hidden>
 
         <!-- ══ PAYMENT INFO CARD ══ -->
         <div class="card" id="geminiPayInfo" style="padding:16px 18px;margin-bottom:16px;border-left:4px solid var(--blue);">
@@ -702,6 +736,15 @@
           <div id="geminiCycleStatus" style="font-size:11.5px;margin-top:6px;min-height:14px;color:var(--muted);"></div>
         </div>
 
+        <div class="card" id="geminiRosterBox" style="display:none;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-weight:700;font-size:13.5px;margin-bottom:5px;">Gemini list</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Add a Gemini-only name here. This creates no Research account and gives no Drive access.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <input id="geminiRecordName" type="text" maxlength="80" placeholder="Name to add to Gemini list" style="flex:1;min-width:190px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit;background:var(--surface);color:var(--ink);">
+            <button class="btn secondary sm" type="button" onclick="addGeminiRecord()"><i class="fas fa-user-plus"></i> Add name</button>
+          </div>
+        </div>
+
         <div id="geminiDueBanner" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius);margin-bottom:14px;">
           <i class="fas fa-triangle-exclamation" style="color:#ef4444;font-size:18px;"></i>
           <div><b>Payment due</b> — <span class="due-months"></span></div>
@@ -716,14 +759,15 @@
           </div>
           <p class="drive-hint" style="margin-top:10px;" id="geminiHint">Everyone can see who's paid. Click a cell to mark it (admin only).</p>
         </div>
+        </div>
       </div>
 
       <!-- ══ MY ACCOUNT PANEL (every signed-in user) ══ -->
       <div class="r-panel" id="panel-account" hidden>
         <div class="r-toolbar">
           <div>
-            <h2>My Account</h2>
-            <p>Your name, photo and WhatsApp number — visible to the rest of the team.</p>
+          <h2>My Dashboard</h2>
+          <p>Your approved-team profile, name, photo and WhatsApp number.</p>
           </div>
         </div>
 
@@ -900,8 +944,10 @@
     let geminiCycleEnd   = ''; // 'YYYY-MM'
     let geminiMonthlyFee = 0;  // ৳ per month; 0 = not tracking amounts yet
     let geminiManagers = [];   // Google-verified co-managers for the Gemini tracker only
+    let geminiRoster = [];     // Gemini-only records plus team-member name overrides / hides
     let geminiLiveUpdated = '';
     let geminiLiveTimer = null;
+    let geminiAccessVerified = false;
 
     // gateUser = the member/admin identity browsing the hub. A Google Drive sign-in in Team Uploads
     // must never replace it, otherwise the saved member profile ends up with the Turbo account's email
@@ -988,6 +1034,9 @@
       if (tab === 'notices') {
         markNoticesSeen();
       }
+      if (tab === 'gemini' && role === 'admin' && !geminiAccessVerified) {
+        unlockGeminiDashboard();
+      }
     }
     function goToTab(tab) {
       const tabs = ['files', 'uploads', 'notices'].concat(isUploadOnly ? [] : ['gemini']).concat(['account']).concat(document.body.classList.contains('admin-mode') ? ['access'] : []);
@@ -1028,6 +1077,7 @@
       if (typeof data.geminiCycleEnd === 'string') geminiCycleEnd = data.geminiCycleEnd;
       if (typeof data.geminiMonthlyFee === 'number') geminiMonthlyFee = data.geminiMonthlyFee;
       if (Array.isArray(data.geminiManagers)) geminiManagers = data.geminiManagers.map(email => String(email || '').toLowerCase());
+      if (Array.isArray(data.geminiRoster)) geminiRoster = data.geminiRoster;
       if (typeof data.updated === 'string') geminiLiveUpdated = data.updated;
     }
     async function fetchFromGitHub() {
@@ -1044,7 +1094,9 @@
       try { const d = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (d) applyData(d); } catch {}
     }
     async function pushToGitHub() {
-      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, geminiPayments, pendingRequests, geminiCycleStart, geminiCycleEnd, geminiMonthlyFee, updated: new Date().toISOString() };
+      // Gemini payments and its private roster live in the protected Worker/KV
+      // state. Never copy them back into this public GitHub Pages data file.
+      const data = { driveLink: driveLinkSaved, driveId, apiKey: apiKeySaved, members, notices, uploads, pendingRequests, geminiManagers, updated: new Date().toISOString() };
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       const token = localStorage.getItem('site_gh_token');
       if (!token && !siteIsAdmin()) return { ok: false, reason: 'no-token' };
@@ -1090,6 +1142,7 @@
       if (typeof data.geminiCycleEnd === 'string') geminiCycleEnd = data.geminiCycleEnd;
       if (typeof data.geminiMonthlyFee === 'number') geminiMonthlyFee = data.geminiMonthlyFee;
       if (Array.isArray(data.geminiManagers)) geminiManagers = data.geminiManagers.map(email => String(email || '').toLowerCase());
+      if (Array.isArray(data.geminiRoster)) geminiRoster = data.geminiRoster;
       if (typeof data.updated === 'string') geminiLiveUpdated = data.updated;
     }
     async function geminiLiveRequest(action, payload = {}) {
@@ -1097,14 +1150,16 @@
       catch (error) { return { ok: false, reason: error.code || 'live-sync-failed', message: error.message }; }
     }
     async function refreshGeminiLive() {
-      if (document.hidden || !SYNC_WORKER_URL) return;
-      const result = await geminiLiveRequest('geminiRead');
+      if (document.hidden || !SYNC_WORKER_URL || !geminiAccessVerified) return;
+      const googleToken = role === 'admin' ? '' : _geminiMemberToken;
+      if (role !== 'admin' && !googleToken) return;
+      const result = await geminiLiveRequest('geminiRead', { googleToken });
       if (!result.ok || !result.data || result.data.updated === geminiLiveUpdated) return;
       applyGeminiLiveState(result.data);
       renderGeminiTab();
     }
     function startGeminiLiveSync() {
-      if (geminiLiveTimer || !SYNC_WORKER_URL) return;
+      if (geminiLiveTimer || !SYNC_WORKER_URL || !geminiAccessVerified) return;
       geminiLiveTimer = setInterval(refreshGeminiLive, 4000);
     }
 
@@ -1458,48 +1513,73 @@
         error_callback: () => { _authInFlight = false; renderTeamTab(); }
       });
     }
-    let _geminiManagerTokenClient = null;
-    let _geminiManagerToken = '';
-    let _geminiManagerTokenExpiry = 0;
-    function initGeminiManagerAuth() {
-      if (_geminiManagerTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
-      _geminiManagerTokenClient = google.accounts.oauth2.initTokenClient({
+    let _geminiMemberTokenClient = null;
+    let _geminiMemberToken = '';
+    let _geminiMemberTokenExpiry = 0;
+    function initGeminiMemberAuth() {
+      if (_geminiMemberTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
+      _geminiMemberTokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GDRIVE_CLIENT_ID,
         scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
         callback: () => {}
       });
     }
-    async function getGeminiManagerToken() {
+    function isApprovedGeminiViewer() {
+      if (role === 'admin') return true;
+      const email = geminiActorEmail();
+      const member = members.find(m => (m.email || '').toLowerCase() === email);
+      return !!(member && !member.uploadOnly);
+    }
+    async function getGeminiMemberToken() {
       if (role === 'admin') return '';
       const expectedEmail = geminiActorEmail();
-      if (!isGeminiManager() || !expectedEmail) return null;
-      if (_geminiManagerToken && Date.now() < _geminiManagerTokenExpiry) return _geminiManagerToken;
+      if (!isApprovedGeminiViewer() || !expectedEmail) return null;
+      if (_geminiMemberToken && Date.now() < _geminiMemberTokenExpiry) return _geminiMemberToken;
       const ready = await new Promise(resolve => {
         const started = Date.now();
         (function wait() {
-          initGeminiManagerAuth();
-          if (_geminiManagerTokenClient) return resolve(true);
+          initGeminiMemberAuth();
+          if (_geminiMemberTokenClient) return resolve(true);
           if (Date.now() - started > 8000) return resolve(false);
           setTimeout(wait, 150);
         })();
       });
       if (!ready) { toast("Google verification didn't load. Check your connection and try again.", 'error'); return null; }
       return new Promise(resolve => {
-        _geminiManagerTokenClient.callback = async response => {
+        _geminiMemberTokenClient.callback = async response => {
           if (response.error || !response.access_token) { toast('Google verification was cancelled.', 'error'); return resolve(null); }
           try {
             const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + response.access_token } }).then(res => res.json());
             if (!info.email || info.email.toLowerCase() !== expectedEmail) {
-              toast(`Use the Google account ${expectedEmail} to manage Gemini.`, 'error', 5000);
+              toast(`Use the Google account ${expectedEmail} that was approved for Research.`, 'error', 5000);
               return resolve(null);
             }
-            _geminiManagerToken = response.access_token;
-            _geminiManagerTokenExpiry = Date.now() + ((response.expires_in || 3600) - 60) * 1000;
-            resolve(_geminiManagerToken);
+            _geminiMemberToken = response.access_token;
+            _geminiMemberTokenExpiry = Date.now() + ((response.expires_in || 3600) - 60) * 1000;
+            resolve(_geminiMemberToken);
           } catch (e) { toast('Could not verify the Google account. Try again.', 'error'); resolve(null); }
         };
-        _geminiManagerTokenClient.requestAccessToken({ prompt: 'consent', login_hint: expectedEmail });
+        _geminiMemberTokenClient.requestAccessToken({ prompt: 'consent', login_hint: expectedEmail });
       });
+    }
+    async function getGeminiManagerToken() {
+      return isGeminiManager() ? getGeminiMemberToken() : null;
+    }
+    async function unlockGeminiDashboard() {
+      const status = document.getElementById('geminiAccessStatus');
+      if (!isApprovedGeminiViewer()) {
+        if (status) status.textContent = 'This signed-in account is not an approved Research team member.';
+        return;
+      }
+      if (status) status.textContent = 'Verifying your approved Google account…';
+      const googleToken = await getGeminiMemberToken();
+      if (role !== 'admin' && !googleToken) { if (status) status.textContent = 'Verification was not completed.'; return; }
+      const result = await geminiLiveRequest('geminiRead', { googleToken });
+      if (!result.ok || !result.data) { if (status) status.textContent = 'Could not open Gemini right now. Please try again.'; return; }
+      geminiAccessVerified = true;
+      applyGeminiLiveState(result.data);
+      renderGeminiTab();
+      startGeminiLiveSync();
     }
     window.addEventListener('load', initUploadAuth);
     function waitForTokenClient(timeoutMs) {
@@ -2125,9 +2205,32 @@ Content-Type: ${file.type || 'application/octet-stream'}
         reportSyncResult(result);
       }
     }
-    function setGeminiAmount(email, key) {
+    function geminiRows() {
+      const changes = new Map((geminiRoster || []).filter(x => x && x.key).map(x => [String(x.key), x]));
+      const teamRows = members.filter(m => !m.uploadOnly).map(m => {
+        const key = String(m.email || '').toLowerCase();
+        const change = changes.get(key) || {};
+        const name = change.name || m.name || key;
+        return { key, type: 'team', name, initials: name.slice(0, 2).toUpperCase(), photo: m.photo || '', hidden: !!change.hidden };
+      }).filter(row => row.key && !row.hidden);
+      const recordRows = (geminiRoster || []).filter(x => x && x.type === 'record' && x.key && !x.archived)
+        .map(x => ({ key: String(x.key), type: 'record', name: String(x.name || 'Unnamed'), initials: String(x.name || '?').slice(0, 2).toUpperCase(), photo: '' }));
+      return teamRows.concat(recordRows);
+    }
+    function geminiRowByKey(key) { return geminiRows().find(row => row.key === key) || null; }
+    async function saveGeminiRosterChange(kind, extra) {
+      if (!isGeminiManager()) return null;
+      const googleToken = await getGeminiManagerToken();
+      if (role !== 'admin' && !googleToken) return null;
+      const result = await geminiLiveRequest('geminiUpdate', Object.assign({ kind, googleToken }, extra || {}));
+      if (!result || !result.ok) { reportSyncResult(result); return null; }
+      applyGeminiLiveState(result.data);
+      renderGeminiTab();
+      return result;
+    }
+    function setGeminiAmount(participantKey, key) {
       if (!isGeminiManager()) return;
-      const current = (geminiPayments[email] && geminiPayments[email][key]) || 0;
+      const current = (geminiPayments[participantKey] && geminiPayments[participantKey][key]) || 0;
       const label = document.getElementById('gemini-pay-label');
       const inp = document.getElementById('gemini-pay-input');
       const err = document.getElementById('gemini-pay-error');
@@ -2143,7 +2246,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
         const googleToken = await getGeminiManagerToken();
         if (role !== 'admin' && !googleToken) return;
         newBtn.disabled = true; newBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
-        const result = await geminiLiveRequest('geminiUpdate', { kind: 'setPayment', email, month: key, amount: amt, googleToken });
+        const result = await geminiLiveRequest('geminiUpdate', { kind: 'setPayment', participantKey, month: key, amount: amt, googleToken });
         newBtn.disabled = false; newBtn.innerHTML = '<i class="fas fa-save"></i> Save';
         if (!result.ok) { reportSyncResult(result); return; }
         closeModal('modal-gemini-pay');
@@ -2154,11 +2257,65 @@ Content-Type: ${file.type || 'application/octet-stream'}
       openModal('modal-gemini-pay');
       setTimeout(() => { if (inp) inp.focus(); }, 80);
     }
+    async function addGeminiRecord() {
+      const input = document.getElementById('geminiRecordName');
+      const name = (input && input.value || '').trim();
+      if (!name) { if (input) input.focus(); return; }
+      const key = 'record_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      const result = await saveGeminiRosterChange('addParticipant', { participantKey: key, name });
+      if (result && input) input.value = '';
+    }
+    function openGeminiPersonEditor(key) {
+      const row = geminiRowByKey(key);
+      if (!row || !isGeminiManager()) return;
+      const input = document.getElementById('gemini-person-input');
+      const error = document.getElementById('gemini-person-error');
+      const button = document.getElementById('gemini-person-save-btn');
+      input.value = row.name;
+      error.style.display = 'none';
+      const freshButton = button.cloneNode(true);
+      button.parentNode.replaceChild(freshButton, button);
+      freshButton.addEventListener('click', async () => {
+        const name = input.value.trim();
+        if (!name) { error.style.display = ''; return; }
+        freshButton.disabled = true;
+        const result = await saveGeminiRosterChange('renameParticipant', { participantKey: key, name });
+        freshButton.disabled = false;
+        if (result) { closeModal('modal-gemini-person'); toast('Gemini name updated', 'success'); }
+      });
+      input.onkeydown = e => { if (e.key === 'Enter') freshButton.click(); };
+      openModal('modal-gemini-person');
+      setTimeout(() => input.focus(), 80);
+    }
+    function confirmGeminiParticipantRemoval(key) {
+      const row = geminiRowByKey(key);
+      if (!row || !isGeminiManager()) return;
+      const text = document.getElementById('gemini-remove-text');
+      const button = document.getElementById('gemini-remove-confirm-btn');
+      text.textContent = row.type === 'team'
+        ? `${row.name} will be hidden from the Gemini payment list. Their Research account and Drive access will not change.`
+        : `${row.name} will be removed from the Gemini-only list. They have no Research account or Drive access.`;
+      const freshButton = button.cloneNode(true);
+      button.parentNode.replaceChild(freshButton, button);
+      freshButton.addEventListener('click', async () => {
+        freshButton.disabled = true;
+        const result = await saveGeminiRosterChange('removeParticipant', { participantKey: key });
+        freshButton.disabled = false;
+        if (result) { closeModal('modal-gemini-remove'); toast('Removed from Gemini list', 'success'); }
+      });
+      openModal('modal-gemini-remove');
+    }
     function renderGeminiTab() {
+      const accessGate = document.getElementById('geminiAccessGate');
+      const content = document.getElementById('geminiDashboardContent');
+      if (accessGate) accessGate.hidden = geminiAccessVerified;
+      if (content) content.hidden = !geminiAccessVerified;
+      if (!geminiAccessVerified) return;
       const months = geminiMonthKeys();
       const _now = new Date();
       const curKey = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0');
       const cycleBox = document.getElementById('geminiCycleBox');
+      const rosterBox = document.getElementById('geminiRosterBox');
       const adminWrap = document.getElementById('geminiAdminTableWrap');
       if (!adminWrap) return;
       const canEdit = isGeminiManager();
@@ -2172,22 +2329,20 @@ Content-Type: ${file.type || 'application/octet-stream'}
         if (eEl && !eEl.matches(':focus')) eEl.value = geminiCycleEnd;
         if (fEl && !fEl.matches(':focus')) fEl.value = geminiMonthlyFee || '';
       }
+      if (rosterBox) rosterBox.style.display = canEdit ? 'block' : 'none';
 
-      // Everyone with access sees the full table, admin or member, so no one
-      // has to guess who's paid; only admin can tap a cell to edit an amount.
       const hint = document.getElementById('geminiHint');
       if (hint) hint.textContent = canEdit
-        ? "Click a cell to enter how much that member paid for that month. Changes appear for everyone within seconds."
-        : "Everyone can see who's paid each month \u2014 only Gemini managers can edit amounts.";
+        ? "Edit names, add Gemini-only records, or click a payment cell. Changes appear for the team within seconds."
+        : "Only approved Research team members can see this payment list.";
 
       const head = document.getElementById('geminiTableHead');
       head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
       const body = document.getElementById('geminiTableBody');
       let myDueMonths = [];
       const myEmail = ((gateIdentity() && gateIdentity().email) || '').toLowerCase();
-      body.innerHTML = members.filter(m => !m.uploadOnly).map(m => {
-        const email = (m.email || '').toLowerCase();
-        const row = geminiPayments[email] || {};
+      body.innerHTML = geminiRows().map(person => {
+        const row = geminiPayments[person.key] || {};
         let totalDue = 0;
         const rowDueMonths = [];
         const cells = months.map(mo => {
@@ -2200,12 +2355,17 @@ Content-Type: ${file.type || 'application/octet-stream'}
           if (geminiMonthlyFee > 0 && due > 0) rowDueMonths.push(mo.label);
           const cls = geminiMonthlyFee > 0 ? (paid >= geminiMonthlyFee ? 'on' : (paid > 0 ? 'partial' : '')) : (paid > 0 ? 'on' : '');
           const label = paid > 0 ? `\u09f3${paid}` : '\u2014';
-          const clickAttr = canEdit ? ` onclick="setGeminiAmount('${esc(email)}','${mo.key}')"` : '';
+          const clickAttr = canEdit ? ` onclick="setGeminiAmount('${esc(person.key)}','${mo.key}')"` : '';
           return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
         }).join('');
-        if (email === myEmail) myDueMonths = rowDueMonths;
+        if (person.key === myEmail) myDueMonths = rowDueMonths;
+        const manage = canEdit ? `<span style="display:inline-flex;gap:5px;margin-left:7px;vertical-align:middle;">
+          <button class="icon-action" title="Edit Gemini name" onclick="openGeminiPersonEditor('${esc(person.key)}')"><i class="fas fa-pen"></i></button>
+          <button class="icon-action danger" title="Remove from Gemini list" onclick="confirmGeminiParticipantRemoval('${esc(person.key)}')"><i class="fas fa-user-minus"></i></button>
+        </span>` : '';
+        const avatar = person.photo ? avatarHtml(person) : `<span class="chat-avatar" style="${person.type === 'record' ? 'background:#64748b;' : ''}">${esc(person.initials)}</span>`;
         return `<tr>
-          <td><div class="member-who">${avatarHtml(m)} ${esc(m.name)}</div></td>
+          <td><div class="member-who">${avatar} ${esc(person.name)}${manage}</div></td>
           ${cells}
           <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
         </tr>`;
@@ -2472,6 +2632,9 @@ Content-Type: ${file.type || 'application/octet-stream'}
 
     function enterAs(r) {
       role = r;
+      geminiAccessVerified = false;
+      _geminiMemberToken = '';
+      _geminiMemberTokenExpiry = 0;
       gateEl.style.display = 'none';
       applyRole();
     }
@@ -2519,7 +2682,6 @@ Content-Type: ${file.type || 'application/octet-stream'}
       }
       activateTab(initialTab);
       renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab(); renderNoticeBadge();
-      startGeminiLiveSync(); refreshGeminiLive();
     }
     function renderPendingView() {
       if (!gateIdentity()) return;
@@ -2581,6 +2743,9 @@ Content-Type: ${file.type || 'application/octet-stream'}
       currentUser = null;
       gateUser = null;
       role = null;
+      geminiAccessVerified = false;
+      _geminiMemberToken = '';
+      _geminiMemberTokenExpiry = 0;
       document.body.classList.remove('admin-mode');
       showGateOptions();
       gateEl.style.display = 'flex';
