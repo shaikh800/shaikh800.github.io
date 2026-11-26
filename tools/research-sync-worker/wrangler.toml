@@ -11,7 +11,7 @@ binding = "DRIVE_SYNC_STATE"
 id = "5a0961e559014043826c1f9e488b2ae4"
 
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["* * * * *"]
 
 # Public URL of the Google Apps Script admin login (same value as SITE_GAS_URL in assets/site-auth.js).
 # The Worker asks it whether an admin session token is valid.

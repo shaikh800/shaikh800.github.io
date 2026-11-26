@@ -507,8 +507,7 @@
           </div>
           <div class="access-box">
             <div class="access-label">Access Control</div>
-            <label class="access-option"><input type="radio" name="work-drive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — no download button</span></label>
-            <label class="access-option"><input type="radio" name="work-drive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+            <label class="access-option"><input type="radio" name="work-drive-access" value="view" checked> <span><i class="fas fa-download" style="color:var(--muted);"></i> Public — anyone can download</span></label>
           </div>
           <div class="drive-progress" id="work-drive-progress">
             <div class="drive-progress-text" id="work-drive-progress-text">Uploading to Drive...</div>
@@ -575,6 +574,9 @@
     const GITHUB_REPO   = 'shaikh800.github.io';
     const GITHUB_FILE   = 'modeling_data.json';
     const GITHUB_BRANCH = 'main';
+    // The real 3D Drive folder. New project files go here by default, then
+    // straight into the selected category/path beneath it.
+    const THREE_D_DRIVE_ROOT = '1En-Yft54a9nnpb9Y8s_KLjxNGIXmZ0Q3';
 
     async function fetchFromGitHub() {
       const url = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_FILE}?_=${Date.now()}`;
@@ -667,7 +669,7 @@
 
     async function uploadWorkFileToDrive(file, category, accessMode, pathOverride, folderIdOverride) {
       const token = await getDriveToken();
-      const mode = accessMode === 'view' ? 'view' : 'preview'; // default: view only
+      const mode = 'view'; // public 3D project files are always downloadable
 
       const prog = document.getElementById('work-drive-progress');
       const fill = document.getElementById('work-drive-progress-fill');
@@ -682,7 +684,7 @@
         parentId = folderIdOverride;
         if (fill) { fill.style.width = '35%'; txt.textContent = 'Accessing your chosen folder...'; }
       } else {
-        parentId = await findOrCreateFolder('3D Portfolio', 'root', token);
+        parentId = THREE_D_DRIVE_ROOT;
         // A path typed by hand wins over the category dropdown, and may be
         // several levels deep (e.g. "Render / Hero Shots").
         const folders = (pathOverride && pathOverride.trim())
@@ -712,10 +714,6 @@
 
       if (fill) { fill.style.width = '85%'; txt.textContent = 'Setting permissions...'; }
       await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
-      if (mode === 'preview') {
-        await driveAPI('PATCH', `/files/${uploaded.id}?fields=copyRequiresWriterPermission`, { copyRequiresWriterPermission: true }, token);
-      }
-
       if (fill) { fill.style.width = '100%'; txt.textContent = 'Done!'; setTimeout(() => prog.classList.remove('show'), 1500); }
 
       return { fileId: uploaded.id, viewLink: `https://drive.google.com/file/d/${uploaded.id}/${mode}?usp=sharing`, access: mode };
@@ -1097,7 +1095,7 @@
       document.querySelectorAll('#file-src-tabs .dsrc-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.dsrc-panel').forEach((p,i) => p.classList.toggle('active', i===0));
       // reset access control to default (view only)
-      const defAccess = document.querySelector('input[name="work-drive-access"][value="preview"]');
+      const defAccess = document.querySelector('input[name="work-drive-access"][value="view"]');
       if (defAccess) defAccess.checked = true;
     }
 
@@ -1183,7 +1181,7 @@
       let driveLink = '', driveFileId = '', driveFileName = '', driveAccess = accessModeVal;
       if (driveLinkVal) {
         const extractedId = extractDriveId(driveLinkVal);
-        driveLink = extractedId ? `https://drive.google.com/file/d/${extractedId}/${accessModeVal}?usp=sharing` : driveLinkVal;
+        driveLink = extractedId ? `https://drive.google.com/file/d/${extractedId}/view?usp=sharing` : driveLinkVal;
         driveFileId = extractedId || '';
       } else if (pendingDriveUpload) {
         driveLink = pendingDriveUpload.viewLink;
@@ -1286,6 +1284,18 @@
     /* ── INIT ── */
     fetchFromGitHub().then(() => renderWorks());
     renderWorks(); // show local data immediately while fetching
+
+    // An open 3D page follows the shared catalog automatically. File content
+    // itself is always read directly from its linked Drive file.
+    let modelingRefreshRunning = false;
+    setInterval(async () => {
+      if (document.hidden || modelingRefreshRunning) return;
+      modelingRefreshRunning = true;
+      const before = JSON.stringify(loadWorks());
+      try {
+        if (await fetchFromGitHub() && before !== JSON.stringify(loadWorks())) await renderWorks();
+      } finally { modelingRefreshRunning = false; }
+    }, 30000);
   })();
   </script>
 </body>

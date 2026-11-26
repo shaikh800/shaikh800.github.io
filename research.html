@@ -550,7 +550,6 @@
             <p>Browse the connected Drive folder right here — nothing jumps to a new tab.</p>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-            <button class="btn secondary sm admin-only" type="button" onclick="syncResearchDrive()" title="Refresh this view from Google Drive"><i class="fas fa-rotate"></i> Sync Drive</button>
             <button class="btn secondary sm admin-only" type="button" onclick="driveCreateNewFolder()"><i class="fas fa-folder-plus"></i> New Folder</button>
             <button class="btn primary sm admin-only" type="button" onclick="switchTab('uploads')"><i class="fas fa-upload"></i> Upload files</button>
             <a class="btn secondary sm" id="driveOpenLink" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-up-right-from-square"></i> Open in Drive</a>
@@ -1351,11 +1350,12 @@
 
     /* ── Admin Drive management: rename + new folder ── */
     // Drive is the source of truth for Research Files. Keep an open Files tab
-    // current even when another device changes the shared folder.
+    // current even when another device changes the shared folder. No manual
+    // refresh is necessary.
     setInterval(() => {
       const filesPanel = document.getElementById('panel-files');
       if (driveId && filesPanel && !filesPanel.hidden && !document.hidden) loadCurrentFolder();
-    }, 5 * 60 * 1000);
+    }, 30000);
 
     let _adminDriveTokenClient = null;
     let _adminDriveToken = null;

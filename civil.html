@@ -494,9 +494,6 @@
       <div class="sem-section-head">
         <h2><i class="fas fa-books" style="color:var(--blue);font-size:20px;margin-right:8px;"></i>Semester Resources</h2>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button class="btn secondary sm admin-only" id="drive-migrate-btn" title="Refresh semester resources from Google Drive without restoring deleted files">
-            <i class="fab fa-google-drive"></i> Sync from Drive
-          </button>
           <button class="btn secondary sm admin-only" id="clear-data-btn" title="Remove this device's local cache; GitHub and Google Drive files are unchanged">
             <i class="fas fa-trash-can"></i> Reset local cache
           </button>
@@ -604,8 +601,7 @@
           </div>
           <div class="access-box">
             <div class="access-label">Access Control</div>
-            <label class="access-option"><input type="radio" name="gdrive-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only — no download button</span></label>
-            <label class="access-option"><input type="radio" name="gdrive-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+            <label class="access-option"><input type="radio" name="gdrive-access" value="view" checked> <span><i class="fas fa-download" style="color:var(--muted);"></i> Public — anyone can download</span></label>
             <label class="access-option"><input type="radio" name="gdrive-access" value="private"> <span><i class="fas fa-lock" style="color:#ef4444;"></i> Hide on this site</span></label>
             <p class="access-info">This hides the item in the site only. For an existing Drive link, set its sharing to <strong>Restricted</strong> in Google Drive if it must be private.</p>
           </div>
@@ -637,8 +633,7 @@
           
           <div class="access-box" style="margin-top:8px;">
             <div class="access-label">Access Control</div>
-            <label class="access-option"><input type="radio" name="upload-access" value="preview" checked> <span><i class="fas fa-eye" style="color:var(--blue);"></i> View only</span></label>
-            <label class="access-option"><input type="radio" name="upload-access" value="view"> <span><i class="fas fa-download" style="color:var(--muted);"></i> Download allowed</span></label>
+            <label class="access-option"><input type="radio" name="upload-access" value="view" checked> <span><i class="fas fa-download" style="color:var(--muted);"></i> Public — anyone can download</span></label>
             <label class="access-option"><input type="radio" name="upload-access" value="private"> <span><i class="fas fa-lock" style="color:#ef4444;"></i> Only Me — restricted in Google Drive</span></label>
           </div>
         </div>
@@ -953,7 +948,9 @@
     async function uploadFileToDrive(file, pathString, accessMode, folderIdOverride) {
       const token = await getDriveToken();
       const isPrivate = accessMode === 'private';
-      const embedMode = isPrivate ? 'preview' : accessMode;
+      // Civil resources are public downloads by default. Private items remain
+      // private, but no public upload is ever created as view-only.
+      const embedMode = isPrivate ? 'preview' : 'view';
       
       const prog = document.getElementById('drive-progress');
       const fill = document.getElementById('drive-progress-fill');
@@ -1051,16 +1048,6 @@
         toast('Could not clear local files. Please try again.', 'error');
       }
     });
-    document.getElementById('drive-migrate-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('drive-migrate-btn'); const old = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Syncing…';
-      try {
-        await driveSyncAction('driveSyncNow', {});
-        buildSemList(); renderAllSems(); toast('Resources refreshed from Google Drive.', 'success');
-      } catch (e) { toast(e.message || 'Drive sync failed', 'error'); }
-      finally { btn.disabled = false; btn.innerHTML = old; }
-    });
-
     /* ── Semester panels ───────────────────── */
     const semLabels = ['','1st','2nd','3rd','4th','5th','6th','7th','8th'];
     let activeSem = 1;
@@ -1363,6 +1350,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
               <span class="dr-meta">${it.type.toUpperCase()}</span>
               <div class="dr-actions">
                 <button class="civ-icon-action" data-id="${it.id}" data-sem="${n}" title="Open"><i class="fas fa-eye"></i></button>
+                ${extractDriveId(it.src) ? `<button class="civ-icon-action download-btn" data-drive-id="${extractDriveId(it.src)}" title="Download"><i class="fas fa-download"></i></button>` : ''}
                 ${!isLocal ? `<button class="civ-icon-action share-btn" data-src="${esc(it.src||'')}" title="Copy share link"><i class="fas fa-share-nodes"></i></button>` : ''}
                 <button class="civ-icon-action move-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Move"><i class="fas fa-folder-tree"></i></button>
                 <button class="civ-icon-action edit-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen-to-square"></i></button>
@@ -1432,6 +1420,12 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       });
       grid.querySelectorAll('.civ-icon-action.share-btn').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); civilShareItem(btn.dataset.src); });
+      });
+      grid.querySelectorAll('.civ-icon-action.download-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          window.open(`https://drive.usercontent.google.com/download?id=${encodeURIComponent(btn.dataset.driveId)}&export=download&confirm=t`, '_blank', 'noopener');
+        });
       });
       grid.querySelectorAll('.civ-icon-action.edit-btn').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); openEditModal(btn.dataset.id, btn.dataset.sem); });
@@ -1776,7 +1770,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         if (!fid) { toast('Paste a valid Google Drive link', 'error'); return; }
         const rawMode = document.querySelector('input[name="gdrive-access"]:checked').value;
         isHidden = (rawMode === 'private');
-        const mode = isHidden ? 'preview' : rawMode;
+        const mode = isHidden ? 'preview' : 'view';
         src = `https://drive.google.com/file/d/${fid}/${mode}?usp=sharing`;
 
       } else if (activeTab === 'url-panel') {
@@ -1896,6 +1890,22 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       renderAllSems();
       buildSemList();
     });
+
+    // Drive changes are mirrored by the Worker every minute.  An open Civil
+    // page checks the shared catalog every 30 seconds, so nobody has to press
+    // a manual sync button or reload the page.
+    let civilRefreshRunning = false;
+    setInterval(async () => {
+      if (document.hidden || civilRefreshRunning) return;
+      civilRefreshRunning = true;
+      const before = JSON.stringify(loadSems());
+      try {
+        if (await fetchFromGitHub() && before !== JSON.stringify(loadSems())) {
+          renderAllSems();
+          buildSemList();
+        }
+      } finally { civilRefreshRunning = false; }
+    }, 30000);
   })();
   </script>
 </body>

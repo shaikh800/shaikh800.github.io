@@ -560,7 +560,9 @@ async function listDriveChildren(env, parentId) {
   return out;
 }
 async function syncDriveMirror(env) {
-  if (!env.DRIVE_SYNC_STATE || await env.DRIVE_SYNC_STATE.get('semester-resources-active') !== 'true') return;
+  // The connected Semester Resources folder is the source of truth. Always
+  // mirror it on the schedule; a browser should never need a manual sync.
+  if (!env.DRIVE_SYNC_STATE || !env.DRIVE_ROOT_FOLDER_ID) return;
   const found = [];
   async function walk(parent, semester, segments) {
     for (const f of await listDriveChildren(env, parent)) {
