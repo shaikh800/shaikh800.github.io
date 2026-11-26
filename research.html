@@ -899,6 +899,9 @@
     let geminiCycleStart = ''; // 'YYYY-MM', admin-set; '' = fall back to a rolling last-6-months view
     let geminiCycleEnd   = ''; // 'YYYY-MM'
     let geminiMonthlyFee = 0;  // ৳ per month; 0 = not tracking amounts yet
+    let geminiManagers = [];   // Google-verified co-managers for the Gemini tracker only
+    let geminiLiveUpdated = '';
+    let geminiLiveTimer = null;
 
     // gateUser = the member/admin identity browsing the hub. A Google Drive sign-in in Team Uploads
     // must never replace it, otherwise the saved member profile ends up with the Turbo account's email
@@ -916,6 +919,10 @@
       if (!email) return false;
       email = email.toLowerCase();
       return members.some(m => (m.email || '').toLowerCase() === email);
+    }
+    function geminiActorEmail() { return ((gateIdentity() && gateIdentity().email) || '').toLowerCase(); }
+    function isGeminiManager() {
+      return role === 'admin' || geminiManagers.some(email => String(email || '').toLowerCase() === geminiActorEmail());
     }
 
     function esc(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -1020,6 +1027,8 @@
       if (typeof data.geminiCycleStart === 'string') geminiCycleStart = data.geminiCycleStart;
       if (typeof data.geminiCycleEnd === 'string') geminiCycleEnd = data.geminiCycleEnd;
       if (typeof data.geminiMonthlyFee === 'number') geminiMonthlyFee = data.geminiMonthlyFee;
+      if (Array.isArray(data.geminiManagers)) geminiManagers = data.geminiManagers.map(email => String(email || '').toLowerCase());
+      if (typeof data.updated === 'string') geminiLiveUpdated = data.updated;
     }
     async function fetchFromGitHub() {
       try {
@@ -1072,6 +1081,31 @@
     async function syncChange(action, payload) {
       if (localStorage.getItem('site_gh_token') || siteIsAdmin()) return pushToGitHub();
       return syncWrite(action, payload);
+    }
+
+    function applyGeminiLiveState(data) {
+      if (!data || typeof data !== 'object') return;
+      if (data.geminiPayments && typeof data.geminiPayments === 'object') geminiPayments = data.geminiPayments;
+      if (typeof data.geminiCycleStart === 'string') geminiCycleStart = data.geminiCycleStart;
+      if (typeof data.geminiCycleEnd === 'string') geminiCycleEnd = data.geminiCycleEnd;
+      if (typeof data.geminiMonthlyFee === 'number') geminiMonthlyFee = data.geminiMonthlyFee;
+      if (Array.isArray(data.geminiManagers)) geminiManagers = data.geminiManagers.map(email => String(email || '').toLowerCase());
+      if (typeof data.updated === 'string') geminiLiveUpdated = data.updated;
+    }
+    async function geminiLiveRequest(action, payload = {}) {
+      try { return await _sdWorker(action, payload); }
+      catch (error) { return { ok: false, reason: error.code || 'live-sync-failed', message: error.message }; }
+    }
+    async function refreshGeminiLive() {
+      if (document.hidden || !SYNC_WORKER_URL) return;
+      const result = await geminiLiveRequest('geminiRead');
+      if (!result.ok || !result.data || result.data.updated === geminiLiveUpdated) return;
+      applyGeminiLiveState(result.data);
+      renderGeminiTab();
+    }
+    function startGeminiLiveSync() {
+      if (geminiLiveTimer || !SYNC_WORKER_URL) return;
+      geminiLiveTimer = setInterval(refreshGeminiLive, 4000);
     }
 
     /* ── Toast + sync-result reporting ──
@@ -1422,6 +1456,49 @@
         // Fires when the Google window is closed or fails to open. Without this, _authInFlight
         // stayed true and the sign-in button stopped responding until a full page refresh.
         error_callback: () => { _authInFlight = false; renderTeamTab(); }
+      });
+    }
+    let _geminiManagerTokenClient = null;
+    let _geminiManagerToken = '';
+    let _geminiManagerTokenExpiry = 0;
+    function initGeminiManagerAuth() {
+      if (_geminiManagerTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
+      _geminiManagerTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GDRIVE_CLIENT_ID,
+        scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+        callback: () => {}
+      });
+    }
+    async function getGeminiManagerToken() {
+      if (role === 'admin') return '';
+      const expectedEmail = geminiActorEmail();
+      if (!isGeminiManager() || !expectedEmail) return null;
+      if (_geminiManagerToken && Date.now() < _geminiManagerTokenExpiry) return _geminiManagerToken;
+      const ready = await new Promise(resolve => {
+        const started = Date.now();
+        (function wait() {
+          initGeminiManagerAuth();
+          if (_geminiManagerTokenClient) return resolve(true);
+          if (Date.now() - started > 8000) return resolve(false);
+          setTimeout(wait, 150);
+        })();
+      });
+      if (!ready) { toast("Google verification didn't load. Check your connection and try again.", 'error'); return null; }
+      return new Promise(resolve => {
+        _geminiManagerTokenClient.callback = async response => {
+          if (response.error || !response.access_token) { toast('Google verification was cancelled.', 'error'); return resolve(null); }
+          try {
+            const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + response.access_token } }).then(res => res.json());
+            if (!info.email || info.email.toLowerCase() !== expectedEmail) {
+              toast(`Use the Google account ${expectedEmail} to manage Gemini.`, 'error', 5000);
+              return resolve(null);
+            }
+            _geminiManagerToken = response.access_token;
+            _geminiManagerTokenExpiry = Date.now() + ((response.expires_in || 3600) - 60) * 1000;
+            resolve(_geminiManagerToken);
+          } catch (e) { toast('Could not verify the Google account. Try again.', 'error'); resolve(null); }
+        };
+        _geminiManagerTokenClient.requestAccessToken({ prompt: 'consent', login_hint: expectedEmail });
       });
     }
     window.addEventListener('load', initUploadAuth);
@@ -2032,22 +2109,24 @@ Content-Type: ${file.type || 'application/octet-stream'}
       return out;
     }
     async function saveGeminiCycle() {
-      if (role !== 'admin') return;
-      geminiCycleStart = document.getElementById('geminiCycleStartInput').value || '';
-      geminiCycleEnd   = document.getElementById('geminiCycleEndInput').value || '';
-      geminiMonthlyFee = parseFloat(document.getElementById('geminiFeeInput').value) || 0;
-      renderGeminiTab();
-      const result = await pushToGitHub();
+      if (!isGeminiManager()) return;
+      const start = document.getElementById('geminiCycleStartInput').value || '';
+      const end = document.getElementById('geminiCycleEndInput').value || '';
+      const fee = parseFloat(document.getElementById('geminiFeeInput').value) || 0;
+      const googleToken = await getGeminiManagerToken();
+      if (role !== 'admin' && !googleToken) return;
+      const result = await geminiLiveRequest('geminiUpdate', { kind: 'setCycle', start, end, fee, googleToken });
       const status = document.getElementById('geminiCycleStatus');
       if (result.ok) {
-        if (status) status.textContent = 'Saved \u2713';
+        applyGeminiLiveState(result.data); renderGeminiTab();
+        if (status) status.textContent = 'Saved live \u2713';
       } else {
         if (status) status.textContent = '';
         reportSyncResult(result);
       }
     }
     function setGeminiAmount(email, key) {
-      if (role !== 'admin') return;
+      if (!isGeminiManager()) return;
       const current = (geminiPayments[email] && geminiPayments[email][key]) || 0;
       const label = document.getElementById('gemini-pay-label');
       const inp = document.getElementById('gemini-pay-input');
@@ -2061,11 +2140,15 @@ Content-Type: ${file.type || 'application/octet-stream'}
       newBtn.addEventListener('click', async () => {
         const amt = parseFloat(inp.value);
         if (isNaN(amt) || amt < 0) { if (err) err.style.display = ''; return; }
+        const googleToken = await getGeminiManagerToken();
+        if (role !== 'admin' && !googleToken) return;
+        newBtn.disabled = true; newBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
+        const result = await geminiLiveRequest('geminiUpdate', { kind: 'setPayment', email, month: key, amount: amt, googleToken });
+        newBtn.disabled = false; newBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+        if (!result.ok) { reportSyncResult(result); return; }
         closeModal('modal-gemini-pay');
-        if (!geminiPayments[email]) geminiPayments[email] = {};
-        geminiPayments[email][key] = amt;
-        renderGeminiTab();
-        reportSyncResult(await pushToGitHub());
+        applyGeminiLiveState(result.data); renderGeminiTab();
+        toast('Payment saved live \u2713', 'success');
       });
       inp.onkeydown = (e) => { if (e.key === 'Enter') newBtn.click(); };
       openModal('modal-gemini-pay');
@@ -2078,7 +2161,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       const cycleBox = document.getElementById('geminiCycleBox');
       const adminWrap = document.getElementById('geminiAdminTableWrap');
       if (!adminWrap) return;
-      const canEdit = role === 'admin';
+      const canEdit = isGeminiManager();
 
       if (cycleBox) {
         cycleBox.style.display = canEdit ? 'block' : 'none';
@@ -2094,8 +2177,8 @@ Content-Type: ${file.type || 'application/octet-stream'}
       // has to guess who's paid; only admin can tap a cell to edit an amount.
       const hint = document.getElementById('geminiHint');
       if (hint) hint.textContent = canEdit
-        ? "Click a cell to enter how much that member paid for that month."
-        : "Everyone can see who's paid each month \u2014 only the admin can edit amounts.";
+        ? "Click a cell to enter how much that member paid for that month. Changes appear for everyone within seconds."
+        : "Everyone can see who's paid each month \u2014 only Gemini managers can edit amounts.";
 
       const head = document.getElementById('geminiTableHead');
       head.innerHTML = `<th>Member</th>` + months.map(m => `<th>${esc(m.label)}</th>`).join('') + `<th>Total Due</th>`;
@@ -2436,6 +2519,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       }
       activateTab(initialTab);
       renderDriveBrowser(); renderDriveStatus(); renderNotices(); renderMembers(); renderTeamTab(); renderGeminiTab(); renderPendingRequests(); renderAccountTab(); renderNoticeBadge();
+      startGeminiLiveSync(); refreshGeminiLive();
     }
     function renderPendingView() {
       if (!gateIdentity()) return;

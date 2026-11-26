@@ -106,6 +106,94 @@ function validEmail(e) {
   return typeof e === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
+// ── Gemini tracker: narrowly-scoped co-manager access ──────────────────────
+// A co-manager is deliberately *not* a Research/Drive admin. Their Google
+// account is checked by Google before they can change only Gemini payments and
+// the subscription cycle. This prevents an email typed into the public gate
+// from becoming an authority credential.
+function geminiSnapshot(data) {
+  return {
+    geminiPayments: data.geminiPayments || {},
+    geminiCycleStart: typeof data.geminiCycleStart === 'string' ? data.geminiCycleStart : '',
+    geminiCycleEnd: typeof data.geminiCycleEnd === 'string' ? data.geminiCycleEnd : '',
+    geminiMonthlyFee: Number(data.geminiMonthlyFee) || 0,
+    geminiManagers: Array.isArray(data.geminiManagers) ? data.geminiManagers : [],
+    updated: data.updated || new Date().toISOString(),
+  };
+}
+
+function isGeminiManager(data, email) {
+  email = String(email || '').toLowerCase();
+  return (data.geminiManagers || []).some((manager) => String(manager || '').toLowerCase() === email);
+}
+
+async function googleEmailForToken(token) {
+  if (!token || typeof token !== 'string') return '';
+  const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  return res.ok && data.email_verified && validEmail(data.email) ? data.email.toLowerCase() : '';
+}
+
+async function handleGemini(action, payload, env, origin) {
+  if (!env.DRIVE_SYNC_STATE) return json({ ok: false, error: 'live-state-not-configured' }, 503, origin);
+
+  // Reads are lightweight and served from KV. A short lifetime also picks up
+  // the rare manual edit made directly in GitHub without making every viewer
+  // wait for a GitHub Pages deployment.
+  if (action === 'geminiRead') {
+    const cached = await env.DRIVE_SYNC_STATE.get('gemini:live-state', 'json');
+    if (cached && cached.updated) return json({ ok: true, data: cached }, 200, origin);
+    const latest = await ghFetchFile(env.GITHUB_TOKEN, GITHUB_FILE);
+    const state = geminiSnapshot(latest.content);
+    // Cloudflare KV enforces a 60-second minimum expiry. The browser still
+    // polls every few seconds, so writes are reflected immediately while a
+    // direct GitHub-only edit becomes visible within this short cache window.
+    await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state), { expirationTtl: 60 });
+    return json({ ok: true, data: state }, 200, origin);
+  }
+
+  const latest = await ghFetchFile(env.GITHUB_TOKEN, GITHUB_FILE);
+  const isPrimaryAdmin = await verifyAdmin(env, payload.adminTokens);
+  const googleEmail = isPrimaryAdmin ? '' : await googleEmailForToken(payload.googleToken);
+  if (!isPrimaryAdmin && !isGeminiManager(latest.content, googleEmail)) {
+    return json({ ok: false, error: 'not-gemini-manager' }, 403, origin);
+  }
+
+  const kind = String(payload.kind || '');
+  if (kind === 'setPayment') {
+    const email = String(payload.email || '').toLowerCase();
+    const month = String(payload.month || '');
+    const amount = Number(payload.amount);
+    if (!isMember(latest.content, email) || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !Number.isFinite(amount) || amount < 0 || amount > 1000000) {
+      return json({ ok: false, error: 'bad-gemini-payment' }, 400, origin);
+    }
+    latest.content.geminiPayments = latest.content.geminiPayments || {};
+    latest.content.geminiPayments[email] = latest.content.geminiPayments[email] || {};
+    latest.content.geminiPayments[email][month] = amount;
+  } else if (kind === 'setCycle') {
+    const start = String(payload.start || '');
+    const end = String(payload.end || '');
+    const fee = Number(payload.fee) || 0;
+    const monthOk = (value) => !value || /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+    if (!monthOk(start) || !monthOk(end) || !!start !== !!end || (start && start > end) || fee < 0 || fee > 1000000) {
+      return json({ ok: false, error: 'bad-gemini-cycle' }, 400, origin);
+    }
+    latest.content.geminiCycleStart = start;
+    latest.content.geminiCycleEnd = end;
+    latest.content.geminiMonthlyFee = fee;
+  } else {
+    return json({ ok: false, error: 'unknown-gemini-action' }, 400, origin);
+  }
+
+  latest.content.updated = new Date().toISOString();
+  await ghWriteFile(env.GITHUB_TOKEN, latest.content, latest.sha, GITHUB_FILE, `Update Gemini subscription: ${kind}`);
+  const state = geminiSnapshot(latest.content);
+  await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state), { expirationTtl: 60 });
+  return json({ ok: true, data: state }, 200, origin);
+}
+
 function applyAction(data, action, payload) {
   data.members = data.members || [];
   data.uploads = data.uploads || [];
@@ -457,6 +545,7 @@ export default {
     try {
       if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
       if (action === 'driveDelete' || action === 'driveDeleteBatch' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow') return await handleDriveAction(action, payload, env, origin);
+      if (action === 'geminiRead' || action === 'geminiUpdate') return await handleGemini(action, payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
       const updated = applyAction(content, action, payload);
       updated.updated = new Date().toISOString();
