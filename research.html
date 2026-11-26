@@ -993,12 +993,14 @@
     document.querySelectorAll('.r-tab').forEach(btn => {
       btn.addEventListener('click', () => goToTab(btn.dataset.tab));
     });
-    window.addEventListener('hashchange', () => {
-      // The hash already changed (typed, a link, or Back/Forward) -- just reflect
-      // it. Never push a new entry here, or pressing Back would instantly push
-      // right back Forward and the button would feel like it does nothing.
-      activateTab((window.location.hash || '').replace('#', ''));
-    });
+    function reflectResearchHistory() {
+      // Both a direct hash edit and History API Back/Forward must update the
+      // panel without adding a new entry. pushState itself emits neither event,
+      // while Back/Forward reliably emits popstate.
+      activateTab((window.location.hash || '').replace('#', '') || 'files');
+    }
+    window.addEventListener('hashchange', reflectResearchHistory);
+    window.addEventListener('popstate', reflectResearchHistory);
     document.querySelectorAll('.nav-sub a[href^="research.html#"]').forEach((link) => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
