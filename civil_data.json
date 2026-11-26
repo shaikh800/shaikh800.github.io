@@ -34,6 +34,42 @@
     ],
     "6": [
       {
+        "id": "drv_1kB2lmbSyAkNDxr0g6OHnETQ6AdIVGDwL",
+        "desc": "",
+        "hidden": false,
+        "title": "RCC Nilson 8th, Column, Footing",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1kB2lmbSyAkNDxr0g6OHnETQ6AdIVGDwL/preview?usp=sharing",
+        "folder": "Semester 6/CE 602 Design of Concrete Structures- II/RCC Books",
+        "driveFileId": "1kB2lmbSyAkNDxr0g6OHnETQ6AdIVGDwL",
+        "driveFolderId": "1XxdMwKH8Z_FGW5pFxDWmDmV7BBa-pIhj",
+        "driveManaged": true
+      },
+      {
+        "id": "drv_1tDfOCAoMfTJJxpOFYIPKoXF-cHBdge3t",
+        "desc": "",
+        "hidden": false,
+        "title": "RCC by Nilson (15th)",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1tDfOCAoMfTJJxpOFYIPKoXF-cHBdge3t/preview?usp=sharing",
+        "folder": "Semester 6/CE 602 Design of Concrete Structures- II/RCC Books",
+        "driveFileId": "1tDfOCAoMfTJJxpOFYIPKoXF-cHBdge3t",
+        "driveFolderId": "1XxdMwKH8Z_FGW5pFxDWmDmV7BBa-pIhj",
+        "driveManaged": true
+      },
+      {
+        "id": "drv_19fwzceULEwYvAwqSNQ1Bkk5Xzz2stnvb",
+        "desc": "",
+        "hidden": false,
+        "title": "RCC by Jaber part II",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/19fwzceULEwYvAwqSNQ1Bkk5Xzz2stnvb/preview?usp=sharing",
+        "folder": "Semester 6/CE 602 Design of Concrete Structures- II/RCC Books",
+        "driveFileId": "19fwzceULEwYvAwqSNQ1Bkk5Xzz2stnvb",
+        "driveFolderId": "1XxdMwKH8Z_FGW5pFxDWmDmV7BBa-pIhj",
+        "driveManaged": true
+      },
+      {
         "id": "drv_1AIswgVIz-uBXTiSqmANyzmMjaDPNK9US",
         "desc": "",
         "hidden": false,
@@ -1914,5 +1950,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-26T17:02:52.733Z"
+  "updated": "2026-11-26T17:25:02.374Z"
 }
