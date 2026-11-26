@@ -920,8 +920,9 @@ async function teacherOp(id, op) {
   else toast('❌ ' + (res?.message || 'Failed'));
 }
 async function teacherResetPw(id) {
-  const pw = prompt('New password for this teacher (min 4 characters):');
+  const pw = prompt('New password for this teacher (min 8 characters):');
   if (!pw) return;
+  if (pw.trim().length < 8) { toast('Use at least 8 characters.'); return; }
   const res = await gasCall('adminTeacherOp', { id, op: 'resetPassword', newPassword: pw.trim() });
   if (res?.status === 'success') { toast('🔐 Password updated!'); loadTeachers(); }
   else toast('❌ ' + (res?.message || 'Failed'));
@@ -1048,30 +1049,11 @@ async function rejectProfile(id) {
 async function resetPassword(id) {
   const el  = document.getElementById(`np-${id}`);
   const pw  = el ? el.value.trim() : '';
-  if (!pw) { toast('Enter a password!'); return; }
+  if (pw.length < 8) { toast('Use at least 8 characters.'); return; }
   if (!await askConfirm(`Set ID ${id}\'s password to "${pw}"?`)) return;
   const res = await gasCall('adminResetPassword', { id, newPassword: pw });
   if (res?.status === 'success') { toast('🔐 Password updated!'); loadStudents(); }
   else toast('❌ ' + (res?.message || 'Failed'));
-}
-
-// ── Password Toggle ──
-let _pwVisible = false;
-let _currentModalPw = '';
-function togglePw() {
-  const display = document.getElementById('pw-display');
-  const icon    = document.getElementById('pw-eye-icon');
-  if (!display || !icon) return;
-  _pwVisible = !_pwVisible;
-  if (_pwVisible) {
-    display.textContent = _currentModalPw || '(not set)';
-    display.style.letterSpacing = '0';
-    icon.className = 'fas fa-eye-slash';
-  } else {
-    display.textContent = '••••••••';
-    display.style.letterSpacing = '2px';
-    icon.className = 'fas fa-eye';
-  }
 }
 
 // ── Student Modal ──
@@ -1085,20 +1067,10 @@ function openStudentModal(id) {
 
   document.getElementById('modal-stu-bio').innerHTML = `
     <div><strong>Mobile</strong>${esc(String(s.mobile))}</div>
-    <div><strong>Password</strong>
-      <span id="pw-display" style="font-family:monospace;letter-spacing:2px;">••••••••</span>
-      <button onclick="togglePw()"
-        id="pw-toggle-btn"
-        style="margin-left:8px;background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;padding:0;"
-        title="Show / Hide">
-        <i class="fas fa-eye" id="pw-eye-icon"></i>
-      </button>
-    </div>
+    <div><strong>Password</strong><span>Protected — use Reset Password to set a new one.</span></div>
     <div><strong>School/College</strong>${esc(s.school||'Not set')}</div>
     <div><strong>Class/Year</strong>${esc(s.studentClass||'Not set')}</div>
   `;
-  _currentModalPw = s.password || '';
-  _pwVisible = false;
 
   const sResults = allResultsData.filter(r => String(r.id) === String(id));
   const wrap = document.getElementById('modal-stu-results');

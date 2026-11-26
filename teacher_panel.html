@@ -116,7 +116,7 @@
         <div class="field"><label>Full Name *</label><input type="text" id="s-name" class="inp"></div>
         <div class="grid-2">
           <div class="field"><label>Mobile Number *</label><input type="tel" id="s-mobile" class="inp" maxlength="11" placeholder="01XXXXXXXXX"></div>
-          <div class="field"><label>Password *</label><input type="password" id="s-pass" class="inp" placeholder="min 4 characters"></div>
+          <div class="field"><label>Password *</label><input type="password" id="s-pass" class="inp" placeholder="minimum 8 characters"></div>
         </div>
         <div class="grid-2">
           <div class="field"><label>Subject</label><input type="text" id="s-subject" class="inp" placeholder="e.g. Mathematics"></div>
@@ -317,6 +317,7 @@ async function doSignup() {
   const name = $('s-name').value.trim(), mobile = $('s-mobile').value.trim(), password = $('s-pass').value;
   msg('s-msg', '');
   if (!name || !mobile || !password) return msg('s-msg', 'নাম, মোবাইল ও পাসওয়ার্ড আবশ্যক');
+  if (password.length < 8) return msg('s-msg', 'পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে');
   if (!/^\d{10,11}$/.test(mobile)) return msg('s-msg', 'সঠিক মোবাইল নম্বর দিন');
   $('s-btn').disabled = true;
   try {

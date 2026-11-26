@@ -289,7 +289,7 @@ async function handleLogin() {
   if (isNewUser) {
     const name = $('reg-name').value.trim();
     if (!name) return setErr('s2-error', 'আপনার নাম দিন');
-    if (password.length < 4) return setErr('s2-error', 'পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে');
+    if (password.length < 8) return setErr('s2-error', 'পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে');
     payload = { action: 'register', mobile, password, name, school: $('reg-school').value.trim(), studentClass: $('reg-class').value.trim() };
   } else payload = { action: 'login', mobile, password };
   $('auth-btn').disabled = true;
@@ -485,7 +485,7 @@ async function submitProfileUpdate() {
   if (!name) return showEditMsg('A name is required!', false);
   $('edit-btn').disabled = true;
   try {
-    const d = await acadRaw({ action: 'requestProfileUpdate', id: currentUser.id, name, school: $('edit-school').value.trim(), studentClass: $('edit-class').value.trim() });
+    const d = await studentCall('requestProfileUpdate', { id: currentUser.id, name, school: $('edit-school').value.trim(), studentClass: $('edit-class').value.trim() });
     if (d.status === 'success') { showEditMsg('Request sent! Your profile will be updated once the admin approves it.', true); setTimeout(() => closeModal('modal-edit'), 2500); }
     else showEditMsg(d.message || 'Something went wrong.', false);
   } catch (e) { showEditMsg('Network error!', false); }

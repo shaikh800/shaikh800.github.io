@@ -55,6 +55,7 @@ function doPost(e) {
       case 'teacherRegister':      result = teacherRegister(body);      break;
       case 'teacherLogin':         result = teacherLogin(body);         break;
       case 'teacherRequestReset':  result = teacherRequestReset(body);  break;
+      case 'teacherUpdateProfile': result = teacherUpdateProfile(body); break;
       case 'teacherMe':            result = teacherMe(body);            break;
       case 'adminListTeachers':    result = adminListTeachers(body);    break;
       case 'adminTeacherOp':       result = adminTeacherOp(body);       break;
@@ -217,6 +218,7 @@ function register(body) {
     if (!name || !mobile || !password) {
       return { status: 'error', message: 'নাম, মোবাইল এবং পাসওয়ার্ড আবশ্যক' };
     }
+    if (password.length < 8) return { status: 'error', message: 'পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে' };
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = getOrCreateSheet(ss, USERS_SHEET);
@@ -235,7 +237,9 @@ function register(body) {
 
     const newId = maxId + 1;
     // Columns: ID, Name, Mobile, Password, School, Class, PendingUpdate, ResetRequest, Time
-    sheet.appendRow([newId, name, `'${mobile}`, password, school, studentClass, '', '', time]);
+    // New student passwords are salted hashes. Existing plain-text records are
+    // upgraded transparently on their next successful login below.
+    sheet.appendRow([newId, name, `'${mobile}`, hashPw_(password), school, studentClass, '', '', time]);
     logActivity('register', `${newId} | ${name} | ${mobile}`);
     
     const tk = signToken_({ r: 's', id: String(newId) });
@@ -258,7 +262,11 @@ function login(body) {
   for (let i = 1; i < data.length; i++) {
     if (normalizeMobile(data[i][2]) === mobile) {
       const storedPass = String(data[i][3] || '').trim();
-      if (storedPass === password) {
+      // Accept a legacy record once, then replace its readable password with
+      // a salted hash. New records never store a readable password.
+      const validPassword = storedPass.indexOf('$') > 0 ? checkPw_(password, storedPass) : storedPass === password;
+      if (validPassword) {
+        if (storedPass.indexOf('$') < 1) sheet.getRange(i + 1, 4).setValue(hashPw_(password));
         throttleClear_(tkey);
         const tk = signToken_({ r: 's', id: String(data[i][0]) });
         return {
@@ -280,7 +288,10 @@ function login(body) {
 }
 
 function requestProfileUpdate(body) {
+  const a = needStudent_(body);
+  if (!a) return UNAUTH_;
   const id = String(body.id || '').trim();
+  if (id !== String(a.id)) return { status: 'unauthorized', message: 'You can only update your own profile' };
   const updateData = JSON.stringify({
     name: body.name || '',
     school: body.school || '',
@@ -335,7 +346,6 @@ function adminGetStudents(body) {
       id: data[i][0],
       name: data[i][1],
       mobile: data[i][2],
-      password: data[i][3],
       school: data[i][4],
       studentClass: data[i][5],
       pendingUpdate: data[i][6] ? JSON.parse(data[i][6]) : null,
@@ -391,13 +401,14 @@ function adminResetPassword(body) {
 
   const id = String(body.id).trim();
   const newPass = String(body.newPassword).trim();
+  if (newPass.length < 8) return { status: 'error', message: 'Password must be at least 8 characters' };
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = getOrCreateSheet(ss, USERS_SHEET);
   const data = sheet.getDataRange().getValues();
 
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]).trim() === id) {
-      sheet.getRange(i + 1, 4).setValue(newPass);
+      sheet.getRange(i + 1, 4).setValue(hashPw_(newPass));
       sheet.getRange(i + 1, 8).clearContent(); // Clear ResetRequest
       return { status: 'success', message: 'Password updated' };
     }
@@ -485,33 +496,10 @@ function adminDeleteStudentResults(body) {
 // ════════════════════════════════════════
 
 function submitResult(body) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = getOrCreateSheet(ss, RESULTS_SHEET);
-  ensureResultsHeader(sheet);
-
-  const id = String(body.id || '').trim();
-  const name = String(body.name || '').trim();
-  const score = body.score !== undefined ? Number(body.score) : 0;
-  const topic = String(body.topic || '').trim();
-  const examId = String(body.examId || '').trim();
-  const details = String(body.details || '').trim();
-  const time = new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' });
-
-  if (!id || !name || !topic) return { status: 'error', message: 'Missing fields' };
-
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][1]).trim() === id && String(data[i][5]).trim() === examId) {
-      sheet.getRange(i + 1, 5).setValue(score);
-      sheet.getRange(i + 1, 7).setValue(details);
-      sheet.getRange(i + 1, 8).setValue(time);
-      return { status: 'success', message: 'Result updated' };
-    }
-  }
-
-  const serial = sheet.getLastRow(); 
-  sheet.appendRow([serial, id, name, topic, score, examId, details, time]);
-  return { status: 'success', message: 'Result saved' };
+  // The former endpoint trusted a browser-supplied score, name and ID. That
+  // allowed anyone to forge or overwrite a result. All live exams now use
+  // examStart/examSave/examSubmit, which score answers on the server.
+  return { status: 'error', code: 'legacy-retired', message: 'This legacy exam flow has been retired. Please use the Student Portal.' };
 }
 
 function getResults(body) {
@@ -874,6 +862,21 @@ function teacherRequestReset(body) {
   }
   return { status: 'error', message: 'এই নম্বরে শিক্ষক অ্যাকাউন্ট নেই' };
 }
+function teacherUpdateProfile(body) {
+  const a = needTeacher_(body);
+  if (!a) return UNAUTH_;
+  if (a.role === 'admin') return { status: 'error', message: 'Update the admin profile in Script Properties' };
+  const name = String(body.name || '').trim();
+  const subject = String(body.subject || '').trim();
+  const institution = String(body.institution || '').trim();
+  if (!name) return { status: 'error', message: 'Name is required' };
+  const t = findTeacher_(a.id);
+  if (!t) return UNAUTH_;
+  teachersSheet_().getRange(t.row, 2).setValue(name);
+  teachersSheet_().getRange(t.row, 5).setValue(subject);
+  teachersSheet_().getRange(t.row, 6).setValue(institution);
+  return { status: 'success', teacher: teacherPublic_(findTeacher_(a.id).v) };
+}
 function teacherMe(body) {
   const a = needTeacher_(body);
   if (!a) return UNAUTH_;
@@ -912,7 +915,7 @@ function adminTeacherOp(body) {
     if (op === 'suspend')  { sh.getRange(t.row, 7).setValue('suspended'); return { status: 'success', message: 'Suspended' }; }
     if (op === 'resetPassword') {
       const np = String(body.newPassword || '');
-      if (np.length < 4) return { status: 'error', message: 'কমপক্ষে ৪ অক্ষর' };
+      if (np.length < 8) return { status: 'error', message: 'কমপক্ষে ৮ অক্ষর' };
       sh.getRange(t.row, 4).setValue(hashPw_(np));
       sh.getRange(t.row, 9).clearContent();
       return { status: 'success', message: 'Password updated' };
@@ -1415,6 +1418,9 @@ function examSave(body) {
   if (!e) return { status: 'error', message: 'Exam not found' };
   const att = findAttempt_(e.id, a.id);
   if (!att || att.status !== 'started') return { status: 'error', code: 'no-attempt', message: 'No active attempt' };
+  if (Date.now() > att.startedAt + e.durationMin * 60000) {
+    return { status: 'error', code: 'expired', message: 'Time is up — submit the answers already saved on the server' };
+  }
   attemptsSheet_().getRange(att.row, 5, 1, 2).setValues([[JSON.stringify(body.answers || []), Date.now()]]);
   return { status: 'success', remainingSec: remainingSec_(e, att) };
 }
@@ -1429,7 +1435,8 @@ function examSubmit(body) {
     if (!done && !att) return { status: 'error', message: 'আগে পরীক্ষা শুরু করুন' };
     if (!done) {
       const now = Date.now();
-      const onTime = now <= att.startedAt + e.durationMin * 60000 + SUBMIT_GRACE_MS;
+      // Grace is for delivery only; no new answer can be accepted after time.
+      const onTime = now <= att.startedAt + e.durationMin * 60000;
       let answers = body.answers || [];
       if (!onTime) { try { answers = JSON.parse(att.answers || '[]'); } catch (x) { answers = []; } }
       finalizeAttempt_(e, findStudent_(a.id), answers, att, now);
