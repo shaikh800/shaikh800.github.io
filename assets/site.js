@@ -28,7 +28,10 @@
     const input = document.getElementById('site-dialog-input');
     const confirm = overlay.querySelector('[data-site-dialog="confirm"]');
     const finish = (result) => { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); document.removeEventListener('keydown', onKey); resolve(result); };
-    const onKey = (event) => { if (event.key === 'Escape') finish(value === undefined ? false : null); if (event.key === 'Enter' && value !== undefined) finish(input.value); };
+    const onKey = (event) => {
+      if (event.key === 'Escape') finish(value === undefined ? false : null);
+      if (event.key === 'Enter') finish(value === undefined ? true : input.value);
+    };
     titleEl.textContent = title;
     messageEl.textContent = message;
     input.hidden = value === undefined;
