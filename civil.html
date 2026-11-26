@@ -309,6 +309,27 @@
     .resource-grid.view-large { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
     .resource-grid.view-list { grid-template-columns: 1fr; display: flex; flex-direction: column; gap: 8px; }
 
+    /* ── COMPACT RESOURCE BROWSER ─────────────────────── */
+    /* Semester and folder cards use the available desktop width instead of
+       leaving a long, mostly empty row after only a few resources. */
+    @media (min-width:760px) {
+      .sem-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+      .sem-list .fs-folder-card { grid-column:auto; min-height:82px; padding:16px 18px; border-radius:var(--radius-lg); }
+      .sem-list .fs-folder-card i.fa-folder { font-size:18px; }
+      .resource-grid.view-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .resource-grid.view-grid > .fs-folder-card {
+        grid-column:auto; min-height:108px; padding:18px; position:relative;
+        align-items:flex-start; flex-wrap:wrap; border-radius:var(--radius-lg);
+      }
+      .resource-grid.view-grid > .fs-folder-card > span { padding-right:24px; }
+      .resource-grid.view-grid > .fs-folder-card .folder-count {
+        flex-basis:100%; margin:2px 0 0 28px; font-size:11px;
+      }
+      .resource-grid.view-grid > .fs-folder-card .fs-folder-chevron {
+        position:absolute; top:22px; right:18px;
+      }
+    }
+
     /* ── MISC ──────────────────────────────────────────── */
     .tool-list { display:flex; flex-wrap:wrap; gap:10px; }
     .tool-pill { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:100px; border:1px solid var(--line); background:var(--surface); font-size:13px; font-weight:600; color:var(--muted); transition:all 0.2s ease; }
