@@ -161,6 +161,16 @@ function normalizeMobile(m) {
   const digits = String(m || '').replace(/\D/g, ''); 
   return digits.length === 10 ? '0' + digits : digits; 
 }
+function jsonObject_(value) {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(String(value));
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch (e) {
+    // A legacy sheet cell must never make the entire admin dashboard fail.
+    return null;
+  }
+}
 
 function ensureUsersHeader(sheet) {
   if (sheet.getLastRow() === 0) {
@@ -348,7 +358,7 @@ function adminGetStudents(body) {
       mobile: data[i][2],
       school: data[i][4],
       studentClass: data[i][5],
-      pendingUpdate: data[i][6] ? JSON.parse(data[i][6]) : null,
+      pendingUpdate: jsonObject_(data[i][6]),
       resetRequest: data[i][7] === 'Requested'
     });
   }
@@ -367,7 +377,8 @@ function adminApproveProfile(body) {
     if (String(data[i][0]).trim() === id) {
       const pendingRaw = data[i][6];
       if (pendingRaw) {
-        const req = JSON.parse(pendingRaw);
+        const req = jsonObject_(pendingRaw);
+        if (!req) return { status: 'error', message: 'This profile request is invalid and cannot be approved' };
         if (req.name) sheet.getRange(i + 1, 2).setValue(req.name);
         if (req.school) sheet.getRange(i + 1, 5).setValue(req.school);
         if (req.studentClass) sheet.getRange(i + 1, 6).setValue(req.studentClass);
