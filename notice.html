@@ -75,10 +75,6 @@
     .pager .pg-gap { color:var(--muted); font-size:13px; padding:0 2px; }
 
     /* ── EXAM SCHEDULE TRACKER ─────────────────────────── */
-    .ex-counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:14px; }
-    .ex-count { background:var(--surface); padding:10px 12px; text-align:center; min-width:0; }
-    .ex-count .n { font-size:20px; font-weight:800; letter-spacing:-0.02em; line-height:1.1; }
-    .ex-count .l { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; margin-top:2px; }
     .ex-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
     @media (max-width:700px) { .ex-filters { grid-template-columns:1fr; } }
     .notice-card.ex-new      { border-color:var(--blue); }
@@ -273,13 +269,6 @@
       </div>
 
       <div id="notice-panel-exam">
-        <div class="ex-counts">
-          <div class="ex-count"><div class="n" id="exCNew">0</div><div class="l">New</div></div>
-          <div class="ex-count"><div class="n" id="exCOngoing">0</div><div class="l">Ongoing</div></div>
-          <div class="ex-count"><div class="n" id="exCUpcoming">0</div><div class="l">Upcoming</div></div>
-          <div class="ex-count"><div class="n" id="exCPast">0</div><div class="l">Past</div></div>
-        </div>
-
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
           <button class="btn secondary sm" id="exAlertBtn"><i class="fas fa-bell"></i> Alerts</button>
           <span id="exStatus" hidden></span>
@@ -512,14 +501,6 @@
         } catch(e) { exPasteItems = []; }
       }
       function exAllItems() { return exApiItems.concat(exPasteItems); }
-      function exRenderCounts() {
-        const c = {new:0, ongoing:0, upcoming:0, past:0};
-        exAllItems().forEach(n => { if (n.status==='new') c.new++; else if (n.status==='ongoing') c.ongoing++; else if (n.status==='upcoming') c.upcoming++; else if (n.status==='past'||n.status==='earlier') c.past++; });
-        document.getElementById('exCNew').textContent = c.new;
-        document.getElementById('exCOngoing').textContent = c.ongoing;
-        document.getElementById('exCUpcoming').textContent = c.upcoming;
-        document.getElementById('exCPast').textContent = c.past;
-      }
       function exChipHTML(label) { return `<span class="ex-chip">${esc(label)}</span>`; }
       function exWhenHtml(n) {
         if (n.source === 'paste') {
@@ -539,7 +520,6 @@
         return `<b>${esc(main)}</b><small>${esc(sub2)}</small>${extra}`;
       }
       function exRender() {
-        exRenderCounts();
         const wrap = document.getElementById('exList');
         const fs = document.getElementById('exFStatus').value, fy = document.getElementById('exFYear').value, fsrc = document.getElementById('exFSource').value;
         let arr = exAllItems().filter(n => (fs==='all'||n.status===fs) && (fy==='all'||String(n.year)===fy) && (fsrc==='all'||n.source===fsrc));
