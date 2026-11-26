@@ -3,7 +3,7 @@
    Uses only the site's own tokens (theme.css), so it follows the
    look of the rest of the website.
    ══════════════════════════════════════════════════════════════ */
-body.portal-body { font-family: 'Noto Serif Bengali', 'Inter', sans-serif; }
+body.portal-body { font-family: 'Inter', system-ui, "Segoe UI", Arial, sans-serif; }
 
 /* ── global loader ── */
 #g-loader { position: fixed; inset: 0; background: rgba(15,23,42,.45); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }

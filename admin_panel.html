@@ -22,19 +22,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/theme.css">
   <style>
-    body { font-family: 'Noto Serif Bengali', sans-serif; color: var(--ink); padding: 0; }
+    body.admin-body { font-family: 'Inter', system-ui, "Segoe UI", Arial, sans-serif; color: var(--ink); background: var(--bg); padding: 0; }
 
     /* ── Gate ── */
     #ctrl-gate {
       position: fixed; inset: 0;
-      background: rgba(241,245,249,0.96);
+      background: rgba(243,241,236,0.96);
       backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center;
       z-index: 99999; padding: 20px;
     }
     .gate-box {
       background: #fff; border: 1px solid var(--line);
-      border-radius: 20px; padding: 40px 32px;
+      border-radius: var(--radius-lg); padding: 40px 32px;
       width: 100%; max-width: 380px; text-align: center;
       box-shadow: 0 20px 60px rgba(15,23,42,.12);
     }
@@ -62,7 +62,7 @@
     /* ── Header card ── */
     .header-card {
       background: var(--ink); color: #fff;
-      padding: 20px 24px; border-radius: var(--radius-lg);
+      padding: 22px 26px; border-radius: var(--radius-lg);
       margin-bottom: 16px; box-shadow: var(--shadow-lg);
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 12px;
@@ -70,7 +70,7 @@
     .header-card h1 { margin: 0; font-size: 20px; display: flex; align-items: center; gap: 10px; color: #fff; }
     .hdr-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .hdr-btn {
-      padding: 8px 14px; border-radius: 8px; border: none; font-size: 13px;
+      padding: 8px 14px; border-radius: 40px; border: none; font-size: 13px;
       font-weight: 700; cursor: pointer; font-family: inherit; transition: .15s;
       display: flex; align-items: center; gap: 6px;
     }
@@ -333,7 +333,7 @@
     }
   </style>
 </head>
-<body>
+<body class="admin-body">
 
 <!-- ═══ TOP LOADER ═══ -->
 <div id="page-loader"></div>
@@ -678,6 +678,22 @@
   </div>
 </div>
 
+<!-- ══ MODAL: Text Input ══ -->
+<div class="modal-overlay" id="modal-prompt">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-hd">
+      <h3 id="modal-prompt-title"><i class="fas fa-key" style="color:var(--blue);"></i> Enter a value</h3>
+      <button class="modal-close" onclick="closePromptModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <p id="modal-prompt-text" class="sub" style="margin:0 0 12px;"></p>
+    <input id="modal-prompt-input" class="inp" type="text" autocomplete="off">
+    <div style="margin-top:24px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+      <button class="danger-btn gray" onclick="closePromptModal()">Cancel</button>
+      <button class="danger-btn orange" id="modal-prompt-ok">Continue</button>
+    </div>
+  </div>
+</div>
+
 <script src="assets/site-data.js"></script>
 <script>
 // ════════════════════════════════════════════════════════
@@ -925,8 +941,8 @@ async function teacherOp(id, op) {
   else toast('❌ ' + (res?.message || 'Failed'));
 }
 async function teacherResetPw(id) {
-  const pw = prompt('New password for this teacher (min 8 characters):');
-  if (!pw) return;
+  const pw = await askPrompt({ title: 'Set teacher password', message: 'Enter a new password with at least 8 characters.', placeholder: 'New password', type: 'password', confirmLabel: 'Update password' });
+  if (pw === null || !pw) return;
   if (pw.trim().length < 8) { toast('Use at least 8 characters.'); return; }
   const res = await gasCall('adminTeacherOp', { id, op: 'resetPassword', newPassword: pw.trim() });
   if (res?.status === 'success') { toast('🔐 Password updated!'); loadTeachers(); }
@@ -1465,6 +1481,35 @@ function getDzToken() {
 }
 
 let confirmResolve = null;
+let promptResolve = null;
+
+async function askPrompt({ title = 'Enter a value', message = '', placeholder = '', type = 'text', confirmLabel = 'Continue' } = {}) {
+  return new Promise(resolve => {
+    const modal = document.getElementById('modal-prompt');
+    const input = document.getElementById('modal-prompt-input');
+    const close = result => {
+      modal.style.display = 'none';
+      modal.removeEventListener('click', onOverlay);
+      document.removeEventListener('keydown', onKey);
+      promptResolve = null;
+      resolve(result);
+    };
+    const onOverlay = event => { if (event.target === modal) close(null); };
+    const onKey = event => { if (event.key === 'Escape') close(null); if (event.key === 'Enter') close(input.value); };
+    promptResolve = () => close(null);
+    document.getElementById('modal-prompt-title').innerHTML = `<i class="fas fa-key" style="color:var(--blue);"></i> ${esc(title)}`;
+    document.getElementById('modal-prompt-text').textContent = message;
+    input.type = type; input.value = ''; input.placeholder = placeholder;
+    document.getElementById('modal-prompt-ok').textContent = confirmLabel;
+    document.getElementById('modal-prompt-ok').onclick = () => close(input.value);
+    modal.addEventListener('click', onOverlay);
+    document.addEventListener('keydown', onKey);
+    modal.style.display = 'flex';
+    setTimeout(() => input.focus(), 0);
+  });
+}
+
+function closePromptModal() { if (promptResolve) promptResolve(); }
 
 async function askConfirm(message) {
   return new Promise(resolve => {

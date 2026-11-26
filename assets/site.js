@@ -1,3 +1,50 @@
+/* ── SHARED FEEDBACK UI ─────────────────────────────────────── */
+/* Kept here so the public site never falls back to browser-native dialogs. */
+(() => {
+  const ensure = () => {
+    if (document.getElementById('site-dialog-overlay')) return;
+    const style = document.createElement('style');
+    style.textContent = `
+      #site-notice{position:fixed;z-index:10020;left:50%;bottom:26px;transform:translate(-50%,18px);opacity:0;pointer-events:none;max-width:min(92vw,520px);padding:13px 18px;border-radius:14px;background:#1c1a16;color:#fff;font:600 14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 16px 40px rgba(23,20,14,.24);transition:.2s ease;text-align:center}#site-notice.show{opacity:1;transform:translate(-50%,0)}#site-notice.error{background:#9f2e29}
+      #site-dialog-overlay{position:fixed;inset:0;z-index:10021;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(22,20,16,.45)}#site-dialog-overlay.open{display:flex}.site-dialog{width:min(100%,430px);padding:24px;border:1px solid #e1ddd4;border-radius:20px;background:#fffdf9;box-shadow:0 24px 70px rgba(20,18,14,.28);font-family:Inter,system-ui,sans-serif}.site-dialog h2{margin:0 0 8px;font-size:20px;color:#1b1915}.site-dialog p{margin:0;color:#716c63;line-height:1.55}.site-dialog input{box-sizing:border-box;width:100%;margin-top:18px;padding:12px 13px;border:1px solid #d8d2c8;border-radius:10px;background:#fff;font:inherit;color:#1b1915}.site-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.site-dialog-btn{border:1px solid #d8d2c8;border-radius:10px;padding:10px 15px;background:#fffdf9;color:#403c35;font:700 14px Inter,system-ui,sans-serif;cursor:pointer}.site-dialog-btn.primary{border-color:#1c1a16;background:#1c1a16;color:#fff}.site-dialog-btn.danger{border-color:#a93e36;background:#a93e36;color:#fff}@media(max-width:480px){.site-dialog{padding:20px;border-radius:16px}.site-dialog-actions{flex-direction:column-reverse}.site-dialog-btn{width:100%}}
+    `;
+    document.head.appendChild(style);
+    document.body.insertAdjacentHTML('beforeend', '<div id="site-notice" role="status" aria-live="polite"></div><div id="site-dialog-overlay" aria-hidden="true"><section class="site-dialog" role="dialog" aria-modal="true" aria-labelledby="site-dialog-title"><h2 id="site-dialog-title"></h2><p id="site-dialog-message"></p><input id="site-dialog-input" type="text"><div class="site-dialog-actions"><button type="button" class="site-dialog-btn" data-site-dialog="cancel">Cancel</button><button type="button" class="site-dialog-btn primary" data-site-dialog="confirm">Continue</button></div></section></div>');
+  };
+  let noticeTimer;
+  window.siteNotify = (message, type = 'info') => {
+    ensure();
+    const notice = document.getElementById('site-notice');
+    notice.textContent = message;
+    notice.className = `show ${type === 'error' ? 'error' : ''}`;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { notice.className = ''; }, 4200);
+  };
+  const ask = ({ title = 'Please confirm', message = '', value, placeholder = '', confirmLabel = 'Continue', danger = false } = {}) => new Promise((resolve) => {
+    ensure();
+    const overlay = document.getElementById('site-dialog-overlay');
+    const titleEl = document.getElementById('site-dialog-title');
+    const messageEl = document.getElementById('site-dialog-message');
+    const input = document.getElementById('site-dialog-input');
+    const confirm = overlay.querySelector('[data-site-dialog="confirm"]');
+    const finish = (result) => { overlay.classList.remove('open'); overlay.setAttribute('aria-hidden', 'true'); document.removeEventListener('keydown', onKey); resolve(result); };
+    const onKey = (event) => { if (event.key === 'Escape') finish(value === undefined ? false : null); if (event.key === 'Enter' && value !== undefined) finish(input.value); };
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    input.hidden = value === undefined;
+    input.value = value ?? '';
+    input.placeholder = placeholder;
+    confirm.textContent = confirmLabel;
+    confirm.className = `site-dialog-btn ${danger ? 'danger' : 'primary'}`;
+    overlay.classList.add('open'); overlay.setAttribute('aria-hidden', 'false');
+    overlay.onclick = (event) => { if (event.target === overlay || event.target.closest('[data-site-dialog="cancel"]')) finish(value === undefined ? false : null); if (event.target.closest('[data-site-dialog="confirm"]')) finish(value === undefined ? true : input.value); };
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => (value === undefined ? confirm : input).focus(), 0);
+  });
+  window.siteConfirm = (options) => ask(options);
+  window.sitePrompt = (options) => ask(options);
+})();
+
 /* ── NAV TOGGLE (mobile slide-in sidebar) ─────────────────── */
 const navToggle = document.querySelector(".nav-toggle");
 const siteNav   = document.querySelector(".site-nav");
@@ -331,14 +378,14 @@ const DrivePicker = (function () {
       state.stack.push({ id: folder.id, name: folder.name });
       load();
     } catch (e) {
-      alert(e.message || "Could not create the folder.");
+      window.siteNotify(e.message || "Could not create the folder.", 'error');
     } finally {
       btn.disabled = false;
     }
   }
 
   function open({ token, rootId, rootLabel, onChoose }) {
-    if (!token || !rootId) { alert("Sign in with Google first."); return; }
+    if (!token || !rootId) { window.siteNotify("Sign in with Google first.", 'error'); return; }
     ensureUI();
     state = { token, stack: [{ id: rootId, name: rootLabel || "Drive" }], onChoose };
     overlay.classList.add("open");

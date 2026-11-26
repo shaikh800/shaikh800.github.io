@@ -1296,8 +1296,8 @@
       });
     }
     async function driveRenameItem(id, currentName) {
-      const newName = prompt('Rename to:', currentName);
-      if (!newName || newName.trim() === currentName) return;
+      const newName = await sitePrompt({ title: 'Rename item', message: 'Enter a new name for this item.', value: currentName, confirmLabel: 'Rename' });
+      if (newName === null || !newName.trim() || newName.trim() === currentName) return;
       try {
         toast('Renaming…', 'info');
         const token = await getAdminDriveToken();
@@ -1310,8 +1310,8 @@
       }
     }
     async function driveCreateNewFolder() {
-      const name = prompt('New folder name:');
-      if (!name || !name.trim()) return;
+      const name = await sitePrompt({ title: 'Create folder', message: 'Enter a name for the new folder.', value: '', placeholder: 'Folder name', confirmLabel: 'Create folder' });
+      if (name === null || !name.trim()) return;
       try {
         toast('Creating folder…', 'info');
         const token = await getAdminDriveToken();
@@ -1359,7 +1359,7 @@
     }
     async function driveTrashItem(id, name, isFolder) {
       const kind = isFolder ? 'folder and all files inside it' : 'file';
-      if (!confirm(`Move this ${kind} to Google Drive Bin? It can be restored from the Bin later.`)) return;
+      if (!await siteConfirm({ title: 'Move to Drive Bin?', message: `This ${kind} can be restored later from Google Drive Bin.`, confirmLabel: 'Move to Bin', danger: true })) return;
       try {
         const token = await getAdminDriveToken();
         const result = await driveApiCall('PATCH', `/files/${id}?fields=id,trashed`, { trashed: true }, token);
@@ -1688,7 +1688,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       if (!currentUser || !currentUser.email) return;
       const mine = uploads.filter(u => currentUser.email === (u.uploaderEmail || '').toLowerCase());
       if (!mine.length) { toast('No uploads to delete.', 'info'); return; }
-      if (!confirm(`Delete all ${mine.length} of your upload${mine.length !== 1 ? 's' : ''}?`)) return;
+      if (!await siteConfirm({ title: 'Delete your uploads?', message: `Move all ${mine.length} of your upload${mine.length !== 1 ? 's' : ''} to Google Drive Bin? They can be restored later.`, confirmLabel: 'Move to Bin', danger: true })) return;
       for (const u of mine) {
         if (currentUser.token) {
           try { await driveApiCall('PATCH', `/files/${u.id}`, { trashed: true }, currentUser.token); } catch (e) {}
@@ -1916,7 +1916,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
     // admin to have shared that folder as Editor, not just Viewer.
     document.getElementById('upBrowseDriveBtn').addEventListener('click', () => {
       if (!isAuthorizedUploader() || !currentUser || Date.now() > currentUser.expiry - 5000) {
-        alert('Sign in with Google first.'); return;
+        toast('Sign in with Google first.', 'error'); return;
       }
       DrivePicker.open({
         token: currentUser.token,

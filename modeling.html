@@ -947,7 +947,7 @@
 
     /* ── DELETE ── */
     async function deleteWork(id) {
-      if (!confirm('Delete this project?')) return;
+      if (!await siteConfirm({ title: 'Delete project?', message: 'This removes the project and its saved thumbnail from this device.', confirmLabel: 'Delete project', danger: true })) return;
       const works = loadWorks().filter(w => w.id !== id);
       await delThumb(id);
       saveWorks(works);
@@ -970,8 +970,8 @@
     thumbFile.addEventListener('change', () => { if (thumbFile.files[0]) handleThumbFile(thumbFile.files[0]); });
 
     function handleThumbFile(f) {
-      if (!f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
-      if (f.size > 10 * 1024 * 1024) { alert('Thumbnail images must be 10 MB or smaller.'); return; }
+      if (!f.type.startsWith('image/')) { toast('Please select an image file.', 'error'); return; }
+      if (f.size > 10 * 1024 * 1024) { toast('Thumbnail images must be 10 MB or smaller.', 'error'); return; }
       // Compress before showing/saving
       compressImage(f, 600, (compressedDataUrl) => {
         pendingThumb = compressedDataUrl;
@@ -1064,7 +1064,7 @@
           }
         });
       } catch (e) {
-        alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
+        toast('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'), 'error');
       } finally {
         btn.disabled = false; btn.innerHTML = orig;
       }
@@ -1248,8 +1248,8 @@
     }
 
     /* ── EXPORT / IMPORT (JSON backup) ── */
-    document.getElementById('clear-data-btn').addEventListener('click', () => {
-      if (!confirm('This device\'s locally-saved project data will be deleted — the default 2 seed projects will show instead. Continue?')) return;
+    document.getElementById('clear-data-btn').addEventListener('click', async () => {
+      if (!await siteConfirm({ title: 'Clear local projects?', message: "This device's saved project data will be deleted. The default two example projects will appear instead.", confirmLabel: 'Clear projects', danger: true })) return;
       localStorage.removeItem(STORE_KEY);
       renderWorks();
       toast('Device data cleared ✓', 'success');
@@ -1268,12 +1268,12 @@
     document.getElementById('import-file').addEventListener('change', function() {
       const f = this.files[0]; if (!f) return;
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = async e => {
         try {
           const data = JSON.parse(e.target.result);
           const works = data.works || data; // support both wrapped and raw array
           if (!Array.isArray(works)) { toast('Invalid backup file', 'error'); return; }
-          if (!confirm(`Importing will load ${works.length} project${works.length===1?'':'s'}. Continue?`)) return;
+          if (!await siteConfirm({ title: 'Import projects?', message: `This will load ${works.length} project${works.length===1?'':'s'} into this device.`, confirmLabel: 'Import projects' })) return;
           localStorage.setItem(STORE_KEY, JSON.stringify(works));
           renderWorks();
           toast(`${works.length} project${works.length===1?'':'s'} imported \u2713`, 'success');

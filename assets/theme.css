@@ -195,6 +195,32 @@ main.page > .sem-section{padding:clamp(28px,3.5vw,42px) 0 34px;}
 /* ─── FOOTER ─────────────────────────────────────────────── */
 .site-footer{border-top:1px solid var(--line);color:var(--muted);}
 
+/* ─── SHARED APP UI ────────────────────────────────────────
+   Portals, tools and dashboards are part of the same product as the public
+   pages.  These small rules give them one control language without changing
+   any page-specific behaviour. */
+body.portal-body, body.admin-body{font-family:'Inter',system-ui,"Segoe UI",Arial,sans-serif;}
+:where(a,button,input,select,textarea):focus-visible{
+  outline:3px solid rgba(193,112,63,.38);outline-offset:3px;
+}
+.portal-wrap,.admin-wrap{max-width:1140px;}
+.portal-wrap.wide{max-width:1140px;}
+.portal-body .panel,.admin-body .main-card,.admin-body .section-card{
+  box-shadow:var(--shadow);
+}
+.portal-body .table-wrap,.admin-body .table-wrap{border-radius:var(--radius);}
+.portal-body .empty-st,.admin-body .empty-state{background:var(--surface-soft);}
+.portal-body .q-card .q-text,.portal-body .q-stim,.portal-body .q-stmts{
+  font-family:'Noto Serif Bengali','Inter',sans-serif;
+}
+@media (max-width:620px){
+  .portal-body .user-banner,.admin-body .header-card{padding:18px;}
+  .portal-body .user-banner .row,.admin-body .hdr-btns{width:100%;}
+  .portal-body .user-banner .btn,.admin-body .hdr-btn{flex:1;justify-content:center;}
+  .portal-body .stat-row{gap:8px;}
+  .portal-body .stat-box{min-width:calc(50% - 8px);padding:10px 12px;}
+}
+
 /* ============================================================
    HOME PAGE  (classes prefixed hm- so nothing else is affected)
    ============================================================ */

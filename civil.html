@@ -1038,7 +1038,7 @@
     });
 
     document.getElementById('clear-data-btn').addEventListener('click', async () => {
-      if (!confirm("This will remove this device's local resource cache, locally-stored files, and pasted notices. GitHub and Google Drive files are unchanged. Continue?")) return;
+      if (!await siteConfirm({ title: 'Clear local cache?', message: "This removes only this device's cached resources, local files and pasted notices. GitHub and Google Drive files are unchanged.", confirmLabel: 'Clear cache', danger: true })) return;
       const btn = document.getElementById('clear-data-btn');
       btn.disabled = true;
       try {
@@ -1185,10 +1185,10 @@
     async function moveResource(id, sem) {
       const item = (loadSems()[sem] || []).find(x => x.id === id);
       if (!item || !driveIdForItem(item)) { toast('Only Google Drive resources can be moved.', 'error'); return; }
-      const targetSemester = prompt('Move to semester (1-8):', String(sem));
-      if (!targetSemester) return;
+      const targetSemester = await sitePrompt({ title: 'Move resource', message: 'Destination semester (1–8)', value: String(sem), placeholder: '1–8', confirmLabel: 'Next' });
+      if (targetSemester === null || !targetSemester.trim()) return;
       if (!/^[1-8]$/.test(targetSemester.trim())) { toast('Enter a semester from 1 to 8.', 'error'); return; }
-      const targetFolder = prompt('Destination folder (example: CE604 / Notes):', 'General');
+      const targetFolder = await sitePrompt({ title: 'Choose destination folder', message: 'Use a folder path, for example CE604 / Notes.', value: 'General', placeholder: 'CE604 / Notes', confirmLabel: 'Move resource' });
       if (targetFolder === null) return;
       try {
         await driveSyncAction('driveMove', { id, semester: String(sem), targetSemester: targetSemester.trim(), targetFolder });
@@ -1576,7 +1576,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
           }
         });
       } catch (e) {
-        alert('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'));
+        toast('Could not connect to Google Drive: ' + (e && e.message ? e.message : 'please sign in and try again.'), 'error');
       } finally {
         btn.disabled = false; btn.innerHTML = orig;
       }
