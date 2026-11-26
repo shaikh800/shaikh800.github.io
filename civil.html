@@ -1124,8 +1124,14 @@
     }
 
     window.backToSemList = function() {
-      history.pushState({ civil_view: 'list' }, '');
-      showSemesterList();
+      // A semester panel is always opened through a history entry. Returning to
+      // the list must consume that entry, not create another one (otherwise the
+      // browser Back button alternates between the two views).
+      if ((history.state || {}).civil_view === 'semester') history.back();
+      else {
+        history.replaceState({ civil_view: 'list' }, '');
+        showSemesterList();
+      }
     };
 
     function civilShareItem(rawSrc) {
@@ -1831,12 +1837,16 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
     buildPanels();
     buildSemList();
 
-    // Restore navigation position after a page refresh
+    // Restore navigation position after a page refresh. Seed a list entry
+    // behind a restored semester panel so browser Back returns to the Semester
+    // Resources list instead of leaving Civil for the previous page.
+    let restoredCivilNav = null;
     try {
       const _civilNav = sessionStorage.getItem('civil_nav');
       if (_civilNav) {
         const _nav = JSON.parse(_civilNav);
         if (_nav && _nav.sem >= 1 && _nav.sem <= 8) {
+          restoredCivilNav = { sem: _nav.sem, path: _nav.path || '' };
           activeSem = _nav.sem;
           currentSemPath = _nav.path || '';
           document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id === `sem-panel-${activeSem}`));
@@ -1845,6 +1855,12 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         }
       }
     } catch(e) {}
+    if (restoredCivilNav) {
+      history.replaceState({ civil_view: 'list' }, '');
+      history.pushState({ civil_view: 'semester', civil_sem: restoredCivilNav.sem, civil_path: restoredCivilNav.path }, '');
+    } else if (!(history.state || {}).civil_view) {
+      history.replaceState({ civil_view: 'list' }, '');
+    }
 
     // Show spinner while loading shared data from GitHub
     document.querySelectorAll('[id^="sem-grid-"]').forEach(g => {
