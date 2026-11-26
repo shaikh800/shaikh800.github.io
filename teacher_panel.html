@@ -137,7 +137,7 @@
         <p id="b-sub">—</p>
       </div>
       <div class="row">
-        <a class="btn secondary sm hide" id="b-admin" href="admin_panel.html#teachers"><i class="fas fa-user-tie"></i> Admin Panel</a>
+        <a class="btn secondary sm hide" id="b-admin" href="admin_panel.html?from=teacher_panel.html#teachers"><i class="fas fa-user-tie"></i> Admin Panel</a>
         <button class="btn secondary sm" id="b-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Log out</button>
         <button class="btn secondary sm" id="b-edit-profile" onclick="openTeacherEditProfile()"><i class="fas fa-pen"></i> Edit Profile</button>
       </div>
@@ -334,7 +334,7 @@ async function forgot() {
   msg('l-msg', d.message, d.status === 'success' ? 'al-success' : 'al-error');
 }
 function logout() {
-  if (isAdmin() && !acadSession.get('teacher')) { location.href = 'admin_panel.html'; return; }
+  if (isAdmin() && !acadSession.get('teacher')) { location.href = 'admin_panel.html?from=teacher_panel.html'; return; }
   acadSession.clear('teacher'); location.reload();
 }
 
