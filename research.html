@@ -370,6 +370,9 @@
     #upFileList .fl-item i { color: var(--blue); flex-shrink: 0; }
     #upFileList .fl-item span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
     #upFileList .fl-item .fl-size { color: var(--muted); font-size: 11px; flex-shrink: 0; }
+    .upload-file-summary { display:none; margin:10px 0; padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); color:var(--muted); font-size:12px; line-height:1.45; }
+    .upload-file-summary.show { display:block; }
+    .upload-file-summary strong { color:var(--ink); }
   </style>
 </head>
 <body>
@@ -582,14 +585,15 @@
           <div class="form-group">
             <label>File</label>
             <div id="upDropZone">
-              <input type="file" id="upFile" multiple>
+              <input type="file" id="upFile" accept="application/pdf,.pdf,image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.zip" multiple>
               <div class="drop-icon"><i class="fas fa-cloud-arrow-up"></i></div>
               <div class="drop-label">
                 <strong>Click to choose</strong> or drag &amp; drop files here<br>
-                <span>Multiple files supported — hold Ctrl / ⌘ to select more than one</span>
+                <span>Documents, images, Office files, CSV, text & ZIP · max 25 MB each</span>
               </div>
             </div>
             <div id="upFileList"></div>
+            <div class="upload-file-summary" id="upFileSummary"></div>
           </div>
           <div class="form-group">
             <label>Title</label>
@@ -1625,6 +1629,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       const category = document.getElementById('upCategory').value;
       const visibility = document.getElementById('upVisibility').value;
       if (!files.length) { setUploadStatus('Choose at least one file.', 'err'); return; }
+      if (files.some(file => !window.isAllowedResearchUpload || !window.isAllowedResearchUpload(file))) { setUploadStatus('Only supported files up to 25 MB can be uploaded.', 'err'); return; }
       // For single file: title is required. For bulk: auto-use filenames if title not set.
       if (files.length === 1 && !title) { setUploadStatus('Give it a title.', 'err'); return; }
       if (!currentUser || Date.now() > currentUser.expiry - 5000) {
@@ -1657,6 +1662,8 @@ Content-Type: ${file.type || 'application/octet-stream'}
       fileInput.value = '';
       const fileListEl = document.getElementById('upFileList');
       if (fileListEl) { fileListEl.style.display = 'none'; fileListEl.innerHTML = ''; }
+      const fileSummaryEl = document.getElementById('upFileSummary');
+      if (fileSummaryEl) { fileSummaryEl.classList.remove('show'); fileSummaryEl.innerHTML = ''; }
       document.getElementById('upDrivePath').value = '';
       document.getElementById('upDriveFolderId').value = '';
       if (files.length === 1) document.getElementById('upTitle').value = '';
@@ -1817,6 +1824,11 @@ Content-Type: ${file.type || 'application/octet-stream'}
       const dropZone = document.getElementById('upDropZone');
       const fileInput = document.getElementById('upFile');
       if (!dropZone || !fileInput) return;
+      const MAX_RESEARCH_UPLOAD_BYTES = 25 * 1024 * 1024;
+      const allowedExtensions = /\.(pdf|png|jpe?g|gif|webp|docx?|pptx?|xlsx?|csv|txt|zip)$/i;
+      window.isAllowedResearchUpload = function(file) {
+        return file && file.size <= MAX_RESEARCH_UPLOAD_BYTES && (allowedExtensions.test(file.name || '') || (file.type || '').startsWith('image/'));
+      };
       function updateList(files) {
         const el = document.getElementById('upFileList');
         if (!el) return;
@@ -1827,11 +1839,38 @@ Content-Type: ${file.type || 'application/octet-stream'}
           return '<div class="fl-item"><i class="fas ' + icon + '"></i><span>' + esc(f.name) + '</span><span class="fl-size">' + (f.size/1024/1024).toFixed(1) + ' MB</span></div>';
         }).join('');
       }
+      function applyFiles(files) {
+        const selected = Array.from(files || []);
+        const accepted = selected.filter(window.isAllowedResearchUpload);
+        const rejected = selected.length - accepted.length;
+        try { const dt = new DataTransfer(); accepted.forEach(file => dt.items.add(file)); fileInput.files = dt.files; } catch(e) {}
+        updateList(accepted);
+        const summary = document.getElementById('upFileSummary');
+        if (summary) {
+          if (!accepted.length) { summary.classList.remove('show'); summary.innerHTML = ''; }
+          else {
+            const total = accepted.reduce((sum, file) => sum + file.size, 0);
+            const path = document.getElementById('upDrivePath').value.trim();
+            const destination = path || (driveId ? 'Shared Files' : 'Research Hub Uploads in your Drive');
+            summary.innerHTML = '<strong>' + accepted.length + ' file' + (accepted.length === 1 ? '' : 's') + '</strong> (' + (total / 1024 / 1024).toFixed(1) + ' MB) will be uploaded to <strong>' + esc(destination) + '</strong>.';
+            summary.classList.add('show');
+          }
+        }
+        const titleEl = document.getElementById('upTitle');
+        if (accepted.length === 1) {
+          if (!titleEl.value || titleEl.readOnly) titleEl.value = accepted[0].name.replace(/\.[^.]+$/, '');
+          titleEl.readOnly = false;
+        } else if (accepted.length > 1) {
+          titleEl.value = '(auto - using filenames)'; titleEl.readOnly = true;
+        } else { titleEl.value = ''; titleEl.readOnly = false; }
+        if (rejected) setUploadStatus('Skipped ' + rejected + ' unsupported or over-25 MB file' + (rejected === 1 ? '.' : 's.'), 'err');
+      }
       dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
       dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
       dropZone.addEventListener('drop', e => {
         e.preventDefault(); dropZone.classList.remove('dragover');
         if (e.dataTransfer.files.length) {
+          applyFiles(e.dataTransfer.files); return;
           try {
             const dt = new DataTransfer();
             Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
@@ -1850,6 +1889,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
         }
       });
       fileInput.addEventListener('change', () => {
+        applyFiles(fileInput.files); return;
         updateList(fileInput.files);
         const titleEl = document.getElementById('upTitle');
         if (fileInput.files.length === 1) {

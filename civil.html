@@ -139,6 +139,10 @@
     .modal-close:hover { background:var(--surface-soft); color:var(--ink); }
     .modal-body { padding:24px; }
     .modal-footer { padding:16px 24px; border-top:1px solid var(--line); display:flex; gap:10px; justify-content:flex-end; }
+    /* The resource form can be long on laptops. Keep its action bar available. */
+    #modal-resource .modal-box { max-height:calc(100vh - 32px); overflow:hidden; display:flex; flex-direction:column; }
+    #modal-resource .modal-body { overflow-y:auto; }
+    #modal-resource .modal-footer { flex:0 0 auto; background:var(--surface); box-shadow:0 -8px 18px rgba(23,22,15,0.04); }
     .img-viewer-wrap img { width:100%; height:auto; border-radius:var(--radius); max-height:75vh; object-fit:contain; display:block; }
 
     /* ── FORM ──────────────────────────────────────────── */
@@ -196,6 +200,9 @@
     #c-file-list .fl-item i { color:var(--blue); flex-shrink:0; }
     #c-file-list .fl-item span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); }
     #c-file-list .fl-item .fl-size { color:var(--muted); font-size:11px; flex-shrink:0; }
+    .upload-summary { display:none; margin-top:10px; padding:10px 12px; border-radius:var(--radius); background:var(--surface-soft); border:1px solid var(--line); font-size:12px; color:var(--muted); line-height:1.45; }
+    .upload-summary.show { display:block; }
+    .upload-summary strong { color:var(--ink); }
     .file-status.loading { color:var(--muted); }
     .file-status.error { color:#ef4444; }
     .access-box { padding:14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); margin-top:4px; }
@@ -599,6 +606,7 @@
               <p><strong>Click to choose</strong> or drag &amp; drop files here<br><small>PDFs &amp; images · max 25 MB each · hold Ctrl / ⌘ for multiple</small></p>
             </div>
             <div id="c-file-list"></div>
+            <div class="upload-summary" id="civil-upload-summary"></div>
             <div class="file-status" id="file-status"></div>
             <div class="drive-progress" id="drive-progress">
               <div class="drive-progress-text" id="drive-progress-text">Uploading to Drive...</div>
@@ -1537,6 +1545,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
           onChoose: (path, folderId) => {
             document.getElementById('r-drive-path').value = path;
             document.getElementById('r-drive-folder-id').value = folderId || '';
+            updateCivilUploadSummary(_pendingFiles);
           }
         });
       } catch (e) {
@@ -1560,6 +1569,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       if (e.target.closest('.clear-path')) {
         input.value = '';
         document.getElementById('r-drive-folder-id').value = ''; // back to Semester X / General
+        updateCivilUploadSummary(_pendingFiles);
         return;
       }
 
@@ -1587,6 +1597,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       // rebuild path
       input.value = parts.join('/');
       document.getElementById('r-drive-folder-id').value = ''; // chips build a name path, not a picked folder
+      updateCivilUploadSummary(_pendingFiles);
     });
 
     // File drop zone
@@ -1614,6 +1625,19 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       }).join('');
     }
 
+    function updateCivilUploadSummary(files) {
+      const summary = document.getElementById('civil-upload-summary');
+      if (!summary) return;
+      const selected = Array.from(files || []);
+      if (!selected.length) { summary.classList.remove('show'); summary.innerHTML = ''; return; }
+      const total = selected.reduce((sum, file) => sum + file.size, 0);
+      const path = document.getElementById('r-drive-path').value.trim();
+      const destination = path ? path.replace(/^\/+|\/+$/g, '') : 'the selected semester folder';
+      summary.innerHTML = '<strong>' + selected.length + ' file' + (selected.length === 1 ? '' : 's') + '</strong> (' + (total / 1024 / 1024).toFixed(1) + ' MB) will be uploaded to <strong>' + esc(destination) + '</strong> in Google Drive.';
+      summary.classList.add('show');
+    }
+    document.getElementById('r-drive-path').addEventListener('input', () => updateCivilUploadSummary(_pendingFiles));
+
     const MAX_RESOURCE_FILE_BYTES = 25 * 1024 * 1024;
     let _pendingFile = null;
     let _pendingFiles = [];   // multi-file queue
@@ -1626,6 +1650,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       _pendingFiles = accepted;
       _pendingFile  = accepted[0] || null;
       updateCivilList(accepted);
+      updateCivilUploadSummary(accepted);
       if (rejected) setFileStatus(`Skipped ${rejected} unsupported or over-25 MB file${rejected === 1 ? '' : 's'}.`, 'error');
       else setFileStatus('', '');
       if (accepted.length === 1) {
@@ -1640,6 +1665,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         document.getElementById('r-title').value = '';
         document.getElementById('r-title').readOnly = false;
       }
+      document.getElementById('save-resource-label').textContent = accepted.length ? (accepted.length > 1 ? 'Upload files to Semester' : 'Upload file to Semester') : 'Add to Semester';
     }
     function fileSelected(f) { filesSelected([f]); }
     function setFileStatus(msg, cls) {
@@ -1664,6 +1690,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       _pendingFile = null; _pendingFiles = []; pendingFileData = null;
       document.getElementById('r-title').readOnly = false;
       updateCivilList([]);
+      updateCivilUploadSummary([]);
       // Restore last-used source tab + access mode from localStorage
       try {
         const lastTab = localStorage.getItem('civil_lastSrcTab') || 'url-panel';

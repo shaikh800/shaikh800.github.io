@@ -254,6 +254,9 @@
     .file-status.ok { color:var(--green); }
     .file-status.loading { color:var(--muted); }
     .file-status.error { color:#ef4444; }
+    .file-selection-note { display:none; margin-top:8px; padding:9px 11px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface-soft); color:var(--muted); font-size:12px; line-height:1.45; }
+    .file-selection-note.show { display:block; }
+    .file-selection-note strong { color:var(--ink); }
     .drive-progress { display:none; padding:12px 14px; background:rgba(23,22,15,0.06); border:1px solid rgba(23,22,15,0.2); border-radius:var(--radius); margin-top:8px; }
     .drive-progress.show { display:block; }
     .drive-progress-bar { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-top:8px; }
@@ -496,9 +499,10 @@
             <p style="font-size:11px;color:var(--muted);margin:-4px 0 8px;">Leave blank to file under the category above, or pick/create a folder below.</p>
             <div class="file-drop-zone" id="work-file-drop">
               <i class="fas fa-cloud-upload-alt"></i>
-              <p>Click to upload — goes to Drive via your Google account</p>
-              <input type="file" id="w-drive-file">
+              <p>Click to upload — goes to Drive via your Google account<br><small>3D files, documents, video, images & ZIP · max 25 MB</small></p>
+              <input type="file" id="w-drive-file" accept=".blend,.fbx,.obj,.glb,.gltf,.stl,.zip,application/pdf,image/*,video/*,.doc,.docx,.ppt,.pptx">
             </div>
+            <div class="file-selection-note" id="work-file-selection"></div>
             <div class="file-status" id="work-file-status"></div>
           </div>
           <div class="access-box">
@@ -528,7 +532,7 @@
           <div class="src-panel" id="thumb-upload-panel">
             <div class="file-drop-zone" id="thumb-drop">
               <i class="fas fa-image"></i>
-              <p>Click to upload thumbnail image</p>
+              <p>Click to upload thumbnail image<br><small>Image files only · max 10 MB</small></p>
               <input type="file" id="w-img-file" accept="image/*">
             </div>
           </div>
@@ -967,6 +971,7 @@
 
     function handleThumbFile(f) {
       if (!f.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+      if (f.size > 10 * 1024 * 1024) { alert('Thumbnail images must be 10 MB or smaller.'); return; }
       // Compress before showing/saving
       compressImage(f, 600, (compressedDataUrl) => {
         pendingThumb = compressedDataUrl;
@@ -1005,6 +1010,17 @@
 
     async function handleWorkFileUpload(file) {
       const status = document.getElementById('work-file-status');
+      const allowedProjectFile = /\.(blend|fbx|obj|glb|gltf|stl|zip|pdf|png|jpe?g|gif|webp|mp4|mov|webm|docx?|pptx?)$/i.test(file.name || '') || (file.type || '').startsWith('image/') || (file.type || '').startsWith('video/');
+      if (!allowedProjectFile || file.size > 25 * 1024 * 1024) {
+        status.textContent = 'Choose a supported project file no larger than 25 MB.';
+        status.className = 'file-status error';
+        return;
+      }
+      const selection = document.getElementById('work-file-selection');
+      selection.innerHTML = '<strong>' + esc(file.name) + '</strong> (' + (file.size / 1024 / 1024).toFixed(1) + ' MB) will be uploaded to the selected Drive folder.';
+      selection.classList.add('show');
+      const titleInput = document.getElementById('w-title');
+      if (!titleInput.value.trim()) titleInput.value = file.name.replace(/\.[^.]+$/, '');
       status.textContent = 'Uploading to your Drive\u2026'; status.className = 'file-status loading';
       try {
         const category = document.getElementById('w-cat').value || 'Other';
@@ -1075,6 +1091,9 @@
       document.getElementById('work-drive-current').style.display = 'none';
       document.getElementById('work-file-status').textContent = '';
       document.getElementById('work-file-status').className = 'file-status';
+      document.getElementById('work-file-selection').classList.remove('show');
+      document.getElementById('work-file-selection').innerHTML = '';
+      document.getElementById('w-drive-file').value = '';
       document.querySelectorAll('#file-src-tabs .dsrc-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.dsrc-panel').forEach((p,i) => p.classList.toggle('active', i===0));
       // reset access control to default (view only)
