@@ -34,6 +34,18 @@
     ],
     "6": [
       {
+        "id": "drv_1TEVGpsMwg5aLo0MumkanN3a_zc5TxqKR",
+        "desc": "",
+        "hidden": false,
+        "title": "RCC by Jaber part I",
+        "type": "pdf",
+        "src": "https://drive.google.com/file/d/1TEVGpsMwg5aLo0MumkanN3a_zc5TxqKR/preview?usp=sharing",
+        "folder": "Semester 6/CE 602 Design of Concrete Structures- II/RCC Books",
+        "driveFileId": "1TEVGpsMwg5aLo0MumkanN3a_zc5TxqKR",
+        "driveFolderId": "1XxdMwKH8Z_FGW5pFxDWmDmV7BBa-pIhj",
+        "driveManaged": true
+      },
+      {
         "id": "drv_1kB2lmbSyAkNDxr0g6OHnETQ6AdIVGDwL",
         "desc": "",
         "hidden": false,
@@ -1950,5 +1962,5 @@
       "live": false
     }
   ],
-  "updated": "2026-11-26T17:25:02.374Z"
+  "updated": "2026-11-26T17:28:42.962Z"
 }
