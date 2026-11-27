@@ -711,6 +711,10 @@
 
       if (fill) { fill.style.width = '85%'; txt.textContent = 'Setting permissions...'; }
       await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
+      // The portfolio is public to view, but project files are not presented as
+      // public downloads. Drive enforces this restriction for supported files.
+      const restriction = await driveAPI('PATCH', `/files/${uploaded.id}?fields=id,copyRequiresWriterPermission`, { copyRequiresWriterPermission: true }, token);
+      if (restriction && restriction.error) console.warn('Could not restrict Drive downloads:', restriction.error);
       if (fill) { fill.style.width = '100%'; txt.textContent = 'Done!'; setTimeout(() => prog.classList.remove('show'), 1500); }
 
       return { fileId: uploaded.id, viewLink: `https://drive.google.com/file/d/${uploaded.id}/${mode}?usp=sharing`, access: mode };
