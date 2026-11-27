@@ -54,8 +54,7 @@ function siteAdminLogout() {
    FOOTER LOCK  (Civil, 3D, Notice, Research)
    - logged out : lock icon -> admin login, and after login the admin is
                   sent BACK to the page they came from
-   - logged in  : shows "Admin ✓", a link to the Admin Panel (whose Back
-                  button returns here) and a Logout button
+   - logged in  : shows "Admin ✓"; the same unlocked lock logs out
    ══════════════════════════════════════════════════════════════ */
 const SITE_RETURN_PAGES = ['index.html', 'civil.html', 'modeling.html', 'notice.html', 'research.html', 'academy.html', 'teacher_panel.html'];
 
@@ -79,18 +78,19 @@ function siteAdminFooterInit() {
     return;
   }
 
-  // Logged in: the lock icon used to double as a link straight into the
-  // Academy Admin Panel (Students / Exam Results / Teachers) -- unrelated
-  // to this page's own content, since Civil/Research/3D/Notice already do
-  // their own add/edit/delete inline, right here, once admin mode is on.
-  // Clicking what looked like a simple "you're unlocked" icon and landing
-  // on a completely different dashboard was the actual bug being reported.
-  // So now the icon is just a status indicator; the Academy Panel is still
-  // one deliberate tap away via its own small link beside Logout.
-  link.removeAttribute('href');
-  link.title = 'Logged in as admin';
+  // Keep the footer deliberately simple across the entire site: there is no
+  // Academy-panel shortcut here. The same lock is the single session control:
+  // locked opens the admin login; unlocked logs the admin out.
+  link.href = '#admin-logout';
+  link.title = 'Log out of admin';
+  link.setAttribute('aria-label', 'Log out of admin');
   const icon = link.querySelector('i');
   if (icon) icon.className = 'fas fa-lock-open';
+  link.addEventListener('click', event => {
+    event.preventDefault();
+    siteAdminLogout();
+    location.reload();
+  });
 
   const group = document.createElement('span');
   group.className = 'footer-admin-group';
@@ -98,21 +98,8 @@ function siteAdminFooterInit() {
   const state = document.createElement('span');
   state.className = 'footer-admin-state';
   state.textContent = 'Admin ✓';
-  const panel = document.createElement('a');
-  panel.href = q;
-  panel.className = 'footer-admin-btn';
-  panel.style.textDecoration = 'none';
-  panel.textContent = 'Academy Panel';
-  panel.title = 'Students, exams & teachers -- a separate area from this page\'s own resources';
-  const out = document.createElement('button');
-  out.type = 'button';
-  out.className = 'footer-admin-btn';
-  out.textContent = 'Logout';
-  out.addEventListener('click', () => { siteAdminLogout(); location.reload(); });
   group.appendChild(state);
   group.appendChild(link);
-  group.appendChild(panel);
-  group.appendChild(out);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', siteAdminFooterInit);
