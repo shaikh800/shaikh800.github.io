@@ -197,7 +197,7 @@ document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
     // the moment the mobile drawer opens. Desktop skips this: there
     // .is-open drives the floating dropdown, and auto-popping that open
     // on every page load (covering the hero) would be the opposite of
-    // helpful -- the underlined label already marks the active page there.
+    // helpful -- the selected navigation box already marks the active page.
     const group = link.closest(".nav-group");
     if (group && mobileNavQuery.matches) {
       group.classList.add("is-open");

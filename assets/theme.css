@@ -110,11 +110,15 @@ main.page > .sem-section{padding:clamp(28px,3.5vw,42px) 0 34px;}
   }
   .site-nav a i{display:none;}
   .site-nav a:hover{background:transparent;opacity:1;}
-  .site-nav a.is-active{opacity:1;font-weight:600;background:transparent;}
-  .site-nav a.is-active::after{
-    content:"";position:absolute;left:0;right:0;bottom:-3px;
-    height:2px;border-radius:2px;background:var(--ink);
+  /* Keep the current section inside a clear selected control instead of
+     relying on an underline. Negative margins keep the header layout steady. */
+  .site-nav a.is-active{
+    opacity:1;font-weight:600;
+    padding:8px 11px;margin:-8px -11px;
+    border-radius:10px;background:var(--surface);
+    box-shadow:inset 0 0 0 1px var(--line),0 3px 8px rgba(23,22,15,.08);
   }
+  .site-nav a.is-active::after{display:none;}
   .nav-actions{margin:0 0 0 10px;padding:0;border:0;gap:9px;}
   .site-nav .nav-actions a{flex:none;min-height:38px;font-size:12.5px;padding:0 15px;}
   .nav-shell{gap:16px;}
@@ -146,6 +150,11 @@ main.page > .sem-section{padding:clamp(28px,3.5vw,42px) 0 34px;}
   }
   .site-nav .nav-sub a{color:var(--ink);opacity:.72;font-size:13.5px;}
   .site-nav .nav-sub a:hover{opacity:1;background:var(--surface-soft);}
+  .site-nav .nav-sub a.is-active{
+    opacity:1;padding:8px 12px;margin:0;
+    background:var(--surface-soft);
+    box-shadow:inset 0 0 0 1px var(--line);
+  }
   .site-nav .nav-sub a i{display:inline-flex;}   /* re-show tool icons inside the dropdown */
 }
 
