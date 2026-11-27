@@ -153,7 +153,7 @@
         <button class="tab-btn active" data-tab="students" onclick="switchTab('students')"><i class="fas fa-users"></i> Students <span class="dot hide" id="dot-pending">0</span></button>
         <button class="tab-btn" data-tab="exams" onclick="switchTab('exams')"><i class="fas fa-file-pen"></i> Exams</button>
         <button class="tab-btn" data-tab="results" onclick="switchTab('results')"><i class="fas fa-ranking-star"></i> Results</button>
-        <button class="tab-btn" data-tab="qbuilder" onclick="switchTab('qbuilder')"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</button>
+        <button class="tab-btn" data-tab="qbuilder" onclick="openQuestionBuilderWorkspace()"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</button>
       </div>
 
       <!-- Students -->
@@ -178,7 +178,7 @@
         <div id="exam-list-view">
           <div class="toolbar">
             <button class="btn primary" onclick="newExam()"><i class="fas fa-plus"></i> New exam</button>
-            <button class="btn secondary" onclick="switchTab('qbuilder')"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</button>
+            <button class="btn secondary" onclick="openQuestionBuilderWorkspace()"><i class="fas fa-wand-magic-sparkles"></i> Question Builder</button>
             <button class="btn secondary hide" id="import-btn" onclick="importLegacy()"><i class="fas fa-file-import"></i> Import old exams</button>
           </div>
           <div id="ex-loader" class="pane-loader"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>
@@ -240,15 +240,14 @@
         <div id="res-body"><div class="empty-st"><i class="fas fa-ranking-star"></i><p>Choose an exam to see its ranking.</p></div></div>
       </div>
 
-      <!-- Question Builder embedded -->
-      <div id="tab-qbuilder" class="tab-pane" style="padding:0;margin-top:16px;border-radius:8px;overflow:hidden;">
-        <div id="qb-notice" style="padding:12px 0 8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <span style="font-size:13.5px;color:var(--muted);"><i class="fas fa-info-circle"></i> Design your question paper here — click <b>Create Online Exam</b> inside to send it to the Exams tab.</span>
-          <a href="print/question-builder.html" target="_blank" class="btn secondary sm"><i class="fas fa-arrow-up-right-from-square"></i> Open full screen</a>
+      <!-- Question Builder workspace launcher -->
+      <div id="tab-qbuilder" class="tab-pane">
+        <div class="empty-st" style="display:block;text-align:left;max-width:620px;margin:32px auto;padding:30px;">
+          <i class="fas fa-wand-magic-sparkles" style="font-size:31px;color:var(--blue);"></i>
+          <h3 style="margin:12px 0 7px;font-size:21px;">Question Builder workspace</h3>
+          <p style="margin:0 0 18px;line-height:1.65;">Build your paper in a full-size workspace with the editor and live preview side by side. Your draft saves automatically in this browser.</p>
+          <button class="btn primary" onclick="openQuestionBuilderWorkspace()"><i class="fas fa-arrow-up-right-from-square"></i> Open Question Builder</button>
         </div>
-        <iframe id="qb-frame" src="about:blank" data-src="print/question-builder.html"
-          style="width:100%;height:calc(100svh - 200px);min-height:620px;border:none;display:block;border-radius:8px;"
-          title="Question Builder" allow="fullscreen"></iframe>
       </div>
     </div>
   </div>
@@ -370,11 +369,6 @@ function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   $('tab-' + name).classList.add('active');
   if (name === 'results') fillResExams();
-  // Lazy-load the QB iframe on first open
-  if (name === 'qbuilder') {
-    const fr = $('qb-frame');
-    if (fr && fr.src === 'about:blank') fr.src = fr.dataset.src;
-  }
   // Pick up any draft left by the QB
   if (name === 'exams') {
     try {
@@ -382,6 +376,15 @@ function switchTab(name) {
       if (raw) { localStorage.removeItem('draft_exam_data'); openBuilder(JSON.parse(raw)); acadToast('Questions loaded from the Question Builder ✓', 'ok'); }
     } catch (_) {}
   }
+}
+function openQuestionBuilderWorkspace() {
+  // A dedicated page gives the editor and live paper preview the full screen.
+  // The return route deliberately points back to this launcher, not the Academy hub.
+  location.href = 'print/question-builder.html?from=teacher-panel';
+}
+function openRouteTab() {
+  const tab = location.hash.replace('#', '');
+  if (['students', 'exams', 'results', 'qbuilder'].includes(tab)) switchTab(tab);
 }
 function guard(d) {
   if (d && d.status === 'unauthorized') { acadSession.clear('teacher'); acadToast('Session expired — please log in again', 'err'); setTimeout(() => location.reload(), 900); return true; }
@@ -717,6 +720,7 @@ window.addEventListener('message', function(ev) {
   const hasSession = !!acadSession.get('teacher') || acadAdminTokens().length > 0;
   if (hasSession) { await enter(); if (!ME) { /* enter() already showed the auth card */ } }
   else show('auth-section');
+  if (ME) openRouteTab();
   if (location.hash === '#signup') authMode('signup');
 })();
 </script>

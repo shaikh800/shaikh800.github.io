@@ -667,6 +667,21 @@
         line-height: 1.2; transition: background 0.15s;
       }
       .sticky-action-bar .sab-pdf:hover { background: #dbeafe; }
+      .teacher-workspace-note {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 14px;
+        padding: 9px 10px;
+        color: #334155;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .teacher-workspace-note.visible { display: flex; }
+      .teacher-workspace-note span { color: #64748b; font-weight: 500; }
       /* Zone labels */
       .zone-label {
         font-size: 10px; font-weight: 700; letter-spacing: 0.6px;
@@ -830,6 +845,10 @@
           <button type="button" class="sab-icon" onclick="redoState()" title="Redo">↷</button>
           <button type="button" class="sab-icon" onclick="resetSample()" title="Reset Sample">↺</button>
           <button type="button" class="sab-pdf" onclick="downloadPDFDirect(this)">↓ PDF</button>
+        </div>
+
+        <div class="teacher-workspace-note" id="teacherWorkspaceNote">
+          <strong>Teacher Panel workspace</strong><span>Draft auto-save is on</span>
         </div>
 
         <h1>Question Builder</h1>
@@ -1431,6 +1450,8 @@
       let autosaveTimer = null;
       const isStandalone = query.get("standalone") === "1";
       const isHiddenMode = query.get("hidden") === "1";
+      const isTeacherWorkspace = query.get("from") === "teacher-panel";
+      const TEACHER_PANEL_RETURN_URL = "../teacher_panel.html#qbuilder";
 
       const pagesWrap = document.getElementById("pagesWrap");
       const fitStatus = document.getElementById("fitStatus");
@@ -4584,6 +4605,10 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         }
       }
       function backToForm() {
+        if (isTeacherWorkspace) {
+          window.location.href = TEACHER_PANEL_RETURN_URL;
+          return;
+        }
         if (window.opener && !window.opener.closed) {
           try {
             window.opener.focus();
@@ -4604,6 +4629,10 @@ ${variant === 'with_figure' ? `7. ছবিতে কোনো ডায়া�
         backToForm();
       }
       function applyStandaloneTweaks() {
+        if (isTeacherWorkspace) {
+          document.title = "Question Builder | Teacher Panel";
+          document.getElementById("teacherWorkspaceNote")?.classList.add("visible");
+        }
         if (isHiddenMode) {
           document.body.style.padding = "0";
           document.body.style.background = "#fff";
@@ -5873,6 +5902,7 @@ function switchStep(n) {
   try { localStorage.setItem('qb_wiz_step', n); } catch(e) {}
 }
 
+      applyStandaloneTweaks();
       const loadedDraft = loadData(true);
       if (!loadedDraft) {
         syncNumbers();
@@ -6001,7 +6031,7 @@ function goToExamController() {
     const modal = document.getElementById("onlineExamModal");
     if (modal) modal.style.display = "none";
   } else {
-    window.location.href = "../teacher_panel.html";
+    window.location.href = "../teacher_panel.html#exams";
   }
 }
     </script>
