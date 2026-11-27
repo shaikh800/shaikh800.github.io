@@ -288,6 +288,46 @@
     .fs-folder-card .folder-count { flex: none; color: var(--muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
     .fs-folder-card .fs-folder-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; }
 
+    /* A resource-folder must never be mistaken for a document preview. */
+    .resource-grid:not(.view-list) > .resource-folder-card {
+      grid-column: auto; min-height: 194px; padding: 20px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+      position: relative; overflow: hidden; isolation: isolate;
+      background: linear-gradient(145deg, #fffdf8 0%, #f7e6b4 100%);
+      border-color: #e3c573; box-shadow: 0 10px 24px rgba(123, 88, 19, .10);
+    }
+    .resource-grid:not(.view-list) > .resource-folder-card::before {
+      content: ''; position: absolute; left: 20px; top: 17px; width: 72px; height: 25px;
+      border: 1px solid #d6ae4d; border-bottom: 0; border-radius: 10px 10px 0 0;
+      background: #efd58c; z-index: -1;
+    }
+    .resource-grid:not(.view-list) > .resource-folder-card:hover {
+      border-color: #b78116; background: linear-gradient(145deg, #fffefa 0%, #f3d989 100%);
+      box-shadow: 0 15px 28px rgba(123, 88, 19, .17); transform: translateY(-4px);
+    }
+    .resource-folder-card .folder-preview-icon {
+      height: 76px; display: flex; align-items: flex-end; position: relative; z-index: 1;
+    }
+    .resource-folder-card .folder-preview-icon i.fa-folder {
+      width: auto; height: auto; margin: 0; padding: 0; border: 0; background: none;
+      color: #a86d10; font-size: 56px; line-height: 1; text-shadow: 0 2px 0 rgba(255,255,255,.5);
+    }
+    .resource-folder-card .folder-preview-copy { display: grid; gap: 5px; position: relative; z-index: 1; }
+    .resource-folder-card .folder-preview-copy .folder-title {
+      padding: 0; font-size: 17px; font-weight: 800; color: #3c2d10; line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .resource-folder-card .folder-preview-copy .folder-count {
+      margin: 0; color: #735724; font-size: 12px; font-weight: 700;
+    }
+    .resource-folder-card .folder-open {
+      margin-top: auto; padding-top: 14px; color: #76530d; font-size: 12px; font-weight: 800;
+      display: inline-flex; align-items: center; gap: 7px; flex: none;
+    }
+    .resource-folder-card .folder-open i { font-size: 11px; transition: transform .2s ease; }
+    .resource-folder-card:hover .folder-open i { transform: translateX(4px); }
+    .resource-folder-card .rc-btn.del { position: absolute; top: 14px; right: 14px; z-index: 2; }
+
     .view-controls { display: flex; gap: 6px; }
     .view-btn { background: var(--surface); border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; color: var(--muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; }
     .view-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
@@ -329,15 +369,15 @@
       .sem-list .fs-folder-card { grid-column:auto; min-height:82px; padding:16px 18px; border-radius:var(--radius-lg); }
       .sem-list .fs-folder-card i.fa-folder { font-size:18px; }
       .resource-grid.view-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-      .resource-grid.view-grid > .fs-folder-card {
+      .resource-grid.view-grid > .fs-folder-card:not(.resource-folder-card) {
         grid-column:auto; min-height:108px; padding:18px; position:relative;
         align-items:flex-start; flex-wrap:wrap; border-radius:var(--radius-lg);
       }
-      .resource-grid.view-grid > .fs-folder-card > span { padding-right:24px; }
-      .resource-grid.view-grid > .fs-folder-card .folder-count {
+      .resource-grid.view-grid > .fs-folder-card:not(.resource-folder-card) > span { padding-right:24px; }
+      .resource-grid.view-grid > .fs-folder-card:not(.resource-folder-card) .folder-count {
         flex-basis:100%; margin:2px 0 0 28px; font-size:11px;
       }
-      .resource-grid.view-grid > .fs-folder-card .fs-folder-chevron {
+      .resource-grid.view-grid > .fs-folder-card:not(.resource-folder-card) .fs-folder-chevron {
         position:absolute; top:22px; right:18px;
       }
     }
@@ -372,6 +412,11 @@
     @media (max-width:600px) {
       .card-grid.three { grid-template-columns:1fr; } 
       .resource-grid { grid-template-columns:1fr 1fr; }
+      .resource-grid:not(.view-list) > .resource-folder-card { min-height: 168px; padding: 15px; }
+      .resource-grid:not(.view-list) > .resource-folder-card::before { left: 15px; top: 12px; }
+      .resource-folder-card .folder-preview-icon { height: 63px; }
+      .resource-folder-card .folder-preview-icon i.fa-folder { font-size: 47px; }
+      .resource-folder-card .folder-preview-copy .folder-title { font-size: 14px; }
       
       /* Fix List View on Mobile - Should be a proper 1-column list */
 
@@ -1377,12 +1422,14 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
             </div>`;
         } else {
           finalHtml += `
-            <div class="fs-folder-card" onclick="navigateFolder(${n}, decodeURIComponent('${pathToken(nextPath)}'))">
-              <i class="fas fa-folder"></i>
-              <span>${esc(f)}</span>
-              <small class="folder-count">${fileCount} file${fileCount===1?'':'s'}</small>
+            <div class="fs-folder-card resource-folder-card" onclick="navigateFolder(${n}, decodeURIComponent('${pathToken(nextPath)}'))" role="button" tabindex="0" aria-label="Open ${esc(f)} folder">
+              <div class="folder-preview-icon" aria-hidden="true"><i class="fas fa-folder"></i></div>
+              <div class="folder-preview-copy">
+                <span class="folder-title">${esc(f)}</span>
+                <small class="folder-count">${fileCount} file${fileCount===1?'':'s'}</small>
+              </div>
+              <span class="folder-open">Open folder <i class="fas fa-arrow-right"></i></span>
               <button class="rc-btn del admin-only" onclick="event.stopPropagation();showConfirm('Delete this folder and all its files?',()=>deleteFolder(${n},decodeURIComponent('${pathToken(nextPath)}')))" title="Delete folder" aria-label="Delete folder ${esc(f)}"><i class="fas fa-trash-alt"></i></button>
-              <i class="fas fa-chevron-right fs-folder-chevron"></i>
             </div>`;
         }
       });
