@@ -851,9 +851,14 @@
     function openModal(id)  {
       document.getElementById(id).classList.add('open');
       document.body.style.overflow='hidden';
-      if (id === 'modal-image') history.pushState({ civil_overlay: 'image' }, '');
+      if (id === 'modal-image' && !(history.state || {}).civil_resource) history.pushState({ civil_overlay: 'image' }, '');
     }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open'); document.body.style.overflow='';
+      if (id === 'modal-image' && (history.state || {}).civil_resource) {
+        history.replaceState(civilState(activeSem, currentSemPath), '', civilRouteUrl(activeSem, currentSemPath));
+      }
+    }
     document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
     document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if(e.target===ov) closeModal(ov.id); }));
     document.addEventListener('keydown', e => {
@@ -890,7 +895,6 @@
       document.getElementById('pdf-frame').src = src;
       document.getElementById('pdf-fullscreen').classList.add('open');
       document.body.style.overflow = 'hidden';
-      history.pushState({ civil_overlay: 'pdf' }, '');
     }
     function closePdfViewer() {
       const el = document.getElementById('pdf-fullscreen');
@@ -898,6 +902,9 @@
       el.classList.remove('open');
       document.getElementById('pdf-frame').src = '';
       document.body.style.overflow = '';
+      if ((history.state || {}).civil_resource) {
+        history.replaceState(civilState(activeSem, currentSemPath), '', civilRouteUrl(activeSem, currentSemPath));
+      }
     }
     document.getElementById('pdf-close').addEventListener('click', closePdfViewer);
 
