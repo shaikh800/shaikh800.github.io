@@ -1517,6 +1517,7 @@
     let _geminiMemberTokenClient = null;
     let _geminiMemberToken = '';
     let _geminiMemberTokenExpiry = 0;
+    let _geminiVerificationIssue = '';
     function initGeminiMemberAuth() {
       if (_geminiMemberTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
       _geminiMemberTokenClient = google.accounts.oauth2.initTokenClient({
@@ -1548,7 +1549,14 @@
       if (!ready) { toast("Google verification didn't load. Check your connection and try again.", 'error'); return null; }
       return new Promise(resolve => {
         _geminiMemberTokenClient.callback = async response => {
-          if (response.error || !response.access_token) { toast('Google verification was cancelled.', 'error'); return resolve(null); }
+          if (response.error || !response.access_token) {
+            _geminiVerificationIssue = response.error === 'access_denied'
+              ? 'Google sign-in is not enabled for this account yet. Ask a Research admin to add your email to the Google sign-in test-user list.'
+              : 'Google verification was cancelled.';
+            toast(_geminiVerificationIssue, 'error', 6500);
+            return resolve(null);
+          }
+          _geminiVerificationIssue = '';
           try {
             const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + response.access_token } }).then(res => res.json());
             if (!info.email || info.email.toLowerCase() !== expectedEmail) {
@@ -1574,7 +1582,10 @@
       }
       if (status) status.textContent = 'Verifying your approved Google account…';
       const googleToken = await getGeminiMemberToken();
-      if (role !== 'admin' && !googleToken) { if (status) status.textContent = 'Verification was not completed.'; return; }
+      if (role !== 'admin' && !googleToken) {
+        if (status) status.textContent = _geminiVerificationIssue || 'Verification was not completed.';
+        return;
+      }
       const result = await geminiLiveRequest('geminiRead', { googleToken });
       if (!result.ok || !result.data) { if (status) status.textContent = 'Could not open Gemini right now. Please try again.'; return; }
       geminiAccessVerified = true;
