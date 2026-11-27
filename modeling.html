@@ -506,10 +506,6 @@
             <div class="file-selection-note" id="work-file-selection"></div>
             <div class="file-status" id="work-file-status"></div>
           </div>
-          <div class="access-box">
-            <div class="access-label">Access Control</div>
-            <label class="access-option"><input type="radio" name="work-drive-access" value="view" checked> <span><i class="fas fa-download" style="color:var(--muted);"></i> Public — anyone can download</span></label>
-          </div>
           <div class="drive-progress" id="work-drive-progress">
             <div class="drive-progress-text" id="work-drive-progress-text">Uploading to Drive...</div>
             <div class="drive-progress-bar"><div class="drive-progress-fill" id="work-drive-progress-fill" style="width:0%"></div></div>
@@ -670,7 +666,7 @@
 
     async function uploadWorkFileToDrive(file, category, accessMode, pathOverride, folderIdOverride) {
       const token = await getDriveToken();
-      const mode = 'view'; // public 3D project files are always downloadable
+      const mode = 'view'; // shared projects open in Drive's viewer
 
       const prog = document.getElementById('work-drive-progress');
       const fill = document.getElementById('work-drive-progress-fill');
@@ -893,7 +889,7 @@
                   ${hasVideo ? '<i class="fab fa-youtube"></i> Watch' : '<i class="fas fa-external-link-alt"></i> Open'} →
                 </a>` : ''}
                 ${w.driveLink ? `<a class="work-link" href="${esc(w.driveLink)}" target="_blank" rel="noopener">
-                  ${w.driveAccess === 'view' ? '<i class="fas fa-download"></i> Download' : '<i class="fas fa-eye"></i> View Project'} →
+                  <i class="fas fa-eye"></i> Open project →
                 </a>` : ''}
                 ${w.marketLink ? `<a class="work-link" href="${esc(w.marketLink)}" target="_blank" rel="noopener">
                   <i class="fas fa-cart-shopping"></i> Marketplace →
@@ -1025,7 +1021,7 @@
         const category = document.getElementById('w-cat').value || 'Other';
         const pathOverride = document.getElementById('w-drive-path').value;
         const folderIdOverride = document.getElementById('w-drive-folder-id').value;
-        const accessMode = document.querySelector('input[name="work-drive-access"]:checked').value;
+        const accessMode = 'view';
         const result = await uploadWorkFileToDrive(file, category, accessMode, pathOverride, folderIdOverride);
         pendingDriveUpload = { fileId: result.fileId, viewLink: result.viewLink, name: file.name, access: result.access };
         document.getElementById('w-drive-link').value = '';
@@ -1095,9 +1091,6 @@
       document.getElementById('w-drive-file').value = '';
       document.querySelectorAll('#file-src-tabs .dsrc-tab').forEach((t,i) => t.classList.toggle('active', i===0));
       document.querySelectorAll('.dsrc-panel').forEach((p,i) => p.classList.toggle('active', i===0));
-      // reset access control to default (view only)
-      const defAccess = document.querySelector('input[name="work-drive-access"][value="view"]');
-      if (defAccess) defAccess.checked = true;
     }
 
     document.getElementById('add-work-btn').addEventListener('click', () => {
@@ -1142,9 +1135,6 @@
         cur.style.display = 'block';
         document.getElementById('work-drive-current-text').textContent = w.driveFileName || 'Drive link attached';
       }
-      const savedAccess = document.querySelector(`input[name="work-drive-access"][value="${w.driveAccess || 'preview'}"]`);
-      if (savedAccess) savedAccess.checked = true;
-
       openModal('modal-work');
     }
 
@@ -1177,7 +1167,7 @@
 
       // Project file (Drive): a pasted link wins; otherwise a just-finished upload;
       // otherwise keep whatever was already saved when editing.
-      const accessModeVal = document.querySelector('input[name="work-drive-access"]:checked').value;
+      const accessModeVal = 'view';
       const driveLinkVal = document.getElementById('w-drive-link').value.trim();
       let driveLink = '', driveFileId = '', driveFileName = '', driveAccess = accessModeVal;
       if (driveLinkVal) {

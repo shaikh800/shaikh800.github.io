@@ -151,6 +151,22 @@
     }
     .icon-action:hover { color: var(--blue); border-color: var(--blue); }
     .icon-action.danger:hover { color: #ef4444; border-color: #ef4444; }
+    /* Keep destructive Drive tools out of the normal file-reading flow. */
+    .drive-admin-menu { position: relative; display: inline-flex; }
+    .drive-admin-menu > summary { list-style: none; }
+    .drive-admin-menu > summary::-webkit-details-marker { display: none; }
+    .drive-admin-popover {
+      position: absolute; z-index: 8; right: 0; top: calc(100% + 6px); min-width: 142px;
+      padding: 5px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+      box-shadow: var(--shadow); display: grid; gap: 2px;
+    }
+    .drive-admin-popover button {
+      width: 100%; border: 0; border-radius: 7px; padding: 8px 9px; background: transparent;
+      color: var(--ink); text-align: left; font: inherit; font-size: 12px; cursor: pointer;
+    }
+    .drive-admin-popover button:hover { background: var(--surface-soft); }
+    .drive-admin-popover button.danger { color: #dc2626; }
+    .research-route-anchor { display: block; scroll-margin-top: 96px; }
 
     @media (max-width: 760px) {
       .file-table thead { display: none; }
@@ -388,7 +404,7 @@
       <p class="sub">Sign in or request to join with your Google email.</p>
 
       <div class="gate-pw-step open" id="gateMemberForm">
-        <input type="email" id="memberEmail" placeholder="Your email" autocomplete="email">
+        <input type="email" id="memberEmail" placeholder="Your approved Google email" autocomplete="email">
         <div class="gate-err" id="memberFormErr"></div>
         <button class="btn primary" style="width:100%;justify-content:center;" id="memberFormBtn"><i class="fas fa-right-to-bracket"></i> Continue</button>
         <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">New here? Send your request once. After admin approval, sign in with this exact Google email on any device.</p>
@@ -519,6 +535,7 @@
   </header>
 
   <main class="page">
+    <noscript><p class="section" style="color:var(--muted);">Research Hub needs JavaScript to verify approved members and protect team content.</p></noscript>
 
     <section class="page-title reveal" id="research-hero" hidden data-keep-hidden>
       <h1>Research Hub</h1>
@@ -544,6 +561,7 @@
 
 
       <!-- ══ FILES PANEL — the real connected Google Drive folder, browsed on this page ══ -->
+      <span class="research-route-anchor" id="files" aria-hidden="true"></span>
       <div class="r-panel" id="panel-files">
         <div class="r-toolbar">
           <div>
@@ -552,7 +570,7 @@
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
             <button class="btn secondary sm admin-only" type="button" onclick="driveCreateNewFolder()"><i class="fas fa-folder-plus"></i> New Folder</button>
-            <button class="btn primary sm admin-only" type="button" onclick="switchTab('uploads')"><i class="fas fa-upload"></i> Upload files</button>
+            <button class="btn primary sm admin-only" type="button" onclick="goToTab('uploads')"><i class="fas fa-upload"></i> Upload files</button>
             <a class="btn secondary sm" id="driveOpenLink" target="_blank" rel="noopener" style="display:none;"><i class="fas fa-up-right-from-square"></i> Open in Drive</a>
           </div>
         </div>
@@ -582,11 +600,12 @@
       </div>
 
       <!-- ══ TEAM UPLOADS PANEL ══ -->
+      <span class="research-route-anchor" id="uploads" aria-hidden="true"></span>
       <div class="r-panel" id="panel-uploads" hidden>
         <div class="r-toolbar">
           <div>
             <h2>Team Uploads</h2>
-            <p>Sign in with the shared <strong>Turbo Researchers</strong> Google account to upload files to the team Drive.</p>
+            <p>Sign in with the shared <strong>Turbo Researchers</strong> Google account to upload files to the team Drive. Leaving this tab automatically returns to your Research account.</p>
           </div>
         </div>
 
@@ -665,6 +684,7 @@
       </div>
 
       <!-- ══ NOTICES PANEL ══ -->
+      <span class="research-route-anchor" id="notices" aria-hidden="true"></span>
       <div class="r-panel" id="panel-notices" hidden>
         <div class="r-toolbar">
           <div>
@@ -678,6 +698,7 @@
       </div>
 
       <!-- ══ GEMINI SUBSCRIPTION TRACKER PANEL ══ -->
+      <span class="research-route-anchor" id="gemini" aria-hidden="true"></span>
       <div class="r-panel" id="panel-gemini" hidden>
         <div class="r-toolbar">
           <div>
@@ -764,6 +785,7 @@
       </div>
 
       <!-- ══ MY ACCOUNT PANEL (every signed-in user) ══ -->
+      <span class="research-route-anchor" id="account" aria-hidden="true"></span>
       <div class="r-panel" id="panel-account" hidden>
         <div class="r-toolbar">
           <div>
@@ -807,6 +829,7 @@
       </div>
 
       <!-- ══ DRIVE & ACCESS PANEL (admin only) ══ -->
+      <span class="research-route-anchor" id="access" aria-hidden="true"></span>
       <div class="r-panel admin-only" id="panel-access" hidden>
         <div class="r-toolbar">
           <div>
@@ -1015,6 +1038,9 @@
       // gets its own explicit check rather than relying on CSS alone.
       if (tab === 'access' && role !== 'admin') tab = 'files';
       if (tab === 'gemini' && isUploadOnly) tab = 'uploads';
+      // Team Uploads has a deliberately separate Google Drive account. Do not
+      // let that shared account linger as the visible user after leaving it.
+      if (_activeTab === 'uploads' && tab !== 'uploads') leaveTeamUploadSession();
       _activeTab = tab;
       document.querySelectorAll('.r-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.querySelectorAll('.r-panel').forEach(p => p.hidden = true);
@@ -1262,6 +1288,19 @@
       }
       return arr;
     }
+    function driveAdminActions(id, name, isFolder) {
+      const safeId = String(id || '').replace(/'/g, "\\'");
+      const safeName = String(name || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\"/g, '&quot;');
+      const noun = isFolder ? 'folder' : 'file';
+      return `<details class="drive-admin-menu" onclick="event.stopPropagation()">
+        <summary class="icon-action" title="Manage ${noun}" aria-label="Manage ${noun}"><i class="fas fa-ellipsis"></i></summary>
+        <div class="drive-admin-popover">
+          <button type="button" onclick="event.stopPropagation();driveRenameItem('${safeId}','${safeName}')"><i class="fas fa-pen-to-square"></i> Rename</button>
+          <button type="button" onclick="event.stopPropagation();driveMoveItem('${safeId}','${safeName}')"><i class="fas fa-folder-tree"></i> Move</button>
+          <button type="button" class="danger" onclick="event.stopPropagation();driveTrashItem('${safeId}','${safeName}',${isFolder ? 'true' : 'false'})"><i class="fas fa-trash-can"></i> Move to Bin</button>
+        </div>
+      </details>`;
+    }
     async function loadCurrentFolder() {
       renderBreadcrumb();
       const current = folderStack[folderStack.length - 1];
@@ -1286,7 +1325,7 @@
             <span class="dr-name">${esc(f.name)}</span>
             <span class="dr-meta">${fmtDate(f.modifiedTime)}</span>
             <div class="row-actions" style="margin-left:auto;display:flex;align-items:center;gap:4px;">
-              ${isAdminView ? `<button class="icon-action" title="Rename" style="display:inline-flex;" onclick="event.stopPropagation();driveRenameItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-pen-to-square"></i></button><button class="icon-action" title="Move" style="display:inline-flex;" onclick="event.stopPropagation();driveMoveItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-folder-tree"></i></button><button class="icon-action" title="Move folder to Drive Bin" style="display:inline-flex;color:#dc2626;" onclick="event.stopPropagation();driveTrashItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}',true)"><i class="fas fa-trash-can"></i></button>` : ''}
+               ${isAdminView ? driveAdminActions(f.id, f.name, true) : ''}
               <button class="icon-action" title="Copy share link" style="display:inline-flex;" onclick="event.stopPropagation();driveShareItem('${f.id}',true)"><i class="fas fa-share-nodes"></i></button>
               <i class="fas fa-chevron-right dr-chev"></i>
             </div>
@@ -1300,7 +1339,7 @@
               ${f.webViewLink ? `<a class="icon-action" title="Open" href="${f.webViewLink}" target="_blank" rel="noopener"><i class="fas fa-eye"></i></a>` : ''}
               ${f.webContentLink ? `<a class="icon-action" title="Download" href="${f.webContentLink}" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>` : ''}
               <button class="icon-action" title="Copy share link" style="display:inline-flex;" onclick="driveShareItem('${f.id}',false)"><i class="fas fa-share-nodes"></i></button>
-              ${isAdminView ? `<button class="icon-action" title="Rename" style="display:inline-flex;" onclick="driveRenameItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-pen-to-square"></i></button><button class="icon-action" title="Move" style="display:inline-flex;" onclick="driveMoveItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-folder-tree"></i></button><button class="icon-action" title="Move file to Drive Bin" style="display:inline-flex;color:#dc2626;" onclick="driveTrashItem('${f.id}','${f.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}',false)"><i class="fas fa-trash-can"></i></button>` : ''}
+               ${isAdminView ? driveAdminActions(f.id, f.name, false) : ''}
             </div>
           </div>`).join('');
       document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
@@ -1670,9 +1709,8 @@
       };
       _uploadTokenClient.requestAccessToken({ prompt: _driveAuthGranted ? '' : 'consent' });
     }
-    /* clearGoogleSession: clears only the Google OAuth token, keeping the gate session intact.
-       Called when the user leaves the upload tab, so they're automatically signed out of Google
-       and returned to their "default" gate-session state next time they visit the upload tab. */
+    /* Manual account switch: revoke only the temporary upload token; the
+       approved Research gate session is always kept separate. */
     function clearGoogleSession() {
       if (!currentUser) return;
       if (currentUser.token && window.google && window.google.accounts) {
@@ -1684,6 +1722,16 @@
       try { localStorage.removeItem('rh_driveAuthGranted'); } catch(e) {}
       try { localStorage.removeItem('rh_currentUser'); } catch(e) {}
       renderTeamTab();
+    }
+    function leaveTeamUploadSession() {
+      // This only clears the temporary Drive identity. gateUser is the member's
+      // approved Research identity and remains untouched, so the rest of the
+      // hub immediately reflects their own account again.
+      currentUser = null;
+      _authInFlight = false;
+      _driveAuthGranted = false;
+      try { localStorage.removeItem('rh_driveAuthGranted'); } catch(e) {}
+      try { localStorage.removeItem('rh_currentUser'); } catch(e) {}
     }
 
     function signOutGoogle() {
@@ -2734,6 +2782,9 @@ Content-Type: ${file.type || 'application/octet-stream'}
       const hashTab = (window.location.hash || '').replace('#', '');
       const validTabs = ['files', 'uploads', 'notices'].concat(isUploadOnly ? [] : ['gemini']).concat(['account']).concat(role === 'admin' ? ['access'] : []);
       const initialTab = validTabs.includes(hashTab) ? hashTab : 'files';
+       // A refresh or a direct link to any normal Research area must not revive
+       // the shared Turbo upload account from a prior visit.
+       if (initialTab !== 'uploads') leaveTeamUploadSession();
       if (hashTab !== initialTab) {
         history.replaceState('', document.title, window.location.pathname + window.location.search + '#' + initialTab);
       }
