@@ -1636,7 +1636,12 @@
       } catch (e) {}
     }
     function initGoogleIdentity() {
-      if (_googleIdentityReady || !window.google || !window.google.accounts || !window.google.accounts.id) return false;
+      // Google Identity's script loads asynchronously. Once it has already
+      // been initialized, it is ready to render another button -- returning
+      // false here made a second tap (especially on mobile) look like the
+      // Google component had failed to load.
+      if (_googleIdentityReady) return true;
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) return false;
       google.accounts.id.initialize({
         client_id: GDRIVE_CLIENT_ID,
         auto_select: false,
@@ -1658,6 +1663,18 @@
       });
       _googleIdentityReady = true;
       return true;
+    }
+    function waitForGoogleIdentity(timeoutMs = 10000) {
+      if (initGoogleIdentity()) return Promise.resolve(true);
+      return new Promise(resolve => {
+        const started = Date.now();
+        const check = () => {
+          if (initGoogleIdentity()) return resolve(true);
+          if (Date.now() - started >= timeoutMs) return resolve(false);
+          setTimeout(check, 250);
+        };
+        check();
+      });
     }
     function renderGoogleIdentityButton(hostId, expectedEmail, handler) {
       const host = document.getElementById(hostId);
@@ -1683,11 +1700,17 @@
       beginGeminiVerification();
       return null;
     }
-    function beginGeminiVerification() {
+    async function beginGeminiVerification() {
       const status = document.getElementById('geminiAccessStatus');
       const expectedEmail = geminiActorEmail();
       if (!isApprovedGeminiViewer() || !expectedEmail) {
         if (status) status.textContent = 'This signed-in account is not an approved Research team member.';
+        return;
+      }
+      if (status) status.textContent = 'Loading Google sign-in…';
+      const ready = await waitForGoogleIdentity();
+      if (!ready) {
+        if (status) status.textContent = 'Google sign-in could not load. Open this page in Chrome with internet access, then try again.';
         return;
       }
       if (status) status.textContent = `Continue with the approved Google account: ${expectedEmail}`;
