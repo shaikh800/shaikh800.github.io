@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Research | Md. Shaikh Alam</title>
   <meta name="description" content="Research hub: browse shared files, upload your own papers or 3D work, and a notice board for Md. Shaikh Alam and collaborators, backed by Google Drive.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://mdshaikh.me/research.html">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
@@ -30,6 +32,9 @@
   <meta property="og:image:alt" content="Md. Shaikh Alam">
   <meta property="og:url" content="https://mdshaikh.me/research.html">
   <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Research Hub | Md. Shaikh Alam">
+  <meta name="twitter:description" content="A collaborative research hub for approved team members and shared project work.">
+  <meta name="twitter:image" content="https://mdshaikh.me/assets/images/shaikh.jpg?v=2">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     /* ══════════════ RESEARCH PAGE — built on top of site.css tokens ══════════════ */
@@ -995,7 +1000,7 @@
     function avatarHtml(m) {
       const bg = m.role === 'admin' ? '' : 'background:#10b981;';
       const initials = esc(m.initials || '?');
-      if (m.photo) return `<span class="chat-avatar" style="${bg}"><img src="${esc(m.photo)}" onerror="this.outerHTML='${initials}'"></span>`;
+      if (m.photo) return `<span class="chat-avatar" style="${bg}"><img src="${esc(m.photo)}" alt="${esc(m.name || 'Team member')}" onerror="this.outerHTML='${initials}'"></span>`;
       return `<span class="chat-avatar" style="${bg}">${initials}</span>`;
     }
 
@@ -2046,7 +2051,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       } else if (!isTurboAccount) {
         // Signed in with a DIFFERENT Google account — show error, let them sign out & retry
         chip.style.display = 'flex';
-        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
+        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" alt="${esc(currentUser.name || 'Google account')}" onerror="this.style.display='none'">` : ''}
           <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
           <button class="btn secondary sm" onclick="clearGoogleSession()">Switch account</button>`;
         if (wrongAccNote) {
@@ -2058,7 +2063,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       } else {
         // Signed in as turbo — show chip + form (or reconnect if token stale)
         chip.style.display = 'flex';
-        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" onerror="this.style.display='none'">` : ''}
+        chip.innerHTML = `${currentUser.picture ? `<img src="${esc(currentUser.picture)}" alt="${esc(currentUser.name || 'Google account')}" onerror="this.style.display='none'">` : ''}
           <div><div class="tu-name">${esc(currentUser.name)}</div><div class="tu-email">${esc(currentUser.email)}</div></div>
           <button class="btn secondary sm" onclick="clearGoogleSession()">Sign out</button>`;
         if (hasGoogleToken) { formArea.style.display = 'block'; reconnectArea.style.display = 'none'; }
@@ -2522,7 +2527,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       const preview = document.getElementById('acctAvatarPreview');
       const photo = (me && me.photo) || gateIdentity().picture || '';
       preview.innerHTML = photo
-        ? `<img src="${esc(photo)}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'">`
+        ? `<img src="${esc(photo)}" alt="${esc(gateIdentity().name || 'Profile photo')}" onerror="this.parentElement.innerHTML='<i class=\'fas fa-user\'></i>'">`
         : '<i class="fas fa-user"></i>';
       const status = document.getElementById('acctStatus');
       if (status) { status.textContent = ''; status.className = 'upload-status'; }
@@ -2545,7 +2550,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 160, 160);
           _acctPendingPhoto = canvas.toDataURL('image/jpeg', 0.85);
-          document.getElementById('acctAvatarPreview').innerHTML = `<img src="${_acctPendingPhoto}">`;
+          document.getElementById('acctAvatarPreview').innerHTML = `<img src="${_acctPendingPhoto}" alt="Profile photo preview">`;
         };
         img.src = e.target.result;
       };
@@ -2800,7 +2805,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function renderPendingView() {
       if (!gateIdentity()) return;
       const chip = document.getElementById('pendingChip');
-      chip.innerHTML = `${gateIdentity().picture ? `<img src="${esc(gateIdentity().picture)}" onerror="this.style.display='none'">` : ''}
+      chip.innerHTML = `${gateIdentity().picture ? `<img src="${esc(gateIdentity().picture)}" alt="${esc(gateIdentity().name || 'Google account')}" onerror="this.style.display='none'">` : ''}
         <div><div class="tu-name">${esc(gateIdentity().name)}</div><div class="tu-email">${esc(gateIdentity().email)}</div></div>`;
       // The request is already queued automatically (see submitMemberForm ->
       // addPendingRequest -> syncChange) and shows up for the admin under

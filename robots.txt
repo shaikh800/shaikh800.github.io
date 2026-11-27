@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
 
+# Personal dashboards and working documents are not search landing pages.
+Disallow: /admin_panel.html
+Disallow: /teacher_panel.html
+Disallow: /student_portal.html
+Disallow: /exam.html
+Disallow: /exam_controller.html
+Disallow: /model_test.html
+Disallow: /print/
+
 Sitemap: https://mdshaikh.me/sitemap.xml
