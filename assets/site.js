@@ -188,25 +188,41 @@ const mobileNavQuery = window.matchMedia("(max-width: 900px)");
 
 /* ── ACTIVE NAV LINK ─────────────────────────────────────── */
 const pagePath = window.location.pathname.split("/").pop() || "index.html";
-document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
-  const isCurrent = link.getAttribute("data-page") === pagePath;
-  if (isCurrent) {
-    link.classList.add("is-active");
-    link.setAttribute("aria-current", "page");
-    link.closest(".nav-group")?.classList.add("has-active-link");
-    // Pre-expand the current page's group so it reads as "you are here"
-    // the moment the mobile drawer opens. Desktop skips this: there
-    // .is-open drives the floating dropdown, and auto-popping that open
-    // on every page load (covering the hero) would be the opposite of
-    // helpful -- the selected navigation box already marks the active page.
-    const group = link.closest(".nav-group");
-    if (group && mobileNavQuery.matches) {
-      group.classList.add("is-open");
-      const caret = group.querySelector(".nav-caret");
-      if (caret) caret.setAttribute("aria-expanded", "true");
-    }
+const topNavLinks = Array.from(document.querySelectorAll(".site-nav a[data-page]"));
+const contextualNavGroups = {
+  "teacher_panel.html": "academy.html",
+  "student_portal.html": "academy.html",
+  "admin_panel.html": "academy.html",
+  "exam.html": "academy.html"
+};
+function markActiveNav(link) {
+  if (!link) return;
+  link.classList.add("is-active");
+  link.setAttribute("aria-current", "page");
+  const group = link.closest(".nav-group");
+  group?.classList.add("has-active-link");
+  // Pre-expand the current page's group so it reads as "you are here"
+  // the moment the mobile drawer opens. Desktop keeps the dropdown closed,
+  // because the selected navigation box already identifies the section.
+  if (group && mobileNavQuery.matches) {
+    group.classList.add("is-open");
+    const caret = group.querySelector(".nav-caret");
+    if (caret) caret.setAttribute("aria-expanded", "true");
   }
-});
+}
+let activeTopLink = topNavLinks.find((link) => link.getAttribute("data-page") === pagePath);
+if (!activeTopLink) {
+  // A sub-page such as Notice Board belongs to the group that links to it
+  // from its dropdown. Highlight that group's label instead of leaving the
+  // header with no active section.
+  const parentSubLink = Array.from(document.querySelectorAll(".site-nav .nav-sub a"))
+    .find((link) => (link.getAttribute("href") || "").split("#")[0] === pagePath);
+  activeTopLink = parentSubLink?.closest(".nav-group")?.querySelector(".nav-group-head .nav-link") || null;
+}
+if (!activeTopLink && contextualNavGroups[pagePath]) {
+  activeTopLink = topNavLinks.find((link) => link.getAttribute("data-page") === contextualNavGroups[pagePath]);
+}
+markActiveNav(activeTopLink);
 
 /* ── ACTIVE NAV SUB-LINK (matches the current page + hash) ── */
 if (window.location.hash) {
