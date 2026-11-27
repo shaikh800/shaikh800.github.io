@@ -954,6 +954,15 @@
     let apiKeySaved = '';
     let folderStack = []; // [{id,name}] — browsing history within the connected folder
 
+    // Drive files are dynamic, so query parameters give each one a stable page
+    // address without needing to generate a separate HTML file for every upload.
+    function researchFilesUrl(folderId, fileId) {
+      const params = new URLSearchParams();
+      if (folderId) params.set('folder', folderId);
+      if (fileId) params.set('file', fileId);
+      return `${window.location.pathname}${params.toString() ? `?${params}` : ''}#files`;
+    }
+
     let notices = [
       { id: 1, type: 'info', title: 'Welcome to the Research Hub', text: 'Browse the Drive folder for shared papers and data, upload your own work under Team Uploads, and check this board for updates.', date: 'Oct 13' },
     ];
@@ -1085,6 +1094,13 @@
     }
     window.addEventListener('hashchange', reflectResearchHistory);
     window.addEventListener('popstate', reflectResearchHistory);
+    window.addEventListener('popstate', () => {
+      if ((window.location.hash || '').replace('#', '') !== 'files' || !driveId) return;
+      const folderId = new URLSearchParams(window.location.search).get('folder');
+      folderStack = [{ id: driveId, name: 'Shared Files' }];
+      if (folderId && folderId !== driveId) folderStack.push({ id: folderId, name: 'Shared folder' });
+      loadCurrentFolder();
+    });
     document.querySelectorAll('.nav-sub a[href^="research.html#"]').forEach((link) => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1273,11 +1289,13 @@
     function jumpToFolder(i) {
       folderStack = folderStack.slice(0, i + 1);
       try { sessionStorage.setItem('rh_folderStack', JSON.stringify(folderStack)); } catch(e) {}
+      history.pushState({}, '', researchFilesUrl(folderStack[folderStack.length - 1].id));
       loadCurrentFolder();
     }
     function openSubfolder(id, name) {
       folderStack.push({ id, name });
       try { sessionStorage.setItem('rh_folderStack', JSON.stringify(folderStack)); } catch(e) {}
+      history.pushState({}, '', researchFilesUrl(id));
       loadCurrentFolder();
     }
     let driveSortMode = (function(){ try { return localStorage.getItem('rh_driveSortMode') || 'name-asc'; } catch(e) { return 'name-asc'; } })();
@@ -1336,7 +1354,7 @@
             </div>
           </div>`).join('');
         const fileRows = files.map(f => `
-          <div class="drive-row drive-row-file">
+          <div class="drive-row drive-row-file" data-drive-file-id="${esc(f.id)}">
             <i class="fas ${fileIconClass(f.mimeType)} dr-icon"></i>
             <span class="dr-name">${esc(f.name)}</span>
             <span class="dr-meta">${[fmtDate(f.modifiedTime), f.size ? fmtSize(f.size) : ''].filter(Boolean).join(' · ')}</span>
@@ -1348,6 +1366,13 @@
             </div>
           </div>`).join('');
       document.getElementById('fileTableBody').innerHTML = folderRows + fileRows;
+        const sharedFileId = new URLSearchParams(window.location.search).get('file');
+        const sharedRow = sharedFileId && document.querySelector(`[data-drive-file-id="${CSS.escape(sharedFileId)}"]`);
+        if (sharedRow) {
+          sharedRow.style.outline = '2px solid var(--blue)';
+          sharedRow.style.outlineOffset = '-2px';
+          sharedRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
         if (!folders.length && !files.length) document.getElementById('driveFolderEmpty').style.display = 'block';
         else document.getElementById('driveFolderEmpty').style.display = 'none';
       } catch (e) {
@@ -1371,10 +1396,14 @@
       const sortSel = document.getElementById('driveSortSelect');
       if (sortSel) sortSel.value = driveSortMode;
       folderStack = [{ id: driveId, name: 'Shared Files' }];
+      const directFolderId = new URLSearchParams(window.location.search).get('folder');
+      if (directFolderId && directFolderId !== driveId) {
+        folderStack.push({ id: directFolderId, name: 'Shared folder' });
+      }
       // Restore saved subfolder position (survives F5; cleared on tab close)
       try {
         const _savedStack = sessionStorage.getItem('rh_folderStack');
-        if (_savedStack) {
+        if (!directFolderId && _savedStack) {
           const _parsed = JSON.parse(_savedStack);
           // Only restore if root folder ID still matches
           if (Array.isArray(_parsed) && _parsed.length > 0 && _parsed[0].id === driveId) {
@@ -1502,19 +1531,18 @@
 
 
     async function driveShareItem(id, isFolder) {
-      const url = isFolder
-        ? `https://drive.google.com/drive/folders/${id}?usp=sharing`
-        : `https://drive.google.com/file/d/${id}/view?usp=sharing`;
+      const currentFolderId = (folderStack[folderStack.length - 1] || {}).id || driveId;
+      const url = new URL(researchFilesUrl(isFolder ? id : currentFolderId, isFolder ? '' : id), window.location.origin).href;
       try {
         await navigator.clipboard.writeText(url);
-        toast('Share link copied!', 'success', 2200);
+        toast('Research page link copied!', 'success', 2200);
       } catch(e) {
         const inp = document.createElement('input');
         inp.value = url; inp.style.position = 'fixed'; inp.style.opacity = '0';
         document.body.appendChild(inp); inp.select();
         document.execCommand('copy');
         document.body.removeChild(inp);
-        toast('Share link copied!', 'success', 2200);
+        toast('Research page link copied!', 'success', 2200);
       }
     }
     /* ── Google sign-in (Team Uploads' own Drive auth, separate from the gate) ── */

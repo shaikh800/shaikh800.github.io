@@ -813,6 +813,26 @@
 
     /* ── FILTER ── */
     let activeFilter = 'all';
+    const directWorkId = new URLSearchParams(window.location.search).get('work') || '';
+    let directWorkOpened = false;
+
+    function workRouteUrl(id) {
+      const params = new URLSearchParams();
+      if (id) params.set('work', id);
+      return `${window.location.pathname}${params.toString() ? `?${params}` : '#works-title'}`;
+    }
+    async function openWork(id, fromRoute) {
+      const w = loadWorks().find(x => x.id === id);
+      if (!w) return;
+      if (!fromRoute) history.pushState({ modeling_work: id }, '', workRouteUrl(id));
+      let src = w.img;
+      if (w.imgSrc === 'idb') src = await getThumb(id);
+      if (!src) return;
+      document.getElementById('img-view-title').innerHTML = `<i class="fas fa-image" style="color:var(--blue);margin-right:8px;"></i>${esc(w.title)}`;
+      document.getElementById('img-view-src').src = src;
+      document.getElementById('img-view-desc').textContent = w.desc || '';
+      openModal('modal-img');
+    }
 
     function buildFilters(works) {
       const cats = ['all', ...new Set(works.map(w => w.cat).filter(Boolean))];
@@ -894,6 +914,7 @@
                 : `<div class="work-desc">${esc(w.desc)}</div>`) : ''}
               <div class="work-footer">
                 <div class="work-tool"><i class="fas fa-cube" style="color:var(--blue)"></i> ${esc(w.tool||'Blender')}</div>
+                <a class="work-link" href="${esc(workRouteUrl(w.id))}"><i class="fas fa-link"></i> View details →</a>
                 ${w.link ? `<a class="work-link" href="${esc(w.link)}" target="_blank" rel="noopener">
                   ${hasVideo ? '<i class="fab fa-youtube"></i> Watch' : '<i class="fas fa-external-link-alt"></i> Open'} →
                 </a>` : ''}
@@ -915,15 +936,7 @@
         card.addEventListener('click', async e => {
           if (e.target.closest('.work-action-btn') || e.target.closest('.work-link') || e.target.closest('.see-more-btn')) return;
           const id = card.dataset.id;
-          const w = loadWorks().find(x => x.id === id);
-          if (!w) return;
-          let src = w.img;
-          if (w.imgSrc === 'idb') src = await getThumb(id);
-          if (!src) return;
-          document.getElementById('img-view-title').innerHTML = `<i class="fas fa-image" style="color:var(--blue);margin-right:8px;"></i>${esc(w.title)}`;
-          document.getElementById('img-view-src').src = src;
-          document.getElementById('img-view-desc').textContent = w.desc || '';
-          openModal('modal-img');
+          await openWork(id);
         });
       });
 
@@ -1282,8 +1295,18 @@
     });
 
     /* ── INIT ── */
-    fetchFromGitHub().then(() => renderWorks());
-    renderWorks(); // show local data immediately while fetching
+    fetchFromGitHub().then(async () => {
+      await renderWorks();
+      if (directWorkId && !directWorkOpened) { directWorkOpened = true; openWork(directWorkId, true); }
+    });
+    renderWorks().then(() => {
+      if (directWorkId && !directWorkOpened) { directWorkOpened = true; openWork(directWorkId, true); }
+    }); // show local data immediately while fetching
+    window.addEventListener('popstate', () => {
+      const id = new URLSearchParams(window.location.search).get('work');
+      if (id) openWork(id, true);
+      else closeModal('modal-img');
+    });
 
     // An open 3D page follows the shared catalog automatically. File content
     // itself is always read directly from its linked Drive file.

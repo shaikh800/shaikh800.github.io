@@ -1051,6 +1051,29 @@
     let currentSemPath = "";
     let currentViewMode = localStorage.getItem('civil_view_mode') || 'view-grid';
 
+    // Every semester, folder and resource has a shareable address.  Query
+    // parameters keep this compatible with GitHub Pages while still allowing
+    // arbitrary Drive folder names and resource IDs.
+    function civilRouteUrl(sem, path, resourceId) {
+      const params = new URLSearchParams();
+      if (sem) params.set('semester', String(sem));
+      if (path) params.set('folder', path);
+      if (resourceId) params.set('resource', resourceId);
+      return `${window.location.pathname}${params.toString() ? `?${params}` : '#semester-section'}`;
+    }
+    function readCivilRoute() {
+      const params = new URLSearchParams(window.location.search);
+      const sem = parseInt(params.get('semester'), 10);
+      return {
+        sem: sem >= 1 && sem <= 8 ? sem : 0,
+        path: (params.get('folder') || '').trim(),
+        resource: (params.get('resource') || '').trim()
+      };
+    }
+    function civilState(sem, path, resourceId) {
+      return { civil_view: sem ? 'semester' : 'list', civil_sem: sem || 0, civil_path: path || '', civil_resource: resourceId || '' };
+    }
+
     function showSemesterList() {
       try { sessionStorage.removeItem('civil_nav'); } catch(e) {}
       document.getElementById('sem-panels').style.display = 'none';
@@ -1070,7 +1093,7 @@
 
     window.navigateFolder = function(sem, path, _fromPopstate) {
       if (!_fromPopstate) {
-        history.pushState({ civil_view: 'semester', civil_sem: sem, civil_path: path }, '');
+        history.pushState(civilState(sem, path), '', civilRouteUrl(sem, path));
       }
       showSemesterPanel(sem, path);
     };
@@ -1095,7 +1118,11 @@
         return;
       }
       // 3. Navigate to the folder stored in state (or root)
-      if (state.civil_view === 'semester' && state.civil_sem) {
+      const route = readCivilRoute();
+      if (route.sem) {
+        showSemesterPanel(route.sem, route.path || '');
+        if (route.resource) openResource(route.resource, route.sem, true);
+      } else if (state.civil_view === 'semester' && state.civil_sem) {
         showSemesterPanel(state.civil_sem, state.civil_path || '');
       } else {
         // Fell back to page history entry or state without civil info — go to folder root
@@ -1139,16 +1166,18 @@
       }
     };
 
-    function civilShareItem(rawSrc) {
-      if (!rawSrc || rawSrc.startsWith('idb:')) { toast('Cannot share a locally-stored file', 'error'); return; }
-      const fid = extractDriveId(rawSrc);
-      const url = fid ? `https://drive.google.com/file/d/${fid}/view?usp=sharing` : rawSrc;
+    function civilShareItem(id, sem) {
+      const item = (loadSems()[sem] || []).find(x => x.id === id);
+      if (!item || !item.src || item.src.startsWith('idb:')) { toast('Cannot share a locally-stored file', 'error'); return; }
+      const parts = String(item.folder || '').split('/').map(x => x.trim()).filter(Boolean);
+      if (parts.length && /^semester\s*\d+$/i.test(parts[0])) parts.shift();
+      const url = new URL(civilRouteUrl(sem, parts.join('/'), id), window.location.origin).href;
       try {
-        navigator.clipboard.writeText(url).then(() => toast('Share link copied!', 'success', 2200)).catch(() => {
+        navigator.clipboard.writeText(url).then(() => toast('Resource page link copied!', 'success', 2200)).catch(() => {
           const inp = document.createElement('input'); inp.value = url;
           inp.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(inp);
           inp.select(); document.execCommand('copy'); document.body.removeChild(inp);
-          toast('Share link copied!', 'success', 2200);
+          toast('Resource page link copied!', 'success', 2200);
         });
       } catch(e) { toast('Could not copy', 'error'); }
     }
@@ -1348,7 +1377,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
               <div class="dr-actions">
                 <button class="civ-icon-action" data-id="${it.id}" data-sem="${n}" title="Open"><i class="fas fa-eye"></i></button>
                 ${extractDriveId(it.src) ? `<button class="civ-icon-action download-btn" data-drive-id="${extractDriveId(it.src)}" title="Download"><i class="fas fa-download"></i></button>` : ''}
-                ${!isLocal ? `<button class="civ-icon-action share-btn" data-src="${esc(it.src||'')}" title="Copy share link"><i class="fas fa-share-nodes"></i></button>` : ''}
+                ${!isLocal ? `<button class="civ-icon-action share-btn" data-id="${it.id}" data-sem="${n}" title="Copy page link"><i class="fas fa-share-nodes"></i></button>` : ''}
                 <button class="civ-icon-action move-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Move"><i class="fas fa-folder-tree"></i></button>
                 <button class="civ-icon-action edit-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen-to-square"></i></button>
                 <button class="civ-icon-action danger del-btn admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
@@ -1416,7 +1445,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         btn.addEventListener('click', async e => { e.stopPropagation(); await openResource(btn.dataset.id, btn.dataset.sem); });
       });
       grid.querySelectorAll('.civ-icon-action.share-btn').forEach(btn => {
-        btn.addEventListener('click', e => { e.stopPropagation(); civilShareItem(btn.dataset.src); });
+        btn.addEventListener('click', e => { e.stopPropagation(); civilShareItem(btn.dataset.id, btn.dataset.sem); });
       });
       grid.querySelectorAll('.civ-icon-action.download-btn').forEach(btn => {
         btn.addEventListener('click', e => {
@@ -1441,14 +1470,20 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
     document.getElementById('sem-list').addEventListener('click', e => {
       const card = e.target.closest('.fs-folder-card[data-sem]'); if (!card) return;
       const n = parseInt(card.dataset.sem);
-      history.pushState({ civil_view: 'semester', civil_sem: n, civil_path: '' }, '');
+      history.pushState(civilState(n, ''), '', civilRouteUrl(n, ''));
       showSemesterPanel(n, '');
     });
 
     /* ── Open resource ─────────────────────── */
-    async function openResource(id, sem) {
+    async function openResource(id, sem, fromRoute) {
       const item = (loadSems()[sem]||[]).find(i=>i.id===id);
       if (!item) return;
+      const resourcePath = (() => {
+        const parts = String(item.folder || '').split('/').map(x => x.trim()).filter(Boolean);
+        if (parts.length && /^semester\s*\d+$/i.test(parts[0])) parts.shift();
+        return parts.join('/');
+      })();
+      if (!fromRoute) history.pushState(civilState(sem, resourcePath, id), '', civilRouteUrl(sem, resourcePath, id));
       let src = item.src;
       if (src && src.startsWith('idb:')) {
         src = await getFile(src.slice(4));
@@ -1848,9 +1883,10 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
     // behind a restored semester panel so browser Back returns to the Semester
     // Resources list instead of leaving Civil for the previous page.
     let restoredCivilNav = null;
+    const directCivilRoute = readCivilRoute();
     try {
       const _civilNav = sessionStorage.getItem('civil_nav');
-      if (_civilNav) {
+      if (!directCivilRoute.sem && _civilNav) {
         const _nav = JSON.parse(_civilNav);
         if (_nav && _nav.sem >= 1 && _nav.sem <= 8) {
           restoredCivilNav = { sem: _nav.sem, path: _nav.path || '' };
@@ -1862,9 +1898,16 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         }
       }
     } catch(e) {}
-    if (restoredCivilNav) {
+    if (directCivilRoute.sem) {
+      activeSem = directCivilRoute.sem;
+      currentSemPath = directCivilRoute.path || '';
+      document.querySelectorAll('.sem-panel').forEach(p => p.classList.toggle('active', p.id === `sem-panel-${activeSem}`));
+      document.getElementById('sem-list').style.display = 'none';
+      document.getElementById('sem-panels').style.display = '';
+      history.replaceState(civilState(activeSem, currentSemPath, directCivilRoute.resource), '', civilRouteUrl(activeSem, currentSemPath, directCivilRoute.resource));
+    } else if (restoredCivilNav) {
       history.replaceState({ civil_view: 'list' }, '');
-      history.pushState({ civil_view: 'semester', civil_sem: restoredCivilNav.sem, civil_path: restoredCivilNav.path }, '');
+      history.pushState(civilState(restoredCivilNav.sem, restoredCivilNav.path), '', civilRouteUrl(restoredCivilNav.sem, restoredCivilNav.path));
     } else if (!(history.state || {}).civil_view) {
       history.replaceState({ civil_view: 'list' }, '');
     }
@@ -1877,10 +1920,12 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       if (!ok) console.warn('GitHub fetch failed — using local cache.');
       renderAllSems();
       buildSemList();
+      if (directCivilRoute.resource) openResource(directCivilRoute.resource, directCivilRoute.sem, true);
       if (_needsHeal && siteIsAdmin()) pushToGitHub();   // restore what this browser still has
     }).catch(() => {
       renderAllSems();
       buildSemList();
+      if (directCivilRoute.resource) openResource(directCivilRoute.resource, directCivilRoute.sem, true);
     });
 
     // Drive changes are mirrored by the Worker every minute.  An open Civil
