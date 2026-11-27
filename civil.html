@@ -86,6 +86,12 @@
     .resource-card.type-pdf .rc-type { color:var(--blue); }
     .resource-card.type-image .rc-type { color:var(--green); }
     .rc-actions { display:flex; gap:4px; }
+    .rc-download {
+      display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line);
+      background:var(--surface-soft); color:var(--ink); border-radius:8px; cursor:pointer;
+      padding:6px 9px; font:700 11px/1 inherit; transition:all 0.2s;
+    }
+    .rc-download:hover { border-color:var(--ink); background:var(--ink); color:var(--surface); }
     .rc-btn {
       background:none; border:none; cursor:pointer; padding:4px 7px;
       border-radius:6px; font-size:13px; transition:all 0.2s; color:var(--muted);
@@ -533,6 +539,9 @@
       <a class="pdf-topbar-btn" id="pdf-open-tab" href="#" target="_blank" rel="noopener">
         <i class="fas fa-external-link-alt"></i> New tab
       </a>
+      <a class="pdf-topbar-btn" id="pdf-download" href="#" target="_blank" rel="noopener">
+        <i class="fas fa-download"></i> Download
+      </a>
       <button class="pdf-topbar-btn close" id="pdf-close">
         <i class="fas fa-times"></i> Close
       </button>
@@ -895,6 +904,7 @@
     function openPdfViewer(src, title) {
       document.getElementById('pdf-title').textContent = title || 'PDF';
       document.getElementById('pdf-open-tab').href = src;
+      document.getElementById('pdf-download').href = driveDownloadUrl(src);
       document.getElementById('pdf-frame').src = src;
       document.getElementById('pdf-fullscreen').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -910,6 +920,12 @@
       }
     }
     document.getElementById('pdf-close').addEventListener('click', closePdfViewer);
+    function driveDownloadUrl(src) {
+      const fileId = extractDriveId(src || '');
+      return fileId
+        ? `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=download&confirm=t`
+        : src;
+    }
 
     /* ── Google Drive helpers ──────────────── */
     let _driveToken = null;
@@ -1446,6 +1462,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
             <div class="rc-meta">
               <span class="rc-type"><i class="fas ${isPdf?'fa-file-pdf':'fa-image'}"></i> ${it.type.toUpperCase()}</span>
               <div class="rc-actions">
+                ${fid ? `<button class="rc-download download-btn" data-drive-id="${fid}" title="Download ${esc(it.title)}"><i class="fas fa-download"></i> Download</button>` : ''}
                 <button class="rc-btn move admin-only" data-id="${it.id}" data-sem="${n}" title="Move"><i class="fas fa-folder-tree"></i></button>
                 <button class="rc-btn edit admin-only" data-id="${it.id}" data-sem="${n}" title="Edit"><i class="fas fa-pen"></i></button>
                 <button class="rc-btn del  admin-only" data-id="${it.id}" data-sem="${n}" title="Delete"><i class="fas fa-trash-alt"></i></button>
@@ -1459,7 +1476,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       // ── Card click / button events ──
       grid.querySelectorAll('.resource-card').forEach(card => {
         card.addEventListener('click', async e => {
-          if (e.target.closest('.rc-btn')) return;
+          if (e.target.closest('.rc-btn, .download-btn')) return;
           await openResource(card.dataset.id, card.dataset.sem);
         });
       });
@@ -1488,10 +1505,10 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
       grid.querySelectorAll('.civ-icon-action.share-btn').forEach(btn => {
         btn.addEventListener('click', e => { e.stopPropagation(); civilShareItem(btn.dataset.id, btn.dataset.sem); });
       });
-      grid.querySelectorAll('.civ-icon-action.download-btn').forEach(btn => {
+      grid.querySelectorAll('.download-btn').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
-          window.open(`https://drive.usercontent.google.com/download?id=${encodeURIComponent(btn.dataset.driveId)}&export=download&confirm=t`, '_blank', 'noopener');
+          window.open(driveDownloadUrl(`https://drive.google.com/file/d/${btn.dataset.driveId}/view`), '_blank', 'noopener');
         });
       });
       grid.querySelectorAll('.civ-icon-action.edit-btn').forEach(btn => {
