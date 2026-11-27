@@ -487,6 +487,19 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-gemini-actions">
+    <div class="modal-box" style="max-width:380px;">
+      <div class="modal-head"><h3><i class="fas fa-ellipsis" style="color:var(--blue);margin-right:8px;"></i>Manage Gemini member</h3><button class="modal-close" onclick="closeModal('modal-gemini-actions')"><i class="fas fa-times"></i></button></div>
+      <div class="modal-body">
+        <p id="gemini-action-name" style="font-size:13px;color:var(--muted);margin:0 0 14px;"></p>
+        <div style="display:grid;gap:9px;">
+          <button class="btn secondary" id="gemini-action-edit" style="justify-content:flex-start;"><i class="fas fa-pen"></i> Edit name</button>
+          <button class="btn danger" id="gemini-action-remove" style="justify-content:flex-start;"><i class="fas fa-user-minus"></i> Remove from Gemini</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <header class="site-header">
     <div class="nav-shell">
       <button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
@@ -2428,7 +2441,6 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function openGeminiPersonEditor(key) {
       const row = geminiRowByKey(key);
       if (!row || !isGeminiManager()) return;
-      document.querySelectorAll('.gemini-manage[open]').forEach(menu => { menu.open = false; });
       const input = document.getElementById('gemini-person-input');
       const error = document.getElementById('gemini-person-error');
       const button = document.getElementById('gemini-person-save-btn');
@@ -2451,7 +2463,6 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function confirmGeminiParticipantRemoval(key) {
       const row = geminiRowByKey(key);
       if (!row || !isGeminiManager()) return;
-      document.querySelectorAll('.gemini-manage[open]').forEach(menu => { menu.open = false; });
       const text = document.getElementById('gemini-remove-text');
       const button = document.getElementById('gemini-remove-confirm-btn');
       text.textContent = row.type === 'team'
@@ -2466,6 +2477,20 @@ Content-Type: ${file.type || 'application/octet-stream'}
         if (result) { closeModal('modal-gemini-remove'); toast('Removed from Gemini list', 'success'); }
       });
       openModal('modal-gemini-remove');
+    }
+    function openGeminiManageMenu(key) {
+      const row = geminiRowByKey(key);
+      if (!row || !isGeminiManager()) return;
+      document.getElementById('gemini-action-name').textContent = row.name;
+      const edit = document.getElementById('gemini-action-edit');
+      const remove = document.getElementById('gemini-action-remove');
+      const freshEdit = edit.cloneNode(true);
+      const freshRemove = remove.cloneNode(true);
+      edit.parentNode.replaceChild(freshEdit, edit);
+      remove.parentNode.replaceChild(freshRemove, remove);
+      freshEdit.addEventListener('click', () => { closeModal('modal-gemini-actions'); openGeminiPersonEditor(key); });
+      freshRemove.addEventListener('click', () => { closeModal('modal-gemini-actions'); confirmGeminiParticipantRemoval(key); });
+      openModal('modal-gemini-actions');
     }
     function renderGeminiTab() {
       const accessGate = document.getElementById('geminiAccessGate');
@@ -2521,13 +2546,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
           return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
         }).join('');
         if (person.key === myEmail) myDueMonths = rowDueMonths;
-        const manage = canEdit ? `<details class="gemini-manage">
-          <summary class="icon-action" title="Manage ${esc(person.name)}" aria-label="Manage ${esc(person.name)}"><i class="fas fa-ellipsis"></i></summary>
-          <div class="gemini-manage-menu">
-            <button type="button" onclick="openGeminiPersonEditor('${esc(person.key)}')"><i class="fas fa-pen"></i> Edit name</button>
-            <button type="button" class="danger" onclick="confirmGeminiParticipantRemoval('${esc(person.key)}')"><i class="fas fa-user-minus"></i> Remove from Gemini</button>
-          </div>
-        </details>` : '';
+        const manage = canEdit ? `<button type="button" class="icon-action" title="Manage ${esc(person.name)}" aria-label="Manage ${esc(person.name)}" onclick="openGeminiManageMenu('${esc(person.key)}')"><i class="fas fa-ellipsis"></i></button>` : '';
         const avatar = person.photo ? avatarHtml(person) : `<span class="chat-avatar" style="${person.type === 'record' ? 'background:#64748b;' : ''}">${esc(person.initials)}</span>`;
         return `<tr>
           <td><div class="gemini-member"><div class="gemini-member-main">${avatar}<span class="gemini-member-name" title="${esc(person.name)}">${esc(person.name)}</span></div>${manage}</div></td>
