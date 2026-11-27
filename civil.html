@@ -293,35 +293,34 @@
       grid-column: auto; min-height: 194px; padding: 20px;
       display: flex; flex-direction: column; align-items: flex-start; gap: 0;
       position: relative; overflow: hidden; isolation: isolate;
-      background: linear-gradient(145deg, #fffdf8 0%, #f7e6b4 100%);
-      border-color: #e3c573; box-shadow: 0 10px 24px rgba(123, 88, 19, .10);
+      background: linear-gradient(145deg, var(--surface) 0%, var(--surface-soft) 100%);
+      border-color: var(--line); box-shadow: var(--shadow);
     }
     .resource-grid:not(.view-list) > .resource-folder-card::before {
       content: ''; position: absolute; left: 20px; top: 17px; width: 72px; height: 25px;
-      border: 1px solid #d6ae4d; border-bottom: 0; border-radius: 10px 10px 0 0;
-      background: #efd58c; z-index: -1;
+      border: 1px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0;
+      background: var(--surface-soft); z-index: -1;
     }
     .resource-grid:not(.view-list) > .resource-folder-card:hover {
-      border-color: #b78116; background: linear-gradient(145deg, #fffefa 0%, #f3d989 100%);
-      box-shadow: 0 15px 28px rgba(123, 88, 19, .17); transform: translateY(-4px);
+      border-color: var(--ink); background: var(--surface); box-shadow: var(--shadow-lg); transform: translateY(-4px);
     }
     .resource-folder-card .folder-preview-icon {
       height: 76px; display: flex; align-items: flex-end; position: relative; z-index: 1;
     }
     .resource-folder-card .folder-preview-icon i.fa-folder {
       width: auto; height: auto; margin: 0; padding: 0; border: 0; background: none;
-      color: #a86d10; font-size: 56px; line-height: 1; text-shadow: 0 2px 0 rgba(255,255,255,.5);
+      color: var(--ink); font-size: 56px; line-height: 1; opacity: .86;
     }
     .resource-folder-card .folder-preview-copy { display: grid; gap: 5px; position: relative; z-index: 1; }
     .resource-folder-card .folder-preview-copy .folder-title {
-      padding: 0; font-size: 17px; font-weight: 800; color: #3c2d10; line-height: 1.2;
+      padding: 0; font-size: 17px; font-weight: 800; color: var(--ink); line-height: 1.2;
       overflow-wrap: anywhere;
     }
     .resource-folder-card .folder-preview-copy .folder-count {
-      margin: 0; color: #735724; font-size: 12px; font-weight: 700;
+      margin: 0; color: var(--muted); font-size: 12px; font-weight: 700;
     }
     .resource-folder-card .folder-open {
-      margin-top: auto; padding-top: 14px; color: #76530d; font-size: 12px; font-weight: 800;
+      margin-top: auto; padding-top: 14px; color: var(--ink); font-size: 12px; font-weight: 800;
       display: inline-flex; align-items: center; gap: 7px; flex: none;
     }
     .resource-folder-card .folder-open i { font-size: 11px; transition: transform .2s ease; }
