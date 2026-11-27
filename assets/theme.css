@@ -274,19 +274,37 @@ body.portal-body, body.admin-body{font-family:'Inter',system-ui,"Segoe UI",Arial
   position:relative;align-self:center;
   width:min(100%,520px);aspect-ratio:1/1;margin-left:auto;
 }
+.hm-photo::before{             /* soft floor shadow to ground the portrait */
+  content:"";position:absolute;left:14%;right:7%;bottom:4%;height:22%;
+  border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(108,72,38,.23) 0%,rgba(150,105,59,.12) 38%,transparent 72%);
+  filter:blur(9px);transform:scaleX(1.08);
+}
+.hm-photo::after{              /* quiet blueprint frame behind the composition */
+  content:"";position:absolute;left:9%;top:12%;width:74%;height:72%;
+  border:1px solid rgba(193,112,63,.19);border-radius:46% 54% 50% 48%;
+  box-shadow:inset 0 0 0 16px rgba(255,255,255,.10);
+  z-index:0;pointer-events:none;transform:rotate(-7deg);
+}
 .hm-photo .cutout{             /* the person on top of everything else */
   position:absolute;left:50%;bottom:0;transform:translateX(-48%);
   height:95%;width:auto;border-radius:0;z-index:3;
-  filter:drop-shadow(0 24px 32px rgba(23,22,15,.14));
+  filter:drop-shadow(0 25px 34px rgba(23,22,15,.18));
 }
 .hm-photo .blob{               /* the big tan circle */
   position:absolute;left:38%;top:48%;transform:translate(-50%,-50%);
-  width:88%;aspect-ratio:1/1;border-radius:50%;background:var(--tan);
+  width:88%;aspect-ratio:1/1;border-radius:50%;
+  background:
+    radial-gradient(circle at 31% 24%,rgba(255,255,255,.7) 0 4%,transparent 28%),
+    linear-gradient(142deg,#f0ddbe 0%,#e1c49d 52%,#c99a68 100%);
+  border:1px solid rgba(255,255,255,.54);
+  box-shadow:0 22px 46px rgba(113,76,39,.16),inset 14px 12px 28px rgba(255,255,255,.2),inset -12px -18px 30px rgba(135,91,46,.10);
   z-index:1;
 }
 .hm-photo .blob-sm{            /* small floating circle top-right */
   position:absolute;top:16%;right:14%;width:52px;height:52px;border-radius:50%;
-  background:var(--tan);opacity:.75;z-index:2;
+  background:linear-gradient(145deg,#f6e4c9,#c89660);opacity:.82;z-index:2;
+  box-shadow:0 9px 18px rgba(110,75,42,.12);
 }
 .hm-photo .sketch{             /* architectural line drawing behind the circle */
   position:absolute;inset:0;width:100%;height:100%;z-index:2;
