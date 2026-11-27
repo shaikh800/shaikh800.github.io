@@ -323,6 +323,8 @@
     .resource-folder-card .rc-btn.del { position: absolute; top: 14px; right: 14px; z-index: 2; }
 
     .view-controls { display: flex; gap: 6px; }
+    .folder-sort { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; color:var(--muted); }
+    .folder-sort select { border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 9px; font:inherit; cursor:pointer; }
     .view-btn { background: var(--surface); border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; color: var(--muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; }
     .view-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
     .view-btn:hover:not(.active) { color: var(--ink); background: var(--surface-soft); }
@@ -1130,6 +1132,7 @@
     let activeSem = 1;
     let currentSemPath = "";
     let currentViewMode = localStorage.getItem('civil_view_mode') || 'view-grid';
+    let currentFolderSort = localStorage.getItem('civil_folder_sort') || 'name-asc';
 
     // Every semester, folder and resource has a shareable address.  Query
     // parameters keep this compatible with GitHub Pages while still allowing
@@ -1181,6 +1184,11 @@
     window.setViewMode = function(mode) {
       currentViewMode = mode;
       localStorage.setItem('civil_view_mode', mode);
+      renderSem(activeSem);
+    };
+    window.setFolderSort = function(mode) {
+      currentFolderSort = mode;
+      localStorage.setItem('civil_folder_sort', mode);
       renderSem(activeSem);
     };
 
@@ -1336,12 +1344,13 @@ if (targetSegs.length && /^semester\s*\d+/i.test(targetSegs[0])) {
           <button class="view-btn ${currentViewMode==='view-large'?'active':''}" onclick="setViewMode('view-large')" title="Large Grid" aria-label="Large grid view" aria-pressed="${currentViewMode==='view-large'}"><i class="fas fa-th-large"></i></button>
         </div>
       `;
+      const sortControlHtml = `<label class="folder-sort"><i class="fas fa-arrow-down-a-z"></i><span>Sort</span><select onchange="setFolderSort(this.value)" aria-label="Sort resources"><option value="name-asc" ${currentFolderSort==='name-asc'?'selected':''}>Name A–Z</option><option value="name-desc" ${currentFolderSort==='name-desc'?'selected':''}>Name Z–A</option><option value="date-desc" ${currentFolderSort==='date-desc'?'selected':''}>Newest first</option><option value="date-asc" ${currentFolderSort==='date-asc'?'selected':''}>Oldest first</option></select></label>`;
 
       let headerHtml = `
         <div style="grid-column: 1/-1;">
           <div class="fs-header">
             <div class="fs-breadcrumb">${breadcrumbHtml}</div>
-            ${viewControlsHtml}
+            ${sortControlHtml}${viewControlsHtml}
           </div>
         </div>
       `;
@@ -1394,6 +1403,15 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
 
       grid.className = `resource-grid ${currentViewMode}`;
       let finalHtml = headerHtml;
+
+      const itemDate = item => Date.parse(item.createdAt || item.addedAt || item.modifiedTime || '') || 0;
+      files.sort((a, b) => {
+        const name = String(a.title || '').localeCompare(String(b.title || ''), undefined, { numeric:true, sensitivity:'base' });
+        if (currentFolderSort === 'name-desc') return -name;
+        if (currentFolderSort === 'date-desc') return (itemDate(b) - itemDate(a)) || name;
+        if (currentFolderSort === 'date-asc') return (itemDate(a) - itemDate(b)) || name;
+        return name;
+      });
 
       if (folders.size === 0 && files.length === 0) {
         finalHtml += `<div class="sem-empty" style="grid-column:1/-1"><i class="fas fa-folder-open"></i><p>This folder is empty.</p></div>`;
@@ -1929,7 +1947,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
             if (curFile.type.startsWith('image/')) {
               await new Promise(resolve => compressImage(curFile, 600, async (dataUrl) => {
                 await saveFile(curId, dataUrl);
-                const item = { id: curId, title: curTitle, desc, type: curType, src:'idb:'+curId, thumb: dataUrl, folder: folderPath };
+                const item = { id: curId, title: curTitle, desc, type: curType, src:'idb:'+curId, thumb: dataUrl, folder: folderPath, createdAt:new Date().toISOString() };
                 const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
                 sems2[activeSem].push(item); saveSems(sems2); resolve();
               }));
@@ -1939,7 +1957,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
                 reader.onload = async ev => {
                   const dataUrl = ev.target.result;
                   await saveFile(curId, dataUrl);
-                  const item = { id: curId, title: curTitle, desc, type: curType, src:'idb:'+curId, thumb: null, folder: folderPath };
+                  const item = { id: curId, title: curTitle, desc, type: curType, src:'idb:'+curId, thumb: null, folder: folderPath, createdAt:new Date().toISOString() };
                   const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
                   sems2[activeSem].push(item); saveSems(sems2); resolve();
                 };
@@ -1951,7 +1969,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
             try {
               if (filesToUpload.length > 1) toast(`Uploading ${fi+1}/${filesToUpload.length}: ${curFile.name}`, 'info');
               const result = await uploadFileToDrive(curFile, folderPath, 'view', pickedFolderId);
-              const item = { id: curId, title: curTitle, desc, type: curType, src: result.embedUrl, thumb:null, folder: folderPath, hidden: isHidden, driveFileId: result.fileId, driveFolderId: result.folderId, driveManaged: true };
+              const item = { id: curId, title: curTitle, desc, type: curType, src: result.embedUrl, thumb:null, folder: folderPath, hidden: isHidden, driveFileId: result.fileId, driveFolderId: result.folderId, driveManaged: true, createdAt:new Date().toISOString() };
               const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
               sems2[activeSem].push(item); saveSems(sems2);
               successCount++;
@@ -1968,7 +1986,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         return;
       }
 
-        const item = { id, title, desc, type, src, thumb:null, folder: folderPath, hidden: isHidden || false, driveFileId: activeTab === 'gdrive-panel' ? extractDriveId(src) : undefined };
+        const item = { id, title, desc, type, src, thumb:null, folder: folderPath, hidden: isHidden || false, driveFileId: activeTab === 'gdrive-panel' ? extractDriveId(src) : undefined, createdAt:new Date().toISOString() };
       const sems = loadSems();
       if (!sems[activeSem]) sems[activeSem] = [];
       sems[activeSem].push(item);
