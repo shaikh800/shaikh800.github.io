@@ -896,7 +896,7 @@
               <div id="pendingRequestsList"></div>
             </div>
             <table class="member-table">
-              <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th></th></tr></thead>
+              <thead><tr><th>Member</th><th>Role</th><th>Can view</th><th>Can download</th><th>Actions</th></tr></thead>
               <tbody id="memberTableBody"></tbody>
             </table>
             <div class="card" style="padding:16px;">
@@ -2656,8 +2656,37 @@ Content-Type: ${file.type || 'application/octet-stream'}
           <td><span class="role-pill ${m.role}">${m.role === 'admin' ? 'Admin' : 'Member'}</span></td>
           <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.view ? 'on' : ''}" onclick="toggleMember(${m.id},'view')"></span>`}</td>
           <td>${m.role === 'admin' ? '<span class="muted-cell">Always on</span>' : `<span class="toggle ${m.download ? 'on' : ''}" onclick="toggleMember(${m.id},'download')"></span>`}</td>
-          <td>${m.role === 'admin' ? '' : `<button class="icon-action danger" onclick="removeMember(${m.id})"><i class="fas fa-user-slash"></i></button>`}</td>
+          <td><span style="display:inline-flex;gap:6px;align-items:center;">
+            <button class="icon-action" title="Edit member name" aria-label="Edit ${esc(m.name)}" onclick="editMemberName(${m.id})"><i class="fas fa-pen"></i></button>
+            ${m.role === 'admin' ? '' : `<button class="icon-action danger" title="Remove member" aria-label="Remove ${esc(m.name)}" onclick="removeMember(${m.id})"><i class="fas fa-user-slash"></i></button>`}
+          </span></td>
         </tr>`).join('');
+    }
+    async function editMemberName(id) {
+      if (role !== 'admin') return;
+      const m = members.find(x => x.id === id);
+      if (!m) return;
+      const name = await sitePrompt({
+        title: 'Edit member name',
+        message: `Change the display name for ${m.email}. Their email and access stay the same.`,
+        value: m.name || '',
+        placeholder: 'Full name',
+        confirmLabel: 'Save name'
+      });
+      if (name === null) return;
+      const cleanName = name.trim();
+      if (!cleanName) { toast('Enter a name', 'error'); return; }
+      const previous = { name: m.name, initials: m.initials };
+      m.name = cleanName;
+      m.initials = cleanName.slice(0, 2).toUpperCase();
+      renderMembers(); renderGeminiTab(); renderTeamTab();
+      const result = await pushToGitHub();
+      if (!result.ok) {
+        m.name = previous.name;
+        m.initials = previous.initials;
+        renderMembers(); renderGeminiTab(); renderTeamTab();
+      }
+      reportSyncResult(result, result.ok ? `Updated ${cleanName}'s display name` : null);
     }
     async function toggleMember(id, field) {
       if (role !== 'admin') return;
