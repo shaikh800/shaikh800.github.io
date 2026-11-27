@@ -296,11 +296,6 @@
       background: linear-gradient(145deg, var(--surface) 0%, var(--surface-soft) 100%);
       border-color: var(--line); box-shadow: var(--shadow);
     }
-    .resource-grid:not(.view-list) > .resource-folder-card::before {
-      content: ''; position: absolute; left: 20px; top: 17px; width: 72px; height: 25px;
-      border: 1px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0;
-      background: var(--surface-soft); z-index: -1;
-    }
     .resource-grid:not(.view-list) > .resource-folder-card:hover {
       border-color: var(--ink); background: var(--surface); box-shadow: var(--shadow-lg); transform: translateY(-4px);
     }
@@ -412,7 +407,6 @@
       .card-grid.three { grid-template-columns:1fr; } 
       .resource-grid { grid-template-columns:1fr 1fr; }
       .resource-grid:not(.view-list) > .resource-folder-card { min-height: 168px; padding: 15px; }
-      .resource-grid:not(.view-list) > .resource-folder-card::before { left: 15px; top: 12px; }
       .resource-folder-card .folder-preview-icon { height: 63px; }
       .resource-folder-card .folder-preview-icon i.fa-folder { font-size: 47px; }
       .resource-folder-card .folder-preview-copy .folder-title { font-size: 14px; }
