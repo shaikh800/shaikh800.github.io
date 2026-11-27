@@ -503,6 +503,9 @@
           <button class="btn secondary sm admin-only" id="clear-data-btn" title="Remove this device's local cache; GitHub and Google Drive files are unchanged">
             <i class="fas fa-trash-can"></i> Reset local cache
           </button>
+          <button class="btn secondary sm admin-only" id="make-civil-public-btn" title="Give every linked Civil Drive file public viewing and download access">
+            <i class="fas fa-globe"></i> Fix public access
+          </button>
           <button class="btn primary sm admin-only" id="add-resource-btn"><i class="fas fa-plus"></i> Add Resource</button>
         </div>
       </div>
@@ -948,6 +951,22 @@
       return data;
     }
 
+    // Civil resources are intentionally public. Keep this check beside every
+    // browser-side Drive write so a pasted Drive link cannot accidentally
+    // create a card that visitors cannot open.
+    async function makeDriveFilePublic(fileId, token) {
+      const accessToken = token || await getDriveToken();
+      const meta = await driveAPI('GET', `/files/${encodeURIComponent(fileId)}?fields=permissions(id,type,role)`, null, accessToken);
+      const anyone = (meta.permissions || []).find(p => p.type === 'anyone');
+      if (anyone && anyone.role === 'reader') return false;
+      if (anyone) {
+        await driveAPI('PATCH', `/files/${encodeURIComponent(fileId)}/permissions/${encodeURIComponent(anyone.id)}`, { role:'reader', allowFileDiscovery:false }, accessToken);
+      } else {
+        await driveAPI('POST', `/files/${encodeURIComponent(fileId)}/permissions?sendNotificationEmail=false`, { role:'reader', type:'anyone', allowFileDiscovery:false }, accessToken);
+      }
+      return true;
+    }
+
     async function findOrCreateFolder(name, parentId, token) {
       const q = `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`;
       const list = await driveAPI('GET', `/files?q=${encodeURIComponent(q)}&fields=files(id,name)`, null, token);
@@ -1015,7 +1034,7 @@
       }
       fill.style.width = '85%'; txt.textContent = 'Setting permissions...';
 
-      await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
+      await makeDriveFilePublic(uploaded.id, token);
 
       fill.style.width = '100%'; txt.textContent = 'Done!';
       setTimeout(() => prog.classList.remove('show'), 1500);
@@ -1202,6 +1221,21 @@
       if (data.data && data.data.semesters) localStorage.setItem(STORE_KEY, JSON.stringify(data.data.semesters));
       return data;
     }
+    document.getElementById('make-civil-public-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('make-civil-public-btn');
+      const original = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Fixing…';
+      try {
+        const result = await driveSyncAction('driveMakeCivilPublic', {});
+        const report = result.report || {};
+        const failed = Number(report.failed || 0);
+        toast(failed ? `${report.published || 0} files made public; ${failed} need owner access.` : `All ${report.total || 0} Civil Drive files are public now.`, failed ? 'info' : 'success');
+      } catch (e) {
+        toast(e.message || 'Could not update public access.', 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = original;
+      }
+    });
     async function moveResource(id, sem) {
       const item = (loadSems()[sem] || []).find(x => x.id === id);
       if (!item || !driveIdForItem(item)) { toast('Only Google Drive resources can be moved.', 'error'); return; }
@@ -1807,6 +1841,12 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         const gUrl = document.getElementById('r-gdrive').value.trim();
         const fid = extractDriveId(gUrl);
         if (!fid) { toast('Paste a valid Google Drive link', 'error'); return; }
+        try {
+          await makeDriveFilePublic(fid);
+        } catch (e) {
+          toast(`This Drive file could not be made public: ${e.message || 'owner permission is required'}`, 'error');
+          return;
+        }
         src = `https://drive.google.com/file/d/${fid}/view?usp=sharing`;
 
       } else if (activeTab === 'url-panel') {

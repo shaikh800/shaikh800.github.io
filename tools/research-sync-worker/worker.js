@@ -507,6 +507,31 @@ async function moveDriveFile(env, id, parentId) {
   const q = `addParents=${encodeURIComponent(parentId)}${removeParents ? `&removeParents=${encodeURIComponent(removeParents)}` : ''}&fields=id,parents`;
   return driveRequest(env, 'PATCH', `/files/${encodeURIComponent(id)}?${q}`, {});
 }
+async function makeDriveFilePublic(env, id) {
+  const meta = await driveRequest(env, 'GET', `/files/${encodeURIComponent(id)}?fields=permissions(id,type,role)`);
+  const anyone = (meta.permissions || []).find(permission => permission.type === 'anyone');
+  if (anyone && anyone.role === 'reader') return false;
+  if (anyone) {
+    await driveRequest(env, 'PATCH', `/files/${encodeURIComponent(id)}/permissions/${encodeURIComponent(anyone.id)}`, { role: 'reader', allowFileDiscovery: false });
+  } else {
+    await driveRequest(env, 'POST', `/files/${encodeURIComponent(id)}/permissions?sendNotificationEmail=false`, { type: 'anyone', role: 'reader', allowFileDiscovery: false });
+  }
+  return true;
+}
+async function publishCivilResources(env, data) {
+  const resources = Object.values(data.semesters || {}).flat().map(entry => ({ entry, id: driveId(entry) })).filter(hit => hit.id);
+  const report = { total: resources.length, published: 0, alreadyPublic: 0, failed: 0, failures: [] };
+  for (const { entry, id } of resources) {
+    try {
+      if (await makeDriveFilePublic(env, id)) report.published++;
+      else report.alreadyPublic++;
+    } catch (error) {
+      report.failed++;
+      report.failures.push({ id, title: entry.title || id, error: (error && error.message) || 'drive-access-failed' });
+    }
+  }
+  return report;
+}
 async function handleDriveAction(action, payload, env, origin) {
   if (!(await verifyAdmin(env, payload.adminTokens))) return json({ ok: false, error: 'not-admin' }, 401, origin);
   if (!env.DRIVE_SYNC_STATE) return json({ ok: false, error: 'drive-state-not-configured' }, 503, origin);
@@ -517,6 +542,10 @@ async function handleDriveAction(action, payload, env, origin) {
   const latest = await ghFetchFile(env.GITHUB_TOKEN, 'civil_data.json');
   const data = latest.content;
   data.semesters = data.semesters || {};
+  if (action === 'driveMakeCivilPublic') {
+    const report = await publishCivilResources(env, data);
+    return json({ ok: true, report }, 200, origin);
+  }
   if (action === 'driveBootstrap') {
     const folderCache = new Map();
     for (let semester = 1; semester <= 8; semester++) {
@@ -613,6 +642,10 @@ async function syncDriveMirror(env) {
     data.updated = new Date().toISOString();
     await ghWriteFile(env.GITHUB_TOKEN, data, latest.sha, 'civil_data.json', 'Mirror Semester Resources from Drive');
   }
+  // The site promises public Civil resources. This also repairs permissions
+  // on older files and Drive files added outside the browser form.
+  const publicReport = await publishCivilResources(env, data);
+  if (publicReport.failed) console.warn('Civil public access repair incomplete:', JSON.stringify(publicReport.failures));
   return data;
 }
 
@@ -636,7 +669,7 @@ export default {
 
     try {
       if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
-      if (action === 'driveDelete' || action === 'driveDeleteBatch' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow') return await handleDriveAction(action, payload, env, origin);
+      if (action === 'driveDelete' || action === 'driveDeleteBatch' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow' || action === 'driveMakeCivilPublic') return await handleDriveAction(action, payload, env, origin);
       if (action === 'geminiRead' || action === 'geminiUpdate') return await handleGemini(action, payload, env, origin);
       if (action === 'researchVerify') return await handleResearchVerify(payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
