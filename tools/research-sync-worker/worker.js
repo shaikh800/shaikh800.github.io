@@ -42,6 +42,7 @@ const GITHUB_REPO   = 'shaikh800.github.io';
 const GITHUB_FILE   = 'research_data.json';
 const GITHUB_BRANCH = 'main';
 const ALLOWED_ORIGINS = ['https://mdshaikh.me', 'https://shaikh800.github.io'];
+const GOOGLE_OAUTH_CLIENT_ID = '935407224568-umj6rfh1nsrjureoaih5n26s6i647ced.apps.googleusercontent.com';
 
 function corsHeaders(origin) {
   const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -130,6 +131,15 @@ function isGeminiManager(data, email) {
 
 async function googleEmailForToken(token) {
   if (!token || typeof token !== 'string') return '';
+  // Google Identity Services returns an ID credential (a JWT), whereas the
+  // Drive uploader uses an OAuth access token. Support both, but validate the
+  // ID token audience before trusting its email.
+  if (token.split('.').length === 3) {
+    const res = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(token));
+    const data = await res.json().catch(() => ({}));
+    const verified = data.email_verified === true || data.email_verified === 'true';
+    return res.ok && data.aud === GOOGLE_OAUTH_CLIENT_ID && verified && validEmail(data.email) ? data.email.toLowerCase() : '';
+  }
   const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -265,6 +275,13 @@ async function handleGemini(action, payload, env, origin) {
   state.updated = new Date().toISOString();
   await env.DRIVE_SYNC_STATE.put('gemini:live-state', JSON.stringify(state));
   return json({ ok: true, data: state }, 200, origin);
+}
+
+async function handleResearchVerify(payload, env, origin) {
+  const latest = await ghFetchFile(env.GITHUB_TOKEN, GITHUB_FILE);
+  const email = await googleEmailForToken(payload.googleToken);
+  if (!isMember(latest.content, email)) return json({ ok: false, error: 'not-approved-research-member' }, 403, origin);
+  return json({ ok: true, email }, 200, origin);
 }
 
 function applyAction(data, action, payload) {
@@ -621,6 +638,7 @@ export default {
       if (action === 'adminRead' || action === 'adminWrite') return await handleAdmin(action, payload, env, origin);
       if (action === 'driveDelete' || action === 'driveDeleteBatch' || action === 'driveMove' || action === 'driveBootstrap' || action === 'driveSyncNow') return await handleDriveAction(action, payload, env, origin);
       if (action === 'geminiRead' || action === 'geminiUpdate') return await handleGemini(action, payload, env, origin);
+      if (action === 'researchVerify') return await handleResearchVerify(payload, env, origin);
       const { content, sha } = await ghFetchFile(env.GITHUB_TOKEN);
       const updated = applyAction(content, action, payload);
       updated.updated = new Date().toISOString();
@@ -632,7 +650,7 @@ export default {
         'not-a-member', 'missing-name', 'missing-fields', 'not-owner',
         'bad-email', 'already-a-member', 'unknown-action',
         'bad-file', 'bad-data', 'not-admin', 'conflict', 'gas-not-configured',
-        'not-approved-gemini-member', 'not-gemini-manager',
+        'not-approved-gemini-member', 'not-approved-research-member', 'not-gemini-manager',
         'bad-gemini-payment', 'bad-gemini-cycle', 'bad-gemini-participant',
       ];
       return json({ ok: false, error: msg }, knownClientErrors.includes(msg) ? 400 : 502, origin);

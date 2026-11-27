@@ -385,19 +385,19 @@
     <div class="gate-card">
       <i class="fab fa-google-drive" style="font-size:30px;color:#0f9d58;margin-bottom:14px;display:block;"></i>
       <h1>Research Hub</h1>
-      <p class="sub">Log in or sign up to continue — just your email.</p>
+      <p class="sub">Sign in or request to join with your Google email.</p>
 
       <div class="gate-pw-step open" id="gateMemberForm">
         <input type="email" id="memberEmail" placeholder="Your email" autocomplete="email">
-        <input type="password" id="memberPass" placeholder="Choose a password" autocomplete="new-password">
         <div class="gate-err" id="memberFormErr"></div>
         <button class="btn primary" style="width:100%;justify-content:center;" id="memberFormBtn"><i class="fas fa-right-to-bracket"></i> Continue</button>
-        <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">New here? Fill this in once — the admin will approve your email, and you'll have access on any device.</p>
+        <p style="font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;">New here? Send your request once. After admin approval, sign in with this exact Google email on any device.</p>
       </div>
 
       <div class="gate-checking" id="gateChecking">
         <i class="fas fa-circle-notch fa-spin"></i>
         <p id="gateCheckingText">Checking…</p>
+        <div id="gateGoogleButton" style="display:flex;justify-content:center;margin-top:12px;"></div>
       </div>
 
       <div class="gate-denied" id="gateDenied">
@@ -689,7 +689,8 @@
         <div class="card" id="geminiAccessGate" style="padding:20px;margin-bottom:16px;max-width:620px;">
           <div style="font-weight:700;margin-bottom:6px;"><i class="fas fa-shield-halved" style="color:var(--blue);margin-right:7px;"></i>Team member verification</div>
           <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Verify the same Google email that was approved for Research to open the Gemini dashboard. Gemini-only names never receive access.</p>
-          <button class="btn primary sm" type="button" onclick="unlockGeminiDashboard()"><i class="fab fa-google"></i> Verify &amp; open Gemini</button>
+          <button class="btn primary sm" type="button" onclick="beginGeminiVerification()"><i class="fab fa-google"></i> Verify &amp; open Gemini</button>
+          <div id="geminiGoogleButton" style="margin-top:10px;"></div>
           <div id="geminiAccessStatus" style="font-size:12px;color:var(--muted);margin-top:8px;min-height:16px;"></div>
         </div>
 
@@ -872,13 +873,9 @@
             </table>
             <div class="card" style="padding:16px;">
               <div style="font-weight:700;font-size:13.5px;margin-bottom:8px;">Add a member</div>
-              <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Use the exact Gmail address they'll sign in with — that's also what lets them upload under Team Uploads.</p>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Use the exact Gmail address they'll sign in with. Added members receive the standard full Research access.</p>
               <div class="invite-row">
                 <input type="email" id="inviteEmail" placeholder="friend@gmail.com">
-                <select id="inviteRole" style="max-width:150px;">
-                  <option value="view">View only</option>
-                  <option value="download">Can download</option>
-                </select>
                 <button class="btn primary sm" onclick="inviteMember()"><i class="fas fa-paper-plane"></i> Add</button>
               </div>
             </div>
@@ -1514,17 +1511,63 @@
         error_callback: () => { _authInFlight = false; renderTeamTab(); }
       });
     }
-    let _geminiMemberTokenClient = null;
+    let _googleIdentityReady = false;
+    let _googleIdentityHandler = null;
+    let _googleIdentityExpectedEmail = '';
     let _geminiMemberToken = '';
     let _geminiMemberTokenExpiry = 0;
     let _geminiVerificationIssue = '';
-    function initGeminiMemberAuth() {
-      if (_geminiMemberTokenClient || !window.google || !window.google.accounts || !window.google.accounts.oauth2) return;
-      _geminiMemberTokenClient = google.accounts.oauth2.initTokenClient({
+    function decodeGoogleCredential(credential) {
+      try {
+        const part = String(credential || '').split('.')[1];
+        if (!part) return {};
+        return JSON.parse(decodeURIComponent(atob(part.replace(/-/g, '+').replace(/_/g, '/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+      } catch (e) { return {}; }
+    }
+    function cacheResearchIdentity(credential, profile) {
+      try {
+        sessionStorage.setItem('research_google_credential_v1', credential);
+        sessionStorage.setItem('research_google_credential_expiry_v1', String((profile.exp || 0) * 1000));
+      } catch (e) {}
+    }
+    function clearResearchIdentity() {
+      try {
+        sessionStorage.removeItem('research_google_credential_v1');
+        sessionStorage.removeItem('research_google_credential_expiry_v1');
+      } catch (e) {}
+    }
+    function initGoogleIdentity() {
+      if (_googleIdentityReady || !window.google || !window.google.accounts || !window.google.accounts.id) return false;
+      google.accounts.id.initialize({
         client_id: GDRIVE_CLIENT_ID,
-        scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
-        callback: () => {}
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        callback: async response => {
+          const profile = decodeGoogleCredential(response && response.credential);
+          const email = String(profile.email || '').toLowerCase();
+          if (!response || !response.credential || !email || (_googleIdentityExpectedEmail && email !== _googleIdentityExpectedEmail)) {
+            const target = _googleIdentityHandler;
+            if (target) target(null, profile);
+            return;
+          }
+          _geminiMemberToken = response.credential;
+          _geminiMemberTokenExpiry = Math.max(Date.now() + 60000, ((profile.exp || 0) * 1000) - 60000);
+          cacheResearchIdentity(response.credential, profile);
+          const target = _googleIdentityHandler;
+          if (target) await target(response.credential, profile);
+        }
       });
+      _googleIdentityReady = true;
+      return true;
+    }
+    function renderGoogleIdentityButton(hostId, expectedEmail, handler) {
+      const host = document.getElementById(hostId);
+      _googleIdentityExpectedEmail = String(expectedEmail || '').toLowerCase();
+      _googleIdentityHandler = handler;
+      if (!host || !initGoogleIdentity()) return false;
+      host.replaceChildren();
+      google.accounts.id.renderButton(host, { theme: 'outline', size: 'large', text: 'continue_with', width: 270 });
+      return true;
     }
     function isApprovedGeminiViewer() {
       if (role === 'admin') return true;
@@ -1537,39 +1580,28 @@
       const expectedEmail = geminiActorEmail();
       if (!isApprovedGeminiViewer() || !expectedEmail) return null;
       if (_geminiMemberToken && Date.now() < _geminiMemberTokenExpiry) return _geminiMemberToken;
-      const ready = await new Promise(resolve => {
-        const started = Date.now();
-        (function wait() {
-          initGeminiMemberAuth();
-          if (_geminiMemberTokenClient) return resolve(true);
-          if (Date.now() - started > 8000) return resolve(false);
-          setTimeout(wait, 150);
-        })();
+      _geminiVerificationIssue = `Choose the approved Google account (${expectedEmail}) below.`;
+      beginGeminiVerification();
+      return null;
+    }
+    function beginGeminiVerification() {
+      const status = document.getElementById('geminiAccessStatus');
+      const expectedEmail = geminiActorEmail();
+      if (!isApprovedGeminiViewer() || !expectedEmail) {
+        if (status) status.textContent = 'This signed-in account is not an approved Research team member.';
+        return;
+      }
+      if (status) status.textContent = `Continue with the approved Google account: ${expectedEmail}`;
+      const ok = renderGoogleIdentityButton('geminiGoogleButton', expectedEmail, async (credential) => {
+        if (!credential) {
+          _geminiVerificationIssue = `Use the approved Google account: ${expectedEmail}`;
+          if (status) status.textContent = _geminiVerificationIssue;
+          return;
+        }
+        _geminiVerificationIssue = '';
+        await unlockGeminiDashboard();
       });
-      if (!ready) { toast("Google verification didn't load. Check your connection and try again.", 'error'); return null; }
-      return new Promise(resolve => {
-        _geminiMemberTokenClient.callback = async response => {
-          if (response.error || !response.access_token) {
-            _geminiVerificationIssue = response.error === 'access_denied'
-              ? 'Google sign-in is not enabled for this account yet. Ask a Research admin to add your email to the Google sign-in test-user list.'
-              : 'Google verification was cancelled.';
-            toast(_geminiVerificationIssue, 'error', 6500);
-            return resolve(null);
-          }
-          _geminiVerificationIssue = '';
-          try {
-            const info = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + response.access_token } }).then(res => res.json());
-            if (!info.email || info.email.toLowerCase() !== expectedEmail) {
-              toast(`Use the Google account ${expectedEmail} that was approved for Research.`, 'error', 5000);
-              return resolve(null);
-            }
-            _geminiMemberToken = response.access_token;
-            _geminiMemberTokenExpiry = Date.now() + ((response.expires_in || 3600) - 60) * 1000;
-            resolve(_geminiMemberToken);
-          } catch (e) { toast('Could not verify the Google account. Try again.', 'error'); resolve(null); }
-        };
-        _geminiMemberTokenClient.requestAccessToken({ prompt: 'consent', login_hint: expectedEmail });
-      });
+      if (!ok && status) status.textContent = "Google verification didn't load. Check your connection and try again.";
     }
     async function getGeminiManagerToken() {
       return isGeminiManager() ? getGeminiMemberToken() : null;
@@ -1679,27 +1711,48 @@
       return (currentUser.email || '').toLowerCase() === 'turbo.researchers@gmail.com';
     }
 
-    /* ── Gate: simple name + email + password sign-in (no Google needed to get past the gate) ── */
-    async function sha256Hex(text) {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    /* ── Gate: approved members must verify the exact Google account. ── */
+    async function verifyApprovedResearchMember(credential) {
+      const result = await geminiLiveRequest('researchVerify', { googleToken: credential });
+      return result && result.ok;
+    }
+    async function completeResearchSignIn(credential, profile) {
+      const expectedEmail = document.getElementById('memberEmail').value.trim().toLowerCase();
+      if (!credential) {
+        showGateDenied(`Use the Google account <strong>${esc(expectedEmail)}</strong> that was approved for Research.`);
+        return;
+      }
+      document.getElementById('gateCheckingText').textContent = 'Verifying your approved account…';
+      if (!(await verifyApprovedResearchMember(credential))) {
+        clearResearchIdentity();
+        showGateDenied('This Google account is not approved for Research yet. Ask the admin to approve the same Gmail address.');
+        return;
+      }
+      const email = String(profile.email || expectedEmail).toLowerCase();
+      const existing = members.find(m => String(m.email || '').toLowerCase() === email) || {};
+      gateUser = { name: profile.name || existing.name || email.split('@')[0], email, picture: profile.picture || existing.photo || '', token: null, expiry: 0 };
+      saveMemberProfile({ email, name: gateUser.name, picture: gateUser.picture || '' });
+      enterAs('member');
     }
     async function submitMemberForm() {
       const email = document.getElementById('memberEmail').value.trim().toLowerCase();
       const name = email.split('@')[0];
-      const pass = document.getElementById('memberPass').value;
       const errEl = document.getElementById('memberFormErr');
       errEl.textContent = '';
       if (!email || !email.includes('@')) { errEl.textContent = 'Enter a valid email.'; return; }
-      if (!pass || pass.length < 4) { errEl.textContent = 'Password must be at least 4 characters.'; return; }
       showGateChecking('Checking access…');
-      const passwordHash = await sha256Hex(email + ':' + pass);
       await fetchFromGitHub(); // make sure we have the freshest member list before deciding
-      gateUser = { name, email, picture: '', token: null, expiry: 0 };
-      saveMemberProfile({ email, name, picture: '', passwordHash });
       const alreadyMember = isMemberEmail(email);
-      if (!alreadyMember) addPendingRequest(name, email);
-      enterAs(alreadyMember ? 'member' : 'pending');
+      if (!alreadyMember) {
+        gateUser = { name, email, picture: '', token: null, expiry: 0 };
+        saveMemberProfile({ email, name, picture: '' });
+        addPendingRequest(name, email);
+        enterAs('pending');
+        return;
+      }
+      document.getElementById('gateCheckingText').textContent = `Continue with the approved Google account: ${email}`;
+      const ok = renderGoogleIdentityButton('gateGoogleButton', email, completeResearchSignIn);
+      if (!ok) showGateDenied("Google sign-in didn't load. Check your connection and try again.");
     }
     async function trySilentReauth() {
       // Nothing to silently refresh until Drive consent has actually been granted once
@@ -2550,8 +2603,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       if (role !== 'admin') return;
       const email = document.getElementById('inviteEmail').value.trim();
       if (!email) return;
-      const access = document.getElementById('inviteRole').value;
-      members.push({ id: Date.now(), name: email, email: email.toLowerCase(), initials: email.slice(0, 2).toUpperCase(), role: 'member', view: true, download: access === 'download' });
+      members.push({ id: Date.now(), name: email, email: email.toLowerCase(), initials: email.slice(0, 2).toUpperCase(), role: 'member', view: true, download: true });
       pendingRequests = pendingRequests.filter(r => r.email !== email.toLowerCase());
       document.getElementById('inviteEmail').value = '';
       renderMembers();
@@ -2597,7 +2649,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       if (role !== 'admin') return;
       const req = pendingRequests.find(r => r.email === email);
       if (!req) return;
-      members.push({ id: Date.now(), name: req.name || req.email, email: req.email, initials: (req.name || req.email).slice(0, 2).toUpperCase(), role: 'member', view: true, download: false });
+      members.push({ id: Date.now(), name: req.name || req.email, email: req.email, initials: (req.name || req.email).slice(0, 2).toUpperCase(), role: 'member', view: true, download: true });
       pendingRequests = pendingRequests.filter(r => r.email !== email);
       renderMembers(); renderGeminiTab(); renderPendingRequests();
       reportSyncResult(await pushToGitHub(), `Approved ${email}`);
@@ -2636,7 +2688,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
     }
     document.getElementById('gateDeniedBackBtn').addEventListener('click', showGateOptions);
     document.getElementById('memberFormBtn').addEventListener('click', submitMemberForm);
-    document.getElementById('memberPass').addEventListener('keydown', e => { if (e.key === 'Enter') submitMemberForm(); });
+    document.getElementById('memberEmail').addEventListener('keydown', e => { if (e.key === 'Enter') submitMemberForm(); });
 
     /* ── Admin mode — shared, server-checked session (assets/site-auth.js).
        Logging in/out happens on admin_panel.html (linked from the footer);
@@ -2645,8 +2697,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function enterAs(r) {
       role = r;
       geminiAccessVerified = false;
-      _geminiMemberToken = '';
-      _geminiMemberTokenExpiry = 0;
+      if (r !== 'member') { _geminiMemberToken = ''; _geminiMemberTokenExpiry = 0; }
       gateEl.style.display = 'none';
       applyRole();
     }
@@ -2758,6 +2809,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
       geminiAccessVerified = false;
       _geminiMemberToken = '';
       _geminiMemberTokenExpiry = 0;
+      clearResearchIdentity();
       document.body.classList.remove('admin-mode');
       showGateOptions();
       gateEl.style.display = 'flex';
@@ -2800,17 +2852,17 @@ Content-Type: ${file.type || 'application/octet-stream'}
       });
       if (siteIsAdmin()) { enterAs('admin'); return; } // already logged in elsewhere on the site this tab
       const cached = loadMemberProfile();
-      if (cached && cached.email) {
-        // Enter immediately from cached data — no waiting for network on every page load.
-        // This makes tab-switching and back-navigation instant with no gate flash.
-        gateUser = { name: cached.name, email: cached.email.toLowerCase(), picture: cached.picture || '', token: null, expiry: 0 };
-        enterAs(isMemberEmail(cached.email) ? 'member' : 'pending');
-        // After fresh data arrives, silently re-check in case membership was revoked.
-        // Drive token is fetched lazily when the member opens Team Uploads.
-        freshPromise.then(() => {
-          if ((role === 'member' || role === 'pending') && !isMemberEmail(cached.email)) exitToGate();
-        }).catch(() => {});
-        return;
+      if (cached && cached.email && isMemberEmail(cached.email)) {
+        const credential = sessionStorage.getItem('research_google_credential_v1') || '';
+        const expiry = Number(sessionStorage.getItem('research_google_credential_expiry_v1') || '0');
+        if (credential && Date.now() < expiry && await verifyApprovedResearchMember(credential)) {
+          const profile = decodeGoogleCredential(credential);
+          gateUser = { name: profile.name || cached.name, email: cached.email.toLowerCase(), picture: profile.picture || cached.picture || '', token: null, expiry: 0 };
+          _geminiMemberToken = credential; _geminiMemberTokenExpiry = expiry;
+          enterAs('member');
+          return;
+        }
+        clearResearchIdentity();
       }
       showGateOptions();
     }

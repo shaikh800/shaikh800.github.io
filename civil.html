@@ -603,8 +603,7 @@
           <div class="access-box">
             <div class="access-label">Access Control</div>
             <label class="access-option"><input type="radio" name="gdrive-access" value="view" checked> <span><i class="fas fa-download" style="color:var(--muted);"></i> Public — anyone can download</span></label>
-            <label class="access-option"><input type="radio" name="gdrive-access" value="private"> <span><i class="fas fa-lock" style="color:#ef4444;"></i> Hide on this site</span></label>
-            <p class="access-info">This hides the item in the site only. For an existing Drive link, set its sharing to <strong>Restricted</strong> in Google Drive if it must be private.</p>
+            <p class="access-info">Semester Resources are public. Set the linked Google Drive file to <strong>Anyone with the link</strong> so visitors can download it.</p>
           </div>
         </div>
 
@@ -635,7 +634,6 @@
           <div class="access-box" style="margin-top:8px;">
             <div class="access-label">Access Control</div>
             <label class="access-option"><input type="radio" name="upload-access" value="view" checked> <span><i class="fas fa-download" style="color:var(--muted);"></i> Public — anyone can download</span></label>
-            <label class="access-option"><input type="radio" name="upload-access" value="private"> <span><i class="fas fa-lock" style="color:#ef4444;"></i> Only Me — restricted in Google Drive</span></label>
           </div>
         </div>
 
@@ -948,10 +946,8 @@
 
     async function uploadFileToDrive(file, pathString, accessMode, folderIdOverride) {
       const token = await getDriveToken();
-      const isPrivate = accessMode === 'private';
-      // Civil resources are public downloads by default. Private items remain
-      // private, but no public upload is ever created as view-only.
-      const embedMode = isPrivate ? 'preview' : 'view';
+      // Semester Resources are always public and downloadable.
+      const embedMode = 'view';
       
       const prog = document.getElementById('drive-progress');
       const fill = document.getElementById('drive-progress-fill');
@@ -1007,12 +1003,7 @@
       }
       fill.style.width = '85%'; txt.textContent = 'Setting permissions...';
 
-      // "Only Me" must stay restricted in Drive. Public resources get a reader
-      // permission; preview also disables Drive's copy/download/print actions.
-      if (!isPrivate) await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
-      if (embedMode === 'preview') {
-        await driveAPI('PATCH', `/files/${uploaded.id}?fields=copyRequiresWriterPermission`, { copyRequiresWriterPermission: true }, token);
-      }
+      await driveAPI('POST', `/files/${uploaded.id}/permissions`, { role:'reader', type:'anyone' }, token);
 
       fill.style.width = '100%'; txt.textContent = 'Done!';
       setTimeout(() => prog.classList.remove('show'), 1500);
@@ -1769,10 +1760,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         const gUrl = document.getElementById('r-gdrive').value.trim();
         const fid = extractDriveId(gUrl);
         if (!fid) { toast('Paste a valid Google Drive link', 'error'); return; }
-        const rawMode = document.querySelector('input[name="gdrive-access"]:checked').value;
-        isHidden = (rawMode === 'private');
-        const mode = isHidden ? 'preview' : 'view';
-        src = `https://drive.google.com/file/d/${fid}/${mode}?usp=sharing`;
+        src = `https://drive.google.com/file/d/${fid}/view?usp=sharing`;
 
       } else if (activeTab === 'url-panel') {
         src = document.getElementById('r-url').value.trim();
@@ -1782,8 +1770,6 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
         // Upload → Drive (supports multiple files)
         const filesToUpload = (_pendingFiles && _pendingFiles.length > 1) ? _pendingFiles : (_pendingFile ? [_pendingFile] : []);
         if (!filesToUpload.length) { toast('Select a file', 'error'); return; }
-        const rawMode = document.querySelector('input[name="upload-access"]:checked').value;
-        isHidden = (rawMode === 'private');
         const pickedFolderId = document.getElementById('r-drive-folder-id').value;
 
         closeModal('modal-resource');
@@ -1820,7 +1806,7 @@ if (itSegs.length && /^my\s*drive$/i.test(itSegs[0])) {
           } else {
             try {
               if (filesToUpload.length > 1) toast(`Uploading ${fi+1}/${filesToUpload.length}: ${curFile.name}`, 'info');
-              const result = await uploadFileToDrive(curFile, folderPath, rawMode, pickedFolderId);
+              const result = await uploadFileToDrive(curFile, folderPath, 'view', pickedFolderId);
               const item = { id: curId, title: curTitle, desc, type: curType, src: result.embedUrl, thumb:null, folder: folderPath, hidden: isHidden, driveFileId: result.fileId, driveFolderId: result.folderId, driveManaged: true };
               const sems2 = loadSems(); if (!sems2[activeSem]) sems2[activeSem]=[];
               sems2[activeSem].push(item); saveSems(sems2);
