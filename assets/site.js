@@ -193,6 +193,7 @@ document.querySelectorAll(".site-nav a[data-page]").forEach((link) => {
   if (isCurrent) {
     link.classList.add("is-active");
     link.setAttribute("aria-current", "page");
+    link.closest(".nav-group")?.classList.add("has-active-link");
     // Pre-expand the current page's group so it reads as "you are here"
     // the moment the mobile drawer opens. Desktop skips this: there
     // .is-open drives the floating dropdown, and auto-popping that open

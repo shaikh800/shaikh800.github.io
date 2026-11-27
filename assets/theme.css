@@ -119,6 +119,17 @@ main.page > .sem-section{padding:clamp(28px,3.5vw,42px) 0 34px;}
     box-shadow:inset 0 0 0 1px var(--line),0 3px 8px rgba(23,22,15,.08);
   }
   .site-nav a.is-active::after{display:none;}
+  /* Section labels with a chevron are a single control. Keeping the active
+     treatment on the shared head keeps the chevron inside the selected box. */
+  .site-nav .nav-group.has-active-link .nav-group-head{
+    margin:-8px -11px;padding:0 11px;
+    border-radius:10px;background:var(--surface);
+    box-shadow:inset 0 0 0 1px var(--line),0 3px 8px rgba(23,22,15,.08);
+  }
+  .site-nav .nav-group.has-active-link .nav-link.is-active{
+    margin:0;padding:8px 0;background:transparent;box-shadow:none;
+  }
+  .site-nav .nav-group.has-active-link .nav-caret{margin-left:6px;}
   .nav-actions{margin:0 0 0 10px;padding:0;border:0;gap:9px;}
   .site-nav .nav-actions a{flex:none;min-height:38px;font-size:12.5px;padding:0 15px;}
   .nav-shell{gap:16px;}
