@@ -304,6 +304,20 @@
     .gem-dot.clickable:hover { outline: 2px solid var(--blue); outline-offset: 1px; }
     .gemini-table th:first-child, .gemini-table td:first-child { white-space: nowrap; position: sticky; left: 0; background: var(--surface); }
     .gemini-table th { white-space: nowrap; }
+    .gemini-table th:first-child { z-index: 3; background: var(--surface-soft); }
+    .gemini-table td:first-child { z-index: 2; }
+    .gemini-member { display:flex; align-items:center; gap:10px; min-width:205px; }
+    .gemini-member-main { display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
+    .gemini-member-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .gemini-manage { position:relative; flex:0 0 auto; }
+    .gemini-manage > summary { list-style:none; }
+    .gemini-manage > summary::-webkit-details-marker { display:none; }
+    .gemini-manage > summary.icon-action { display:inline-flex; }
+    .gemini-manage-menu { position:absolute; top:calc(100% + 6px); right:0; z-index:25; width:172px; padding:6px; border:1px solid var(--line); border-radius:10px; background:var(--surface); box-shadow:var(--shadow-lg); }
+    .gemini-manage-menu button { width:100%; display:flex; align-items:center; gap:8px; border:0; border-radius:7px; background:transparent; color:var(--ink); padding:8px 9px; cursor:pointer; font:600 12px/1.2 inherit; text-align:left; }
+    .gemini-manage-menu button:hover { background:var(--surface-soft); }
+    .gemini-manage-menu button.danger { color:#dc2626; }
+    .gemini-manage-menu button.danger:hover { background:rgba(239,68,68,.08); }
     /* keep this one a real scrollable table on phones instead of the stacked member-table layout */
     @media (max-width: 640px) {
       .gemini-table.member-table { min-width: 560px; }
@@ -2414,6 +2428,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function openGeminiPersonEditor(key) {
       const row = geminiRowByKey(key);
       if (!row || !isGeminiManager()) return;
+      document.querySelectorAll('.gemini-manage[open]').forEach(menu => { menu.open = false; });
       const input = document.getElementById('gemini-person-input');
       const error = document.getElementById('gemini-person-error');
       const button = document.getElementById('gemini-person-save-btn');
@@ -2436,6 +2451,7 @@ Content-Type: ${file.type || 'application/octet-stream'}
     function confirmGeminiParticipantRemoval(key) {
       const row = geminiRowByKey(key);
       if (!row || !isGeminiManager()) return;
+      document.querySelectorAll('.gemini-manage[open]').forEach(menu => { menu.open = false; });
       const text = document.getElementById('gemini-remove-text');
       const button = document.getElementById('gemini-remove-confirm-btn');
       text.textContent = row.type === 'team'
@@ -2505,13 +2521,16 @@ Content-Type: ${file.type || 'application/octet-stream'}
           return `<td style="text-align:center;"><span class="gem-amt ${cls}${canEdit ? ' clickable' : ''}"${clickAttr} title="${esc(mo.label)}">${label}</span></td>`;
         }).join('');
         if (person.key === myEmail) myDueMonths = rowDueMonths;
-        const manage = canEdit ? `<span style="display:inline-flex;gap:5px;margin-left:7px;vertical-align:middle;">
-          <button class="icon-action" title="Edit Gemini name" onclick="openGeminiPersonEditor('${esc(person.key)}')"><i class="fas fa-pen"></i></button>
-          <button class="icon-action danger" title="Remove from Gemini list" onclick="confirmGeminiParticipantRemoval('${esc(person.key)}')"><i class="fas fa-user-minus"></i></button>
-        </span>` : '';
+        const manage = canEdit ? `<details class="gemini-manage">
+          <summary class="icon-action" title="Manage ${esc(person.name)}" aria-label="Manage ${esc(person.name)}"><i class="fas fa-ellipsis"></i></summary>
+          <div class="gemini-manage-menu">
+            <button type="button" onclick="openGeminiPersonEditor('${esc(person.key)}')"><i class="fas fa-pen"></i> Edit name</button>
+            <button type="button" class="danger" onclick="confirmGeminiParticipantRemoval('${esc(person.key)}')"><i class="fas fa-user-minus"></i> Remove from Gemini</button>
+          </div>
+        </details>` : '';
         const avatar = person.photo ? avatarHtml(person) : `<span class="chat-avatar" style="${person.type === 'record' ? 'background:#64748b;' : ''}">${esc(person.initials)}</span>`;
         return `<tr>
-          <td><div class="member-who">${avatar} ${esc(person.name)}${manage}</div></td>
+          <td><div class="gemini-member"><div class="gemini-member-main">${avatar}<span class="gemini-member-name" title="${esc(person.name)}">${esc(person.name)}</span></div>${manage}</div></td>
           ${cells}
           <td style="text-align:center;font-weight:700;color:${totalDue>0?'#ef4444':'#0f9d58'};">\u09f3${totalDue}</td>
         </tr>`;
